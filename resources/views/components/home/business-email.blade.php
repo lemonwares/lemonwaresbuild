@@ -1,13 +1,20 @@
 <section {{ $attributes->class('border-t border-border bg-white') }}>
     <div class="container-page grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-20">
-        <div class="relative order-2 overflow-hidden rounded-3xl border border-border bg-blush-soft p-8 min-h-[20rem] lg:order-1 lg:min-h-[28rem]">
-            <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(224,69,69,0.08),transparent_60%)]"></div>
-            <div class="relative z-10 flex h-full flex-col justify-end gap-4">
-                <span class="inline-flex size-14 items-center justify-center rounded-2xl bg-rose text-white">
+        <div class="email-visual relative order-2 min-h-[20rem] overflow-hidden rounded-3xl border border-border lg:order-1 lg:min-h-[28rem]">
+            <img
+                src="{{ asset('images/home/business-email.jpg') }}"
+                alt="{{ __('site.home.feature_email') }}"
+                class="absolute inset-0 size-full object-cover object-center"
+                loading="lazy"
+                decoding="async"
+            >
+            <div class="email-visual-overlay absolute inset-0"></div>
+            <div class="relative z-10 flex h-full min-h-[20rem] flex-col justify-end gap-3 p-8 lg:min-h-[28rem]">
+                <span class="inline-flex size-14 items-center justify-center rounded-2xl bg-rose text-white shadow-lg shadow-rose/30">
                     <x-ui.icons.mail class="size-7" />
                 </span>
-                <p class="text-2xl font-bold text-on-blush">hello@yourcompany.com</p>
-                <p class="body-text">{{ __('site.home.email_brand_sample') }}</p>
+                <p class="text-2xl font-bold text-white drop-shadow-sm">hello@yourcompany.com</p>
+                <p class="max-w-sm text-base font-light text-white/85">{{ __('site.home.email_brand_sample') }}</p>
             </div>
         </div>
 

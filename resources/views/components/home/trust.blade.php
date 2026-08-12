@@ -20,22 +20,22 @@
         <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
             <div>
                 <p class="mb-2 text-5xl font-bold text-rose">0</p>
-                <p class="mb-2 text-base font-semibold text-on-blush">{{ __('site.home.trust_stat_incidents') }}</p>
+                <p class="mb-2 text-lg font-bold text-on-blush">{{ __('site.home.trust_stat_incidents') }}</p>
                 <p class="body-text">{{ __('site.home.trust_stat_incidents_body') }}</p>
             </div>
             <div>
                 <p class="mb-2 text-5xl font-bold text-rose">99+</p>
-                <p class="mb-2 text-base font-semibold text-on-blush">{{ __('site.home.trust_stat_uptime') }}</p>
+                <p class="mb-2 text-lg font-bold text-on-blush">{{ __('site.home.trust_stat_uptime') }}</p>
                 <p class="body-text">{{ __('site.home.trust_stat_uptime_body') }}</p>
             </div>
             <div>
                 <p class="mb-2 text-5xl font-bold text-rose">{{ config('site.years_experience') }}+</p>
-                <p class="mb-2 text-base font-semibold text-on-blush">{{ __('site.home.trust_stat_years') }}</p>
+                <p class="mb-2 text-lg font-bold text-on-blush">{{ __('site.home.trust_stat_years') }}</p>
                 <p class="body-text">{{ __('site.home.trust_stat_years_body') }}</p>
             </div>
             <div class="flex flex-col justify-between gap-4">
                 <div>
-                    <p class="mb-2 text-base font-semibold text-on-blush">{{ __('site.home.trust_backups') }}</p>
+                    <p class="mb-2 text-5xl font-bold leading-tight text-rose">{{ __('site.home.trust_backups') }}</p>
                     <p class="body-text">{{ __('site.home.trust_backups_body') }}</p>
                 </div>
                 <x-ui.button href="{{ route('contact') }}" variant="ghost" class="w-fit">

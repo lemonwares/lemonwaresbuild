@@ -2,10 +2,12 @@
 
 return [
     'nav' => [
+        'home' => 'Startseite',
         'about' => 'Über uns',
         'services' => 'Services',
         'work' => 'Projekte',
         'team' => 'Team',
+        'faq' => 'FAQ',
         'primary' => 'Primär',
     ],
     'common' => [
@@ -14,6 +16,8 @@ return [
         'language' => 'Sprache',
         'get_started' => 'Loslegen',
         'about_us' => 'Über uns',
+        'open_menu' => 'Menü öffnen',
+        'close_menu' => 'Menü schließen',
         'all_rights_reserved' => 'Alle Rechte vorbehalten.',
         'built_by' => 'Erstellt von',
     ],
@@ -61,7 +65,8 @@ return [
         'dev_mobile_title' => 'Mobile-App-Entwicklung',
         'dev_mobile_body' => 'Native und Cross-Platform-Apps für iOS und Android.',
         'tech_title' => 'Wir nutzen aktuelle Technologien, damit Ihr Projekt reibungslos läuft',
-        'partners_title' => 'Organisationen, die unsere Arbeit anerkannt haben',
+        'partners_title' => 'Arbeit, hinter der wir stehen',
+        'partners_cta' => 'Fallstudien ansehen',
         'email_label' => 'Business-E-Mail · Premium',
         'email_title_before' => 'Professionelle E-Mail für',
         'email_title_accent' => 'seriöse Business-',

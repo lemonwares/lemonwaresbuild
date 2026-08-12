@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Manually curated Google reviews shown on the site.
+ * Replace these with real client reviews from your Google Business Profile.
+ * When GOOGLE_PLACES_API_KEY (+ Place ID) is set, live Google reviews take over automatically.
+ */
 return [
 
     'rating' => 4.8,

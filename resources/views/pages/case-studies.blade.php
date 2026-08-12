@@ -10,6 +10,8 @@
         :lede="__('site.pages.case_lede')"
         cta-href="#page-content"
         :cta-label="__('site.pages.case_cta')"
+        :art="true"
+        art-src="images/heroes/work.webp"
     />
 
     <x-layout.page-content>

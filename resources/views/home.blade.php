@@ -5,12 +5,13 @@
 
 @section('content')
     <x-home.hero-banner />
-    <x-home.hosting-intro />
-    <x-home.hosting-plans />
-    <x-home.features />
-    <x-home.web-development />
+    <x-home.hosting-intro data-reveal />
+    <x-home.hosting-plans data-reveal />
+    <x-home.features data-reveal />
+    <x-home.web-development data-reveal />
     <x-home.tech-partners />
-    <x-home.business-email />
-    <x-home.trust />
-    <x-home.contact />
+    <x-home.business-email data-reveal />
+    <x-home.trust data-reveal />
+    <x-home.contact data-reveal />
+    <x-home.faq :limit="4" data-reveal />
 @endsection

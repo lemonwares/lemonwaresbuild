@@ -4,5 +4,7 @@
     :lede="__('site.home.hero_lede')"
     cta-href="#hosting-intro"
     :cta-label="__('site.common.get_started')"
+    :art="true"
+    art-alt=""
     {{ $attributes }}
 />

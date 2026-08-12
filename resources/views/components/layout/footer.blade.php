@@ -5,6 +5,7 @@
         ['label' => __('site.nav.about'), 'href' => route('about')],
         ['label' => __('site.common.contact_us'), 'href' => route('contact')],
         ['label' => __('site.footer.case_studies'), 'href' => route('case-studies')],
+        ['label' => __('site.nav.faq'), 'href' => route('faq')],
         ['label' => __('site.common.client_login'), 'href' => config('site.whmcs.client_login_url'), 'external' => true],
     ];
 

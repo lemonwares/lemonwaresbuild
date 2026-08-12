@@ -8,11 +8,11 @@
 
         <div>
             @foreach ([
-                ['icon' => 'code', 'tone' => 'slate', 'image' => null],
-                ['icon' => 'zap', 'tone' => 'blush', 'image' => null],
-                ['icon' => 'mail', 'tone' => 'rose', 'image' => null],
-                ['icon' => 'smartphone', 'tone' => 'slate', 'image' => null],
-                ['icon' => 'headset', 'tone' => 'blush', 'image' => null],
+                ['icon' => 'code', 'tone' => 'slate', 'image' => 'images/case-studies/web.jpg'],
+                ['icon' => 'zap', 'tone' => 'blush', 'image' => 'images/case-studies/hosting.jpg'],
+                ['icon' => 'mail', 'tone' => 'rose', 'image' => 'images/case-studies/email.jpg'],
+                ['icon' => 'smartphone', 'tone' => 'slate', 'image' => 'images/case-studies/mobile.jpg'],
+                ['icon' => 'headset', 'tone' => 'blush', 'image' => 'images/case-studies/vps.jpg'],
             ] as $index => $meta)
                 @php
                     $study = __('pages.case_studies.items')[$index];

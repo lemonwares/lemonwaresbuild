@@ -9,7 +9,7 @@
         [data-spec-accordion] [data-spec-accordion-panel] {
             display: grid;
             grid-template-rows: 0fr;
-            transition: grid-template-rows 320ms ease;
+            transition: grid-template-rows 400ms ease;
         }
 
         [data-spec-accordion][data-open="true"] [data-spec-accordion-panel] {
@@ -22,7 +22,7 @@
         }
 
         [data-spec-accordion] [data-spec-accordion-chevron] {
-            transition: transform 320ms ease;
+            transition: transform 400ms ease;
         }
 
         [data-spec-accordion][data-open="true"] [data-spec-accordion-chevron] {

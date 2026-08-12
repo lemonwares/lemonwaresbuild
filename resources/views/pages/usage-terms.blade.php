@@ -10,6 +10,8 @@
         :lede="__('legal.usage.lede')"
         cta-href="#page-content"
         :cta-label="__('legal.read_guidelines')"
+        :art="true"
+        art-src="images/heroes/legal.webp"
     />
 
     <x-layout.page-content>
