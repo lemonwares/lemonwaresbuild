@@ -2,10 +2,12 @@
 
 return [
     'nav' => [
+        'home' => 'Home',
         'about' => 'About',
         'services' => 'Services',
         'work' => 'Work',
         'team' => 'Team',
+        'faq' => 'FAQ',
         'primary' => 'Primary',
     ],
     'common' => [
@@ -14,6 +16,8 @@ return [
         'language' => 'Language',
         'get_started' => 'Get Started',
         'about_us' => 'About Us',
+        'open_menu' => 'Open menu',
+        'close_menu' => 'Close menu',
         'all_rights_reserved' => 'All rights reserved.',
         'built_by' => 'Built by',
     ],
@@ -61,7 +65,8 @@ return [
         'dev_mobile_title' => 'Mobile App Development',
         'dev_mobile_body' => 'Native and cross-platform apps that extend your product to iOS and Android users.',
         'tech_title' => 'We Use the Latest Technologies to Run Your Project Smoothly',
-        'partners_title' => 'Organizations Who Recognized Our Work',
+        'partners_title' => 'Work We\'re Proud To Stand Behind',
+        'partners_cta' => 'View case studies',
         'email_label' => 'Business Email · Premium Business',
         'email_title_before' => 'Professional Email for',
         'email_title_accent' => 'Serious Business',

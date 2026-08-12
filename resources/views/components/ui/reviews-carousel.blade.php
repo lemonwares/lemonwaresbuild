@@ -1,9 +1,12 @@
 @php
-    $reviews = config('reviews.items');
-    $rating = config('reviews.rating');
-    $total = config('reviews.total');
+    $reviewsData = \App\Support\GoogleReviews::get();
+    $reviews = $reviewsData['items'] ?? [];
+    $rating = $reviewsData['rating'] ?? config('reviews.rating');
+    $total = $reviewsData['total'] ?? config('reviews.total');
+    $mapsUrl = $reviewsData['url'] ?: config('services.google.business_url');
 @endphp
 
+@if (count($reviews) > 0)
 <div {{ $attributes->class('reviews-carousel') }} data-reviews-carousel>
     <div class="reviews-carousel-track" data-reviews-track>
         @foreach ($reviews as $index => $review)
@@ -25,10 +28,16 @@
 
     <div class="mt-4 flex items-center justify-between gap-4">
         <p class="text-sm font-light text-black/60">
-            Rated {{ $rating }} of 5 · {{ $total }} reviews on Google
+            Rated {{ number_format((float) $rating, 1) }} of 5 · {{ $total }} reviews on Google
         </p>
 
         <div class="flex items-center gap-2">
+            @if ($mapsUrl)
+                <a href="{{ $mapsUrl }}" target="_blank" rel="noopener noreferrer" class="mr-2 text-sm font-semibold text-rose hover:text-rose/80">
+                    View on Google
+                </a>
+            @endif
+
             <button type="button" class="reviews-carousel-btn" data-reviews-prev aria-label="Previous review">
                 <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="m15 18-6-6 6-6" />
@@ -56,3 +65,4 @@
         </div>
     </div>
 </div>
+@endif

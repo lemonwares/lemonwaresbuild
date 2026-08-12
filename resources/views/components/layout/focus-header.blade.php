@@ -1,5 +1,5 @@
-<header class="site-header">
-    <div class="container-page flex items-center justify-between gap-4 py-4 sm:py-5">
+<header class="site-header-bar site-header-fixed" data-focus-header>
+    <div class="container-page flex items-center justify-between gap-4 py-4 sm:py-5" data-site-header-bar>
         <x-layout.logo />
 
         <div class="hidden text-sm font-semibold text-on-blush/70 md:block">
@@ -14,3 +14,4 @@
         </div>
     </div>
 </header>
+<div class="site-header-spacer" data-site-header-spacer aria-hidden="true"></div>

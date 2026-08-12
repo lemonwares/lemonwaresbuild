@@ -23,6 +23,7 @@ Route::get('/', function () {
 Route::view('/about', 'pages.about')->name('about');
 Route::view('/contact', 'pages.contact')->name('contact');
 Route::view('/case-studies', 'pages.case-studies')->name('case-studies');
+Route::view('/faq', 'pages.faq')->name('faq');
 Route::view('/terms', 'pages.terms')->name('terms');
 Route::view('/refund-policy', 'pages.refund-policy')->name('refund-policy');
 Route::view('/privacy-policy', 'pages.privacy-policy')->name('privacy-policy');

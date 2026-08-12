@@ -2,10 +2,12 @@
 
 return [
     'nav' => [
+        'home' => 'Accueil',
         'about' => 'À propos',
         'services' => 'Services',
         'work' => 'Réalisations',
         'team' => 'Équipe',
+        'faq' => 'FAQ',
         'primary' => 'Principal',
     ],
     'common' => [
@@ -14,6 +16,8 @@ return [
         'language' => 'Langue',
         'get_started' => 'Commencer',
         'about_us' => 'À propos de nous',
+        'open_menu' => 'Ouvrir le menu',
+        'close_menu' => 'Fermer le menu',
         'all_rights_reserved' => 'Tous droits réservés.',
         'built_by' => 'Construit par',
     ],
@@ -61,7 +65,8 @@ return [
         'dev_mobile_title' => 'Développement d’applications mobiles',
         'dev_mobile_body' => 'Apps natives et multiplateformes pour iOS et Android.',
         'tech_title' => 'Nous utilisons les technologies récentes pour faire tourner votre projet sans friction',
-        'partners_title' => 'Des organisations qui ont reconnu notre travail',
+        'partners_title' => 'Des projets dont nous sommes fiers',
+        'partners_cta' => 'Voir les études de cas',
         'email_label' => 'Email professionnel · Premium',
         'email_title_before' => 'Un email professionnel pour une',
         'email_title_accent' => 'communication sérieuse',

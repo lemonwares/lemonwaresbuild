@@ -10,6 +10,8 @@
         :lede="__('site.pages.contact_lede')"
         cta-href="#page-content"
         :cta-label="__('site.pages.contact_cta')"
+        :art="true"
+        art-src="images/heroes/contact.webp"
     />
 
     <x-layout.page-content wide>

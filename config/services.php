@@ -45,4 +45,12 @@ return [
         'api_token' => env('HETZNER_API_TOKEN'),
     ],
 
+    'google' => [
+        'places_api_key' => env('GOOGLE_PLACES_API_KEY'),
+        'place_id' => env('GOOGLE_PLACE_ID'),
+        'place_query' => env('GOOGLE_PLACE_QUERY', 'LemonWares Technology Lagos'),
+        'business_url' => env('GOOGLE_BUSINESS_URL', 'https://share.google/wqlwtQwIpQUx4b70S'),
+        'kg_mid' => env('GOOGLE_KG_MID', '/g/11lsrw_gqc'),
+    ],
+
 ];
