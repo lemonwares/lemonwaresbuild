@@ -1,0 +1,388 @@
+@import "tailwindcss";
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+@theme {
+    --font-sans:
+        "Space Grotesk", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
+
+    --color-blush: #ffeded;
+    --color-blush-soft: #fff6f6;
+    --color-blush-deep: #f0c9c9;
+    --color-rose: #e04545;
+    --color-slate: #484f56;
+    --color-slate-raised: #565e66;
+    --color-ink: #f7f5f5;
+    --color-on-blush: #000000;
+    --color-border: #e2e6ea;
+
+    /* Aliases for existing class names */
+    --color-brand: #ffeded;
+    --color-brand-dark: #f0c9c9;
+    --color-surface: #ffffff;
+    --color-muted: #fff6f6;
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 5.5rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        html {
+            scroll-behavior: auto;
+        }
+    }
+
+    body {
+        @apply bg-white text-base font-light text-black font-sans antialiased;
+    }
+}
+
+@layer components {
+    .container-page {
+        @apply mx-auto w-full max-w-7xl px-5 sm:px-8;
+    }
+
+    .section-band {
+        @apply bg-blush-soft;
+    }
+
+    .site-header {
+        @apply sticky top-0 z-50 border-b border-border bg-blush-soft/95 backdrop-blur;
+    }
+
+    .site-logo {
+        @apply inline-flex shrink-0 items-center;
+    }
+
+    .site-logo img {
+        @apply h-12 w-auto sm:h-14;
+    }
+
+    .nav-links {
+        @apply absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 md:flex;
+    }
+
+    .nav-link {
+        @apply text-base font-bold capitalize tracking-wide text-on-blush/80 transition hover:text-on-blush;
+    }
+
+    .nav-link-active {
+        @apply text-on-blush underline decoration-on-blush/40 underline-offset-8;
+    }
+
+    .nav-contact {
+        @apply text-base font-bold capitalize tracking-wide text-rose transition hover:text-rose/80;
+    }
+
+    .site-footer {
+        @apply border-t border-border bg-blush-soft;
+    }
+
+    .footer-heading {
+        @apply text-base font-bold text-on-blush;
+    }
+
+    .footer-link-list {
+        @apply divide-y divide-border;
+    }
+
+    .footer-link {
+        @apply inline-block w-fit py-3 text-base capitalize text-on-blush/70 transition hover:text-rose;
+    }
+
+    .footer-social {
+        @apply inline-flex size-10 items-center justify-center rounded-full border border-border/80 bg-transparent text-on-blush/70 transition hover:border-rose/30 hover:text-rose;
+    }
+
+    .footer-contact-card {
+        @apply bg-transparent;
+    }
+
+    .footer-newsletter {
+        @apply bg-transparent;
+    }
+
+    .footer-input {
+        @apply w-full rounded-2xl border border-border bg-white px-4 py-3 text-base font-light text-black placeholder:font-light placeholder:text-black transition focus:border-rose/40 focus:outline-none focus:ring-2 focus:ring-rose/15;
+    }
+
+    .footer-reviews {
+        @apply px-1 py-2;
+    }
+
+    .body-text {
+        @apply text-base font-light leading-relaxed text-black;
+    }
+
+    .prose-page {
+        @apply space-y-4 text-base font-light leading-relaxed text-black;
+    }
+
+    .prose-page h2 {
+        @apply pt-2 text-xl font-semibold text-black;
+    }
+
+    .prose-page ul {
+        @apply list-disc space-y-2 pl-5;
+    }
+
+    .review-card {
+        @apply rounded-3xl border border-border bg-white p-6 sm:p-8;
+    }
+
+    .reviews-carousel-track {
+        @apply grid;
+    }
+
+    .reviews-carousel-slide {
+        @apply col-start-1 row-start-1 translate-y-2 opacity-0 transition-all duration-500 ease-in-out;
+        visibility: hidden;
+        pointer-events: none;
+    }
+
+    .reviews-carousel-slide.is-active {
+        @apply translate-y-0 opacity-100;
+        visibility: visible;
+        pointer-events: auto;
+    }
+
+    .reviews-carousel-btn {
+        @apply inline-flex size-8 items-center justify-center rounded-full border border-border text-on-blush/70 transition hover:border-rose/30 hover:text-rose;
+    }
+
+    .reviews-carousel-dot {
+        @apply size-2 rounded-full bg-border transition hover:bg-rose/40;
+    }
+
+    .reviews-carousel-dot.is-active,
+    .reviews-carousel-dot[aria-selected="true"] {
+        @apply w-5 bg-rose;
+    }
+
+    .btn {
+        @apply inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full px-6 py-3 text-base font-semibold transition;
+    }
+
+    .btn-primary {
+        @apply bg-rose text-white hover:bg-rose/90;
+    }
+
+    .btn-ghost {
+        @apply border border-border bg-transparent text-on-blush hover:bg-blush-soft;
+    }
+
+    .heading {
+        @apply text-3xl font-semibold tracking-tight text-on-blush sm:text-4xl;
+    }
+
+    .lede {
+        @apply max-w-2xl text-base font-light leading-relaxed text-black sm:text-lg;
+    }
+
+    .link {
+        @apply font-medium text-rose underline-offset-4 hover:underline;
+    }
+
+    .surface-soft {
+        @apply border border-border bg-blush-soft;
+    }
+
+    .section-label {
+        @apply text-base font-semibold uppercase tracking-[0.12em] text-rose;
+    }
+
+    .card-tech {
+        @apply rounded-3xl border border-border bg-white;
+    }
+
+    .tech-panel-light {
+        @apply border border-border bg-blush-soft;
+    }
+
+    .tech-panel-dark {
+        @apply bg-slate;
+    }
+
+    .tech-pill {
+        @apply inline-flex rounded-full bg-white px-5 py-2.5 text-base font-light text-black sm:px-6 sm:py-3 sm:text-lg;
+    }
+
+    .partner-logo-text {
+        @apply text-lg font-semibold tracking-tight text-white;
+    }
+
+    .partner-logo-img {
+        @apply object-contain;
+    }
+
+    .service-card {
+        @apply overflow-hidden rounded-3xl border border-border bg-white;
+    }
+
+    .service-card-media {
+        @apply aspect-[4/3] w-full overflow-hidden;
+    }
+
+    .service-card-body {
+        @apply p-6;
+    }
+
+    .service-visual {
+        @apply relative flex size-full flex-col items-center justify-center gap-4 overflow-hidden;
+    }
+
+    .service-visual-glow {
+        @apply absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.18),transparent_55%)];
+    }
+
+    .service-row-media {
+        @apply overflow-hidden rounded-4xl;
+    }
+
+    .service-visual-icon {
+        @apply relative z-10 size-16 sm:size-20;
+    }
+
+    .service-visual-label {
+        @apply relative z-10 text-sm font-semibold uppercase tracking-[0.14em] opacity-80;
+    }
+
+    .check-list li {
+        @apply flex items-start gap-3 text-base font-light text-black;
+    }
+
+    .check-list li::before {
+        content: "";
+        @apply mt-1.5 size-4 shrink-0 rounded-full bg-rose/15;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e04545' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+        background-size: 10px;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+
+    .check-list-light li {
+        @apply text-white/85;
+    }
+
+    .check-list-light li::before {
+        @apply bg-white/20;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+    }
+
+    .accordion-item summary {
+        @apply flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-base font-semibold text-on-blush;
+    }
+
+    .accordion-item summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .accordion-item[open] summary {
+        @apply text-rose;
+    }
+
+    .accordion-panel {
+        @apply pb-5 text-base font-light leading-relaxed text-black;
+    }
+
+    [data-spec-details] summary::-webkit-details-marker {
+        display: none;
+    }
+
+    [data-spec-accordion] [data-spec-accordion-panel] {
+        display: grid;
+        grid-template-rows: 0fr;
+        transition: grid-template-rows 320ms ease;
+    }
+
+    [data-spec-accordion][data-open="true"] [data-spec-accordion-panel] {
+        grid-template-rows: 1fr;
+    }
+
+    [data-spec-accordion] [data-spec-accordion-inner] {
+        overflow: hidden;
+    }
+
+    [data-spec-accordion] [data-spec-accordion-chevron] {
+        transition: transform 320ms ease;
+    }
+
+    [data-spec-accordion][data-open="true"] [data-spec-accordion-chevron] {
+        transform: rotate(180deg);
+    }
+
+    .chat-widget {
+        @apply fixed bottom-10 right-5 z-[60] flex flex-col items-end gap-3 sm:bottom-12 sm:right-6;
+    }
+
+    .chat-widget-launcher {
+        @apply inline-flex animate-bounce items-center gap-2 rounded-full bg-rose px-5 py-3.5 text-base font-semibold text-white shadow-lg shadow-rose/25 transition hover:bg-rose/90;
+    }
+
+    .chat-widget-launcher-label {
+        @apply hidden sm:inline;
+    }
+
+    .chat-widget-open .chat-widget-launcher {
+        @apply animate-none bg-slate shadow-slate/20 hover:bg-slate-raised;
+    }
+
+    .chat-widget-panel {
+        @apply w-[min(calc(100vw-2.5rem),22rem)] overflow-hidden rounded-3xl border border-border bg-white shadow-xl shadow-on-blush/10 sm:w-96;
+    }
+
+    .chat-widget-header {
+        @apply flex items-center gap-2 border-b border-border bg-blush-soft/80 px-4 py-3;
+    }
+
+    .chat-widget-icon-btn {
+        @apply inline-flex size-8 shrink-0 items-center justify-center rounded-full text-on-blush/60 transition hover:bg-white hover:text-on-blush;
+    }
+
+    .chat-widget-body {
+        @apply p-4;
+    }
+
+    .chat-widget-option {
+        @apply flex w-full items-center gap-3 rounded-2xl border border-border bg-white p-4 text-left transition hover:border-rose/30 hover:bg-blush-soft/50;
+    }
+
+    .chat-widget-option-icon {
+        @apply inline-flex size-11 shrink-0 items-center justify-center rounded-2xl;
+    }
+
+    .chat-widget-option-icon-ai {
+        @apply bg-rose/10 text-rose;
+    }
+
+    .chat-widget-option-icon-live {
+        @apply bg-slate/10 text-slate;
+    }
+
+    .chat-widget-messages {
+        @apply mb-3 flex max-h-64 flex-col gap-2 overflow-y-auto pr-1;
+    }
+
+    .chat-widget-message {
+        @apply max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed;
+    }
+
+    .chat-widget-message-bot {
+        @apply self-start rounded-bl-md bg-blush-soft text-on-blush;
+    }
+
+    .chat-widget-message-user {
+        @apply self-end rounded-br-md bg-rose text-white;
+    }
+
+    .chat-widget-form {
+        @apply flex items-center gap-2 border-t border-border pt-3;
+    }
+}
