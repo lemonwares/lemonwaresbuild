@@ -27,6 +27,7 @@ return [
         'monthly' => 'Monthly',
         'bimonthly' => '2 Months',
         'quarterly' => 'Quarterly',
+        'semiannual' => 'Bi-annual (6 months)',
         'annually' => 'Annually',
     ],
     'billing_details_title' => 'Billing & Contact Details',

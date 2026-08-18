@@ -8,9 +8,7 @@
 
         <div class="flex items-center gap-3">
             <x-layout.locale-switcher />
-            <a href="{{ config('site.whmcs.client_login_url') }}" target="_blank" rel="noopener noreferrer" class="nav-contact">
-                {{ __('site.common.client_login') }}
-            </a>
+            <x-layout.account-session />
         </div>
     </div>
 </header>

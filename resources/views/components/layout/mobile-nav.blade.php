@@ -37,6 +37,20 @@
         ],
     ];
 
+    if (auth()->check()) {
+        $exploreLinks[] = [
+            'label' => __('account.account_title'),
+            'href' => route('account.show'),
+            'active' => request()->routeIs('account.*'),
+        ];
+    } else {
+        $exploreLinks[] = [
+            'label' => __('site.common.client_login'),
+            'href' => route('login'),
+            'active' => request()->routeIs('login', 'register'),
+        ];
+    }
+
     $legalLinks = [
         [
             'label' => __('site.footer.terms'),
@@ -74,6 +88,12 @@
             </a>
         @endforeach
     </nav>
+
+    @auth
+        <div class="mt-4 border-t border-border pt-4">
+            <x-layout.account-session class="flex-col items-start gap-3" :account-link="false" />
+        </div>
+    @endauth
 
     <nav class="mobile-nav-links mt-4 border-t border-border pt-4" aria-label="{{ __('site.footer.legal') }}">
         <p class="mobile-nav-heading">{{ __('site.footer.legal') }}</p>

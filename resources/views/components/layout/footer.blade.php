@@ -6,7 +6,10 @@
         ['label' => __('site.common.contact_us'), 'href' => route('contact')],
         ['label' => __('site.footer.case_studies'), 'href' => route('case-studies')],
         ['label' => __('site.nav.faq'), 'href' => route('faq')],
-        ['label' => __('site.common.client_login'), 'href' => config('site.whmcs.client_login_url'), 'external' => true],
+        [
+            'label' => auth()->check() ? __('account.account_title') : __('site.common.client_login'),
+            'href' => auth()->check() ? route('account.show') : route('login'),
+        ],
     ];
 
     $legalLinks = [

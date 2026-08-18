@@ -49,6 +49,38 @@
         @apply mx-auto w-full max-w-6xl px-5 sm:px-8;
     }
 
+    .admin-shell {
+        @apply flex min-h-screen;
+    }
+
+    .admin-sidebar {
+        @apply hidden w-64 shrink-0 flex-col border-r border-border bg-white lg:flex;
+    }
+
+    .admin-sidebar-logo {
+        @apply h-9 w-auto max-w-[11rem] object-contain object-left;
+    }
+
+    .admin-main {
+        @apply min-w-0 flex-1;
+    }
+
+    .admin-mobile-nav {
+        @apply border-b border-border bg-white px-4 py-4 lg:hidden;
+    }
+
+    .admin-nav-link {
+        @apply flex items-center rounded-xl px-3 py-2.5 text-sm font-semibold transition;
+    }
+
+    .admin-nav-link-active {
+        @apply bg-rose text-white;
+    }
+
+    .admin-nav-link-idle {
+        @apply text-black hover:bg-blush-soft hover:text-rose;
+    }
+
     .hero-section,
     .hero-container,
     .hero-shell {
@@ -191,7 +223,7 @@
         display: none !important;
     }
 
-    @media (min-width: 768px) {
+    @media (min-width: 1024px) {
         .mobile-nav-overlay {
             display: none !important;
         }
@@ -206,7 +238,7 @@
     }
 
     .nav-links {
-        @apply absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 md:flex;
+        @apply hidden min-w-0 flex-1 items-center justify-center gap-5 xl:gap-8 lg:flex;
     }
 
     .mobile-nav-links {
@@ -218,7 +250,7 @@
     }
 
     .nav-link {
-        @apply text-base font-bold capitalize tracking-wide text-on-blush/80 transition hover:text-on-blush;
+        @apply whitespace-nowrap text-base font-bold capitalize tracking-wide text-on-blush/80 transition hover:text-on-blush;
     }
 
     .mobile-nav-link {
@@ -234,7 +266,7 @@
     }
 
     .nav-contact {
-        @apply text-base font-bold capitalize tracking-wide text-rose transition hover:text-rose/80;
+        @apply whitespace-nowrap text-base font-bold capitalize tracking-wide text-rose transition hover:text-rose/80;
     }
 
     .site-footer {

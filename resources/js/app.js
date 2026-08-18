@@ -2,6 +2,9 @@ import './chat-widget.js';
 import './reviews-carousel.js';
 import './mobile-nav.js';
 import './scroll-reveal.js';
+import './confirm-modal.js';
+import './email-checkout.js';
+import './form-submit.js';
 
 document.querySelectorAll('[data-accordion]').forEach((accordion) => {
     const items = accordion.querySelectorAll('[data-accordion-item]');

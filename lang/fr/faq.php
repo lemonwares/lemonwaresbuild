@@ -21,7 +21,7 @@ return [
         ],
         [
             'question' => 'Pouvez-vous mettre en place un email pro sur mon domaine ?',
-            'answer' => 'Oui. Nous configurons Microsoft 365, Google Workspace ou Titan — boîtes mail, DNS et migration si besoin.',
+            'answer' => 'Oui. Commandez Lemon Mail sur votre domaine depuis ce site — nous créons les boîtes et vous donnons les DNS. Microsoft 365, Google Workspace et Titan sont disponibles sur devis.',
         ],
         [
             'question' => 'Construisez-vous des sites WordPress et des apps sur mesure ?',

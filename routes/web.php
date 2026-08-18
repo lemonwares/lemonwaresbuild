@@ -1,8 +1,19 @@
 <?php
 
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AdminEmailCatalogController;
 use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\AdminCustomerController;
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\AdminEmailOrderController;
+use App\Http\Controllers\AdminHostingLeadController;
 use App\Http\Controllers\AdminHostingPriceController;
+use App\Http\Controllers\AdminSubscriberController;
 use App\Http\Controllers\AdminTeamMemberController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\EmailOrderController;
 use App\Http\Middleware\EnsureAdminAuthenticated;
 use App\Models\HostingLead;
 use App\Models\HostingPlanPrice;
@@ -54,6 +65,41 @@ Route::get('/locale/{locale}', function (string $locale) {
 
     return redirect()->to($previous);
 })->name('locale.switch');
+
+Route::middleware('guest')->group(function (): void {
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:10,1')->name('login.store');
+    Route::get('/register', [RegisterController::class, 'create'])->name('register');
+    Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:8,1')->name('register.store');
+    Route::get('/forgot-password', [PasswordResetController::class, 'request'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'email'])->middleware('throttle:5,1')->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'reset'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'update'])->middleware('throttle:8,1')->name('password.update');
+});
+
+Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
+
+Route::get('/email', [EmailOrderController::class, 'plans'])->name('email.plans');
+Route::get('/email/payment/flutterwave/callback', [EmailOrderController::class, 'callback'])->name('email.flutterwave.callback');
+
+Route::middleware('auth')->group(function (): void {
+    Route::get('/account', [AccountController::class, 'show'])->name('account.show');
+    Route::get('/account/profile', [AccountController::class, 'profile'])->name('account.profile');
+    Route::put('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');
+    Route::get('/account/settings', [AccountController::class, 'settings'])->name('account.settings');
+    Route::post('/account/settings/contacts', [AccountController::class, 'storeContact'])->middleware('throttle:20,1')->name('account.contacts.store');
+    Route::delete('/account/settings/contacts/{contact}', [AccountController::class, 'destroyContact'])->name('account.contacts.destroy');
+    Route::get('/account/email', [AccountController::class, 'email'])->name('account.email.index');
+    Route::get('/account/email/{order}', [EmailOrderController::class, 'show'])->name('account.email.show');
+    Route::post('/account/email/{order}/pay', [EmailOrderController::class, 'pay'])->middleware('throttle:10,1')->name('email.pay');
+    Route::post('/account/email/{order}/provision', [EmailOrderController::class, 'provision'])->middleware('throttle:5,1')->name('email.provision');
+    Route::get('/account/vps', [AccountController::class, 'vps'])->name('account.vps.index');
+    Route::get('/account/vps/{lead}', [AccountController::class, 'vpsShow'])->name('account.vps.show');
+    Route::get('/account/hosting', [AccountController::class, 'hosting'])->name('account.hosting.index');
+    Route::get('/account/hosting/{lead}', [AccountController::class, 'hostingShow'])->name('account.hosting.show');
+    Route::get('/email/checkout', [EmailOrderController::class, 'create'])->name('email.checkout');
+    Route::post('/email/checkout', [EmailOrderController::class, 'store'])->middleware('throttle:10,1')->name('email.checkout.store');
+});
 
 Route::get('/hosting/request', function (Request $request) {
     $planOptions = config('site.hosting_plans', []);
@@ -436,6 +482,7 @@ Route::post('/hosting/request/details', function (Request $request) {
         ->join('; ');
 
     $leadPayload = [
+        'user_id' => $request->user()?->id,
         'full_name' => $payload['full_name'],
         'email' => strtolower($payload['email']),
         'phone' => $payload['phone'],
@@ -677,17 +724,21 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         ->name('login.submit');
 
     Route::middleware([EnsureAdminAuthenticated::class])->group(function (): void {
-        Route::get('/', function () {
-            $teamMembersCount = TeamMember::count();
-            $activeTeamMembersCount = TeamMember::where('is_active', true)->count();
-            $pricedSpecsCount = HostingPlanPrice::where('is_visible', true)->where('price_amount', '>', 0)->count();
-
-            return view('admin.dashboard', compact('teamMembersCount', 'activeTeamMembersCount', 'pricedSpecsCount'));
-        })->name('dashboard');
+        Route::get('/', AdminDashboardController::class)->name('dashboard');
 
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+        Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
+        Route::get('/customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
+        Route::get('/hosting-leads', [AdminHostingLeadController::class, 'index'])->name('hosting-leads.index');
+        Route::get('/hosting-leads/{hostingLead}', [AdminHostingLeadController::class, 'show'])->name('hosting-leads.show');
+        Route::get('/subscribers', [AdminSubscriberController::class, 'index'])->name('subscribers.index');
         Route::resource('team-members', AdminTeamMemberController::class)->except(['show']);
         Route::get('/hosting-prices', [AdminHostingPriceController::class, 'index'])->name('hosting-prices.index');
         Route::put('/hosting-prices', [AdminHostingPriceController::class, 'update'])->name('hosting-prices.update');
+        Route::get('/email-catalog', [AdminEmailCatalogController::class, 'index'])->name('email-catalog.index');
+        Route::put('/email-catalog', [AdminEmailCatalogController::class, 'update'])->name('email-catalog.update');
+        Route::get('/email-orders', [AdminEmailOrderController::class, 'index'])->name('email-orders.index');
+        Route::get('/email-orders/{emailOrder}', [AdminEmailOrderController::class, 'show'])->name('email-orders.show');
+        Route::post('/email-orders/{emailOrder}/provision', [AdminEmailOrderController::class, 'provision'])->name('email-orders.provision');
     });
 });

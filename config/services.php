@@ -41,6 +41,12 @@ return [
         'secret_hash' => env('FLW_SECRET_HASH'),
     ],
 
+    'trekmail' => [
+        'token' => env('TREKMAIL_API_TOKEN'),
+        'base_url' => rtrim(env('TREKMAIL_BASE_URL', 'https://trekmail.net/api/v1'), '/'),
+        'webmail_url' => env('TREKMAIL_WEBMAIL_URL', 'https://trekmail.net/webmail'),
+    ],
+
     'hetzner' => [
         'api_token' => env('HETZNER_API_TOKEN'),
     ],

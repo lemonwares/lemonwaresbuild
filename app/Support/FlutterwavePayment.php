@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\EmailOrder;
 use App\Models\HostingLead;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -60,6 +61,62 @@ class FlutterwavePayment
         $link = data_get($response->json(), 'data.link');
 
         $lead->update([
+            'payment_reference' => $txRef,
+            'payment_provider' => 'flutterwave',
+            'checkout_url' => $link,
+            'status' => 'awaiting_payment',
+        ]);
+
+        return is_string($link) ? $link : null;
+    }
+
+    public static function createEmailPaymentLink(EmailOrder $order): ?string
+    {
+        if (! self::isConfigured()) {
+            return null;
+        }
+
+        $txRef = $order->payment_reference ?: ('LW-MAIL-' . $order->id . '-' . Str::upper(Str::random(8)));
+        $amountNgn = max(1, (int) round((float) ($order->amount_ngn ?? 0)));
+        $order->loadMissing('user');
+
+        $response = Http::timeout(20)
+            ->withToken((string) config('services.flutterwave.secret_key'))
+            ->acceptJson()
+            ->post('https://api.flutterwave.com/v3/payments', [
+                'tx_ref' => $txRef,
+                'amount' => $amountNgn,
+                'currency' => 'NGN',
+                'redirect_url' => route('email.flutterwave.callback'),
+                'customer' => [
+                    'email' => $order->user?->email,
+                    'name' => $order->user?->name,
+                ],
+                'customizations' => [
+                    'title' => config('site.short_name') . ' Lemon Mail',
+                    'description' => trim($order->plan_name . ' — ' . $order->domain),
+                    'logo' => asset('lemonwareslogo.webp'),
+                ],
+                'meta' => [
+                    'email_order_id' => $order->id,
+                    'plan_key' => $order->plan_key,
+                    'domain' => $order->domain,
+                    'billing_cycle' => $order->billing_cycle,
+                ],
+            ]);
+
+        if (! $response->successful() || data_get($response->json(), 'status') !== 'success') {
+            Log::warning('Flutterwave email payment init failed', [
+                'order_id' => $order->id,
+                'body' => $response->json(),
+            ]);
+
+            return null;
+        }
+
+        $link = data_get($response->json(), 'data.link');
+
+        $order->update([
             'payment_reference' => $txRef,
             'payment_provider' => 'flutterwave',
             'checkout_url' => $link,

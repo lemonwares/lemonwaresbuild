@@ -1,18 +1,19 @@
 <div data-site-header>
     <header class="site-header-bar site-header-fixed">
-        <div class="container-page flex items-center justify-between gap-4 py-4 sm:py-5" data-site-header-bar>
+        <div class="container-page flex items-center gap-4 py-4 sm:py-5 lg:gap-6" data-site-header-bar>
             <x-layout.logo />
 
             <x-layout.nav />
 
-            <div class="flex items-center gap-2 sm:gap-4">
+            <div class="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
                 <x-layout.locale-switcher />
-                <a href="{{ route('contact') }}" class="nav-contact hidden sm:inline-flex">
+                <x-layout.account-session class="hidden lg:flex" />
+                <a href="{{ route('contact') }}" class="nav-contact hidden xl:inline-flex">
                     {{ __('site.common.contact_us') }}
                 </a>
                 <button
                     type="button"
-                    class="inline-flex size-10 items-center justify-center rounded-full text-on-blush transition hover:bg-white/70 md:hidden"
+                    class="inline-flex size-10 items-center justify-center rounded-full text-on-blush transition hover:bg-white/70 lg:hidden"
                     data-mobile-nav-toggle
                     data-open-label="{{ __('site.common.open_menu') }}"
                     data-close-label="{{ __('site.common.close_menu') }}"
@@ -33,7 +34,7 @@
     {{-- Portaled to <body> by JS so fixed + backdrop-blur on the header never clip it --}}
     <div
         id="mobile-nav"
-        class="mobile-nav-overlay md:hidden"
+        class="mobile-nav-overlay lg:hidden"
         data-mobile-nav
         aria-hidden="true"
     >
