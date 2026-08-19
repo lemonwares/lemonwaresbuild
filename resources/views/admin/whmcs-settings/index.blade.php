@@ -35,12 +35,37 @@
                     <input type="text" name="order_route" value="{{ old('order_route', $settings['order_route']) }}" class="footer-input w-full rounded-xl border border-border px-3 py-2.5" required>
                 </div>
                 <div>
+                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Default Payment Method</label>
+                    <input type="text" name="payment_method" value="{{ old('payment_method', $settings['payment_method'] ?: 'banktransfer') }}" class="footer-input w-full rounded-xl border border-border px-3 py-2.5" required placeholder="banktransfer">
+                    <p class="mt-2 text-xs text-on-blush/60">WHMCS gateway system name used when creating orders via API (e.g. <code class="rounded bg-blush-soft px-1">banktransfer</code>, <code class="rounded bg-blush-soft px-1">paypal</code>).</p>
+                </div>
+                <div>
                     <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">API Identifier</label>
                     <input type="text" name="api_identifier" value="{{ old('api_identifier', $settings['api_identifier']) }}" class="footer-input w-full rounded-xl border border-border px-3 py-2.5" required>
                 </div>
                 <div class="sm:col-span-2">
                     <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">API Secret</label>
                     <input type="text" name="api_secret" value="{{ old('api_secret', $settings['api_secret']) }}" class="footer-input w-full rounded-xl border border-border px-3 py-2.5" required>
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">API Access Key (optional)</label>
+                    <input type="text" name="api_access_key" value="{{ old('api_access_key', $settings['api_access_key']) }}" class="footer-input w-full rounded-xl border border-border px-3 py-2.5" placeholder="Only if enabled in WHMCS General Settings > Security">
+                    <p class="mt-2 text-xs text-on-blush/60">Required only when WHMCS has a global API Access Key configured. This also lets API calls work from any IP when combined with WHMCS <code class="rounded bg-blush-soft px-1">$api_access_key</code> in configuration.php.</p>
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="inline-flex items-start gap-3 rounded-xl border border-border bg-blush-soft/40 px-4 py-3">
+                        <input
+                            type="checkbox"
+                            name="defer_payment_redirect"
+                            value="1"
+                            class="mt-1 rounded border-border text-rose focus:ring-rose/20"
+                            @checked(\App\Support\WhmcsSettings::deferPaymentRedirect())
+                        />
+                        <span>
+                            <span class="block text-sm font-semibold text-black">Test mode: skip WHMCS payment redirect</span>
+                            <span class="mt-1 block text-xs text-on-blush/65">Create the WHMCS client and pending order via API, then stay on Lemonwares instead of sending the customer to WHMCS checkout or invoice payment. Enabled automatically when <code class="rounded bg-white px-1">APP_ENV=local</code> unless overridden here.</span>
+                        </span>
+                    </label>
                 </div>
             </div>
         </section>
@@ -100,4 +125,53 @@
             <button type="submit" class="btn btn-primary">Save WHMCS Settings</button>
         </div>
     </form>
+
+    <section class="mt-8 rounded-3xl border border-border bg-white p-6">
+        <h2 class="text-lg font-bold text-black">Test Domain Lookup</h2>
+        <p class="mt-2 text-sm text-on-blush/65">
+            Step 1 checks API credentials with <code class="rounded bg-blush-soft px-1.5 py-0.5">GetClients</code>.
+            Step 2 checks domain availability with <code class="rounded bg-blush-soft px-1.5 py-0.5">DomainWhois</code>.
+            Your API role must allow domain lookups, and WHMCS WHOIS servers must be configured for the TLD.
+        </p>
+
+        <form method="POST" action="{{ route('admin.whmcs-settings.test-domain') }}" class="mt-5 grid gap-4 sm:grid-cols-3">
+            @csrf
+            <div class="sm:col-span-2">
+                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Domain</label>
+                <input type="text" name="domain" value="{{ old('domain', 'google.com') }}" class="footer-input w-full rounded-xl border border-border px-3 py-2.5" required>
+            </div>
+            <div>
+                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Option</label>
+                <select name="domain_option" class="footer-input w-full rounded-xl border border-border px-3 py-2.5">
+                    <option value="register">Register</option>
+                    <option value="transfer">Transfer</option>
+                    <option value="owndomain">Already own</option>
+                </select>
+            </div>
+            <div class="sm:col-span-3">
+                <button type="submit" class="btn btn-ghost">Run Domain Test</button>
+            </div>
+        </form>
+
+        @if (session('domain_test_result'))
+            @php($test = session('domain_test_result'))
+            <div class="mt-6 rounded-2xl border border-border bg-blush-soft p-4 text-sm">
+                <p class="font-semibold text-black">API configured: {{ ($test['configured'] ?? false) ? 'Yes' : 'No' }}</p>
+                @if (! empty($test['connection']['message']))
+                    <p class="mt-2 {{ ($test['connection']['ok'] ?? false) ? 'text-emerald-700' : 'text-rose' }}">
+                        <span class="font-semibold">API connection:</span> {{ $test['connection']['message'] }}
+                    </p>
+                @endif
+                @if (! empty($test['whmcs_error']))
+                    <p class="mt-2 text-rose"><span class="font-semibold">WHMCS error:</span> {{ $test['whmcs_error'] }}</p>
+                @endif
+                @if (! empty($test['validation']['message']))
+                    <p class="mt-2"><span class="font-semibold">Validation:</span> {{ $test['validation']['message'] }} ({{ $test['validation']['status'] ?? '—' }})</p>
+                @endif
+                @if (! empty($test['whois']))
+                    <pre class="mt-4 overflow-x-auto rounded-xl bg-white p-4 text-xs text-black">{{ json_encode($test['whois'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) }}</pre>
+                @endif
+            </div>
+        @endif
+    </section>
 @endsection

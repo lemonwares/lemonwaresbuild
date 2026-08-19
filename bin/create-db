@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "$0")/.." && pwd)"
+env_file="$repo_root/.env"
+psql="/c/Program Files/PostgreSQL/18/bin/psql.exe"
+
+if [[ ! -f "$env_file" ]]; then
+  echo "Missing .env file at $env_file" >&2
+  exit 1
+fi
+
+read_env() {
+  local key="$1"
+  local value
+  value="$(grep "^${key}=" "$env_file" | head -n1 | cut -d= -f2-)"
+  value="${value%\"}"
+  value="${value#\"}"
+  value="${value%\'}"
+  value="${value#\'}"
+  printf '%s' "$value"
+}
+
+db_host="$(read_env DB_HOST)"
+db_port="$(read_env DB_PORT)"
+db_name="$(read_env DB_DATABASE)"
+db_user="$(read_env DB_USERNAME)"
+db_pass="$(read_env DB_PASSWORD)"
+
+db_host="${db_host:-127.0.0.1}"
+db_port="${db_port:-5432}"
+db_name="${db_name:-lemonwares_db}"
+db_user="${db_user:-postgres}"
+
+export PGPASSWORD="$db_pass"
+
+exists="$("$psql" -h "$db_host" -U "$db_user" -p "$db_port" -tAc "SELECT 1 FROM pg_database WHERE datname = '$db_name'")"
+
+if [[ "$exists" != "1" ]]; then
+  "$psql" -h "$db_host" -U "$db_user" -p "$db_port" -c "CREATE DATABASE \"$db_name\""
+  echo "Created database: $db_name"
+else
+  echo "Database already exists: $db_name"
+fi

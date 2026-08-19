@@ -18,7 +18,10 @@ class WhmcsSyncTest extends TestCase
             'site.whmcs.api_identifier' => 'identifier',
             'site.whmcs.api_secret' => 'secret',
             'site.whmcs.order_route' => '/cart.php',
+            'site.whmcs.payment_method' => 'banktransfer',
+            'site.whmcs.defer_payment_redirect' => false,
             'site.hosting_plans.cpanel.whmcs_pid' => '15',
+            'services.flutterwave.secret_key' => 'flw_test_key',
         ]);
 
         Http::fake([
@@ -27,6 +30,10 @@ class WhmcsSyncTest extends TestCase
                 ->push(['result' => 'error', 'message' => 'Client not found'], 200)
                 ->push(['result' => 'success', 'clientid' => '99'], 200)
                 ->push(['result' => 'success', 'orderid' => '321', 'invoiceid' => '654'], 200),
+            'https://api.flutterwave.com/v3/payments' => Http::response([
+                'status' => 'success',
+                'data' => ['link' => 'https://checkout.flutterwave.com/v3/hosted/pay/test-link'],
+            ], 200),
             'open.er-api.com/*' => Http::response(['rates' => ['NGN' => 1600]], 200),
         ]);
 
@@ -49,7 +56,7 @@ class WhmcsSyncTest extends TestCase
             'notes' => 'test order',
         ]);
 
-        $response->assertRedirect();
+        $response->assertRedirect('https://checkout.flutterwave.com/v3/hosted/pay/test-link');
 
         $lead = HostingLead::query()->latest()->firstOrFail();
         $this->assertSame('brightmedia.ng', $lead->hostname);
@@ -57,6 +64,8 @@ class WhmcsSyncTest extends TestCase
         $this->assertSame(99, (int) $lead->whmcs_client_id);
         $this->assertSame(321, (int) $lead->whmcs_order_id);
         $this->assertSame(654, (int) $lead->whmcs_invoice_id);
+        $this->assertSame('flutterwave', $lead->payment_provider);
+        $this->assertSame('awaiting_payment', $lead->status);
     }
 
     public function test_hosting_checkout_falls_back_with_failed_sync_state_when_whmcs_errors(): void
@@ -66,6 +75,8 @@ class WhmcsSyncTest extends TestCase
             'site.whmcs.api_identifier' => 'identifier',
             'site.whmcs.api_secret' => 'secret',
             'site.whmcs.order_route' => '/cart.php',
+            'site.whmcs.payment_method' => 'banktransfer',
+            'site.whmcs.defer_payment_redirect' => false,
             'site.hosting_plans.cpanel.whmcs_pid' => '15',
         ]);
 
@@ -100,6 +111,9 @@ class WhmcsSyncTest extends TestCase
         $lead = HostingLead::query()->latest()->firstOrFail();
         $this->assertSame('failed', $lead->whmcs_sync_status);
         $this->assertNotNull($lead->checkout_url);
+        $this->assertStringContainsString('/cart.php', (string) $lead->checkout_url);
+        $this->assertStringContainsString('sld=compilerworks', (string) $lead->checkout_url);
+        $this->assertStringContainsString('tld=.com', (string) $lead->checkout_url);
     }
 
     public function test_hosting_payment_callback_syncs_payment_to_whmcs_and_is_idempotent(): void
@@ -128,6 +142,7 @@ class WhmcsSyncTest extends TestCase
             'payment_reference' => 'LW-TX-1',
             'status' => 'awaiting_payment',
             'whmcs_order_id' => 777,
+            'whmcs_invoice_id' => 888,
             'whmcs_sync_status' => 'checkout_synced',
         ]);
 
@@ -141,9 +156,9 @@ class WhmcsSyncTest extends TestCase
                     'currency' => 'NGN',
                 ],
             ], 200),
-            'https://billing.example.test/includes/api.php' => Http::response([
-                'result' => 'success',
-            ], 200),
+            'https://billing.example.test/includes/api.php' => Http::sequence()
+                ->push(['result' => 'success'], 200)
+                ->push(['result' => 'success'], 200),
         ]);
 
         $this->get(route('hosting.flutterwave.callback', [
@@ -176,5 +191,52 @@ class WhmcsSyncTest extends TestCase
             'tx_ref' => 'LW-TX-1',
             'transaction_id' => 'tx-900',
         ]))->assertRedirect(route('hosting.order-received', $lead));
+    }
+
+    public function test_hosting_checkout_stays_on_site_when_payment_deferred(): void
+    {
+        config([
+            'site.whmcs.base_url' => 'https://billing.example.test',
+            'site.whmcs.api_identifier' => 'identifier',
+            'site.whmcs.api_secret' => 'secret',
+            'site.whmcs.order_route' => '/cart.php',
+            'site.whmcs.payment_method' => 'banktransfer',
+            'site.whmcs.defer_payment_redirect' => true,
+            'site.hosting_plans.cpanel.whmcs_pid' => '15',
+        ]);
+
+        Http::fake([
+            'https://billing.example.test/includes/api.php' => Http::sequence()
+                ->push(['result' => 'success', 'status' => 'available', 'whois' => ''], 200)
+                ->push(['result' => 'error', 'message' => 'Client not found'], 200)
+                ->push(['result' => 'success', 'clientid' => '99'], 200)
+                ->push(['result' => 'success', 'orderid' => '321', 'invoiceid' => '654'], 200),
+            'open.er-api.com/*' => Http::response(['rates' => ['NGN' => 1600]], 200),
+        ]);
+
+        $response = $this->post(route('hosting.intake.submit'), [
+            'full_name' => 'Ada Lovelace',
+            'email' => 'ada@example.com',
+            'phone' => '+2348012345678',
+            'company' => 'Analytical Engines Ltd',
+            'domain' => 'brightmedia.ng',
+            'domain_option' => 'register',
+            'billing_address_line_1' => '12 Marina',
+            'billing_address_line_2' => '',
+            'billing_city' => 'Lagos',
+            'billing_state' => 'Lagos',
+            'billing_postcode' => '100001',
+            'billing_country' => 'NG',
+            'plan' => 'cpanel',
+            'spec' => 'starter',
+            'billing_cycle' => 'monthly',
+            'notes' => 'deferred payment test',
+        ]);
+
+        $lead = HostingLead::query()->latest()->firstOrFail();
+        $response->assertRedirect(route('hosting.order-received', $lead));
+        $this->assertSame('awaiting_payment', $lead->status);
+        $this->assertSame('checkout_synced', $lead->whmcs_sync_status);
+        $this->assertSame(321, (int) $lead->whmcs_order_id);
     }
 }

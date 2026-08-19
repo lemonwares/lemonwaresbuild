@@ -15,6 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
         ]);
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/flutterwave',
+        ]);
         $middleware->redirectGuestsTo('/login');
         $middleware->redirectUsersTo('/account');
     })

@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminEmailOrderController;
 use App\Http\Controllers\AdminHostingLeadController;
 use App\Http\Controllers\AdminHostingPriceController;
+use App\Http\Controllers\AdminFlutterwaveSettingsController;
 use App\Http\Controllers\AdminWhmcsSettingsController;
 use App\Http\Controllers\AdminSubscriberController;
 use App\Http\Controllers\AdminTeamMemberController;
@@ -15,6 +16,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\EmailOrderController;
+use App\Http\Controllers\FlutterwaveWebhookController;
 use App\Http\Middleware\EnsureAdminAuthenticated;
 use App\Models\HostingLead;
 use App\Models\HostingPlanPrice;
@@ -25,6 +27,10 @@ use App\Support\FlutterwavePayment;
 use App\Support\HostingPlanPriceSync;
 use App\Support\HostingPricing;
 use App\Support\WhmcsDomainCheck;
+use App\Support\WhmcsDomainPricing;
+use App\Support\WhmcsDomainSuggest;
+use App\Support\WhmcsCheckout;
+use App\Support\WhmcsClient;
 use App\Support\WhmcsLeadSync;
 use App\Support\WhmcsSettings;
 use Illuminate\Http\Request;
@@ -265,6 +271,10 @@ Route::get('/hosting/request/details', function (Request $request) {
         'selectedBillingCycle' => $selectedBillingCycle,
         'orderTotalUsd' => $orderTotalUsd,
         'orderTotalDisplay' => HostingPricing::dualPriceDisplay($orderTotalUsd),
+        'hostingAmountUsd' => $orderTotalUsd,
+        'hostingAmountDisplay' => HostingPricing::dualPriceDisplay($orderTotalUsd),
+        'usdToNgn' => HostingPricing::usdToNgnRate(),
+        'requiresDomain' => $selectedPlan !== 'vps',
     ]);
 })->name('hosting.intake');
 
@@ -286,7 +296,7 @@ Route::get('/hosting/payment/flutterwave/callback', function (Request $request) 
             ->route('home')
             ->with('hosting_feedback', [
                 'type' => 'error',
-                'message' => 'We could not match that payment to an order.',
+                'message' => __('hosting.payment_order_not_found'),
             ]);
     }
 
@@ -300,13 +310,13 @@ Route::get('/hosting/payment/flutterwave/callback', function (Request $request) 
             ->route('hosting.order-received', $lead)
             ->with('hosting_feedback', [
                 'type' => 'error',
-                'message' => 'Payment was not completed. You can try again from this page.',
+                'message' => __('hosting.payment_not_completed'),
             ]);
     }
 
     $verified = FlutterwavePayment::verifyTransaction($transactionId);
 
-    if (! $verified || strtolower((string) data_get($verified, 'status')) !== 'successful') {
+    if (! $verified) {
         $lead->update([
             'payment_status' => 'unverified',
             'status' => 'payment_failed',
@@ -316,46 +326,21 @@ Route::get('/hosting/payment/flutterwave/callback', function (Request $request) 
             ->route('hosting.order-received', $lead)
             ->with('hosting_feedback', [
                 'type' => 'error',
-                'message' => 'We could not verify your payment yet. Please contact support if you were charged.',
+                'message' => __('hosting.payment_unverified'),
             ]);
     }
 
-    $paidAmount = (float) data_get($verified, 'amount', 0);
-    $expected = (float) ($lead->amount_ngn ?? 0);
-    $currency = strtoupper((string) data_get($verified, 'currency', ''));
-
-    if ($currency !== 'NGN' || abs($paidAmount - $expected) > 1) {
-        $lead->update([
-            'payment_status' => 'amount_mismatch',
-            'status' => 'payment_failed',
-            'flutterwave_transaction_id' => (string) data_get($verified, 'id'),
-        ]);
-
-        return redirect()
-            ->route('hosting.order-received', $lead)
-            ->with('hosting_feedback', [
-                'type' => 'error',
-                'message' => 'Payment verification failed amount checks. Please contact support.',
-            ]);
-    }
-
-    $lead->update([
-        'payment_status' => 'successful',
-        'status' => 'paid',
-        'flutterwave_transaction_id' => (string) data_get($verified, 'id'),
-    ]);
-
-    if ($lead->checkout_provider === 'whmcs') {
-        WhmcsLeadSync::syncPayment($lead->fresh());
-    }
+    $result = FlutterwavePayment::confirmHostingLeadPayment($lead->fresh(), $verified);
 
     return redirect()
         ->route('hosting.order-received', $lead)
         ->with('hosting_feedback', [
-            'type' => 'success',
-            'message' => 'Payment confirmed. Our team will provision your VPS next.',
+            'type' => ($result['ok'] ?? false) ? 'success' : 'error',
+            'message' => (string) ($result['message'] ?? __('hosting.payment_not_completed')),
         ]);
 })->name('hosting.flutterwave.callback');
+
+Route::post('/webhooks/flutterwave', FlutterwaveWebhookController::class)->name('webhooks.flutterwave');
 
 Route::post('/hosting/request/received/{lead}/pay', function (HostingLead $lead) {
     abort_unless(($lead->checkout_provider === 'internal' || $lead->payment_provider === 'flutterwave'), 404);
@@ -403,6 +388,54 @@ Route::post('/hosting/domain/check', function (Request $request) {
 
     return response()->json($result, $result['ok'] ? 200 : 422);
 })->middleware('throttle:30,1')->name('hosting.domain.check');
+
+Route::post('/hosting/domain/suggest', function (Request $request) {
+    $validator = Validator::make($request->all(), [
+        'query' => ['required', 'string', 'max:253'],
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'ok' => false,
+            'suggestions' => [],
+            'message' => $validator->errors()->first(),
+        ], 422);
+    }
+
+    if (! WhmcsClient::isConfigured()) {
+        return response()->json([
+            'ok' => false,
+            'suggestions' => [],
+            'message' => __('hosting.domain_check_unconfigured'),
+        ], 503);
+    }
+
+    $suggestions = WhmcsDomainSuggest::suggest((string) $validator->validated()['query']);
+
+    return response()->json([
+        'ok' => true,
+        'suggestions' => $suggestions,
+    ]);
+})->middleware('throttle:20,1')->name('hosting.domain.suggest');
+
+Route::post('/hosting/domain/quote', function (Request $request) {
+    $validated = Validator::make($request->all(), [
+        'domain' => ['required', 'string', 'max:253'],
+        'domain_option' => ['required', 'string', 'in:register,transfer,owndomain'],
+    ])->validate();
+
+    $domain = DomainName::normalize((string) $validated['domain']);
+    if (! $domain) {
+        return response()->json([
+            'ok' => false,
+            'message' => __('hosting.domain_invalid'),
+        ], 422);
+    }
+
+    $quote = WhmcsDomainPricing::quote($domain, (string) $validated['domain_option']);
+
+    return response()->json($quote, ($quote['ok'] ?? false) ? 200 : 422);
+})->middleware('throttle:30,1')->name('hosting.domain.quote');
 
 Route::post('/hosting/request/details', function (Request $request) {
     $planOptions = config('site.hosting_plans', []);
@@ -534,12 +567,34 @@ Route::post('/hosting/request/details', function (Request $request) {
     $specForPid = $selectedSpecKeys[0] ?? '';
     $whmcsPid = WhmcsSettings::resolvePid($planSlug, $specForPid);
     $whmcsBaseUrl = WhmcsSettings::baseUrl();
-    $whmcsOrderRoute = '/' . ltrim(WhmcsSettings::orderRoute(), '/');
     $nameParts = preg_split('/\s+/', trim($payload['full_name'])) ?: [];
     $firstname = $nameParts[0] ?? '';
     $lastname = trim(implode(' ', array_slice($nameParts, 1)));
     if ($lastname === '') {
         $lastname = $firstname;
+    }
+
+    $hostingAmountUsd = $amountUsd;
+    $hostingAmountNgn = $amountNgn;
+    $domainAmountUsd = 0.0;
+    $domainAmountNgn = 0.0;
+
+    if ($checkoutProvider === 'whmcs' && $normalizedDomain) {
+        $domainQuote = WhmcsDomainPricing::quote($normalizedDomain, (string) $domainOption);
+        if (! ($domainQuote['ok'] ?? false)) {
+            return back()
+                ->withInput()
+                ->withErrors(['domain' => $domainQuote['message'] ?? __('hosting.domain_quote_unavailable')])
+                ->with('hosting_feedback', [
+                    'type' => 'error',
+                    'message' => $domainQuote['message'] ?? __('hosting.domain_quote_unavailable'),
+                ]);
+        }
+
+        $domainAmountUsd = (float) ($domainQuote['amount_usd'] ?? 0);
+        $domainAmountNgn = (float) ($domainQuote['amount_ngn'] ?? 0);
+        $amountUsd = round($hostingAmountUsd + $domainAmountUsd, 2);
+        $amountNgn = round($hostingAmountNgn + $domainAmountNgn, 2);
     }
 
     $specSummary = collect($selectedSpecsData)
@@ -577,6 +632,10 @@ Route::post('/hosting/request/details', function (Request $request) {
         'billing_cycle' => $billingCycle,
         'amount_usd' => $amountUsd,
         'amount_ngn' => $amountNgn,
+        'hosting_amount_usd' => $hostingAmountUsd,
+        'hosting_amount_ngn' => $hostingAmountNgn,
+        'domain_amount_usd' => $domainAmountUsd,
+        'domain_amount_ngn' => $domainAmountNgn,
         'checkout_provider' => $checkoutProvider,
         'status' => 'pending',
         'notes' => $payload['notes'] ?? null,
@@ -621,13 +680,14 @@ Route::post('/hosting/request/details', function (Request $request) {
     }
 
     $whmcsCycle = (string) ($billingCycles[$billingCycle]['whmcs'] ?? 'monthly');
+    $domainParts = DomainName::split((string) $normalizedDomain);
 
-    $checkoutUrl = $whmcsBaseUrl . $whmcsOrderRoute . '?' . http_build_query([
+    $checkoutQuery = [
         'a' => 'add',
         'pid' => $whmcsPid,
         'billingcycle' => $whmcsCycle,
-        'domain' => $normalizedDomain,
         'domainoption' => $domainOption,
+        'skipconfig' => 1,
         'email' => strtolower($payload['email']),
         'firstname' => $firstname,
         'lastname' => $lastname,
@@ -639,13 +699,61 @@ Route::post('/hosting/request/details', function (Request $request) {
         'state' => $payload['billing_state'],
         'postcode' => $payload['billing_postcode'],
         'country' => strtoupper($payload['billing_country']),
-        'promocode' => strtoupper($specKeyJoined),
-    ]);
+    ];
+
+    if ($domainParts) {
+        $checkoutQuery['sld'] = $domainParts['sld'];
+        $checkoutQuery['tld'] = $domainParts['tld'];
+    }
+
+    $checkoutUrl = WhmcsCheckout::cartUrl($checkoutQuery);
 
     $leadPayload['checkout_url'] = $checkoutUrl;
     $leadPayload['status'] = 'redirected_whmcs';
     $lead = HostingLead::create($leadPayload);
-    WhmcsLeadSync::syncCheckout($lead);
+    $lead = WhmcsLeadSync::syncCheckout($lead);
+    $lead = $lead->fresh();
+
+    if (WhmcsCheckout::syncSucceeded($lead)) {
+        if (WhmcsSettings::deferPaymentRedirect()) {
+            $lead->update(['status' => 'awaiting_payment']);
+
+            return redirect()
+                ->route('hosting.order-received', $lead)
+                ->with('hosting_feedback', [
+                    'type' => 'success',
+                    'message' => __('hosting.whmcs_test_order_created'),
+                ]);
+        }
+
+        $paymentLink = FlutterwavePayment::createPaymentLink($lead);
+
+        if ($paymentLink) {
+            return redirect()->away($paymentLink);
+        }
+
+        return redirect()
+            ->route('hosting.order-received', $lead)
+            ->with('hosting_feedback', [
+                'type' => 'error',
+                'message' => __('hosting.flutterwave_unavailable'),
+            ]);
+    }
+
+    if (WhmcsSettings::deferPaymentRedirect()) {
+        return back()
+            ->withInput()
+            ->with('hosting_feedback', [
+                'type' => 'error',
+                'message' => $lead->whmcs_sync_error ?: __('hosting.whmcs_sync_failed'),
+            ]);
+    }
+
+    logger()->info('WHMCS checkout falling back to cart URL', [
+        'lead_id' => $lead->id,
+        'whmcs_sync_status' => $lead->whmcs_sync_status,
+        'whmcs_sync_error' => $lead->whmcs_sync_error,
+    ]);
 
     return redirect()->away($checkoutUrl);
 })->middleware('throttle:10,1')->name('hosting.intake.submit');
@@ -819,6 +927,10 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::put('/hosting-prices', [AdminHostingPriceController::class, 'update'])->name('hosting-prices.update');
         Route::get('/whmcs-settings', [AdminWhmcsSettingsController::class, 'index'])->name('whmcs-settings.index');
         Route::put('/whmcs-settings', [AdminWhmcsSettingsController::class, 'update'])->name('whmcs-settings.update');
+        Route::post('/whmcs-settings/test-domain', [AdminWhmcsSettingsController::class, 'testDomain'])->name('whmcs-settings.test-domain');
+        Route::get('/flutterwave-settings', [AdminFlutterwaveSettingsController::class, 'index'])->name('flutterwave-settings.index');
+        Route::put('/flutterwave-settings', [AdminFlutterwaveSettingsController::class, 'update'])->name('flutterwave-settings.update');
+        Route::post('/flutterwave-settings/test-connection', [AdminFlutterwaveSettingsController::class, 'testConnection'])->name('flutterwave-settings.test-connection');
         Route::get('/email-catalog', [AdminEmailCatalogController::class, 'index'])->name('email-catalog.index');
         Route::put('/email-catalog', [AdminEmailCatalogController::class, 'update'])->name('email-catalog.update');
         Route::get('/email-orders', [AdminEmailOrderController::class, 'index'])->name('email-orders.index');

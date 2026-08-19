@@ -29,6 +29,20 @@ class WhmcsDomainCheckTest extends TestCase
         $this->assertSame('available', $result['status']);
     }
 
+    public function test_unconfigured_domain_check_shows_setup_message(): void
+    {
+        config([
+            'site.whmcs.base_url' => 'https://billing.example.test',
+            'site.whmcs.api_identifier' => '',
+            'site.whmcs.api_secret' => '',
+        ]);
+
+        $result = WhmcsDomainCheck::validate('google.com', 'register');
+
+        $this->assertFalse($result['ok']);
+        $this->assertSame('unconfigured', $result['status']);
+    }
+
     public function test_register_option_rejects_unavailable_domain(): void
     {
         config([

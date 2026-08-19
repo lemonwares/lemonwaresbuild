@@ -32,6 +32,34 @@ class WhmcsSettings
         return (string) IntegrationSetting::getValue('whmcs.api_secret', (string) config('site.whmcs.api_secret'));
     }
 
+    public static function apiAccessKey(): string
+    {
+        return (string) IntegrationSetting::getValue('whmcs.api_access_key', (string) config('site.whmcs.api_access_key', ''));
+    }
+
+    public static function paymentMethod(): string
+    {
+        return strtolower(trim((string) IntegrationSetting::getValue(
+            'whmcs.payment_method',
+            (string) config('site.whmcs.payment_method', ''),
+        )));
+    }
+
+    public static function deferPaymentRedirect(): bool
+    {
+        $stored = IntegrationSetting::getValue('whmcs.defer_payment_redirect', null);
+        if ($stored !== null && $stored !== '') {
+            return filter_var($stored, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        $configured = config('site.whmcs.defer_payment_redirect');
+        if ($configured !== null && $configured !== '') {
+            return filter_var($configured, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        return app()->environment('local');
+    }
+
     public static function resolvePid(string $planSlug, string $specKey): ?int
     {
         $mapping = WhmcsProductMapping::query()

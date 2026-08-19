@@ -60,11 +60,16 @@ class WhmcsLeadSync
             return self::mark($lead, 'failed', 'Missing WHMCS product id mapping for selected plan.');
         }
 
+        $paymentMethod = WhmcsSettings::paymentMethod();
+        if ($paymentMethod === '') {
+            return self::mark($lead, 'failed', 'WHMCS payment method is not configured. Set it in Admin > WHMCS Settings.');
+        }
+
         $orderPayload = [
             'clientid' => $clientId,
             'pid' => [$pid],
             'billingcycle' => [$lead->billing_cycle ?: 'monthly'],
-            'promocode' => strtoupper((string) ($lead->spec_key ?? '')),
+            'paymentmethod' => $paymentMethod,
             'noinvoice' => false,
             'noemail' => true,
         ];
@@ -79,7 +84,11 @@ class WhmcsLeadSync
 
         if ($domain) {
             $orderPayload['domain'] = [$domain];
-            $orderPayload['domaintype'] = [$domainOption ?: 'register'];
+
+            if (in_array($domainOption, ['register', 'transfer'], true)) {
+                $orderPayload['domaintype'] = [$domainOption];
+                $orderPayload['regperiod'] = [1];
+            }
         }
 
         $order = WhmcsClient::createOrder($orderPayload);
@@ -88,7 +97,7 @@ class WhmcsLeadSync
         $invoiceId = (int) data_get($order, 'invoiceid', 0);
 
         if ($orderId < 1) {
-            return self::mark($lead, 'failed', 'Unable to create WHMCS order.');
+            return self::mark($lead, 'failed', WhmcsClient::lastError() ?: 'Unable to create WHMCS order.');
         }
 
         $lead->update([
@@ -120,6 +129,21 @@ class WhmcsLeadSync
         $orderId = (int) ($lead->whmcs_order_id ?: 0);
         if ($orderId < 1) {
             return self::mark($lead, 'failed', 'Cannot sync payment because WHMCS order id is missing.');
+        }
+
+        $invoiceId = (int) ($lead->whmcs_invoice_id ?: 0);
+        $transactionId = trim((string) ($lead->flutterwave_transaction_id ?: $lead->payment_reference ?: ''));
+
+        if ($invoiceId > 0 && $transactionId !== '') {
+            $invoicePaid = WhmcsClient::addInvoicePayment(
+                $invoiceId,
+                (float) ($lead->amount_ngn ?? 0),
+                $transactionId,
+            );
+
+            if (! $invoicePaid) {
+                return self::mark($lead, 'failed', WhmcsClient::lastError() ?: 'WHMCS invoice payment recording failed.');
+            }
         }
 
         $accepted = WhmcsClient::acceptOrder($orderId);
