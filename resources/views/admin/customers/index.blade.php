@@ -1,5 +1,5 @@
 @extends('layouts.admin')
-
+{{-- {{ dd($customers) }} --}}
 @section('title', 'Customers — ' . config('site.short_name'))
 
 @section('content')
