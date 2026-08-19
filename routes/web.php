@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminEmailOrderController;
 use App\Http\Controllers\AdminHostingLeadController;
 use App\Http\Controllers\AdminHostingPriceController;
+use App\Http\Controllers\AdminWhmcsSettingsController;
 use App\Http\Controllers\AdminSubscriberController;
 use App\Http\Controllers\AdminTeamMemberController;
 use App\Http\Controllers\Auth\LoginController;
@@ -23,6 +24,7 @@ use App\Support\FlutterwavePayment;
 use App\Support\HostingPlanPriceSync;
 use App\Support\HostingPricing;
 use App\Support\WhmcsLeadSync;
+use App\Support\WhmcsSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -371,7 +373,6 @@ Route::post('/hosting/request/received/{lead}/pay', function (HostingLead $lead)
 
 Route::post('/hosting/request/details', function (Request $request) {
     $planOptions = config('site.hosting_plans', []);
-    $whmcsConfig = config('site.whmcs', []);
     $billingCycles = HostingPricing::billingCycles();
 
     $rawPhone = trim((string) $request->input('phone', ''));
@@ -464,9 +465,10 @@ Route::post('/hosting/request/details', function (Request $request) {
     $specKeyJoined = implode(',', $selectedSpecKeys);
     $checkoutProvider = (string) ($selectedPlan['checkout_provider'] ?? 'whmcs');
 
-    $whmcsPid = (string) ($selectedPlan['whmcs_pid'] ?? '');
-    $whmcsBaseUrl = rtrim((string) ($whmcsConfig['base_url'] ?? ''), '/');
-    $whmcsOrderRoute = '/' . ltrim((string) ($whmcsConfig['order_route'] ?? '/cart.php'), '/');
+    $specForPid = $selectedSpecKeys[0] ?? '';
+    $whmcsPid = WhmcsSettings::resolvePid($planSlug, $specForPid);
+    $whmcsBaseUrl = WhmcsSettings::baseUrl();
+    $whmcsOrderRoute = '/' . ltrim(WhmcsSettings::orderRoute(), '/');
     $nameParts = preg_split('/\s+/', trim($payload['full_name'])) ?: [];
     $firstname = $nameParts[0] ?? '';
     $lastname = trim(implode(' ', array_slice($nameParts, 1)));
@@ -534,7 +536,7 @@ Route::post('/hosting/request/details', function (Request $request) {
             ]);
     }
 
-    if ($whmcsBaseUrl === '' || $whmcsPid === '') {
+    if ($whmcsBaseUrl === '' || ! $whmcsPid) {
         logger()->warning('WHMCS checkout mapping missing', [
             'plan_slug' => $planSlug,
             'whmcs_base_url' => $whmcsBaseUrl,
@@ -746,6 +748,8 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::resource('team-members', AdminTeamMemberController::class)->except(['show']);
         Route::get('/hosting-prices', [AdminHostingPriceController::class, 'index'])->name('hosting-prices.index');
         Route::put('/hosting-prices', [AdminHostingPriceController::class, 'update'])->name('hosting-prices.update');
+        Route::get('/whmcs-settings', [AdminWhmcsSettingsController::class, 'index'])->name('whmcs-settings.index');
+        Route::put('/whmcs-settings', [AdminWhmcsSettingsController::class, 'update'])->name('whmcs-settings.update');
         Route::get('/email-catalog', [AdminEmailCatalogController::class, 'index'])->name('email-catalog.index');
         Route::put('/email-catalog', [AdminEmailCatalogController::class, 'update'])->name('email-catalog.update');
         Route::get('/email-orders', [AdminEmailOrderController::class, 'index'])->name('email-orders.index');

@@ -9,9 +9,9 @@ class WhmcsClient
 {
     public static function isConfigured(): bool
     {
-        return filled(config('site.whmcs.api_identifier'))
-            && filled(config('site.whmcs.api_secret'))
-            && filled(config('site.whmcs.base_url'));
+        return filled(WhmcsSettings::apiIdentifier())
+            && filled(WhmcsSettings::apiSecret())
+            && filled(WhmcsSettings::baseUrl());
     }
 
     /**
@@ -137,7 +137,7 @@ class WhmcsClient
             return null;
         }
 
-        $url = rtrim((string) config('site.whmcs.base_url'), '/') . '/includes/api.php';
+        $url = WhmcsSettings::baseUrl() . '/includes/api.php';
 
         try {
             $response = Http::asForm()
@@ -145,8 +145,8 @@ class WhmcsClient
                 ->acceptJson()
                 ->post($url, array_merge($payload, [
                     'action' => $action,
-                    'identifier' => (string) config('site.whmcs.api_identifier'),
-                    'secret' => (string) config('site.whmcs.api_secret'),
+                    'identifier' => WhmcsSettings::apiIdentifier(),
+                    'secret' => WhmcsSettings::apiSecret(),
                     'responsetype' => 'json',
                 ]));
 
