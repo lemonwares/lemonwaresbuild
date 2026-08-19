@@ -30,25 +30,25 @@
             </p>
 
             <x-ui.accordion>
-                <x-ui.accordion-item title="Microsoft 365" :default-open="true">
+                <x-ui.accordion-item :title="__('site.home.email_lw_title')" :default-open="true">
+                    {{ __('site.home.email_lw') }}
+                </x-ui.accordion-item>
+
+                <x-ui.accordion-item :title="__('site.home.email_m365_title')">
                     {{ __('site.home.email_m365') }}
                 </x-ui.accordion-item>
 
-                <x-ui.accordion-item title="Google Workspace">
+                <x-ui.accordion-item :title="__('site.home.email_google_title')">
                     {{ __('site.home.email_google') }}
-                </x-ui.accordion-item>
-
-                <x-ui.accordion-item title="Titan Business Email">
-                    {{ __('site.home.email_titan') }}
                 </x-ui.accordion-item>
             </x-ui.accordion>
 
             <div class="mt-8 flex flex-wrap items-center gap-4">
-                <x-ui.button href="#contact">
+                <x-ui.button href="{{ route('email.plans') }}">
                     <x-ui.icons.arrow-up-right class="size-4" />
                     <span>{{ __('site.home.feature_email') }}</span>
                 </x-ui.button>
-                <a href="#contact" class="inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-base font-semibold text-on-blush transition hover:text-rose">
+                <a href="{{ route('contact') }}" class="inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-base font-semibold text-on-blush transition hover:text-rose">
                     <span class="inline-flex size-8 shrink-0 items-center justify-center rounded-full bg-blush text-rose">
                         <x-ui.icons.phone class="size-4" />
                     </span>

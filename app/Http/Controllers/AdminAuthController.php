@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class AdminAuthController extends Controller
@@ -24,36 +26,29 @@ class AdminAuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        $adminEmail = env('ADMIN_EMAIL');
-        $adminPassword = env('ADMIN_PASSWORD');
+        $admin = User::query()
+            ->where('role', 'admin')
+            ->where('email', strtolower($credentials['email']))
+            ->first();
 
-        if (! $adminEmail || ! $adminPassword) {
-            return back()
-                ->withErrors(['email' => 'Admin login is not configured yet. Please set ADMIN_EMAIL and ADMIN_PASSWORD in .env.'])
-                ->onlyInput('email');
-        }
-
-        if (
-            $credentials['email'] !== $adminEmail ||
-            $credentials['password'] !== $adminPassword
-        ) {
+        if (! $admin || ! Hash::check($credentials['password'], $admin->password)) {
             return back()
                 ->withErrors(['email' => 'Invalid admin credentials.'])
                 ->onlyInput('email');
         }
 
         $request->session()->put('admin_authenticated', true);
+        $request->session()->put('admin_user_id', $admin->id);
 
         return redirect()->route('admin.dashboard');
     }
 
     public function logout(Request $request): RedirectResponse
     {
-        $request->session()->forget('admin_authenticated');
+        $request->session()->forget(['admin_authenticated', 'admin_user_id']);
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
         return redirect()->route('admin.login')->with('status', 'Signed out.');
     }
 }
-

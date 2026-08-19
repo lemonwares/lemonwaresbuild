@@ -27,6 +27,7 @@ return [
         'monthly' => 'Monatlich',
         'bimonthly' => '2 Monate',
         'quarterly' => 'Vierteljährlich',
+        'semiannual' => 'Halbjährlich (6 Monate)',
         'annually' => 'Jährlich',
     ],
     'billing_details_title' => 'Rechnungs- & Kontaktdaten',

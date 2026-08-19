@@ -21,7 +21,7 @@ return [
         ],
         [
             'question' => 'Können Sie Business-E-Mail auf meiner Domain einrichten?',
-            'answer' => 'Ja. Wir richten Microsoft 365, Google Workspace oder Titan ein — inkl. Postfächer, DNS und Migration bei Bedarf.',
+            'answer' => 'Ja. Bestellen Sie Lemon Mail für Ihre Domain auf dieser Site — wir legen die Postfächer an und liefern die DNS-Einträge. Microsoft 365, Google Workspace und Titan gibt es auf Anfrage.',
         ],
         [
             'question' => 'Bauen Sie WordPress-Sites und individuelle Apps?',

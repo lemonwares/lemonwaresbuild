@@ -27,7 +27,7 @@
     ];
 @endphp
 
-<nav class="flex items-center gap-1.5" aria-label="{{ __('site.common.language') }}" data-locale-switcher>
+<nav class="flex shrink-0 items-center gap-1.5" aria-label="{{ __('site.common.language') }}" data-locale-switcher>
     @foreach (config('site.locales', []) as $code => $label)
         @php $active = app()->getLocale() === $code; @endphp
         <a

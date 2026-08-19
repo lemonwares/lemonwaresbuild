@@ -27,6 +27,7 @@ return [
         'monthly' => 'Mensuel',
         'bimonthly' => '2 mois',
         'quarterly' => 'Trimestriel',
+        'semiannual' => 'Semestriel (6 mois)',
         'annually' => 'Annuel',
     ],
     'billing_details_title' => 'Coordonnées et facturation',

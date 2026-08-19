@@ -34,7 +34,7 @@
         @fonts
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="min-h-screen flex flex-col">
+    <body @class(['min-h-screen flex flex-col', 'bg-blush-soft' => filled(trim($__env->yieldContent('client_area')))])>
         @hasSection('focus_flow')
             <x-layout.focus-header />
         @else
@@ -45,7 +45,7 @@
             @yield('content')
         </main>
 
-        @unless (trim($__env->yieldContent('focus_flow')))
+        @unless (trim($__env->yieldContent('focus_flow')) || trim($__env->yieldContent('client_area')))
             <x-layout.footer />
             <x-layout.chat-widget />
         @endunless

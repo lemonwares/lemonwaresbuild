@@ -21,7 +21,7 @@ return [
         ],
         [
             'question' => 'Can you set up business email on my domain?',
-            'answer' => 'Yes. We set up professional email on Microsoft 365, Google Workspace, or Titan — including mailbox creation, DNS records, and migration support when needed.',
+            'answer' => 'Yes. Order Lemon Mail on your domain from this site — we create the mailboxes and give you the DNS records. Microsoft 365, Google Workspace, and Titan are available on request if you need a full productivity suite.',
         ],
         [
             'question' => 'Do you build WordPress sites and custom apps?',
