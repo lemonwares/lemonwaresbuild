@@ -5,7 +5,7 @@ on:
     branches: ["main"]
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,18 +33,7 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Deploy files via rsync over SSH
-        uses: burnett01/rsync-deployments@7.0.1
-        with:
-          switches: -avzr --delete --exclude='.git' --exclude='.env' --exclude='storage/logs/' --exclude='storage/framework/sessions/' --exclude='storage/framework/cache/' --exclude='node_modules/' --exclude='.cursor/'
-          path: ./
-          remote_path: ${{ secrets.CPANEL_DEPLOY_PATH }}/
-          remote_host: ${{ secrets.CPANEL_SSH_HOST }}
-          remote_user: ${{ secrets.CPANEL_SSH_USERNAME }}
-          remote_port: ${{ secrets.CPANEL_SSH_PORT }}
-          remote_key: ${{ secrets.CPANEL_SSH_KEY }}
-
-      - name: Run post-deploy commands
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.CPANEL_SSH_HOST }}
@@ -53,6 +42,10 @@ jobs:
           port: ${{ secrets.CPANEL_SSH_PORT }}
           script: |
             cd ${{ secrets.CPANEL_DEPLOY_PATH }}
+            git pull origin main
+            composer install --no-dev --optimize-autoloader --no-interaction
+            npm ci
+            npm run build
             php artisan migrate --force
             php artisan config:cache
             php artisan route:cache
