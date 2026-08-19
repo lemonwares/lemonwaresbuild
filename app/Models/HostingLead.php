@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\WhmcsSettings;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -128,7 +129,7 @@ class HostingLead extends Model
         }
 
         if ($this->isShared()) {
-            return config('site.whmcs.client_login_url');
+            return WhmcsSettings::clientLoginUrl();
         }
 
         return null;
