@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\IntegrationSetting;
 use App\Models\WhmcsProductMapping;
+use App\Support\WhmcsClient;
+use App\Support\WhmcsDomainCheck;
 use App\Support\WhmcsSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -29,6 +31,9 @@ class AdminWhmcsSettingsController extends Controller
                 'order_route' => WhmcsSettings::orderRoute(),
                 'api_identifier' => WhmcsSettings::apiIdentifier(),
                 'api_secret' => WhmcsSettings::apiSecret(),
+                'api_access_key' => WhmcsSettings::apiAccessKey(),
+                'payment_method' => WhmcsSettings::paymentMethod(),
+                'defer_payment_redirect' => WhmcsSettings::deferPaymentRedirect(),
             ],
         ]);
     }
@@ -41,6 +46,9 @@ class AdminWhmcsSettingsController extends Controller
             'order_route' => ['required', 'string', 'max:120'],
             'api_identifier' => ['required', 'string', 'max:255'],
             'api_secret' => ['required', 'string', 'max:255'],
+            'api_access_key' => ['nullable', 'string', 'max:255'],
+            'payment_method' => ['required', 'string', 'max:80'],
+            'defer_payment_redirect' => ['nullable', 'boolean'],
             'mappings' => ['nullable', 'array'],
             'mappings.*.plan_slug' => ['required_with:mappings', 'string', 'max:50'],
             'mappings.*.spec_key' => ['required_with:mappings', 'string', 'max:80'],
@@ -54,6 +62,9 @@ class AdminWhmcsSettingsController extends Controller
             'whmcs.order_route' => '/' . ltrim((string) $validated['order_route'], '/'),
             'whmcs.api_identifier' => (string) $validated['api_identifier'],
             'whmcs.api_secret' => (string) $validated['api_secret'],
+            'whmcs.api_access_key' => (string) ($validated['api_access_key'] ?? ''),
+            'whmcs.payment_method' => strtolower(trim((string) $validated['payment_method'])),
+            'whmcs.defer_payment_redirect' => ! empty($validated['defer_payment_redirect']) ? '1' : '0',
         ]);
 
         foreach (($validated['mappings'] ?? []) as $mapping) {
@@ -84,5 +95,33 @@ class AdminWhmcsSettingsController extends Controller
         return redirect()
             ->route('admin.whmcs-settings.index')
             ->with('status', 'WHMCS settings updated.');
+    }
+
+    public function testDomain(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'domain' => ['required', 'string', 'max:253'],
+            'domain_option' => ['required', 'string', 'in:register,transfer,owndomain'],
+        ]);
+
+        $connection = WhmcsClient::verifyConnection();
+        $result = WhmcsDomainCheck::validate(
+            (string) $validated['domain'],
+            (string) $validated['domain_option'],
+            true
+        );
+
+        $whois = WhmcsClient::domainWhois((string) $validated['domain']);
+
+        return redirect()
+            ->route('admin.whmcs-settings.index')
+            ->with('domain_test_result', [
+                'input' => $validated,
+                'connection' => $connection,
+                'validation' => $result,
+                'configured' => WhmcsClient::isConfigured(),
+                'whmcs_error' => WhmcsClient::lastError(),
+                'whois' => $whois,
+            ]);
     }
 }

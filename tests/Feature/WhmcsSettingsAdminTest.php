@@ -26,6 +26,8 @@ class WhmcsSettingsAdminTest extends TestCase
             'order_route' => '/cart.php',
             'api_identifier' => 'abc123',
             'api_secret' => 'secret456',
+            'payment_method' => 'banktransfer',
+            'defer_payment_redirect' => '1',
             'mappings' => [
                 'cpanel_aspire' => [
                     'plan_slug' => 'cpanel',
@@ -64,6 +66,8 @@ class WhmcsSettingsAdminTest extends TestCase
             'order_route' => '/cart.php',
             'api_identifier' => 'abc123',
             'api_secret' => 'secret456',
+            'payment_method' => 'banktransfer',
+            'defer_payment_redirect' => '1',
             'mappings' => [
                 'cpanel_starter' => [
                     'plan_slug' => 'cpanel',
@@ -103,8 +107,10 @@ class WhmcsSettingsAdminTest extends TestCase
 
         $response->assertRedirect();
         $location = (string) $response->headers->get('Location');
+        $this->assertStringContainsString('/cart.php', $location);
         $this->assertStringContainsString('pid=16', $location);
-        $this->assertStringContainsString('domain=example.com', $location);
+        $this->assertStringContainsString('sld=example', $location);
+        $this->assertStringContainsString('tld=.com', $location);
         $this->assertStringContainsString('domainoption=register', $location);
     }
 }

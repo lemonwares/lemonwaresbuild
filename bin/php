@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Use the local PHP build with PostgreSQL support (pdo_pgsql).
+exec "$HOME/.config/php-8.5-nts/php.exe" "$@"

@@ -7,6 +7,13 @@ use Illuminate\Support\Facades\Log;
 
 class WhmcsClient
 {
+    protected static ?string $lastError = null;
+
+    public static function lastError(): ?string
+    {
+        return self::$lastError;
+    }
+
     public static function isConfigured(): bool
     {
         return filled(WhmcsSettings::apiIdentifier())
@@ -78,6 +85,74 @@ class WhmcsClient
         return (bool) $response && ($response['result'] ?? null) === 'success';
     }
 
+    public static function addInvoicePayment(int $invoiceId, float $amount, string $transactionId): bool
+    {
+        $response = self::request('AddInvoicePayment', [
+            'invoiceid' => $invoiceId,
+            'transid' => $transactionId,
+            'amount' => round($amount, 2),
+            'date' => now()->format('Y-m-d'),
+            'paymentmethod' => WhmcsSettings::paymentMethod(),
+            'noemail' => true,
+        ]);
+
+        return (bool) $response && ($response['result'] ?? null) === 'success';
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public static function createSsoToken(int $clientId, string $redirectPath): ?array
+    {
+        $response = self::request('CreateSsoToken', [
+            'client_id' => $clientId,
+            'destination' => 'sso:custom_redirect',
+            'sso_redirect_path' => ltrim($redirectPath, '/'),
+        ]);
+
+        if (! $response || ($response['result'] ?? null) !== 'success') {
+            return null;
+        }
+
+        return $response;
+    }
+
+    /**
+     * @return array{ok:bool,action:string,message:string,response?:array<string,mixed>|null}
+     */
+    public static function verifyConnection(): array
+    {
+        $response = self::request('GetClients', [
+            'limitnum' => 1,
+            'limitstart' => 0,
+        ]);
+
+        if (! $response) {
+            return [
+                'ok' => false,
+                'action' => 'GetClients',
+                'message' => self::lastError() ?: 'Could not reach WHMCS API.',
+                'response' => null,
+            ];
+        }
+
+        if (($response['result'] ?? null) !== 'success') {
+            return [
+                'ok' => false,
+                'action' => 'GetClients',
+                'message' => trim((string) ($response['message'] ?? self::lastError() ?: 'WHMCS API rejected the request.')),
+                'response' => $response,
+            ];
+        }
+
+        return [
+            'ok' => true,
+            'action' => 'GetClients',
+            'message' => 'WHMCS API credentials are working.',
+            'response' => $response,
+        ];
+    }
+
     /**
      * @return array<string, mixed>|null
      */
@@ -87,7 +162,21 @@ class WhmcsClient
             'domain' => strtolower(trim($domain)),
         ]);
 
-        if (! $response || ($response['result'] ?? null) !== 'success') {
+        if (! $response) {
+            return null;
+        }
+
+        return $response;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public static function getTldPricing(): ?array
+    {
+        $response = self::request('GetTLDPricing', []);
+
+        if (! $response) {
             return null;
         }
 
@@ -149,36 +238,52 @@ class WhmcsClient
      */
     protected static function request(string $action, array $payload): ?array
     {
+        self::$lastError = null;
+
         if (! self::isConfigured()) {
+            self::$lastError = 'WHMCS API credentials are missing.';
+
             return null;
         }
 
         $url = WhmcsSettings::baseUrl() . '/includes/api.php';
 
+        $auth = [
+            'action' => $action,
+            'identifier' => WhmcsSettings::apiIdentifier(),
+            'secret' => WhmcsSettings::apiSecret(),
+            'responsetype' => 'json',
+        ];
+
+        if ($accessKey = WhmcsSettings::apiAccessKey()) {
+            $auth['accesskey'] = $accessKey;
+        }
+
         try {
             $response = Http::asForm()
                 ->timeout(20)
                 ->acceptJson()
-                ->post($url, array_merge($payload, [
-                    'action' => $action,
-                    'identifier' => WhmcsSettings::apiIdentifier(),
-                    'secret' => WhmcsSettings::apiSecret(),
-                    'responsetype' => 'json',
-                ]));
+                ->post($url, array_merge($payload, $auth));
 
             $json = $response->json();
 
             if ($response->failed() || ! is_array($json)) {
+                $body = trim(substr((string) $response->body(), 0, 240));
+                self::$lastError = self::formatRequestFailure($response->status(), is_array($json) ? $json : null, $body);
+
                 Log::warning('WHMCS request failed', [
                     'action' => $action,
                     'status' => $response->status(),
                     'response' => $json,
+                    'body' => $body,
                 ]);
 
                 return null;
             }
 
             if (($json['result'] ?? null) !== 'success') {
+                self::$lastError = self::formatApiError($json);
+
                 Log::warning('WHMCS API returned non-success', [
                     'action' => $action,
                     'response' => $json,
@@ -187,6 +292,8 @@ class WhmcsClient
 
             return $json;
         } catch (\Throwable $exception) {
+            self::$lastError = $exception->getMessage();
+
             Log::warning('WHMCS request exception', [
                 'action' => $action,
                 'error' => $exception->getMessage(),
@@ -194,5 +301,37 @@ class WhmcsClient
 
             return null;
         }
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $json
+     */
+    protected static function formatRequestFailure(int $status, ?array $json, string $body): string
+    {
+        $message = trim((string) data_get($json, 'message', ''));
+
+        if ($message !== '' && preg_match('/invalid ip\s+([0-9a-f:.]+)/i', $message, $matches)) {
+            return __('hosting.domain_check_invalid_ip', ['ip' => $matches[1]]);
+        }
+
+        if ($message !== '') {
+            return $message;
+        }
+
+        return 'WHMCS API request failed with HTTP ' . $status . ($body !== '' ? ': ' . $body : '.');
+    }
+
+    /**
+     * @param  array<string, mixed>  $json
+     */
+    protected static function formatApiError(array $json): string
+    {
+        $message = trim((string) ($json['message'] ?? 'WHMCS API returned an error.'));
+
+        if (preg_match('/invalid ip\s+([0-9a-f:.]+)/i', $message, $matches)) {
+            return __('hosting.domain_check_invalid_ip', ['ip' => $matches[1]]);
+        }
+
+        return $message;
     }
 }

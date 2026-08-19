@@ -16,6 +16,7 @@
                 ['label' => 'Hosting Prices', 'route' => 'admin.hosting-prices.index', 'match' => 'admin.hosting-prices.*'],
                 ['label' => 'Lemon Mail', 'route' => 'admin.email-catalog.index', 'match' => 'admin.email-catalog.*'],
                 ['label' => 'WHMCS Settings', 'route' => 'admin.whmcs-settings.index', 'match' => 'admin.whmcs-settings.*'],
+                ['label' => 'Flutterwave Settings', 'route' => 'admin.flutterwave-settings.index', 'match' => 'admin.flutterwave-settings.*'],
             ],
         ],
         [

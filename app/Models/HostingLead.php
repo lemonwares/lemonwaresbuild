@@ -31,6 +31,10 @@ class HostingLead extends Model
         'billing_cycle',
         'amount_usd',
         'amount_ngn',
+        'hosting_amount_usd',
+        'hosting_amount_ngn',
+        'domain_amount_usd',
+        'domain_amount_ngn',
         'checkout_provider',
         'payment_provider',
         'payment_reference',
@@ -58,6 +62,10 @@ class HostingLead extends Model
         return [
             'amount_usd' => 'decimal:2',
             'amount_ngn' => 'decimal:2',
+            'hosting_amount_usd' => 'decimal:2',
+            'hosting_amount_ngn' => 'decimal:2',
+            'domain_amount_usd' => 'decimal:2',
+            'domain_amount_ngn' => 'decimal:2',
             'whmcs_synced_at' => 'datetime',
         ];
     }

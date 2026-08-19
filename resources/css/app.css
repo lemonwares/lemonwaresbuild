@@ -301,6 +301,15 @@
         @apply w-full rounded-2xl border border-border bg-white px-4 py-3 text-base font-light text-black placeholder:font-light placeholder:text-black transition focus:border-rose/40 focus:outline-none focus:ring-2 focus:ring-rose/15;
     }
 
+    .hosting-domain-field [data-hosting-domain-spinner] {
+        @apply pointer-events-none absolute top-1/2 flex -translate-y-1/2 items-center;
+        right: 1rem;
+    }
+
+    .hosting-domain-field [data-hosting-domain-input].is-domain-loading {
+        padding-right: 3rem;
+    }
+
     .footer-reviews {
         @apply px-1 py-2;
     }

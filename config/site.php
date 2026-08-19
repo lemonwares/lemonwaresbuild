@@ -55,6 +55,20 @@ return [
         'order_route' => env('WHMCS_ORDER_ROUTE', '/cart.php'),
         'api_identifier' => env('WHMCS_API_IDENTIFIER', ''),
         'api_secret' => env('WHMCS_API_SECRET', ''),
+        'api_access_key' => env('WHMCS_API_ACCESS_KEY', ''),
+        'payment_method' => env('WHMCS_PAYMENT_METHOD', 'banktransfer'),
+        // null = auto (enabled on local only). true/false to force.
+        'defer_payment_redirect' => env('WHMCS_DEFER_PAYMENT'),
+    ],
+
+    'domain_suggestion_tlds' => [
+        'com',
+        'net',
+        'org',
+        'ng',
+        'com.ng',
+        'io',
+        'online',
     ],
 
     'hosting_plans' => [
