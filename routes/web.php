@@ -22,6 +22,7 @@ use App\Models\TeamMember;
 use App\Support\FlutterwavePayment;
 use App\Support\HostingPlanPriceSync;
 use App\Support\HostingPricing;
+use App\Support\WhmcsLeadSync;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -339,6 +340,10 @@ Route::get('/hosting/payment/flutterwave/callback', function (Request $request) 
         'flutterwave_transaction_id' => (string) data_get($verified, 'id'),
     ]);
 
+    if ($lead->checkout_provider === 'whmcs') {
+        WhmcsLeadSync::syncPayment($lead->fresh());
+    }
+
     return redirect()
         ->route('hosting.order-received', $lead)
         ->with('hosting_feedback', [
@@ -471,6 +476,8 @@ Route::post('/hosting/request/details', function (Request $request) {
 
     $specSummary = collect($selectedSpecsData)
         ->map(function ($spec) {
+            $spec = is_array($spec) ? $spec : [];
+
             $metrics = collect($spec)
                 ->reject(fn ($value, $key) => in_array($key, ['key', 'label', 'description', 'highlights', 'details', 'default_price', 'default_currency', 'default_billing_cycle', 'default_suffix'], true) || is_array($value))
                 ->map(fn ($value, $key) => strtoupper((string) $key) . ': ' . $value)
@@ -566,7 +573,8 @@ Route::post('/hosting/request/details', function (Request $request) {
 
     $leadPayload['checkout_url'] = $checkoutUrl;
     $leadPayload['status'] = 'redirected_whmcs';
-    HostingLead::create($leadPayload);
+    $lead = HostingLead::create($leadPayload);
+    WhmcsLeadSync::syncCheckout($lead);
 
     return redirect()->away($checkoutUrl);
 })->middleware('throttle:10,1')->name('hosting.intake.submit');
@@ -728,9 +736,12 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
 
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
         Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
+        Route::post('/customers/sync-whmcs', [AdminCustomerController::class, 'syncWhmcs'])->name('customers.sync-whmcs');
         Route::get('/customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
+        Route::get('/legacy-customers/{legacyCustomer}', [AdminCustomerController::class, 'showLegacy'])->name('customers.legacy.show');
         Route::get('/hosting-leads', [AdminHostingLeadController::class, 'index'])->name('hosting-leads.index');
         Route::get('/hosting-leads/{hostingLead}', [AdminHostingLeadController::class, 'show'])->name('hosting-leads.show');
+        Route::post('/hosting-leads/{hostingLead}/retry-whmcs-sync', [AdminHostingLeadController::class, 'retryWhmcsSync'])->name('hosting-leads.retry-whmcs-sync');
         Route::get('/subscribers', [AdminSubscriberController::class, 'index'])->name('subscribers.index');
         Route::resource('team-members', AdminTeamMemberController::class)->except(['show']);
         Route::get('/hosting-prices', [AdminHostingPriceController::class, 'index'])->name('hosting-prices.index');
