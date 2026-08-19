@@ -23,6 +23,7 @@ class WhmcsSyncTest extends TestCase
 
         Http::fake([
             'https://billing.example.test/includes/api.php' => Http::sequence()
+                ->push(['result' => 'success', 'status' => 'available', 'whois' => ''], 200)
                 ->push(['result' => 'error', 'message' => 'Client not found'], 200)
                 ->push(['result' => 'success', 'clientid' => '99'], 200)
                 ->push(['result' => 'success', 'orderid' => '321', 'invoiceid' => '654'], 200),
@@ -34,6 +35,8 @@ class WhmcsSyncTest extends TestCase
             'email' => 'ada@example.com',
             'phone' => '+2348012345678',
             'company' => 'Analytical Engines Ltd',
+            'domain' => 'brightmedia.ng',
+            'domain_option' => 'register',
             'billing_address_line_1' => '12 Marina',
             'billing_address_line_2' => '',
             'billing_city' => 'Lagos',
@@ -49,6 +52,7 @@ class WhmcsSyncTest extends TestCase
         $response->assertRedirect();
 
         $lead = HostingLead::query()->latest()->firstOrFail();
+        $this->assertSame('brightmedia.ng', $lead->hostname);
         $this->assertSame('checkout_synced', $lead->whmcs_sync_status);
         $this->assertSame(99, (int) $lead->whmcs_client_id);
         $this->assertSame(321, (int) $lead->whmcs_order_id);
@@ -66,10 +70,9 @@ class WhmcsSyncTest extends TestCase
         ]);
 
         Http::fake([
-            'https://billing.example.test/includes/api.php' => Http::response([
-                'result' => 'error',
-                'message' => 'WHMCS unavailable',
-            ], 200),
+            'https://billing.example.test/includes/api.php' => Http::sequence()
+                ->push(['result' => 'success', 'status' => 'available', 'whois' => ''], 200)
+                ->push(['result' => 'error', 'message' => 'WHMCS unavailable'], 200),
             'open.er-api.com/*' => Http::response(['rates' => ['NGN' => 1600]], 200),
         ]);
 
@@ -78,6 +81,8 @@ class WhmcsSyncTest extends TestCase
             'email' => 'grace@example.com',
             'phone' => '+2348012345600',
             'company' => 'Compilers Inc',
+            'domain' => 'compilerworks.com',
+            'domain_option' => 'owndomain',
             'billing_address_line_1' => '42 Dockyard',
             'billing_address_line_2' => '',
             'billing_city' => 'Lagos',
