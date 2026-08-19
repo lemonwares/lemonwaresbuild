@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
           cache: "npm"
 
       - name: Install PHP deps
@@ -33,30 +33,23 @@ jobs:
       - name: Build frontend
         run: npm run build
 
-      - name: Deploy via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: Deploy files via rsync over SSH
+        uses: burnett01/rsync-deployments@7.0.1
         with:
-          server: ${{ secrets.CPANEL_FTP_SERVER }}
-          username: ${{ secrets.CPANEL_FTP_USERNAME }}
-          password: ${{ secrets.CPANEL_FTP_PASSWORD }}
-          server-dir: ${{ secrets.CPANEL_DEPLOY_PATH }}/
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/node_modules/**
-            **/.env
-            **/tests/**
-            **/.cursor/**
-            **/storage/logs/**
-            **/storage/framework/cache/**
-            **/storage/framework/sessions/**
+          switches: -avzr --delete --exclude='.git' --exclude='.env' --exclude='storage/logs/' --exclude='storage/framework/sessions/' --exclude='storage/framework/cache/' --exclude='node_modules/' --exclude='.cursor/'
+          path: ./
+          remote_path: ${{ secrets.CPANEL_DEPLOY_PATH }}/
+          remote_host: ${{ secrets.CPANEL_SSH_HOST }}
+          remote_user: ${{ secrets.CPANEL_SSH_USERNAME }}
+          remote_port: ${{ secrets.CPANEL_SSH_PORT }}
+          remote_key: ${{ secrets.CPANEL_SSH_KEY }}
 
-      - name: Run post-deploy commands via SSH
+      - name: Run post-deploy commands
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.CPANEL_SSH_HOST }}
           username: ${{ secrets.CPANEL_SSH_USERNAME }}
-          password: ${{ secrets.CPANEL_SSH_PASSWORD }}
+          key: ${{ secrets.CPANEL_SSH_KEY }}
           port: ${{ secrets.CPANEL_SSH_PORT }}
           script: |
             cd ${{ secrets.CPANEL_DEPLOY_PATH }}
