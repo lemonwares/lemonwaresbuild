@@ -38,6 +38,12 @@ class HostingLead extends Model
         'status',
         'notes',
         'whmcs_pid',
+        'whmcs_client_id',
+        'whmcs_order_id',
+        'whmcs_invoice_id',
+        'whmcs_sync_status',
+        'whmcs_sync_error',
+        'whmcs_synced_at',
         'checkout_url',
         'source_url',
         'ip_address',
@@ -51,6 +57,7 @@ class HostingLead extends Model
         return [
             'amount_usd' => 'decimal:2',
             'amount_ngn' => 'decimal:2',
+            'whmcs_synced_at' => 'datetime',
         ];
     }
 

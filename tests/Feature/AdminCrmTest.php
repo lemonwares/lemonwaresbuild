@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use App\Models\WhmcsCustomer;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class AdminCrmTest extends TestCase
@@ -109,5 +111,94 @@ class AdminCrmTest extends TestCase
             'email' => 'admin@example.com',
             'password' => 'password',
         ])->assertRedirect(route('admin.login'));
+    }
+
+    public function test_admin_can_filter_native_and_legacy_customers(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+        $customer = User::query()->where('email', 'amara@brightmedia.ng')->firstOrFail();
+
+        WhmcsCustomer::create([
+            'user_id' => $customer->id,
+            'whmcs_client_id' => 5001,
+            'full_name' => 'Legacy Amara',
+            'email' => 'amara@brightmedia.ng',
+            'company' => 'Bright Media',
+            'last_synced_at' => now(),
+        ]);
+
+        $this->post(route('admin.login.submit'), [
+            'email' => 'admin@example.com',
+            'password' => 'password',
+        ])->assertRedirect(route('admin.dashboard'));
+
+        $this->get(route('admin.customers.index', ['source' => 'native']))
+            ->assertOk()
+            ->assertSee('Native', false)
+            ->assertSee('Amara Okonkwo', false);
+
+        $this->get(route('admin.customers.index', ['source' => 'legacy']))
+            ->assertOk()
+            ->assertSee('Legacy WHMCS', false)
+            ->assertSee('Legacy Amara', false);
+    }
+
+    public function test_admin_can_run_whmcs_sync_from_customers_page(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        Http::fake([
+            'https://my.lemonwares.com/includes/api.php' => Http::sequence()
+                ->push([
+                    'result' => 'success',
+                    'totalresults' => 1,
+                    'clients' => ['client' => [[
+                        'id' => 7001,
+                        'firstname' => 'Legacy',
+                        'lastname' => 'Customer',
+                        'email' => 'legacy@example.com',
+                        'companyname' => 'Legacy Co',
+                        'phonenumber' => '+2348000000000',
+                        'status' => 'Active',
+                        'countrycode' => 'NG',
+                    ]]],
+                ], 200)
+                ->push([
+                    'result' => 'success',
+                    'products' => ['product' => [[
+                        'id' => 9001,
+                        'productname' => 'cPanel Business',
+                        'domain' => 'legacy.ng',
+                        'billingcycle' => 'Monthly',
+                        'nextduedate' => '2026-12-01',
+                        'status' => 'Active',
+                    ]]],
+                ], 200),
+        ]);
+
+        $this->post(route('admin.login.submit'), [
+            'email' => 'admin@example.com',
+            'password' => 'password',
+        ])->assertRedirect(route('admin.dashboard'));
+
+        $this->post(route('admin.customers.sync-whmcs'))
+            ->assertRedirect(route('admin.customers.index', ['source' => 'legacy']));
+
+        $this->assertDatabaseHas('whmcs_customers', [
+            'whmcs_client_id' => 7001,
+            'email' => 'legacy@example.com',
+        ]);
+
+        $this->assertDatabaseHas('whmcs_services', [
+            'whmcs_service_id' => 9001,
+            'domain' => 'legacy.ng',
+        ]);
+
+        $legacyCustomer = WhmcsCustomer::query()->where('whmcs_client_id', 7001)->firstOrFail();
+
+        $this->get(route('admin.customers.legacy.show', $legacyCustomer))
+            ->assertOk()
+            ->assertSee('Legacy Customer', false)
+            ->assertSee('legacy.ng', false);
     }
 }

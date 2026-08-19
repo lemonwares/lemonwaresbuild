@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -76,6 +77,16 @@ class User extends Authenticatable
     public function contacts(): HasMany
     {
         return $this->hasMany(AccountContact::class)->latest();
+    }
+
+    public function whmcsCustomer(): HasOne
+    {
+        return $this->hasOne(WhmcsCustomer::class);
+    }
+
+    public function whmcsServices(): HasMany
+    {
+        return $this->hasMany(WhmcsService::class)->latest();
     }
 
     /**
