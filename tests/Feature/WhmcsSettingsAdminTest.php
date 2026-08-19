@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
 class WhmcsSettingsAdminTest extends TestCase
@@ -73,11 +74,21 @@ class WhmcsSettingsAdminTest extends TestCase
             ],
         ])->assertRedirect(route('admin.whmcs-settings.index'));
 
+        Http::fake([
+            'https://billing.example.com/includes/api.php' => Http::response([
+                'result' => 'success',
+                'status' => 'available',
+            ], 200),
+            'open.er-api.com/*' => Http::response(['rates' => ['NGN' => 1600]], 200),
+        ]);
+
         $response = $this->post(route('hosting.intake.submit'), [
             'full_name' => 'Ada Lovelace',
             'email' => 'ada@example.com',
             'phone' => '+2348012345678',
             'company' => 'Analytical Engines',
+            'domain' => 'example.com',
+            'domain_option' => 'register',
             'billing_address_line_1' => '14 Admiralty Way',
             'billing_address_line_2' => '',
             'billing_city' => 'Lagos',
@@ -93,5 +104,7 @@ class WhmcsSettingsAdminTest extends TestCase
         $response->assertRedirect();
         $location = (string) $response->headers->get('Location');
         $this->assertStringContainsString('pid=16', $location);
+        $this->assertStringContainsString('domain=example.com', $location);
+        $this->assertStringContainsString('domainoption=register', $location);
     }
 }

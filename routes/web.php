@@ -20,15 +20,18 @@ use App\Models\HostingLead;
 use App\Models\HostingPlanPrice;
 use App\Models\NewsletterSubscriber;
 use App\Models\TeamMember;
+use App\Support\DomainName;
 use App\Support\FlutterwavePayment;
 use App\Support\HostingPlanPriceSync;
 use App\Support\HostingPricing;
+use App\Support\WhmcsDomainCheck;
 use App\Support\WhmcsLeadSync;
 use App\Support\WhmcsSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 Route::get('/', function () {
     return view('home');
@@ -371,6 +374,36 @@ Route::post('/hosting/request/received/{lead}/pay', function (HostingLead $lead)
     return redirect()->away($link);
 })->middleware('throttle:10,1')->name('hosting.flutterwave.pay');
 
+Route::post('/hosting/domain/check', function (Request $request) {
+    $validator = Validator::make($request->all(), [
+        'domain' => ['required', 'string', 'max:253'],
+        'domain_option' => ['required', 'string', 'in:register,transfer,owndomain'],
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'ok' => false,
+            'status' => 'invalid',
+            'message' => $validator->errors()->first(),
+        ], 422);
+    }
+
+    $payload = $validator->validated();
+    $domain = DomainName::normalize((string) $payload['domain']);
+
+    if (! $domain) {
+        return response()->json([
+            'ok' => false,
+            'status' => 'invalid',
+            'message' => __('hosting.domain_invalid'),
+        ], 422);
+    }
+
+    $result = WhmcsDomainCheck::validate($domain, (string) $payload['domain_option']);
+
+    return response()->json($result, $result['ok'] ? 200 : 422);
+})->middleware('throttle:30,1')->name('hosting.domain.check');
+
 Route::post('/hosting/request/details', function (Request $request) {
     $planOptions = config('site.hosting_plans', []);
     $billingCycles = HostingPricing::billingCycles();
@@ -380,11 +413,16 @@ Route::post('/hosting/request/details', function (Request $request) {
     $normalizedPhone = $digitsOnly !== '' ? '+' . $digitsOnly : '';
     $request->merge(['phone' => $normalizedPhone]);
 
+    $planSlugInput = strtolower(trim((string) $request->input('plan', '')));
+    $requiresDomain = in_array($planSlugInput, ['cpanel', 'plesk'], true);
+
     $validator = Validator::make($request->all(), [
         'full_name' => ['required', 'string', 'max:120'],
         'email' => ['required', 'email', 'max:160'],
         'phone' => ['required', 'regex:/^\+[1-9]\d{6,14}$/'],
         'company' => ['nullable', 'string', 'max:120'],
+        'domain' => [Rule::requiredIf($requiresDomain), 'nullable', 'string', 'max:253'],
+        'domain_option' => [Rule::requiredIf($requiresDomain), 'nullable', 'string', 'in:register,transfer,owndomain'],
         'billing_address_line_1' => ['required', 'string', 'max:180'],
         'billing_address_line_2' => ['nullable', 'string', 'max:180'],
         'billing_city' => ['required', 'string', 'max:120'],
@@ -465,6 +503,34 @@ Route::post('/hosting/request/details', function (Request $request) {
     $specKeyJoined = implode(',', $selectedSpecKeys);
     $checkoutProvider = (string) ($selectedPlan['checkout_provider'] ?? 'whmcs');
 
+    $normalizedDomain = null;
+    $domainOption = null;
+    if ($checkoutProvider === 'whmcs') {
+        $normalizedDomain = DomainName::normalize((string) ($payload['domain'] ?? ''));
+        if (! $normalizedDomain) {
+            return back()
+                ->withInput()
+                ->withErrors(['domain' => __('hosting.domain_invalid')])
+                ->with('hosting_feedback', [
+                    'type' => 'error',
+                    'message' => __('hosting.domain_invalid'),
+                ]);
+        }
+
+        $domainOption = (string) ($payload['domain_option'] ?? 'register');
+
+        $domainCheck = WhmcsDomainCheck::validate($normalizedDomain, $domainOption);
+        if (! $domainCheck['ok']) {
+            return back()
+                ->withInput()
+                ->withErrors(['domain' => $domainCheck['message']])
+                ->with('hosting_feedback', [
+                    'type' => 'error',
+                    'message' => $domainCheck['message'],
+                ]);
+        }
+    }
+
     $specForPid = $selectedSpecKeys[0] ?? '';
     $whmcsPid = WhmcsSettings::resolvePid($planSlug, $specForPid);
     $whmcsBaseUrl = WhmcsSettings::baseUrl();
@@ -507,6 +573,7 @@ Route::post('/hosting/request/details', function (Request $request) {
         'spec_key' => $specKeyJoined,
         'spec_label' => $specLabel ?: null,
         'spec_summary' => $specSummary ?: null,
+        'hostname' => $normalizedDomain,
         'billing_cycle' => $billingCycle,
         'amount_usd' => $amountUsd,
         'amount_ngn' => $amountNgn,
@@ -559,6 +626,8 @@ Route::post('/hosting/request/details', function (Request $request) {
         'a' => 'add',
         'pid' => $whmcsPid,
         'billingcycle' => $whmcsCycle,
+        'domain' => $normalizedDomain,
+        'domainoption' => $domainOption,
         'email' => strtolower($payload['email']),
         'firstname' => $firstname,
         'lastname' => $lastname,

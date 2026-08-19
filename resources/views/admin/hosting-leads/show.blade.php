@@ -29,6 +29,12 @@
                 <dt class="text-on-blush/55">Company</dt>
                 <dd class="font-semibold">{{ $lead->company ?: '—' }}</dd>
             </div>
+            @if ($lead->hostname && $lead->isShared())
+                <div class="sm:col-span-2">
+                    <dt class="text-on-blush/55">Primary domain</dt>
+                    <dd class="font-semibold">{{ $lead->hostname }}</dd>
+                </div>
+            @endif
             <div>
                 <dt class="text-on-blush/55">Status</dt>
                 <dd class="font-semibold">{{ str_replace('_', ' ', $lead->status ?: 'pending') }} / {{ $lead->payment_status ?: '—' }}</dd>

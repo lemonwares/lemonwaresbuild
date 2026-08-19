@@ -60,14 +60,29 @@ class WhmcsLeadSync
             return self::mark($lead, 'failed', 'Missing WHMCS product id mapping for selected plan.');
         }
 
-        $order = WhmcsClient::createOrder([
+        $orderPayload = [
             'clientid' => $clientId,
             'pid' => [$pid],
             'billingcycle' => [$lead->billing_cycle ?: 'monthly'],
             'promocode' => strtoupper((string) ($lead->spec_key ?? '')),
             'noinvoice' => false,
             'noemail' => true,
-        ]);
+        ];
+
+        $domain = filled($lead->hostname) ? (string) $lead->hostname : null;
+        $domainOption = 'register';
+
+        if ($lead->checkout_url) {
+            parse_str((string) parse_url((string) $lead->checkout_url, PHP_URL_QUERY), $checkoutQuery);
+            $domainOption = (string) ($checkoutQuery['domainoption'] ?? $domainOption);
+        }
+
+        if ($domain) {
+            $orderPayload['domain'] = [$domain];
+            $orderPayload['domaintype'] = [$domainOption ?: 'register'];
+        }
+
+        $order = WhmcsClient::createOrder($orderPayload);
 
         $orderId = (int) data_get($order, 'orderid', 0);
         $invoiceId = (int) data_get($order, 'invoiceid', 0);

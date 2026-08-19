@@ -79,6 +79,22 @@ class WhmcsClient
     }
 
     /**
+     * @return array<string, mixed>|null
+     */
+    public static function domainWhois(string $domain): ?array
+    {
+        $response = self::request('DomainWhois', [
+            'domain' => strtolower(trim($domain)),
+        ]);
+
+        if (! $response || ($response['result'] ?? null) !== 'success') {
+            return null;
+        }
+
+        return $response;
+    }
+
+    /**
      * @return array{clients:list<array<string,mixed>>,total:int}
      */
     public static function getClients(int $start = 0, int $limit = 50): array

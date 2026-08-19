@@ -6,6 +6,7 @@ use App\Models\EmailMailbox;
 use App\Models\EmailOrder;
 use App\Support\EmailPricing;
 use App\Support\EmailProvisioner;
+use App\Support\DomainName;
 use App\Support\FlutterwavePayment;
 use App\Support\HostingPricing;
 use App\Support\TrekMailClient;
@@ -101,7 +102,7 @@ class EmailOrderController extends Controller
             ]);
         }
 
-        $domain = self::normalizeDomain((string) $payload['domain']);
+        $domain = DomainName::normalize((string) $payload['domain']);
         if ($domain === null) {
             return back()->withInput()->withErrors(['domain' => __('email.invalid_domain')]);
         }
@@ -285,19 +286,5 @@ class EmailOrderController extends Controller
                 'type' => 'info',
                 'message' => __('email.provision_retried'),
             ]);
-    }
-
-    protected static function normalizeDomain(string $value): ?string
-    {
-        $value = strtolower(trim($value));
-        $value = preg_replace('#^https?://#', '', $value) ?? $value;
-        $value = rtrim(explode('/', $value)[0], '.');
-        $value = preg_replace('/:\d+$/', '', $value) ?? $value;
-
-        if ($value === '' || ! preg_match('/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/', $value)) {
-            return null;
-        }
-
-        return $value;
     }
 }

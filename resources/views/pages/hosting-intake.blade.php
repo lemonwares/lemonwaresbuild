@@ -77,6 +77,50 @@
                     </a>
                 </div>
 
+                @if (($selectedPlan ?? '') !== 'vps')
+                    <div class="rounded-2xl border border-border bg-blush-soft p-4">
+                        <p class="text-xs font-semibold uppercase tracking-widest text-on-blush/60">{{ __('hosting.domain_section_title') }}</p>
+                        <p class="mt-1 text-sm text-on-blush/75">{{ __('hosting.domain_section_help') }}</p>
+
+                        <div class="mt-4 grid gap-5 sm:grid-cols-2">
+                            <div class="sm:col-span-2">
+                                <label for="domain" class="mb-2 block text-sm font-semibold text-black">{{ __('hosting.domain_label') }} <span class="text-rose">*</span></label>
+                                <input
+                                    id="domain"
+                                    name="domain"
+                                    type="text"
+                                    value="{{ old('domain') }}"
+                                    placeholder="example.com"
+                                    class="footer-input w-full rounded-xl border border-border bg-white px-4 py-3"
+                                    required
+                                    autocomplete="off"
+                                    spellcheck="false"
+                                    data-hosting-input
+                                    data-hosting-domain-input
+                                />
+                                <p class="mt-2 text-sm text-on-blush/65" data-hosting-domain-prompt>{{ __('hosting.domain_check_prompt') }}</p>
+                                <p class="mt-2 hidden text-sm font-semibold" data-hosting-domain-status aria-live="polite"></p>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label for="domain_option" class="mb-2 block text-sm font-semibold text-black">{{ __('hosting.domain_option_label') }} <span class="text-rose">*</span></label>
+                                <select
+                                    id="domain_option"
+                                    name="domain_option"
+                                    class="footer-input w-full rounded-xl border border-border bg-white px-4 py-3"
+                                    required
+                                    data-hosting-input
+                                    data-hosting-domain-option
+                                >
+                                    <option value="register" @selected(old('domain_option', 'register') === 'register')>{{ __('hosting.domain_option_register') }}</option>
+                                    <option value="owndomain" @selected(old('domain_option') === 'owndomain')>{{ __('hosting.domain_option_owndomain') }}</option>
+                                    <option value="transfer" @selected(old('domain_option') === 'transfer')>{{ __('hosting.domain_option_transfer') }}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
                 <div class="grid gap-5 sm:grid-cols-2">
                     <div>
                         <label for="full_name" class="mb-2 block text-sm font-semibold text-black">Full Name <span class="text-rose">*</span></label>
@@ -215,7 +259,130 @@
             const citySelect = hostingIntakeForm.querySelector('[data-billing-city]');
             const submitButton = hostingIntakeForm.querySelector('[data-hosting-submit]');
             const requiredInputs = hostingIntakeForm.querySelectorAll('[data-hosting-input][required]');
+            const domainInput = hostingIntakeForm.querySelector('[data-hosting-domain-input]');
+            const domainOptionSelect = hostingIntakeForm.querySelector('[data-hosting-domain-option]');
+            const domainStatus = hostingIntakeForm.querySelector('[data-hosting-domain-status]');
+            const domainPrompt = hostingIntakeForm.querySelector('[data-hosting-domain-prompt]');
             let allCountryOptions = [];
+            let domainCheckOk = !domainInput;
+            let domainCheckTimer = null;
+            let domainCheckRequestId = 0;
+
+            const domainCheckMessages = {
+                checking: @json(__('hosting.domain_checking')),
+                invalid: @json(__('hosting.domain_invalid')),
+            };
+
+            const setDomainStatus = (state, message = '') => {
+                if (!domainStatus) {
+                    return;
+                }
+
+                domainStatus.textContent = message;
+                domainStatus.classList.remove('hidden', 'text-emerald-700', 'text-rose', 'text-on-blush/65');
+
+                if (state === 'checking') {
+                    domainStatus.classList.add('text-on-blush/65');
+                } else if (state === 'ok') {
+                    domainStatus.classList.add('text-emerald-700');
+                } else if (state === 'error') {
+                    domainStatus.classList.add('text-rose');
+                } else {
+                    domainStatus.classList.add('hidden');
+                }
+            };
+
+            const normalizeDomainValue = (value) => {
+                let normalized = String(value || '').trim().toLowerCase();
+                normalized = normalized.replace(/^https?:\/\//, '');
+                normalized = normalized.split('/')[0].replace(/\.$/, '');
+                normalized = normalized.replace(/:\d+$/, '');
+
+                if (!/^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$/.test(normalized)) {
+                    return null;
+                }
+
+                return normalized;
+            };
+
+            const runDomainCheck = async () => {
+                if (!domainInput || !domainOptionSelect) {
+                    return;
+                }
+
+                const domainOption = String(domainOptionSelect.value || 'register');
+                if (domainOption === 'owndomain') {
+                    domainCheckOk = true;
+                    setDomainStatus('hidden');
+                    if (domainPrompt) {
+                        domainPrompt.classList.remove('hidden');
+                    }
+                    updateSubmitState();
+                    return;
+                }
+
+                const normalized = normalizeDomainValue(domainInput.value);
+                if (!normalized) {
+                    domainCheckOk = false;
+                    setDomainStatus('error', domainCheckMessages.invalid);
+                    updateSubmitState();
+                    return;
+                }
+
+                const requestId = ++domainCheckRequestId;
+                domainCheckOk = false;
+                setDomainStatus('checking', domainCheckMessages.checking);
+                if (domainPrompt) {
+                    domainPrompt.classList.add('hidden');
+                }
+                updateSubmitState();
+
+                try {
+                    const response = await fetch(@json(route('hosting.domain.check')), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': @json(csrf_token()),
+                        },
+                        body: JSON.stringify({
+                            domain: normalized,
+                            domain_option: domainOption,
+                        }),
+                    });
+
+                    const result = await response.json();
+                    if (requestId !== domainCheckRequestId) {
+                        return;
+                    }
+
+                    domainCheckOk = Boolean(result?.ok);
+                    setDomainStatus(domainCheckOk ? 'ok' : 'error', String(result?.message || domainCheckMessages.invalid));
+                } catch (error) {
+                    if (requestId !== domainCheckRequestId) {
+                        return;
+                    }
+
+                    domainCheckOk = false;
+                    setDomainStatus('error', @json(__('hosting.domain_check_failed')));
+                }
+
+                updateSubmitState();
+            };
+
+            const scheduleDomainCheck = () => {
+                if (!domainInput) {
+                    return;
+                }
+
+                if (domainCheckTimer) {
+                    clearTimeout(domainCheckTimer);
+                }
+
+                domainCheckTimer = setTimeout(() => {
+                    runDomainCheck();
+                }, 650);
+            };
 
             const oldCountry = (countrySelect?.dataset.oldCountry || 'NG').toUpperCase();
             const oldState = stateSelect?.dataset.oldState || '';
@@ -284,7 +451,8 @@
                     return input.checkValidity() && String(input.value || '').trim() !== '';
                 });
 
-                submitButton.disabled = !allValid;
+                const domainReady = !domainInput || domainCheckOk;
+                submitButton.disabled = !allValid || !domainReady;
             };
 
             const fetchStatesByCountryCode = async (countryCode, selectedState = '', selectedCity = '') => {
@@ -505,6 +673,15 @@
                 countrySearchInput?.addEventListener('input', () => {
                     renderCountryResults(filterCountries());
                 });
+
+                domainInput?.addEventListener('input', scheduleDomainCheck);
+                domainInput?.addEventListener('blur', runDomainCheck);
+                domainOptionSelect?.addEventListener('change', runDomainCheck);
+
+                if (domainInput?.value) {
+                    scheduleDomainCheck();
+                }
+
                 updateSubmitState();
             };
 
