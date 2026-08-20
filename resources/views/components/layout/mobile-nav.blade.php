@@ -16,6 +16,11 @@
             'active' => false,
         ],
         [
+            'label' => __('site.nav.email'),
+            'href' => route('email.plans'),
+            'active' => request()->routeIs('email.*'),
+        ],
+        [
             'label' => __('site.nav.work'),
             'href' => route('case-studies'),
             'active' => request()->routeIs('case-studies'),

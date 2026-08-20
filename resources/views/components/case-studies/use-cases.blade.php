@@ -9,10 +9,10 @@
         <div>
             @foreach ([
                 ['icon' => 'code', 'tone' => 'slate', 'image' => 'images/case-studies/web.jpg'],
-                ['icon' => 'zap', 'tone' => 'blush', 'image' => 'images/case-studies/hosting.jpg'],
-                ['icon' => 'mail', 'tone' => 'rose', 'image' => 'images/case-studies/email.jpg'],
+                ['icon' => 'zap', 'tone' => 'blush', 'image' => 'images/case-studies/hosting.jpg', 'href' => url('/#hosting-plans'), 'cta' => __('site.footer.hosting_plans')],
+                ['icon' => 'mail', 'tone' => 'rose', 'image' => 'images/case-studies/email.jpg', 'href' => route('email.plans'), 'cta' => __('site.nav.email')],
                 ['icon' => 'smartphone', 'tone' => 'slate', 'image' => 'images/case-studies/mobile.jpg'],
-                ['icon' => 'headset', 'tone' => 'blush', 'image' => 'images/case-studies/vps.jpg'],
+                ['icon' => 'headset', 'tone' => 'blush', 'image' => 'images/case-studies/vps.jpg', 'href' => route('hosting.specifications', ['plan' => 'vps']), 'cta' => __('site.home.vps_cta')],
             ] as $index => $meta)
                 @php
                     $study = __('pages.case_studies.items')[$index];
@@ -28,6 +28,8 @@
                     :icon="$meta['icon']"
                     :tone="$meta['tone']"
                     :reverse="$index % 2 === 1"
+                    :href="$meta['href'] ?? null"
+                    :cta="$meta['cta'] ?? null"
                 />
             @endforeach
         </div>

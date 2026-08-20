@@ -6,6 +6,8 @@
     'icon' => 'zap',
     'tone' => 'blush',
     'reverse' => false,
+    'href' => null,
+    'cta' => null,
 ])
 
 <div
@@ -20,6 +22,15 @@
                     <li>{{ $item }}</li>
                 @endforeach
             </ul>
+        @endif
+
+        @if ($href && $cta)
+            <div>
+                <a href="{{ $href }}" class="inline-flex items-center gap-2 text-sm font-semibold text-rose hover:underline">
+                    <span>{{ $cta }}</span>
+                    <x-ui.icons.arrow-up-right class="size-4" />
+                </a>
+            </div>
         @endif
     </div>
 

@@ -16,18 +16,27 @@
             @php
                 $topFeatures = [
                     ['icon' => 'zap', 'title' => __('site.home.feature_fast')],
-                    ['icon' => 'mail', 'title' => __('site.home.feature_email')],
+                    ['icon' => 'mail', 'title' => __('site.home.feature_email'), 'href' => route('email.plans')],
                     ['icon' => 'shield-check', 'title' => __('site.home.feature_secure')],
                 ];
             @endphp
 
             @foreach ($topFeatures as $feature)
-                <article class="card-tech flex flex-col gap-4 p-6">
-                    <span class="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-blush text-rose">
-                        <x-dynamic-component :component="'ui.icons.'.$feature['icon']" class="size-5" />
-                    </span>
-                    <h3 class="text-base font-semibold text-on-blush">{{ $feature['title'] }}</h3>
-                </article>
+                @if (! empty($feature['href']))
+                    <a href="{{ $feature['href'] }}" class="card-tech flex flex-col gap-4 p-6 transition hover:border-rose/40 hover:shadow-sm">
+                        <span class="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-blush text-rose">
+                            <x-dynamic-component :component="'ui.icons.'.$feature['icon']" class="size-5" />
+                        </span>
+                        <h3 class="text-base font-semibold text-on-blush">{{ $feature['title'] }}</h3>
+                    </a>
+                @else
+                    <article class="card-tech flex flex-col gap-4 p-6">
+                        <span class="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-blush text-rose">
+                            <x-dynamic-component :component="'ui.icons.'.$feature['icon']" class="size-5" />
+                        </span>
+                        <h3 class="text-base font-semibold text-on-blush">{{ $feature['title'] }}</h3>
+                    </article>
+                @endif
             @endforeach
 
             <article class="flex flex-col gap-4 rounded-3xl border border-white/10 bg-on-blush p-6 text-white lg:col-span-2">

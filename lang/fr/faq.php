@@ -14,6 +14,7 @@ return [
     'still_title' => 'Encore une question ?',
     'still_lede' => 'Dites-nous ce dont vous avez besoin et nous vous orienterons.',
     'still_cta' => 'Nous contacter',
+    'email_cta' => 'Voir les offres Lemon Mail',
     'items' => [
         [
             'question' => 'Quelles offres d’hébergement proposez-vous ?',
@@ -22,6 +23,8 @@ return [
         [
             'question' => 'Pouvez-vous mettre en place un email pro sur mon domaine ?',
             'answer' => 'Oui. Commandez Lemon Mail sur votre domaine depuis ce site — nous créons les boîtes et vous donnons les DNS. Microsoft 365, Google Workspace et Titan sont disponibles sur devis.',
+            'href' => 'email.plans',
+            'cta' => 'Commander Lemon Mail',
         ],
         [
             'question' => 'Construisez-vous des sites WordPress et des apps sur mesure ?',

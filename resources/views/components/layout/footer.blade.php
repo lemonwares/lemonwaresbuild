@@ -3,6 +3,8 @@
 
     $businessLinks = [
         ['label' => __('site.nav.about'), 'href' => route('about')],
+        ['label' => __('site.footer.hosting_plans'), 'href' => url('/#hosting-plans')],
+        ['label' => __('site.nav.email'), 'href' => route('email.plans')],
         ['label' => __('site.common.contact_us'), 'href' => route('contact')],
         ['label' => __('site.footer.case_studies'), 'href' => route('case-studies')],
         ['label' => __('site.nav.faq'), 'href' => route('faq')],

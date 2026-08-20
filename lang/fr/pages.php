@@ -89,6 +89,7 @@ return [
         'hosting' => [
             'title' => 'Hébergement cloud',
             'description' => 'Votre site est souvent le premier point de contact avec votre marque — et l’indisponibilité coûte de la confiance. Nous proposons un hébergement cloud managé sur cPanel et Plesk, plus des options VPS quand vous avez besoin de contrôle total. Chaque offre inclut SSL, sauvegardes automatiques et monitoring proactif pour rester joignable 24h/24.',
+            'cta' => 'Voir les offres d’hébergement',
             'highlights' => [
                 'Options partagées, VPS et serveurs managés',
                 'Certificats SSL gratuits et sauvegardes quotidiennes',
@@ -99,6 +100,7 @@ return [
         'email' => [
             'title' => 'Email professionnel',
             'description' => 'Les adresses @gmail génériques conviennent au personnel, mais vos clients attendent un email à votre domaine. Nous mettons en place une messagerie pro sécurisée à votre image — avec anti-spam, sync mobile et outils d’admin pour collaborer sans jongler entre boîtes personnelles.',
+            'cta' => 'Voir les offres Lemon Mail',
             'highlights' => [
                 'Adresses professionnelles sur votre domaine',
                 'Fonctionne sur téléphone, desktop et webmail',
@@ -109,6 +111,7 @@ return [
         'web' => [
             'title' => 'Développement web',
             'description' => 'Des sites marketing aux applications web sur mesure, nous construisons des produits digitaux rapides, soignés et faciles à maintenir. WordPress que votre équipe peut mettre à jour, ou plateforme Laravel sur mesure — design, développement et déploiement de bout en bout.',
+            'cta' => 'Parler d’un site web',
             'highlights' => [
                 'Stacks WordPress, Laravel et JavaScript moderne',
                 'Layouts responsive pensés mobile-first',
@@ -119,6 +122,7 @@ return [
         'mobile' => [
             'title' => 'Développement mobile',
             'description' => 'Vos clients vivent sur leur téléphone — votre produit aussi. Nous concevons et construisons des apps iOS et Android, en natif Swift/Kotlin ou en Flutter cross-platform selon votre timeline, budget et fonctionnalités. Du MVP à la prod, nous vous aidons à shipper quelque chose que les gens ouvrent vraiment chaque jour.',
+            'cta' => 'Parler d’une app',
             'highlights' => [
                 'Builds natifs iOS & Android et cross-platform',
                 'Support de soumission App Store et Play Store',
@@ -129,6 +133,7 @@ return [
         'support' => [
             'title' => 'Support continu',
             'description' => 'La tech ne marche que si quelqu’un décroche. Notre équipe support est dispo sur WhatsApp, téléphone et email — de vraies personnes qui connaissent votre setup, pas une file de tickets qui disparaît pendant des jours. Hébergement, email, mises à jour de site et petits correctifs pour faire tourner votre business sans courir après les vendors.',
+            'cta' => 'Contacter le support',
             'highlights' => [
                 'WhatsApp, téléphone et email — choisissez ce qui vous convient',
                 'Hébergement, email, web et mobile sous un même toit',
