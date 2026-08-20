@@ -11,6 +11,13 @@
                 @php
                     $key = $service['key'];
                     $copy = __('pages.services.' . $key);
+                    $href = null;
+                    if (! empty($service['route'])) {
+                        $href = route($service['route']);
+                        if (! empty($service['fragment'])) {
+                            $href .= '#' . $service['fragment'];
+                        }
+                    }
                 @endphp
                 <x-ui.service-row
                     :title="$copy['title']"
@@ -20,6 +27,8 @@
                     :icon="$service['icon'] ?? 'zap'"
                     :tone="$service['tone'] ?? 'blush'"
                     :reverse="$index % 2 === 1"
+                    :href="$href"
+                    :cta="$copy['cta'] ?? null"
                 />
             @endforeach
         </div>

@@ -14,6 +14,7 @@ return [
     'still_title' => 'Noch eine Frage?',
     'still_lede' => 'Sagen Sie uns, was Sie brauchen — wir zeigen Ihnen den nächsten Schritt.',
     'still_cta' => 'Kontakt',
+    'email_cta' => 'Lemon-Mail-Pläne ansehen',
     'items' => [
         [
             'question' => 'Welche Hosting-Pläne bieten Sie an?',
@@ -22,6 +23,8 @@ return [
         [
             'question' => 'Können Sie Business-E-Mail auf meiner Domain einrichten?',
             'answer' => 'Ja. Bestellen Sie Lemon Mail für Ihre Domain auf dieser Site — wir legen die Postfächer an und liefern die DNS-Einträge. Microsoft 365, Google Workspace und Titan gibt es auf Anfrage.',
+            'href' => 'email.plans',
+            'cta' => 'Lemon Mail bestellen',
         ],
         [
             'question' => 'Bauen Sie WordPress-Sites und individuelle Apps?',

@@ -19,7 +19,14 @@
             <x-ui.accordion>
                 @foreach (__('faq.items') as $index => $item)
                     <x-ui.accordion-item :title="$item['question']" :default-open="$index === 0">
-                        {{ $item['answer'] }}
+                        <div class="space-y-3">
+                            <p>{{ $item['answer'] }}</p>
+                            @if (! empty($item['href']) && ! empty($item['cta']))
+                                <a href="{{ route($item['href']) }}" class="inline-flex text-sm font-semibold text-rose hover:underline">
+                                    {{ $item['cta'] }}
+                                </a>
+                            @endif
+                        </div>
                     </x-ui.accordion-item>
                 @endforeach
             </x-ui.accordion>
@@ -28,10 +35,15 @@
         <div class="mt-14 rounded-3xl bg-blush-soft px-8 py-10 text-center sm:px-12">
             <h2 class="heading mb-3">{{ __('faq.still_title') }}</h2>
             <p class="lede mx-auto mb-6">{{ __('faq.still_lede') }}</p>
-            <x-ui.button href="{{ route('contact') }}">
-                <x-ui.icons.arrow-up-right class="size-4" />
-                <span>{{ __('faq.still_cta') }}</span>
-            </x-ui.button>
+            <div class="flex flex-wrap items-center justify-center gap-3">
+                <x-ui.button href="{{ route('email.plans') }}">
+                    <x-ui.icons.arrow-up-right class="size-4" />
+                    <span>{{ __('faq.email_cta') }}</span>
+                </x-ui.button>
+                <x-ui.button href="{{ route('contact') }}" variant="ghost">
+                    <span>{{ __('faq.still_cta') }}</span>
+                </x-ui.button>
+            </div>
         </div>
     </x-layout.page-content>
 @endsection

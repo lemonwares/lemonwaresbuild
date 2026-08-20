@@ -42,8 +42,11 @@
         </div>
 
         <div class="mt-10 flex flex-wrap gap-4">
-            <x-ui.button href="{{ route('contact') }}">
+            <x-ui.button href="{{ route('email.plans') }}">
                 <x-ui.icons.arrow-up-right class="size-4" />
+                <span>{{ __('site.nav.email') }}</span>
+            </x-ui.button>
+            <x-ui.button href="{{ route('contact') }}" variant="ghost">
                 <span>{{ __('site.common.contact_us') }}</span>
             </x-ui.button>
             <x-ui.button href="{{ route('case-studies') }}" variant="ghost">

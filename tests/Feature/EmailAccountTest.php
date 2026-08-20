@@ -576,7 +576,11 @@ class EmailAccountTest extends TestCase
 
     public function test_header_login_is_on_the_homepage(): void
     {
-        $this->get('/')->assertOk()->assertSee(route('login'), false);
+        $this->get('/')
+            ->assertOk()
+            ->assertSee(route('login'), false)
+            ->assertSee(route('email.plans'), false)
+            ->assertSee(__('site.nav.email'), false);
     }
 
     public function test_logged_in_headers_show_account_instead_of_login(): void

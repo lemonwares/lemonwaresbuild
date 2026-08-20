@@ -14,6 +14,7 @@ return [
     'still_title' => 'Still have a question?',
     'still_lede' => 'Tell us what you need and we will point you in the right direction.',
     'still_cta' => 'Contact Us',
+    'email_cta' => 'View Lemon Mail plans',
     'items' => [
         [
             'question' => 'What hosting plans do you offer?',
@@ -22,6 +23,8 @@ return [
         [
             'question' => 'Can you set up business email on my domain?',
             'answer' => 'Yes. Order Lemon Mail on your domain from this site — we create the mailboxes and give you the DNS records. Microsoft 365, Google Workspace, and Titan are available on request if you need a full productivity suite.',
+            'href' => 'email.plans',
+            'cta' => 'Order Lemon Mail',
         ],
         [
             'question' => 'Do you build WordPress sites and custom apps?',
