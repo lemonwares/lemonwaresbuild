@@ -24,7 +24,23 @@
                 <x-ui.submit-button :label="__('email.pay_with_flutterwave')" :loading="__('account.starting_payment')" class="btn btn-primary" />
             </form>
         </section>
-    @elseif ($order->status === 'provisioned' || $order->trekmail_domain_id)
+    @elseif ($order->isManualFulfilment() && $order->fulfilment_status !== 'completed' && $order->status === 'awaiting_manual_fulfilment')
+        <section class="mb-6 rounded-3xl border border-sky-200 bg-sky-50 p-6 sm:p-8">
+            <p class="text-xs font-semibold uppercase tracking-widest text-sky-700">{{ __('account.next_step') }}</p>
+            <h2 class="mt-2 text-2xl font-bold text-black">{{ __('email.request_setup') }}</h2>
+            <p class="mt-2 body-text">{{ __('email.manual_fulfilment_queued', ['hours' => 4]) }}</p>
+            <p class="mt-3 text-sm font-semibold text-sky-800">{{ __('email.fulfilment_progress') }}: {{ $order->fulfilmentStatusLabel() }}</p>
+            <p class="mt-1 text-sm text-sky-700/80">{{ __('email.fulfilment_sla') }}</p>
+        </section>
+    @elseif ($order->isManualFulfilment() && $order->isPaid() && $order->fulfilment_status !== 'completed')
+        <section class="mb-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-6 sm:p-8">
+            <p class="text-xs font-semibold uppercase tracking-widest text-emerald-700">{{ __('account.next_step') }}</p>
+            <h2 class="mt-2 text-2xl font-bold text-black">{{ __('email.payment_confirmed') }}</h2>
+            <p class="mt-2 body-text">{{ __('email.manual_fulfilment_paid', ['hours' => 4]) }}</p>
+            <p class="mt-3 text-sm font-semibold text-emerald-800">{{ __('email.fulfilment_progress') }}: {{ $order->fulfilmentStatusLabel() }}</p>
+            <p class="mt-1 text-sm text-emerald-700/80">{{ __('email.fulfilment_sla') }}</p>
+        </section>
+    @elseif ($order->status === 'provisioned' || $order->trekmail_domain_id || ($order->isManualFulfilment() && $order->fulfilment_status === 'completed'))
         <section class="mb-6 rounded-3xl bg-rose p-6 text-white sm:p-8">
             <p class="text-xs font-semibold uppercase tracking-widest text-white/75">{{ __('account.next_step') }}</p>
             <h2 class="mt-2 text-2xl font-bold">{{ __('account.next_webmail_title') }}</h2>
@@ -70,6 +86,12 @@
                     <dt class="text-on-blush/55">{{ __('email.status_label') }}</dt>
                     <dd class="font-semibold text-black">{{ $order->statusLabel() }}</dd>
                 </div>
+                @if ($order->isManualFulfilment())
+                    <div>
+                        <dt class="text-on-blush/55">{{ __('email.fulfilment_progress') }}</dt>
+                        <dd class="font-semibold text-black">{{ $order->fulfilmentStatusLabel() }}</dd>
+                    </div>
+                @endif
                 <div>
                     <dt class="text-on-blush/55">{{ __('hosting.billing_period') }}</dt>
                     <dd class="font-semibold text-black">{{ __('hosting.cycles.' . $order->billing_cycle) }}</dd>

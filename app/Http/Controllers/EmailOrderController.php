@@ -4,15 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\EmailMailbox;
 use App\Models\EmailOrder;
+use App\Models\HostingLead;
+use App\Models\User;
+use App\Support\DomainName;
 use App\Support\EmailPricing;
 use App\Support\EmailProvisioner;
-use App\Support\DomainName;
 use App\Support\FlutterwavePayment;
 use App\Support\HostingPricing;
 use App\Support\TrekMailClient;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class EmailOrderController extends Controller
@@ -73,26 +80,96 @@ class EmailOrderController extends Controller
 
         $presented = EmailPricing::presentPlan($plan, $cycle);
         $localParts = old('mailboxes', EmailPricing::defaultLocalParts((int) $plan['mailboxes']));
+        $user = $request->user();
+        $needsBusiness = ! ($user instanceof User && $user->hasLeanBusinessProfile());
+        $missingBusinessFields = $user instanceof User
+            ? $user->missingLeanBusinessFields()
+            : ['company', 'phone', 'billing_country'];
+
+        $guestAccountStatus = 'pending';
+        if (! $user && old('email')) {
+            $existing = User::query()->where('email', strtolower((string) old('email')))->first();
+            if (! $existing || $existing->isAdmin()) {
+                $guestAccountStatus = 'new';
+                $needsBusiness = true;
+            } elseif ($existing->hasLeanBusinessProfile()) {
+                $guestAccountStatus = 'existing_complete';
+                $needsBusiness = false;
+            } else {
+                $guestAccountStatus = 'existing_incomplete';
+                $needsBusiness = true;
+            }
+        }
 
         return view('pages.email-checkout', [
             'plan' => $presented,
             'cycle' => $cycle,
             'localParts' => $localParts,
             'cycles' => $cycles,
+            'needsBusiness' => $needsBusiness,
+            'missingBusinessFields' => $missingBusinessFields,
+            'countryOptions' => config('site.country_options', []),
+            'guestAccountStatus' => $guestAccountStatus,
+        ]);
+    }
+
+    public function accountStatus(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email', 'max:160'],
+        ]);
+
+        $email = strtolower((string) $validated['email']);
+        $user = User::query()->where('email', $email)->first();
+
+        if (! $user || $user->isAdmin()) {
+            return response()->json(['status' => 'new']);
+        }
+
+        return response()->json([
+            'status' => $user->hasLeanBusinessProfile()
+                ? 'existing_complete'
+                : 'existing_incomplete',
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $cycles = EmailPricing::billingCycles();
+        $guestRules = $request->user()
+            ? []
+            : [
+                'name' => [
+                    Rule::requiredIf(function () use ($request) {
+                        $email = strtolower((string) $request->input('email', ''));
+                        if ($email === '') {
+                            return true;
+                        }
 
-        $payload = $request->validate([
+                        $existing = User::query()->where('email', $email)->first();
+
+                        return ! $existing || $existing->isAdmin();
+                    }),
+                    'nullable',
+                    'string',
+                    'max:120',
+                ],
+                'email' => ['required', 'email', 'max:160'],
+                'password' => ['required', 'string', Password::min(8)],
+            ];
+
+        $payload = $request->validate(array_merge([
             'plan' => ['required', 'string'],
             'billing_cycle' => ['required', 'string', 'in:' . implode(',', $cycles)],
             'domain' => ['required', 'string', 'max:190'],
             'mailboxes' => ['required', 'array', 'min:1'],
             'mailboxes.*' => ['required', 'string', 'max:64', 'regex:/^[a-z0-9]+(?:[._-][a-z0-9]+)*$/i'],
-        ]);
+            'company' => ['nullable', 'string', 'max:160'],
+            'phone' => ['nullable', 'string', 'max:40'],
+            'billing_country' => ['nullable', 'string', 'max:2'],
+            'billing_city' => ['nullable', 'string', 'max:120'],
+            'billing_address_line_1' => ['nullable', 'string', 'max:190'],
+        ], $guestRules));
 
         $plan = EmailPricing::plan(strtolower($payload['plan']));
         if (! $plan) {
@@ -121,21 +198,49 @@ class EmailOrderController extends Controller
             ]);
         }
 
+        $needsBusinessBeforeAuth = $this->checkoutNeedsBusinessFields($request, $payload);
+        if ($needsBusinessBeforeAuth) {
+            $request->validate([
+                'company' => ['required', 'string', 'max:160'],
+                'phone' => ['required', 'string', 'max:40'],
+                'billing_country' => ['required', 'string', 'size:2'],
+                'billing_city' => ['nullable', 'string', 'max:120'],
+                'billing_address_line_1' => ['nullable', 'string', 'max:190'],
+            ]);
+        }
+
+        $user = $request->user() ?? $this->resolveGuestCheckoutUser($request, $payload);
+        $user->fillLeanBusinessFromCheckout($payload);
+
+        if (! $user->fresh()->hasLeanBusinessProfile()) {
+            throw ValidationException::withMessages([
+                'company' => __('email.checkout_business_required'),
+            ]);
+        }
+
         $cycle = $payload['billing_cycle'];
         $amountUsd = EmailPricing::periodTotalUsd((float) $plan['monthly_usd'], $cycle);
         $amountNgn = $amountUsd * HostingPricing::usdToNgnRate();
 
-        $order = DB::transaction(function () use ($request, $plan, $domain, $localParts, $cycle, $amountUsd, $amountNgn) {
+        $order = DB::transaction(function () use ($request, $user, $plan, $domain, $localParts, $cycle, $amountUsd, $amountNgn) {
+            $provider = (string) ($plan['provider'] ?? 'lemonmail');
+            $fulfilmentMode = (string) ($plan['fulfilment_mode'] ?? 'auto');
+            $isManual = $fulfilmentMode === 'manual';
+
             $order = EmailOrder::create([
-                'user_id' => $request->user()->id,
+                'user_id' => $user->id,
                 'plan_key' => $plan['key'],
                 'plan_name' => __('email.plans.' . $plan['key'] . '.name'),
+                'provider' => $provider,
+                'fulfilment_mode' => $fulfilmentMode,
+                'fulfilment_status' => $isManual ? 'queued' : null,
+                'fulfilment_updated_at' => $isManual ? now() : null,
                 'domain' => $domain,
                 'mailbox_count' => $localParts->count(),
                 'billing_cycle' => $cycle,
                 'amount_usd' => $amountUsd,
                 'amount_ngn' => $amountNgn,
-                'status' => 'awaiting_payment',
+                'status' => $isManual ? 'awaiting_manual_fulfilment' : 'awaiting_payment',
                 'ip_address' => $request->ip(),
             ]);
 
@@ -151,6 +256,15 @@ class EmailOrderController extends Controller
             return $order;
         });
 
+        if ($order->isManualFulfilment()) {
+            return redirect()
+                ->route('account.email.show', $order)
+                ->with('email_feedback', [
+                    'type' => 'success',
+                    'message' => __('email.manual_fulfilment_queued', ['hours' => 4]),
+                ]);
+        }
+
         $link = FlutterwavePayment::createEmailPaymentLink($order);
 
         if ($link) {
@@ -163,6 +277,69 @@ class EmailOrderController extends Controller
                 'type' => 'info',
                 'message' => __('email.pay_later'),
             ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    private function checkoutNeedsBusinessFields(Request $request, array $payload): bool
+    {
+        $user = $request->user();
+        if ($user instanceof User) {
+            return ! $user->hasLeanBusinessProfile();
+        }
+
+        $email = strtolower((string) ($payload['email'] ?? ''));
+        if ($email === '') {
+            return true;
+        }
+
+        $existing = User::query()->where('email', $email)->first();
+        if (! $existing || $existing->isAdmin()) {
+            return true;
+        }
+
+        return ! $existing->hasLeanBusinessProfile();
+    }
+
+    /**
+     * @param  array{name:string,email:string,password:string}  $payload
+     */
+    private function resolveGuestCheckoutUser(Request $request, array $payload): User
+    {
+        $email = strtolower((string) $payload['email']);
+        $existing = User::query()->where('email', $email)->first();
+
+        if ($existing) {
+            if ($existing->isAdmin()) {
+                throw ValidationException::withMessages([
+                    'email' => __('email.checkout_use_customer_account'),
+                ]);
+            }
+
+            if (! Auth::attempt(['email' => $email, 'password' => $payload['password']], true)) {
+                throw ValidationException::withMessages([
+                    'password' => __('email.checkout_existing_account'),
+                ]);
+            }
+
+            $request->session()->regenerate();
+
+            return $existing->fresh() ?? $existing;
+        }
+
+        $user = User::create([
+            'name' => $payload['name'],
+            'email' => $email,
+            'role' => 'customer',
+            'password' => $payload['password'],
+        ]);
+
+        Auth::login($user);
+        $request->session()->regenerate();
+        HostingLead::claimFor($user);
+
+        return $user;
     }
 
     public function show(Request $request, EmailOrder $order): View
@@ -216,7 +393,7 @@ class EmailOrderController extends Controller
 
         $accountUrl = route('account.email.show', $order);
 
-        if ($status !== 'successful' || $transactionId === '') {
+        if ($transactionId === '') {
             $order->update([
                 'payment_status' => $status ?: 'failed',
                 'status' => 'payment_failed',
@@ -228,9 +405,21 @@ class EmailOrderController extends Controller
             ]);
         }
 
+        if (in_array($status, ['failed', 'cancelled', 'abandoned'], true)) {
+            $order->update([
+                'payment_status' => $status,
+                'status' => 'payment_failed',
+            ]);
+
+            return redirect()->to($accountUrl)->with('email_feedback', [
+                'type' => 'error',
+                'message' => __('email.payment_incomplete'),
+            ]);
+        }
+
         $verified = FlutterwavePayment::verifyTransaction($transactionId);
 
-        if (! $verified || strtolower((string) data_get($verified, 'status')) !== 'successful') {
+        if (! $verified) {
             $order->update([
                 'payment_status' => 'unverified',
                 'status' => 'payment_failed',
@@ -242,34 +431,11 @@ class EmailOrderController extends Controller
             ]);
         }
 
-        $paidAmount = (float) data_get($verified, 'amount', 0);
-        $expected = (float) ($order->amount_ngn ?? 0);
-        $currency = strtoupper((string) data_get($verified, 'currency', ''));
-
-        if ($currency !== 'NGN' || abs($paidAmount - $expected) > 1) {
-            $order->update([
-                'payment_status' => 'amount_mismatch',
-                'status' => 'payment_failed',
-                'flutterwave_transaction_id' => (string) data_get($verified, 'id'),
-            ]);
-
-            return redirect()->to($accountUrl)->with('email_feedback', [
-                'type' => 'error',
-                'message' => __('email.payment_mismatch'),
-            ]);
-        }
-
-        $order->update([
-            'payment_status' => 'successful',
-            'status' => 'paid',
-            'flutterwave_transaction_id' => (string) data_get($verified, 'id'),
-        ]);
-
-        EmailProvisioner::provision($order->fresh(['mailboxes', 'user']));
+        $result = FlutterwavePayment::confirmEmailOrderPayment($order->fresh(), $verified);
 
         return redirect()->to($accountUrl)->with('email_feedback', [
-            'type' => 'success',
-            'message' => __('email.payment_confirmed'),
+            'type' => ($result['ok'] ?? false) ? 'success' : 'error',
+            'message' => (string) ($result['message'] ?? __('email.payment_incomplete')),
         ]);
     }
 

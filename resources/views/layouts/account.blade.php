@@ -57,5 +57,7 @@
             <x-ui.flash key="hosting_feedback" />
             @yield('content')
         </div>
+
+        <x-account.complete-profile-modal />
     </body>
 </html>

@@ -7,6 +7,7 @@ use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\View\View;
@@ -24,13 +25,36 @@ class PasswordResetController extends Controller
             'email' => ['required', 'email'],
         ]);
 
+        $email = strtolower((string) $request->input('email'));
+        $ip = (string) $request->ip();
+        $emailIpKey = 'auth-forgot-password|'.$email.'|'.$ip;
+        $ipKey = 'auth-forgot-password-ip|'.$ip;
+
+        if (RateLimiter::tooManyAttempts($emailIpKey, 3) || RateLimiter::tooManyAttempts($ipKey, 20)) {
+            $availableIn = max(
+                RateLimiter::availableIn($emailIpKey),
+                RateLimiter::availableIn($ipKey),
+            );
+
+            return back()
+                ->withErrors(['email' => __('account.forgot_password_rate_limited', ['seconds' => $availableIn])])
+                ->onlyInput('email');
+        }
+
+        RateLimiter::hit($emailIpKey, 900);
+        RateLimiter::hit($ipKey, 900);
+
         $status = Password::sendResetLink(
-            ['email' => strtolower((string) $request->input('email'))],
+            ['email' => $email],
         );
 
-        return $status === Password::RESET_LINK_SENT
-            ? back()->with('status', __('account.reset_sent'))
-            : back()->withErrors(['email' => __('account.reset_failed')])->onlyInput('email');
+        // Broker throttle and unknown emails both get the same success UX so we
+        // do not leak account existence; request volume is capped above.
+        if (in_array($status, [Password::RESET_LINK_SENT, Password::RESET_THROTTLED], true)) {
+            return back()->with('status', __('account.reset_sent'));
+        }
+
+        return back()->withErrors(['email' => __('account.reset_failed')])->onlyInput('email');
     }
 
     public function reset(string $token): View

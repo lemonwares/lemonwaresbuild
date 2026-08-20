@@ -12,6 +12,10 @@ class EmailProvisioner
     {
         $order->loadMissing('mailboxes', 'user');
 
+        if ($order->isManualFulfilment()) {
+            return $order;
+        }
+
         if ($order->status === 'provisioned' && $order->trekmail_domain_id) {
             return $order;
         }

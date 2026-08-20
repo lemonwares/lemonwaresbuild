@@ -32,6 +32,30 @@
                         </div>
 
                         <div class="sm:col-span-2">
+                            <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Provider</label>
+                            <select
+                                name="plans[{{ $plan->id }}][provider]"
+                                class="footer-input w-full rounded-xl border border-border bg-white px-3 py-2.5"
+                            >
+                                <option value="lemonmail" @selected(old("plans.{$plan->id}.provider", $plan->provider) === 'lemonmail')>Lemon Mail</option>
+                                <option value="titan" @selected(old("plans.{$plan->id}.provider", $plan->provider) === 'titan')>Titan</option>
+                                <option value="google_workspace" @selected(old("plans.{$plan->id}.provider", $plan->provider) === 'google_workspace')>Google Workspace</option>
+                                <option value="ms365" @selected(old("plans.{$plan->id}.provider", $plan->provider) === 'ms365')>Microsoft 365</option>
+                            </select>
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Fulfilment</label>
+                            <select
+                                name="plans[{{ $plan->id }}][fulfilment_mode]"
+                                class="footer-input w-full rounded-xl border border-border bg-white px-3 py-2.5"
+                            >
+                                <option value="auto" @selected(old("plans.{$plan->id}.fulfilment_mode", $plan->fulfilment_mode) === 'auto')>Automatic</option>
+                                <option value="manual" @selected(old("plans.{$plan->id}.fulfilment_mode", $plan->fulfilment_mode) === 'manual')>Manual queue</option>
+                            </select>
+                        </div>
+
+                        <div class="sm:col-span-1">
                             <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Mailboxes</label>
                             <input
                                 type="number"
@@ -44,7 +68,7 @@
                             >
                         </div>
 
-                        <div class="sm:col-span-2">
+                        <div class="sm:col-span-1">
                             <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Monthly USD</label>
                             <input
                                 type="number"
@@ -141,7 +165,7 @@
                 class="inline-flex items-center justify-center gap-2 rounded-2xl bg-rose px-6 py-3.5 text-sm font-bold text-white shadow-[0_10px_24px_rgba(224,69,69,0.35)] transition hover:bg-[#cf3a3a]"
             >
                 <span class="hidden size-4 animate-spin rounded-full border-2 border-white/35 border-t-white" data-submit-spinner></span>
-                <span data-submit-label>Save Lemon Mail pricing</span>
+                <span data-submit-label>Save email catalog</span>
                 <span class="hidden" data-submit-loading>Saving...</span>
             </button>
         </div>

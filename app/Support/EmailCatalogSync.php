@@ -16,6 +16,8 @@ class EmailCatalogSync
             }
 
             $defaults = [
+                'provider' => (string) ($plan['provider'] ?? 'lemonmail'),
+                'fulfilment_mode' => (string) ($plan['fulfilment_mode'] ?? 'auto'),
                 'mailbox_count' => (int) ($plan['mailboxes'] ?? 1),
                 'monthly_usd' => (float) ($plan['monthly_usd'] ?? 0),
                 'featured' => (bool) ($plan['featured'] ?? false),

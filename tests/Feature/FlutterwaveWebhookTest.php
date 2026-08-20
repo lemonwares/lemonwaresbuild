@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\EmailOrder;
 use App\Models\HostingLead;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
@@ -121,6 +123,100 @@ class FlutterwaveWebhookTest extends TestCase
             'data' => [
                 'tx_ref' => 'LW-HOST-PAID',
                 'id' => '7777',
+            ],
+        ], [
+            'verif-hash' => 'expected-hash',
+        ])->assertOk();
+    }
+
+    public function test_webhook_confirms_email_order_payment(): void
+    {
+        config([
+            'services.flutterwave.secret_hash' => 'expected-hash',
+            'services.flutterwave.secret_key' => 'flw_test_key',
+        ]);
+
+        $user = User::factory()->create();
+
+        $order = EmailOrder::create([
+            'user_id' => $user->id,
+            'plan_key' => 'team',
+            'plan_name' => 'Team',
+            'provider' => 'lemonmail',
+            'fulfilment_mode' => 'manual',
+            'domain' => 'acme.ng',
+            'mailbox_count' => 5,
+            'billing_cycle' => 'monthly',
+            'amount_usd' => 10,
+            'amount_ngn' => 15000,
+            'status' => 'awaiting_payment',
+            'payment_provider' => 'flutterwave',
+            'payment_reference' => 'LW-MAIL-100',
+        ]);
+
+        Http::fake([
+            'https://api.flutterwave.com/v3/transactions/*/verify' => Http::response([
+                'status' => 'success',
+                'data' => [
+                    'id' => 'tx-email-1',
+                    'status' => 'successful',
+                    'amount' => 15000,
+                    'currency' => 'NGN',
+                ],
+            ], 200),
+        ]);
+
+        $this->postJson(route('webhooks.flutterwave'), [
+            'event' => 'charge.completed',
+            'data' => [
+                'tx_ref' => 'LW-MAIL-100',
+                'id' => 'tx-email-1',
+            ],
+        ], [
+            'verif-hash' => 'expected-hash',
+        ])->assertOk();
+
+        $fresh = $order->fresh();
+        $this->assertSame('successful', $fresh->payment_status);
+        $this->assertSame('paid', $fresh->status);
+    }
+
+    public function test_email_webhook_is_idempotent_when_order_already_paid(): void
+    {
+        config([
+            'services.flutterwave.secret_hash' => 'expected-hash',
+            'services.flutterwave.secret_key' => 'flw_test_key',
+        ]);
+
+        $user = User::factory()->create();
+        EmailOrder::create([
+            'user_id' => $user->id,
+            'plan_key' => 'team',
+            'plan_name' => 'Team',
+            'provider' => 'lemonmail',
+            'fulfilment_mode' => 'manual',
+            'domain' => 'acme.ng',
+            'mailbox_count' => 5,
+            'billing_cycle' => 'monthly',
+            'amount_usd' => 10,
+            'amount_ngn' => 15000,
+            'status' => 'paid',
+            'payment_provider' => 'flutterwave',
+            'payment_status' => 'successful',
+            'payment_reference' => 'LW-MAIL-PAID-1',
+        ]);
+
+        Http::fake([
+            'https://api.flutterwave.com/v3/*' => function () {
+                $this->fail('Verify call should not run for already-paid email orders.');
+            },
+        ]);
+
+        $this->postJson(route('webhooks.flutterwave'), [
+            'event' => 'charge.completed',
+            'data' => [
+                'tx_ref' => 'LW-MAIL-PAID-1',
+                'id' => 'tx-email-paid',
             ],
         ], [
             'verif-hash' => 'expected-hash',

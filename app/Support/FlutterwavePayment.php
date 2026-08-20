@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\EmailOrder;
 use App\Models\HostingLead;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -162,6 +163,38 @@ class FlutterwavePayment
             ];
         }
 
+        if (str_starts_with($txRef, 'LW-MAIL-')) {
+            $order = EmailOrder::query()->where('payment_reference', $txRef)->first();
+            if (! $order) {
+                return [
+                    'ok' => false,
+                    'message' => 'No email order matched this payment reference.',
+                ];
+            }
+
+            if ($order->isPaid()) {
+                return [
+                    'ok' => true,
+                    'message' => 'Payment already processed.',
+                ];
+            }
+
+            $verified = self::verifyTransaction($transactionId);
+            if (! $verified) {
+                return [
+                    'ok' => false,
+                    'message' => 'Unable to verify Flutterwave transaction.',
+                ];
+            }
+
+            $result = self::confirmEmailOrderPayment($order->fresh(), $verified);
+
+            return [
+                'ok' => (bool) ($result['ok'] ?? false),
+                'message' => (string) ($result['message'] ?? 'Payment processed.'),
+            ];
+        }
+
         $lead = HostingLead::query()->where('payment_reference', $txRef)->first();
         if (! $lead) {
             return [
@@ -207,7 +240,7 @@ class FlutterwavePayment
         return hash_equals($secretHash, $signature);
     }
 
-    public static function createEmailPaymentLink(\App\Models\EmailOrder $order): ?string
+    public static function createEmailPaymentLink(EmailOrder $order): ?string
     {
         if (! self::isConfigured()) {
             return null;
@@ -261,6 +294,66 @@ class FlutterwavePayment
         ]);
 
         return is_string($link) ? $link : null;
+    }
+
+    /**
+     * @return array{ok:bool,already_paid?:bool,message:string}
+     */
+    public static function confirmEmailOrderPayment(EmailOrder $order, array $verified): array
+    {
+        if ($order->isPaid()) {
+            return [
+                'ok' => true,
+                'already_paid' => true,
+                'message' => __('email.payment_already_confirmed'),
+            ];
+        }
+
+        if (! in_array(strtolower((string) data_get($verified, 'status')), ['successful', 'completed'], true)) {
+            $order->update([
+                'payment_status' => strtolower((string) data_get($verified, 'status', 'failed')),
+                'status' => 'payment_failed',
+            ]);
+
+            return [
+                'ok' => false,
+                'message' => __('email.payment_incomplete'),
+            ];
+        }
+
+        $paidAmount = (float) data_get($verified, 'amount', 0);
+        $expected = (float) ($order->amount_ngn ?? 0);
+        $currency = strtoupper((string) data_get($verified, 'currency', ''));
+
+        if ($currency !== 'NGN' || abs($paidAmount - $expected) > 1) {
+            $order->update([
+                'payment_status' => 'amount_mismatch',
+                'status' => 'payment_failed',
+                'flutterwave_transaction_id' => (string) data_get($verified, 'id', ''),
+            ]);
+
+            return [
+                'ok' => false,
+                'message' => __('email.payment_mismatch'),
+            ];
+        }
+
+        $order->update([
+            'payment_status' => 'successful',
+            'status' => 'paid',
+            'flutterwave_transaction_id' => (string) data_get($verified, 'id', ''),
+        ]);
+
+        if (! $order->isManualFulfilment()) {
+            EmailProvisioner::provision($order->fresh(['mailboxes', 'user']));
+        }
+
+        return [
+            'ok' => true,
+            'message' => $order->isManualFulfilment()
+                ? __('email.manual_fulfilment_paid')
+                : __('email.payment_confirmed'),
+        ];
     }
 
     public static function verifyTransaction(string|int $transactionId): ?array

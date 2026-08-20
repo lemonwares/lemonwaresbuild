@@ -80,11 +80,11 @@ Route::get('/locale/{locale}', function (string $locale) {
 
 Route::middleware('guest')->group(function (): void {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
-    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:10,1')->name('login.store');
+    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:auth-login')->name('login.store');
     Route::get('/register', [RegisterController::class, 'create'])->name('register');
     Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:8,1')->name('register.store');
     Route::get('/forgot-password', [PasswordResetController::class, 'request'])->name('password.request');
-    Route::post('/forgot-password', [PasswordResetController::class, 'email'])->middleware('throttle:5,1')->name('password.email');
+    Route::post('/forgot-password', [PasswordResetController::class, 'email'])->middleware('throttle:auth-forgot-password')->name('password.email');
     Route::get('/reset-password/{token}', [PasswordResetController::class, 'reset'])->name('password.reset');
     Route::post('/reset-password', [PasswordResetController::class, 'update'])->middleware('throttle:8,1')->name('password.update');
 });
@@ -92,12 +92,20 @@ Route::middleware('guest')->group(function (): void {
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
 
 Route::get('/email', [EmailOrderController::class, 'plans'])->name('email.plans');
+Route::get('/email/checkout', [EmailOrderController::class, 'create'])->name('email.checkout');
+Route::post('/email/checkout', [EmailOrderController::class, 'store'])->middleware('throttle:10,1')->name('email.checkout.store');
+Route::post('/email/checkout/account-status', [EmailOrderController::class, 'accountStatus'])
+    ->middleware('throttle:20,1')
+    ->name('email.checkout.account-status');
 Route::get('/email/payment/flutterwave/callback', [EmailOrderController::class, 'callback'])->name('email.flutterwave.callback');
 
 Route::middleware('auth')->group(function (): void {
     Route::get('/account', [AccountController::class, 'show'])->name('account.show');
     Route::get('/account/profile', [AccountController::class, 'profile'])->name('account.profile');
     Route::put('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');
+    Route::put('/account/profile/business', [AccountController::class, 'updateBusinessProfile'])
+        ->middleware('throttle:20,1')
+        ->name('account.profile.business');
     Route::get('/account/settings', [AccountController::class, 'settings'])->name('account.settings');
     Route::post('/account/settings/contacts', [AccountController::class, 'storeContact'])->middleware('throttle:20,1')->name('account.contacts.store');
     Route::delete('/account/settings/contacts/{contact}', [AccountController::class, 'destroyContact'])->name('account.contacts.destroy');
@@ -109,8 +117,6 @@ Route::middleware('auth')->group(function (): void {
     Route::get('/account/vps/{lead}', [AccountController::class, 'vpsShow'])->name('account.vps.show');
     Route::get('/account/hosting', [AccountController::class, 'hosting'])->name('account.hosting.index');
     Route::get('/account/hosting/{lead}', [AccountController::class, 'hostingShow'])->name('account.hosting.show');
-    Route::get('/email/checkout', [EmailOrderController::class, 'create'])->name('email.checkout');
-    Route::post('/email/checkout', [EmailOrderController::class, 'store'])->middleware('throttle:10,1')->name('email.checkout.store');
 });
 
 Route::get('/hosting/request', function (Request $request) {
@@ -958,6 +964,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::put('/email-catalog', [AdminEmailCatalogController::class, 'update'])->name('email-catalog.update');
         Route::get('/email-orders', [AdminEmailOrderController::class, 'index'])->name('email-orders.index');
         Route::get('/email-orders/{emailOrder}', [AdminEmailOrderController::class, 'show'])->name('email-orders.show');
+        Route::put('/email-orders/{emailOrder}/fulfilment', [AdminEmailOrderController::class, 'updateFulfilment'])->name('email-orders.fulfilment');
         Route::post('/email-orders/{emailOrder}/provision', [AdminEmailOrderController::class, 'provision'])->name('email-orders.provision');
     });
 });

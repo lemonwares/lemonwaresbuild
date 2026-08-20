@@ -3,6 +3,7 @@ import './reviews-carousel.js';
 import './mobile-nav.js';
 import './scroll-reveal.js';
 import './confirm-modal.js';
+import './complete-profile-modal.js';
 import './email-checkout.js';
 import './form-submit.js';
 

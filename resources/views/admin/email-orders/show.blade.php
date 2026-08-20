@@ -12,11 +12,19 @@
         @endif
     </div>
 
+    @if (session('status'))
+        <p class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('status') }}</p>
+    @endif
+
     <div class="rounded-3xl border border-border bg-white p-6">
         <dl class="space-y-3 text-sm">
             <div class="flex justify-between gap-4 border-b border-border pb-3">
                 <dt class="text-on-blush/60">Status</dt>
                 <dd class="font-semibold">{{ $order->status }} / {{ $order->payment_status ?: '—' }}</dd>
+            </div>
+            <div class="flex justify-between gap-4 border-b border-border pb-3">
+                <dt class="text-on-blush/60">Provider</dt>
+                <dd class="font-semibold">{{ __('email.providers.' . ($order->provider ?: 'lemonmail')) }} · {{ $order->fulfilment_mode ?: 'auto' }}</dd>
             </div>
             <div class="flex justify-between gap-4 border-b border-border pb-3">
                 <dt class="text-on-blush/60">Plan</dt>
@@ -26,6 +34,16 @@
                 <dt class="text-on-blush/60">Amount</dt>
                 <dd class="font-semibold">{{ \App\Support\HostingPricing::dualPriceDisplay((float) $order->amount_usd) }}</dd>
             </div>
+            @if ($order->isManualFulfilment())
+                <div class="flex justify-between gap-4 border-b border-border pb-3">
+                    <dt class="text-on-blush/60">Fulfilment</dt>
+                    <dd class="font-semibold">{{ $order->fulfilmentStatusLabel() }}</dd>
+                </div>
+                <div class="flex justify-between gap-4 border-b border-border pb-3">
+                    <dt class="text-on-blush/60">SLA</dt>
+                    <dd class="font-semibold text-on-blush/80">{{ __('email.fulfilment_sla') }}</dd>
+                </div>
+            @endif
             <div class="flex justify-between gap-4">
                 <dt class="text-on-blush/60">TrekMail domain</dt>
                 <dd class="font-semibold">{{ $order->trekmail_domain_id ?: '—' }}</dd>
@@ -42,8 +60,31 @@
             @endforeach
         </ul>
 
+        @if ($order->isManualFulfilment())
+            <form method="POST" action="{{ route('admin.email-orders.fulfilment', $order) }}" class="mt-8 space-y-4 rounded-2xl border border-border bg-blush-soft/40 p-4">
+                @csrf
+                @method('PUT')
+                <p class="text-sm font-semibold text-black">Update fulfilment queue</p>
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Status</label>
+                    <select name="fulfilment_status" class="footer-input w-full rounded-xl border border-border bg-white px-3 py-2.5" required>
+                        @foreach ($fulfilmentStatuses as $status)
+                            <option value="{{ $status }}" @selected(old('fulfilment_status', $order->fulfilment_status ?: 'queued') === $status)>
+                                {{ __('email.fulfilment_statuses.' . $status) }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Internal notes</label>
+                    <textarea name="fulfilment_notes" rows="3" class="footer-input w-full rounded-xl border border-border bg-white px-3 py-2.5" placeholder="Contacted customer, awaiting DNS, etc.">{{ old('fulfilment_notes', $order->fulfilment_notes) }}</textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save fulfilment</button>
+            </form>
+        @endif
+
         <div class="mt-6 flex flex-wrap gap-3">
-            @if ($order->isPaid())
+            @if ($order->isPaid() && ! $order->isManualFulfilment())
                 <form method="POST" action="{{ route('admin.email-orders.provision', $order) }}">
                     @csrf
                     <button type="submit" class="btn btn-primary">Retry TrekMail provision</button>

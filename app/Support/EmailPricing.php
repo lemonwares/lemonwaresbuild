@@ -26,6 +26,8 @@ class EmailPricing
             ->get()
             ->map(fn (EmailPlan $plan) => [
                 'key' => $plan->plan_key,
+                'provider' => $plan->provider,
+                'fulfilment_mode' => $plan->fulfilment_mode,
                 'mailboxes' => (int) $plan->mailbox_count,
                 'monthly_usd' => (float) $plan->monthly_usd,
                 'featured' => (bool) $plan->featured,
@@ -53,6 +55,8 @@ class EmailPricing
 
         return [
             'key' => $plan->plan_key,
+            'provider' => $plan->provider,
+            'fulfilment_mode' => $plan->fulfilment_mode,
             'mailboxes' => (int) $plan->mailbox_count,
             'monthly_usd' => (float) $plan->monthly_usd,
             'featured' => (bool) $plan->featured,
@@ -162,6 +166,8 @@ class EmailPricing
             'discount_percent' => $discount,
             'name' => __('email.plans.' . $plan['key'] . '.name'),
             'summary' => __('email.plans.' . $plan['key'] . '.summary'),
+            'provider_label' => __('email.providers.' . ($plan['provider'] ?? 'lemonmail')),
+            'is_manual' => ($plan['fulfilment_mode'] ?? 'auto') === 'manual',
         ]);
     }
 

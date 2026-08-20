@@ -26,6 +26,8 @@ class AdminEmailCatalogController extends Controller
         $validated = $request->validate([
             'plans' => ['required', 'array'],
             'plans.*.id' => ['required', 'integer', 'exists:email_plans,id'],
+            'plans.*.provider' => ['required', 'string', 'in:lemonmail,titan,google_workspace,ms365'],
+            'plans.*.fulfilment_mode' => ['required', 'string', 'in:auto,manual'],
             'plans.*.mailbox_count' => ['required', 'integer', 'min:1', 'max:500'],
             'plans.*.monthly_usd' => ['required', 'numeric', 'min:0'],
             'plans.*.is_visible' => ['nullable', 'boolean'],
@@ -42,6 +44,8 @@ class AdminEmailCatalogController extends Controller
             EmailPlan::query()
                 ->whereKey($row['id'])
                 ->update([
+                    'provider' => (string) $row['provider'],
+                    'fulfilment_mode' => (string) $row['fulfilment_mode'],
                     'mailbox_count' => (int) $row['mailbox_count'],
                     'monthly_usd' => $row['monthly_usd'],
                     'featured' => $featuredId !== null && (int) $row['id'] === (int) $featuredId,
