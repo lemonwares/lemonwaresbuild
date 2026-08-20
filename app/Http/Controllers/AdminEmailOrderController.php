@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\EmailOrder;
+use App\Support\EmailProviderSettings;
 use App\Support\EmailProvisioner;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,9 +42,15 @@ class AdminEmailOrderController extends Controller
     {
         $emailOrder->load(['user', 'mailboxes']);
 
+        $providerSettings = null;
+        if ($emailOrder->isManualFulfilment() && filled($emailOrder->provider)) {
+            $providerSettings = EmailProviderSettings::for((string) $emailOrder->provider);
+        }
+
         return view('admin.email-orders.show', [
             'order' => $emailOrder,
             'fulfilmentStatuses' => EmailOrder::FULFILMENT_STATUSES,
+            'providerSettings' => $providerSettings,
         ]);
     }
 

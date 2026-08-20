@@ -61,6 +61,48 @@
         </ul>
 
         @if ($order->isManualFulfilment())
+            @if ($providerSettings && collect($providerSettings)->filter()->isNotEmpty())
+                <div class="mt-8 rounded-2xl border border-border bg-blush-soft/40 p-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <p class="text-sm font-semibold text-black">Provider credentials</p>
+                        <a href="{{ route('admin.email-provider-settings.index') }}" class="text-xs font-semibold text-rose hover:underline">Edit in Email Providers</a>
+                    </div>
+                    <dl class="mt-4 space-y-2 text-sm">
+                        @if ($providerSettings['portal_url'])
+                            <div class="flex justify-between gap-4">
+                                <dt class="text-on-blush/60">Portal</dt>
+                                <dd class="text-right font-semibold">
+                                    <a href="{{ $providerSettings['portal_url'] }}" target="_blank" rel="noopener noreferrer" class="text-rose hover:underline">{{ $providerSettings['portal_url'] }}</a>
+                                </dd>
+                            </div>
+                        @endif
+                        @if ($providerSettings['account_ref'])
+                            <div class="flex justify-between gap-4">
+                                <dt class="text-on-blush/60">Account ref</dt>
+                                <dd class="font-semibold">{{ $providerSettings['account_ref'] }}</dd>
+                            </div>
+                        @endif
+                        @if ($providerSettings['api_key'])
+                            <div class="flex justify-between gap-4">
+                                <dt class="text-on-blush/60">API key</dt>
+                                <dd class="break-all font-semibold">{{ $providerSettings['api_key'] }}</dd>
+                            </div>
+                        @endif
+                        @if ($providerSettings['notes'])
+                            <div>
+                                <dt class="text-on-blush/60">Notes</dt>
+                                <dd class="mt-1 whitespace-pre-wrap text-on-blush/80">{{ $providerSettings['notes'] }}</dd>
+                            </div>
+                        @endif
+                    </dl>
+                </div>
+            @else
+                <p class="mt-8 text-sm text-on-blush/70">
+                    No partner credentials saved yet.
+                    <a href="{{ route('admin.email-provider-settings.index') }}" class="font-semibold text-rose hover:underline">Add them under Email Providers</a>.
+                </p>
+            @endif
+
             <form method="POST" action="{{ route('admin.email-orders.fulfilment', $order) }}" class="mt-8 space-y-4 rounded-2xl border border-border bg-blush-soft/40 p-4">
                 @csrf
                 @method('PUT')

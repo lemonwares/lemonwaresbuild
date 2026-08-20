@@ -17,12 +17,28 @@
     <x-layout.page-content wide>
         <x-ui.flash />
 
-        <div class="mx-auto mb-10 max-w-3xl" id="email-plans">
+        <div
+            class="mx-auto mb-10 max-w-3xl"
+            id="email-plans"
+            data-email-plans
+            data-selected-cycle="{{ $selectedCycle }}"
+            data-checkout-base="{{ $checkoutBaseUrl }}"
+            data-plans-url="{{ route('email.plans') }}"
+        >
             <p class="text-center text-sm font-semibold text-black">{{ __('email.choose_period') }}</p>
-            <nav class="mt-4 flex w-full gap-2 overflow-x-auto rounded-2xl border border-border bg-white p-2" aria-label="{{ __('email.choose_period') }}">
+            <div
+                class="mt-4 flex w-full gap-2 overflow-x-auto rounded-2xl border border-border bg-white p-2"
+                role="tablist"
+                aria-label="{{ __('email.choose_period') }}"
+            >
                 @foreach ($billingCycleOptions as $option)
-                    <a
-                        href="{{ route('email.plans', ['billing_cycle' => $option['key']]) }}#email-plans"
+                    <button
+                        type="button"
+                        role="tab"
+                        data-email-cycle-tab
+                        data-cycle="{{ $option['key'] }}"
+                        data-discount="{{ $option['discount_percent'] }}"
+                        aria-selected="{{ $option['key'] === $selectedCycle ? 'true' : 'false' }}"
                         @class([
                             'flex min-w-[9.5rem] flex-1 flex-col items-center rounded-xl px-4 py-3 text-center transition',
                             'bg-rose text-white shadow-[0_8px_20px_rgba(224,69,69,0.25)]' => $option['key'] === $selectedCycle,
@@ -31,32 +47,43 @@
                     >
                         <span class="text-sm font-bold">{{ $option['label'] }}</span>
                         @if ($option['discount_percent'] > 0)
-                            <span @class([
-                                'mt-1 text-[0.65rem] font-semibold uppercase tracking-widest',
-                                'text-white/80' => $option['key'] === $selectedCycle,
-                                'text-rose' => $option['key'] !== $selectedCycle,
-                            ])>
+                            <span
+                                data-email-cycle-badge
+                                @class([
+                                    'mt-1 text-[0.65rem] font-semibold uppercase tracking-widest',
+                                    'text-white/80' => $option['key'] === $selectedCycle,
+                                    'text-rose' => $option['key'] !== $selectedCycle,
+                                ])
+                            >
                                 {{ __('hosting.save_percent', ['percent' => $option['discount_percent']]) }}
                             </span>
                         @else
-                            <span @class([
-                                'mt-1 text-[0.65rem] font-semibold uppercase tracking-widest',
-                                'text-white/70' => $option['key'] === $selectedCycle,
-                                'text-on-blush/55' => $option['key'] !== $selectedCycle,
-                            ])>{{ __('email.standard_rate') }}</span>
+                            <span
+                                data-email-cycle-badge
+                                @class([
+                                    'mt-1 text-[0.65rem] font-semibold uppercase tracking-widest',
+                                    'text-white/70' => $option['key'] === $selectedCycle,
+                                    'text-on-blush/55' => $option['key'] !== $selectedCycle,
+                                ])
+                            >{{ __('email.standard_rate') }}</span>
                         @endif
-                    </a>
+                    </button>
                 @endforeach
-            </nav>
+            </div>
         </div>
 
-        <div class="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
+        <div class="mx-auto grid max-w-5xl gap-6 md:grid-cols-2" data-email-plans-grid>
             @foreach ($plans as $plan)
-                <article @class([
-                    'flex flex-col rounded-4xl border p-7 sm:p-8',
-                    'border-rose bg-rose text-white shadow-[0_18px_40px_rgba(224,69,69,0.28)]' => $plan['featured'],
-                    'border-border bg-white text-black' => ! $plan['featured'],
-                ])>
+                <article
+                    @class([
+                        'flex flex-col rounded-4xl border p-7 sm:p-8',
+                        'border-rose bg-rose text-white shadow-[0_18px_40px_rgba(224,69,69,0.28)]' => $plan['featured'],
+                        'border-border bg-white text-black' => ! $plan['featured'],
+                    ])
+                    data-email-plan-card
+                    data-plan-key="{{ $plan['key'] }}"
+                    data-pricing='@json($plan['pricing_by_cycle'])'
+                >
                     <div class="flex items-start justify-between gap-4">
                         <div>
                             @if ($plan['featured'])
@@ -81,15 +108,12 @@
                     </div>
 
                     <div @class(['mt-6 border-t pt-6', 'border-white/20' => $plan['featured'], 'border-border' => ! $plan['featured']])>
-                        <p class="text-3xl font-bold tracking-tight sm:text-4xl">{{ $plan['period_display'] }}</p>
-                        <p @class(['mt-1 text-sm', 'text-white/75' => $plan['featured'], 'text-on-blush/60' => ! $plan['featured']])>
-                            {{ $plan['billing_cycle_label'] }}
-                            @if ($plan['discount_percent'] > 0)
-                                · {{ __('hosting.save_percent', ['percent' => $plan['discount_percent']]) }}
-                            @endif
+                        <p class="text-3xl font-bold tracking-tight sm:text-4xl" data-email-period-price>{{ $plan['period_display'] }}</p>
+                        <p @class(['mt-1 text-sm', 'text-white/75' => $plan['featured'], 'text-on-blush/60' => ! $plan['featured']]) data-email-cycle-meta>
+                            {{ $plan['pricing_by_cycle'][$selectedCycle]['cycle_meta'] ?? $plan['billing_cycle_label'] }}
                         </p>
-                        <p @class(['mt-2 text-sm font-medium', 'text-white/90' => $plan['featured'], 'text-on-blush/70' => ! $plan['featured']])>
-                            {{ __('email.per_mailbox_price', ['price' => $plan['per_mailbox_display']]) }}
+                        <p @class(['mt-2 text-sm font-medium', 'text-white/90' => $plan['featured'], 'text-on-blush/70' => ! $plan['featured']]) data-email-per-mailbox>
+                            {{ $plan['pricing_by_cycle'][$selectedCycle]['per_mailbox_line'] ?? __('email.per_mailbox_price', ['price' => $plan['per_mailbox_display']]) }}
                         </p>
                     </div>
 
@@ -102,6 +126,7 @@
 
                     <a
                         href="{{ route('email.checkout', ['plan' => $plan['key'], 'billing_cycle' => $selectedCycle]) }}"
+                        data-email-plan-cta
                         @class(['btn mt-8 w-full justify-center', 'bg-white text-rose hover:bg-blush' => $plan['featured'], 'btn-primary' => ! $plan['featured']])
                     >
                         {{ $plan['is_manual'] ? __('email.request_setup') : __('email.get_started') }}

@@ -53,6 +53,9 @@ class FlutterwaveSettingsAdminTest extends TestCase
                     (string) ($request->header('Authorization')[0] ?? ''),
                 );
 
+                $payload = $request->data();
+                $this->assertArrayNotHasKey('logo', $payload['customizations'] ?? []);
+
                 return Http::response([
                     'status' => 'success',
                     'data' => ['link' => 'https://checkout.flutterwave.com/v3/hosted/pay/db-key'],
@@ -78,5 +81,51 @@ class FlutterwaveSettingsAdminTest extends TestCase
         $link = \App\Support\FlutterwavePayment::createPaymentLink($lead);
 
         $this->assertSame('https://checkout.flutterwave.com/v3/hosted/pay/db-key', $link);
+    }
+
+    public function test_email_payment_omits_unreachable_checkout_logo(): void
+    {
+        IntegrationSetting::putMany([
+            'flutterwave.enabled' => '1',
+            'flutterwave.secret_key' => 'FLWSECK_TEST-email',
+        ]);
+
+        config(['app.url' => 'https://gadgets.lemonwares.com']);
+
+        Http::fake([
+            'https://gadgets.lemonwares.com/lemonwareslogo.webp' => Http::response('error', 500),
+            'https://api.flutterwave.com/v3/payments' => function ($request) {
+                $payload = $request->data();
+                $this->assertArrayNotHasKey('logo', $payload['customizations'] ?? []);
+                $this->assertSame('card,banktransfer,ussd,account', $payload['payment_options'] ?? null);
+
+                return Http::response([
+                    'status' => 'success',
+                    'data' => ['link' => 'https://checkout-v2.dev-flutterwave.com/v3/hosted/pay/email-token'],
+                ], 200);
+            },
+        ]);
+
+        $user = \App\Models\User::factory()->create([
+            'phone' => '+2348011111111',
+        ]);
+
+        $order = \App\Models\EmailOrder::create([
+            'user_id' => $user->id,
+            'plan_key' => 'solo',
+            'plan_name' => 'Solo',
+            'provider' => 'lemonmail',
+            'fulfilment_mode' => 'auto',
+            'domain' => 'example.test',
+            'mailbox_count' => 1,
+            'billing_cycle' => 'monthly',
+            'amount_usd' => 4.99,
+            'amount_ngn' => 6737.15,
+            'status' => 'awaiting_payment',
+        ]);
+
+        $link = \App\Support\FlutterwavePayment::createEmailPaymentLink($order);
+
+        $this->assertSame('https://checkout-v2.dev-flutterwave.com/v3/hosted/pay/email-token', $link);
     }
 }
