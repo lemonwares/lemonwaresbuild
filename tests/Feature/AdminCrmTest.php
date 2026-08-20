@@ -57,6 +57,38 @@ class AdminCrmTest extends TestCase
             ->assertSee('cPanel', false)
             ->assertSee('ops@brightmedia.ng', false)
             ->assertSee('14 Admiralty Way', false);
+
+        $whmcsCustomer = \App\Models\WhmcsCustomer::query()->create([
+            'user_id' => $customer->id,
+            'whmcs_client_id' => 42,
+            'full_name' => $customer->name,
+            'email' => $customer->email,
+            'status' => 'Active',
+        ]);
+
+        \App\Models\WhmcsService::query()->create([
+            'whmcs_customer_id' => $whmcsCustomer->id,
+            'user_id' => $customer->id,
+            'whmcs_service_id' => 9001,
+            'whmcs_client_id' => 42,
+            'product_name' => 'Shared Hosting',
+            'domain' => 'brightmedia.ng',
+            'status' => 'Active',
+        ]);
+        \App\Models\WhmcsService::query()->create([
+            'whmcs_customer_id' => $whmcsCustomer->id,
+            'user_id' => $customer->id,
+            'whmcs_service_id' => 9002,
+            'whmcs_client_id' => 42,
+            'product_name' => 'Old Plan',
+            'domain' => 'old.brightmedia.ng',
+            'status' => 'Suspended',
+        ]);
+
+        $this->get(route('admin.customers.show', $customer))
+            ->assertOk()
+            ->assertSee('Shared Hosting', false)
+            ->assertSee('Suspended', false);
     }
 
     public function test_seeded_customer_sees_email_vps_and_hosting_on_account(): void
