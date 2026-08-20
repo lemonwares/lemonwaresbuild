@@ -29,4 +29,21 @@ class WhmcsCheckout
 
         return $redirectUrl !== '' ? $redirectUrl : null;
     }
+
+    public static function clientAreaUrl(int $clientId): ?string
+    {
+        if ($clientId < 1) {
+            return null;
+        }
+
+        $sso = WhmcsClient::createSsoToken($clientId, 'clientarea.php');
+        $redirectUrl = trim((string) data_get($sso, 'redirect_url', ''));
+
+        return $redirectUrl !== '' ? $redirectUrl : WhmcsSettings::clientLoginUrl();
+    }
+
+    public static function passwordResetUrl(): string
+    {
+        return rtrim(WhmcsSettings::baseUrl(), '/') . '/index.php?rp=/password/reset/begin';
+    }
 }

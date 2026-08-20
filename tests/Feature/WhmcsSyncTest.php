@@ -193,6 +193,62 @@ class WhmcsSyncTest extends TestCase
         ]))->assertRedirect(route('hosting.order-received', $lead));
     }
 
+    public function test_hosting_payment_callback_accepts_flutterwave_completed_redirect_status(): void
+    {
+        config([
+            'site.whmcs.base_url' => 'https://billing.example.test',
+            'site.whmcs.api_identifier' => 'identifier',
+            'site.whmcs.api_secret' => 'secret',
+            'services.flutterwave.secret_key' => 'flw_test_key',
+        ]);
+
+        $lead = HostingLead::create([
+            'full_name' => 'Test User',
+            'email' => 'test@example.com',
+            'phone' => '+2348012345678',
+            'plan_slug' => 'cpanel',
+            'plan_name' => 'Cloud Hosting',
+            'spec_key' => 'starter',
+            'spec_label' => 'Starter',
+            'billing_cycle' => 'monthly',
+            'amount_usd' => 5,
+            'amount_ngn' => 7500,
+            'checkout_provider' => 'whmcs',
+            'payment_provider' => 'flutterwave',
+            'payment_reference' => 'LW-COMPLETED-1',
+            'status' => 'awaiting_payment',
+            'whmcs_order_id' => 777,
+            'whmcs_invoice_id' => 888,
+            'whmcs_sync_status' => 'checkout_synced',
+        ]);
+
+        Http::fake([
+            'https://api.flutterwave.com/v3/transactions/*/verify' => Http::response([
+                'status' => 'success',
+                'data' => [
+                    'id' => '9876',
+                    'status' => 'successful',
+                    'amount' => 7500,
+                    'currency' => 'NGN',
+                ],
+            ], 200),
+            'https://billing.example.test/includes/api.php' => Http::sequence()
+                ->push(['result' => 'success'], 200)
+                ->push(['result' => 'success'], 200),
+        ]);
+
+        $this->get(route('hosting.flutterwave.callback', [
+            'status' => 'completed',
+            'tx_ref' => 'LW-COMPLETED-1',
+            'transaction_id' => 'tx-completed',
+        ]))->assertRedirect(route('hosting.order-received', $lead));
+
+        $fresh = $lead->fresh();
+        $this->assertTrue($fresh->isPaid());
+        $this->assertSame('paid', $fresh->status);
+        $this->assertSame('payment_synced', $fresh->whmcs_sync_status);
+    }
+
     public function test_hosting_checkout_stays_on_site_when_payment_deferred(): void
     {
         config([

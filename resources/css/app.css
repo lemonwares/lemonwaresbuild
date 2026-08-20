@@ -310,6 +310,34 @@
         padding-right: 3rem;
     }
 
+    .hosting-intake-layout {
+        display: grid;
+        gap: 2rem;
+        align-items: start;
+    }
+
+    .hosting-intake-layout [data-hosting-order-summary] {
+        order: 1;
+    }
+
+    .hosting-intake-layout [data-hosting-intake-form] {
+        order: 2;
+    }
+
+    @media (min-width: 1024px) {
+        .hosting-intake-layout {
+            grid-template-columns: minmax(0, 1.65fr) minmax(260px, 300px);
+        }
+
+        .hosting-intake-layout [data-hosting-intake-form] {
+            order: 1;
+        }
+
+        .hosting-intake-layout [data-hosting-order-summary] {
+            order: 2;
+        }
+    }
+
     .footer-reviews {
         @apply px-1 py-2;
     }

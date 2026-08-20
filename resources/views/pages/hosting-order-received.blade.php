@@ -8,7 +8,7 @@
     <x-layout.page-hero
         :eyebrow="$lead->isShared() ? __('hosting.secure_checkout') : 'VPS'"
         :title="__('hosting.order_received_title')"
-        :lede="$lead->isShared() ? __('hosting.order_received_whmcs_lede') : __('hosting.order_received_lede')"
+        :lede="$lead->isPaid() ? __('hosting.order_received_paid_lede') : ($lead->isShared() ? __('hosting.order_received_whmcs_lede') : __('hosting.order_received_lede'))"
         cta-href="{{ route('home') }}"
         :cta-label="__('hosting.back_home')"
     />
@@ -65,16 +65,27 @@
                 </div>
                 <div class="flex justify-between gap-4 border-b border-border pb-3">
                     <dt class="text-on-blush/60">Payment status</dt>
-                    <dd class="font-semibold text-black">{{ ucfirst(str_replace('_', ' ', $lead->payment_status ?: $lead->status ?: 'pending')) }}</dd>
+                    <dd @class([
+                        'font-semibold',
+                        'text-emerald-700' => $lead->isPaid(),
+                        'text-black' => ! $lead->isPaid(),
+                    ])>{{ $lead->paymentStatusLabel() }}</dd>
                 </div>
-                @if ($lead->checkout_provider === 'whmcs' && $lead->whmcs_sync_status === 'checkout_synced')
+                @if ($lead->checkout_provider === 'whmcs' && in_array($lead->whmcs_sync_status, ['checkout_synced', 'payment_synced'], true))
                     <div class="flex justify-between gap-4 border-b border-border pb-3">
                         <dt class="text-on-blush/60">WHMCS client</dt>
                         <dd class="font-semibold text-black">#{{ $lead->whmcs_client_id }}</dd>
                     </div>
                     <div class="flex justify-between gap-4 border-b border-border pb-3">
                         <dt class="text-on-blush/60">WHMCS order</dt>
-                        <dd class="font-semibold text-black">#{{ $lead->whmcs_order_id }} (pending)</dd>
+                        <dd class="font-semibold text-black">
+                            #{{ $lead->whmcs_order_id }}
+                            @if ($lead->whmcs_sync_status === 'payment_synced')
+                                (accepted)
+                            @else
+                                (pending)
+                            @endif
+                        </dd>
                     </div>
                     @if ($lead->whmcs_invoice_id)
                         <div class="flex justify-between gap-4 border-b border-border pb-3">
@@ -88,6 +99,22 @@
                     <dd class="font-semibold text-black">{{ $lead->email }}</dd>
                 </div>
             </dl>
+
+            @if ($lead->isPaid())
+                <section class="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+                    <p class="text-xs font-semibold uppercase tracking-widest text-emerald-800">{{ __('hosting.next_steps_title') }}</p>
+                    <p class="mt-2 text-sm text-emerald-900">{{ __('hosting.next_steps_body') }}</p>
+                    <ul class="mt-3 list-disc space-y-1 pl-5 text-sm text-emerald-900">
+                        @guest
+                            <li>{{ __('hosting.next_step_create_account') }}</li>
+                        @endguest
+                        @if ($lead->isShared())
+                            <li>{{ __('hosting.next_step_whmcs_panel') }}</li>
+                        @endif
+                        <li>{{ __('hosting.next_step_provisioning') }}</li>
+                    </ul>
+                </section>
+            @endif
 
             <p class="mt-6 text-sm text-on-blush/70">
                 @if ($lead->isShared())
@@ -111,7 +138,45 @@
             </p>
 
             <div class="mt-6 flex flex-wrap gap-3">
-                @if ($lead->isAwaitingPayment())
+                @if ($lead->isPaid())
+                    @auth
+                        @if ($lead->isShared())
+                            <a href="{{ route('account.hosting.show', $lead) }}" class="inline-flex rounded-2xl bg-rose px-5 py-3 text-sm font-bold text-white">
+                                {{ __('hosting.open_lemonwares_dashboard') }}
+                            </a>
+                        @elseif ($lead->isVps())
+                            <a href="{{ route('account.vps.show', $lead) }}" class="inline-flex rounded-2xl bg-rose px-5 py-3 text-sm font-bold text-white">
+                                {{ __('hosting.open_lemonwares_dashboard') }}
+                            </a>
+                        @else
+                            <a href="{{ route('account.show') }}" class="inline-flex rounded-2xl bg-rose px-5 py-3 text-sm font-bold text-white">
+                                {{ __('hosting.open_lemonwares_dashboard') }}
+                            </a>
+                        @endif
+                    @else
+                        @if ($accountExists ?? false)
+                            <a href="{{ route('login') }}" class="inline-flex rounded-2xl bg-rose px-5 py-3 text-sm font-bold text-white">
+                                {{ __('hosting.sign_in_to_dashboard') }}
+                            </a>
+                        @else
+                            <a href="{{ route('register', ['email' => $lead->email, 'name' => $lead->full_name]) }}" class="inline-flex rounded-2xl bg-rose px-5 py-3 text-sm font-bold text-white">
+                                {{ __('hosting.create_account_cta') }}
+                            </a>
+                        @endif
+                    @endauth
+
+                    @if ($lead->isShared() && ! empty($whmcsClientAreaUrl))
+                        <a href="{{ $whmcsClientAreaUrl }}" class="inline-flex rounded-2xl border border-border px-5 py-3 text-sm font-bold text-black">
+                            {{ __('hosting.open_whmcs_panel') }}
+                        </a>
+                    @endif
+
+                    @if ($lead->isShared() && empty($whmcsClientAreaUrl))
+                        <a href="{{ \App\Support\WhmcsCheckout::passwordResetUrl() }}" class="inline-flex rounded-2xl border border-border px-5 py-3 text-sm font-bold text-black">
+                            {{ __('hosting.set_whmcs_password') }}
+                        </a>
+                    @endif
+                @elseif ($lead->isAwaitingPayment())
                     <form method="POST" action="{{ route('hosting.flutterwave.pay', $lead) }}">
                         @csrf
                         <button type="submit" class="inline-flex rounded-2xl bg-rose px-5 py-3 text-sm font-bold text-white">

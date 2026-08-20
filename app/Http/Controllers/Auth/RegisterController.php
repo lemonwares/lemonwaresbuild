@@ -12,13 +12,16 @@ use Illuminate\View\View;
 
 class RegisterController extends Controller
 {
-    public function create(): View|RedirectResponse
+    public function create(Request $request): View|RedirectResponse
     {
         if (Auth::check()) {
             return redirect()->route('account.show');
         }
 
-        return view('auth.register');
+        return view('auth.register', [
+            'prefillEmail' => strtolower((string) $request->query('email', '')),
+            'prefillName' => (string) $request->query('name', ''),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -38,6 +41,8 @@ class RegisterController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
+
+        \App\Models\HostingLead::claimFor($user);
 
         return redirect()->intended(route('account.show'));
     }
