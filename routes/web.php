@@ -279,7 +279,16 @@ Route::get('/hosting/request/details', function (Request $request) {
 })->name('hosting.intake');
 
 Route::get('/hosting/request/received/{lead}', function (HostingLead $lead) {
-    return view('pages.hosting-order-received', compact('lead'));
+    $accountExists = \App\Models\User::query()
+        ->where('email', strtolower((string) $lead->email))
+        ->exists();
+
+    $whmcsClientAreaUrl = null;
+    if ($lead->isPaid() && $lead->isShared() && $lead->whmcs_client_id) {
+        $whmcsClientAreaUrl = WhmcsCheckout::clientAreaUrl((int) $lead->whmcs_client_id);
+    }
+
+    return view('pages.hosting-order-received', compact('lead', 'accountExists', 'whmcsClientAreaUrl'));
 })->name('hosting.order-received');
 
 Route::get('/hosting/payment/flutterwave/callback', function (Request $request) {
@@ -300,9 +309,23 @@ Route::get('/hosting/payment/flutterwave/callback', function (Request $request) 
             ]);
     }
 
-    if ($status !== 'successful' || $transactionId === '') {
+    if ($transactionId === '') {
         $lead->update([
             'payment_status' => $status ?: 'failed',
+            'status' => 'payment_failed',
+        ]);
+
+        return redirect()
+            ->route('hosting.order-received', $lead)
+            ->with('hosting_feedback', [
+                'type' => 'error',
+                'message' => __('hosting.payment_not_completed'),
+            ]);
+    }
+
+    if (in_array($status, ['failed', 'cancelled', 'abandoned'], true)) {
+        $lead->update([
+            'payment_status' => $status,
             'status' => 'payment_failed',
         ]);
 

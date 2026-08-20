@@ -17,11 +17,11 @@
                 @csrf
                 <div>
                     <label for="name" class="mb-2 block text-sm font-semibold text-black">{{ __('account.name') }}</label>
-                    <input id="name" name="name" type="text" value="{{ old('name') }}" required autocomplete="name" class="footer-input w-full rounded-xl border border-border bg-white px-4 py-3">
+                    <input id="name" name="name" type="text" value="{{ old('name', $prefillName ?? '') }}" required autocomplete="name" class="footer-input w-full rounded-xl border border-border bg-white px-4 py-3">
                 </div>
                 <div>
                     <label for="email" class="mb-2 block text-sm font-semibold text-black">{{ __('account.email') }}</label>
-                    <input id="email" name="email" type="email" value="{{ old('email') }}" required autocomplete="email" class="footer-input w-full rounded-xl border border-border bg-white px-4 py-3">
+                    <input id="email" name="email" type="email" value="{{ old('email', $prefillEmail ?? '') }}" required autocomplete="email" class="footer-input w-full rounded-xl border border-border bg-white px-4 py-3">
                 </div>
                 <div>
                     <label for="password" class="mb-2 block text-sm font-semibold text-black">{{ __('account.password') }}</label>

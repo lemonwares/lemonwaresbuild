@@ -6,6 +6,35 @@
 
 @section('content')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.12.2/build/css/intlTelInput.css">
+    <style>
+        #hosting-intake-form .hosting-intake-layout {
+            display: grid;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        #hosting-intake-form .hosting-intake-layout [data-hosting-order-summary] {
+            order: 1;
+        }
+
+        #hosting-intake-form .hosting-intake-layout [data-hosting-intake-form] {
+            order: 2;
+        }
+
+        @media (min-width: 1024px) {
+            #hosting-intake-form .hosting-intake-layout {
+                grid-template-columns: minmax(0, 1.65fr) minmax(260px, 300px);
+            }
+
+            #hosting-intake-form .hosting-intake-layout [data-hosting-intake-form] {
+                order: 1;
+            }
+
+            #hosting-intake-form .hosting-intake-layout [data-hosting-order-summary] {
+                order: 2;
+            }
+        }
+    </style>
 
     <x-layout.page-hero
         :eyebrow="__('hosting.step_2')"
@@ -15,8 +44,8 @@
         cta-label="Continue"
     />
 
-    <x-layout.page-content>
-        <div id="hosting-intake-form" class="mx-auto max-w-6xl scroll-mt-28">
+    <x-layout.page-content full>
+        <div id="hosting-intake-form" class="mx-auto w-full max-w-6xl scroll-mt-28">
             @if (session('hosting_feedback'))
                 <p @class([
                     'mb-5 rounded-xl px-4 py-3 text-sm',
@@ -26,8 +55,8 @@
                 ])>{{ session('hosting_feedback.message') }}</p>
             @endif
 
-            <div class="grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
-                <form method="POST" action="{{ route('hosting.intake.submit') }}" class="order-2 space-y-5 rounded-3xl border border-border bg-white p-6 sm:p-8 lg:order-1" data-hosting-intake-form>
+            <div class="hosting-intake-layout">
+                <form method="POST" action="{{ route('hosting.intake.submit') }}" class="space-y-5 rounded-3xl border border-border bg-white p-6 sm:p-8" data-hosting-intake-form>
                 @csrf
                 <input type="hidden" name="plan" value="{{ old('plan', $selectedPlan) }}">
                 <input type="hidden" name="spec" value="{{ old('spec', $selectedSpec ?? '') }}">

@@ -83,7 +83,7 @@ class FlutterwavePayment
             ];
         }
 
-        if (strtolower((string) data_get($verified, 'status')) !== 'successful') {
+        if (! in_array(strtolower((string) data_get($verified, 'status')), ['successful', 'completed'], true)) {
             $lead->update([
                 'payment_status' => strtolower((string) data_get($verified, 'status', 'failed')),
                 'status' => 'payment_failed',

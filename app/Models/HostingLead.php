@@ -104,8 +104,35 @@ class HostingLead extends Model
 
     public function isPaid(): bool
     {
-        return in_array($this->payment_status, ['successful'], true)
-            || in_array($this->status, ['paid', 'provisioned'], true);
+        $paymentStatus = strtolower((string) ($this->payment_status ?? ''));
+        $orderStatus = strtolower((string) ($this->status ?? ''));
+
+        if (in_array($paymentStatus, ['successful', 'completed'], true)) {
+            return true;
+        }
+
+        if (in_array($orderStatus, ['paid', 'provisioned'], true)) {
+            return true;
+        }
+
+        return $this->whmcs_sync_status === 'payment_synced';
+    }
+
+    public function paymentStatusLabel(): string
+    {
+        if ($this->isPaid()) {
+            return __('hosting.payment_status_paid');
+        }
+
+        $status = strtolower((string) ($this->payment_status ?: $this->status ?: 'pending'));
+
+        return match ($status) {
+            'awaiting_payment' => __('hosting.payment_status_awaiting'),
+            'payment_failed', 'failed' => __('hosting.payment_status_failed'),
+            'unverified' => __('hosting.payment_status_unverified'),
+            'amount_mismatch' => __('hosting.payment_status_mismatch'),
+            default => ucfirst(str_replace('_', ' ', $status)),
+        };
     }
 
     public function isAwaitingPayment(): bool
