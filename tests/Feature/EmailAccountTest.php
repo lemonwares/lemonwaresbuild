@@ -35,18 +35,243 @@ class EmailAccountTest extends TestCase
             ->assertSee(__('hosting.cycles.annually'), false);
     }
 
-    public function test_guest_checkout_redirects_to_login(): void
+    public function test_guest_can_open_email_checkout(): void
     {
         $this->get(route('email.checkout', ['plan' => 'team']))
-            ->assertRedirect('/login');
+            ->assertOk()
+            ->assertSee('data-email-checkout', false)
+            ->assertSee(__('email.checkout_account_title'), false)
+            ->assertSee(__('email.checkout_mail_setup_title'), false)
+            ->assertSee('data-checkout-email', false)
+            ->assertSee('data-account-status-url', false);
+    }
+
+    public function test_guest_can_checkout_and_creates_account(): void
+    {
+        Http::fake([
+            'open.er-api.com/*' => Http::response(['rates' => ['NGN' => 1500]], 200),
+        ]);
+
+        $response = $this->post(route('email.checkout.store'), [
+            'plan' => 'solo',
+            'billing_cycle' => 'monthly',
+            'domain' => 'newco.ng',
+            'mailboxes' => ['hello'],
+            'name' => 'Ada Lovelace',
+            'email' => 'ada@newco.ng',
+            'password' => 'secretpass',
+            'company' => 'NewCo',
+            'phone' => '+2348010000000',
+            'billing_country' => 'NG',
+        ]);
+
+        $user = User::query()->where('email', 'ada@newco.ng')->firstOrFail();
+        $order = EmailOrder::query()->where('user_id', $user->id)->latest()->firstOrFail();
+
+        $this->assertAuthenticatedAs($user);
+        $response->assertRedirect();
+        $this->assertSame('solo', $order->plan_key);
+        $this->assertSame('newco.ng', $order->domain);
+        $this->assertSame('NewCo', $user->company);
+        $this->assertSame('NG', $user->billing_country);
+        $this->assertTrue($user->hasLeanBusinessProfile());
+    }
+
+    public function test_guest_checkout_requires_business_fields_for_new_accounts(): void
+    {
+        $this->from(route('email.checkout', ['plan' => 'solo']))
+            ->post(route('email.checkout.store'), [
+                'plan' => 'solo',
+                'billing_cycle' => 'monthly',
+                'domain' => 'newco.ng',
+                'mailboxes' => ['hello'],
+                'name' => 'Ada Lovelace',
+                'email' => 'ada@newco.ng',
+                'password' => 'secretpass',
+            ])
+            ->assertSessionHasErrors(['company', 'phone', 'billing_country']);
+    }
+
+    public function test_account_status_endpoint_returns_status_only(): void
+    {
+        User::factory()->create([
+            'email' => 'complete@example.com',
+            'company' => 'Acme',
+            'phone' => '+2348011111111',
+            'billing_country' => 'NG',
+        ]);
+
+        User::factory()->create([
+            'email' => 'incomplete@example.com',
+            'company' => null,
+            'phone' => null,
+            'billing_country' => null,
+        ]);
+
+        $this->postJson(route('email.checkout.account-status'), [
+            'email' => 'brand-new@example.com',
+        ])->assertOk()->assertExactJson(['status' => 'new']);
+
+        $this->postJson(route('email.checkout.account-status'), [
+            'email' => 'complete@example.com',
+        ])->assertOk()->assertExactJson(['status' => 'existing_complete']);
+
+        $this->postJson(route('email.checkout.account-status'), [
+            'email' => 'incomplete@example.com',
+        ])->assertOk()->assertExactJson(['status' => 'existing_incomplete']);
+    }
+
+    public function test_guest_existing_complete_account_skips_business_fields(): void
+    {
+        Http::fake([
+            'open.er-api.com/*' => Http::response(['rates' => ['NGN' => 1500]], 200),
+        ]);
+
+        $user = User::factory()->create([
+            'email' => 'returning@example.com',
+            'password' => 'secretpass',
+            'company' => 'Returning Co',
+            'phone' => '+2348022222222',
+            'billing_country' => 'NG',
+        ]);
+
+        $this->post(route('email.checkout.store'), [
+            'plan' => 'solo',
+            'billing_cycle' => 'monthly',
+            'domain' => 'returning.ng',
+            'mailboxes' => ['hello'],
+            'email' => 'returning@example.com',
+            'password' => 'secretpass',
+        ])->assertRedirect();
+
+        $this->assertAuthenticatedAs($user);
+        $this->assertDatabaseHas('email_orders', [
+            'user_id' => $user->id,
+            'domain' => 'returning.ng',
+        ]);
+    }
+
+    public function test_guest_existing_complete_rejects_wrong_password(): void
+    {
+        User::factory()->create([
+            'email' => 'returning@example.com',
+            'password' => 'secretpass',
+            'company' => 'Returning Co',
+            'phone' => '+2348022222222',
+            'billing_country' => 'NG',
+        ]);
+
+        $this->from(route('email.checkout', ['plan' => 'solo']))
+            ->post(route('email.checkout.store'), [
+                'plan' => 'solo',
+                'billing_cycle' => 'monthly',
+                'domain' => 'returning.ng',
+                'mailboxes' => ['hello'],
+                'email' => 'returning@example.com',
+                'password' => 'wrong-password',
+            ])
+            ->assertSessionHasErrors('password');
+    }
+
+    public function test_logged_in_user_with_business_profile_skips_business_fields(): void
+    {
+        Http::fake([
+            'open.er-api.com/*' => Http::response(['rates' => ['NGN' => 1500]], 200),
+        ]);
+
+        $user = User::factory()->create([
+            'company' => 'Profile Co',
+            'phone' => '+2348033333333',
+            'job_title' => 'Founder',
+            'trading_name' => 'Profile',
+            'industry' => 'technology',
+            'billing_country' => 'NG',
+            'billing_address_line_1' => '12 Marina',
+            'billing_city' => 'Lagos',
+            'billing_state' => 'Lagos',
+            'billing_postcode' => '100001',
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('email.checkout', ['plan' => 'solo']))
+            ->assertOk()
+            ->assertSee(__('email.checkout_profile_reuse'), false)
+            ->assertDontSee(__('account.complete_profile_title'), false);
+
+        $this->actingAs($user)
+            ->post(route('email.checkout.store'), [
+                'plan' => 'solo',
+                'billing_cycle' => 'monthly',
+                'domain' => 'profileco.ng',
+                'mailboxes' => ['hello'],
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('email_orders', [
+            'user_id' => $user->id,
+            'domain' => 'profileco.ng',
+        ]);
+    }
+
+    public function test_incomplete_logged_in_user_sees_forced_profile_modal(): void
+    {
+        $user = User::factory()->create([
+            'company' => null,
+            'phone' => null,
+            'billing_country' => null,
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('account.show'))
+            ->assertOk()
+            ->assertSee(__('account.complete_profile_title'), false)
+            ->assertSee('data-complete-profile-modal', false);
+    }
+
+    public function test_customer_can_complete_business_profile_via_modal_endpoint(): void
+    {
+        $user = User::factory()->create([
+            'company' => null,
+            'phone' => null,
+            'billing_country' => null,
+        ]);
+
+        $this->actingAs($user)
+            ->from(route('account.show'))
+            ->put(route('account.profile.business'), [
+                'name' => 'Modal User',
+                'job_title' => 'Founder',
+                'company' => 'Modal Co',
+                'trading_name' => 'Modal',
+                'website' => 'modalco.ng',
+                'industry' => 'technology',
+                'tax_id' => 'TIN-1',
+                'registration_number' => 'RC-1',
+                'phone' => '+2348066666666',
+                'billing_country' => 'NG',
+                'billing_address_line_1' => '1 Broad Street',
+                'billing_address_line_2' => '',
+                'billing_city' => 'Lagos',
+                'billing_state' => 'Lagos',
+                'billing_postcode' => '100001',
+            ])
+            ->assertRedirect(route('account.show'));
+
+        $user->refresh();
+        $this->assertTrue($user->hasCompleteBusinessProfile());
+        $this->assertSame('Modal Co', $user->company);
+        $this->assertSame('Modal User', $user->name);
+        $this->assertSame('https://modalco.ng', $user->website);
+
+        $this->actingAs($user)
+            ->get(route('account.show'))
+            ->assertOk()
+            ->assertDontSee('data-complete-profile-modal', false);
     }
 
     public function test_checkout_page_shows_live_domain_suffix_markup(): void
     {
-        $user = User::factory()->create();
-
-        $this->actingAs($user)
-            ->get(route('email.checkout', ['plan' => 'team', 'billing_cycle' => 'monthly']))
+        $this->get(route('email.checkout', ['plan' => 'team', 'billing_cycle' => 'monthly']))
             ->assertOk()
             ->assertSee('data-email-checkout', false)
             ->assertSee('data-email-domain-suffix', false)
@@ -187,6 +412,9 @@ class EmailAccountTest extends TestCase
                 'billing_cycle' => 'monthly',
                 'domain' => 'https://Acme.ng/',
                 'mailboxes' => ['hello'],
+                'company' => 'Acme',
+                'phone' => '+2348044444444',
+                'billing_country' => 'NG',
             ])
             ->assertRedirect();
 
@@ -196,6 +424,66 @@ class EmailAccountTest extends TestCase
         $this->assertSame('hello@acme.ng', $order->mailboxes()->first()?->address);
         $this->assertSame('awaiting_payment', $order->status);
         $this->assertSame('solo', $order->plan_key);
+    }
+
+    public function test_manual_provider_email_plan_creates_fulfilment_ticket_without_payment(): void
+    {
+        $user = User::factory()->create();
+
+        Http::fake([
+            'open.er-api.com/*' => Http::response(['rates' => ['NGN' => 1500]], 200),
+        ]);
+
+        $response = $this->actingAs($user)
+            ->post(route('email.checkout.store'), [
+                'plan' => 'titan_business',
+                'billing_cycle' => 'monthly',
+                'domain' => 'https://Acme.ng/',
+                'mailboxes' => ['hello', 'sales', 'support', 'ops', 'billing'],
+                'company' => 'Acme',
+                'phone' => '+2348055555555',
+                'billing_country' => 'NG',
+            ]);
+
+        $order = EmailOrder::query()->latest()->firstOrFail();
+        $response->assertRedirect(route('account.email.show', $order));
+        $this->assertSame('manual', $order->fulfilment_mode);
+        $this->assertSame('titan', $order->provider);
+        $this->assertSame('awaiting_manual_fulfilment', $order->status);
+        $this->assertSame('queued', $order->fulfilment_status);
+        $this->assertNull($order->payment_reference);
+    }
+
+    public function test_admin_can_update_manual_fulfilment_status(): void
+    {
+        $customer = User::factory()->create();
+        $order = EmailOrder::create([
+            'user_id' => $customer->id,
+            'plan_key' => 'titan_business',
+            'plan_name' => 'Titan Business',
+            'provider' => 'titan',
+            'fulfilment_mode' => 'manual',
+            'fulfilment_status' => 'queued',
+            'fulfilment_updated_at' => now(),
+            'domain' => 'acme.ng',
+            'mailbox_count' => 5,
+            'billing_cycle' => 'monthly',
+            'amount_usd' => 20,
+            'amount_ngn' => 30000,
+            'status' => 'awaiting_manual_fulfilment',
+        ]);
+
+        $this->withSession(['admin_authenticated' => true])
+            ->put(route('admin.email-orders.fulfilment', $order), [
+                'fulfilment_status' => 'completed',
+                'fulfilment_notes' => 'Accounts created in Titan.',
+            ])
+            ->assertRedirect(route('admin.email-orders.show', $order));
+
+        $fresh = $order->fresh();
+        $this->assertSame('completed', $fresh->fulfilment_status);
+        $this->assertSame('Accounts created in Titan.', $fresh->fulfilment_notes);
+        $this->assertSame('provisioned', $fresh->status);
     }
 
     public function test_provisioner_marks_pending_when_trekmail_is_not_configured(): void

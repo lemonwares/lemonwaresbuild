@@ -62,10 +62,18 @@
                             @if ($plan['featured'])
                                 <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-white/80">{{ __('email.most_popular') }}</p>
                             @endif
+                            <p @class(['mb-2 text-xs font-semibold uppercase tracking-widest', 'text-white/80' => $plan['featured'], 'text-rose' => ! $plan['featured']])>
+                                {{ $plan['provider_label'] }}
+                            </p>
                             <h2 class="text-2xl font-bold sm:text-[1.75rem]">{{ $plan['name'] }}</h2>
                             <p @class(['mt-2 max-w-sm text-base font-light leading-relaxed', 'text-white/85' => $plan['featured'], 'text-on-blush/80' => ! $plan['featured']])>
                                 {{ $plan['summary'] }}
                             </p>
+                            @if ($plan['is_manual'])
+                                <p @class(['mt-2 text-xs', 'text-white/80' => $plan['featured'], 'text-on-blush/65' => ! $plan['featured']])>
+                                    {{ __('email.manual_queue_note') }}
+                                </p>
+                            @endif
                         </div>
                         <p @class(['shrink-0 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-widest', 'bg-white/15 text-white' => $plan['featured'], 'bg-blush-soft text-rose' => ! $plan['featured']])>
                             {{ trans_choice('email.mailboxes', $plan['mailboxes'], ['count' => $plan['mailboxes']]) }}
@@ -96,7 +104,7 @@
                         href="{{ route('email.checkout', ['plan' => $plan['key'], 'billing_cycle' => $selectedCycle]) }}"
                         @class(['btn mt-8 w-full justify-center', 'bg-white text-rose hover:bg-blush' => $plan['featured'], 'btn-primary' => ! $plan['featured']])
                     >
-                        {{ __('email.get_started') }}
+                        {{ $plan['is_manual'] ? __('email.request_setup') : __('email.get_started') }}
                     </a>
                 </article>
             @endforeach

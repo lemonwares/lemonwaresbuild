@@ -151,4 +151,79 @@ class User extends Authenticatable
 
         return __('account.industries.' . $this->industry);
     }
+
+    /**
+     * Lean business profile required for email checkout.
+     */
+    public function hasLeanBusinessProfile(): bool
+    {
+        return filled($this->company)
+            && filled($this->phone)
+            && filled($this->billing_country);
+    }
+
+    /**
+     * Fuller customer profile gate for the forced completion modal.
+     */
+    public function hasCompleteBusinessProfile(): bool
+    {
+        return filled($this->name)
+            && filled($this->phone)
+            && filled($this->job_title)
+            && filled($this->company)
+            && filled($this->trading_name)
+            && filled($this->industry)
+            && filled($this->billing_country)
+            && filled($this->billing_address_line_1)
+            && filled($this->billing_city)
+            && filled($this->billing_state)
+            && filled($this->billing_postcode);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function missingLeanBusinessFields(): array
+    {
+        $missing = [];
+
+        if (! filled($this->company)) {
+            $missing[] = 'company';
+        }
+
+        if (! filled($this->phone)) {
+            $missing[] = 'phone';
+        }
+
+        if (! filled($this->billing_country)) {
+            $missing[] = 'billing_country';
+        }
+
+        return $missing;
+    }
+
+    /**
+     * Fill blank lean business fields from checkout without wiping existing values.
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    public function fillLeanBusinessFromCheckout(array $payload): void
+    {
+        $updates = [];
+
+        foreach (['company', 'phone', 'billing_country', 'billing_city', 'billing_address_line_1'] as $field) {
+            $value = isset($payload[$field]) ? trim((string) $payload[$field]) : '';
+            if ($value === '') {
+                continue;
+            }
+
+            if (! filled($this->{$field})) {
+                $updates[$field] = $value;
+            }
+        }
+
+        if ($updates !== []) {
+            $this->forceFill($updates)->save();
+        }
+    }
 }

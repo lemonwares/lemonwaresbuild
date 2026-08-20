@@ -50,6 +50,8 @@
             <x-layout.chat-widget />
         @endunless
 
+        <x-account.complete-profile-modal />
+
         <script>
             const newsletterForm = document.querySelector('[data-newsletter-form]');
 

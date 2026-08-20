@@ -84,6 +84,57 @@ class AccountController extends Controller
             ->with('status', __('account.profile_saved'));
     }
 
+    public function updateBusinessProfile(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        abort_unless($user && $user->isCustomer(), 403);
+
+        $request->merge([
+            'industry' => $request->filled('industry') ? $request->input('industry') : null,
+            'billing_country' => $request->filled('billing_country') ? $request->input('billing_country') : null,
+            'website' => $request->filled('website') ? trim((string) $request->input('website')) : null,
+            'phone' => $request->filled('phone') ? $request->input('phone') : null,
+            'job_title' => $request->filled('job_title') ? $request->input('job_title') : null,
+            'trading_name' => $request->filled('trading_name') ? $request->input('trading_name') : null,
+            'tax_id' => $request->filled('tax_id') ? $request->input('tax_id') : null,
+            'registration_number' => $request->filled('registration_number') ? $request->input('registration_number') : null,
+            'billing_address_line_2' => $request->filled('billing_address_line_2') ? $request->input('billing_address_line_2') : null,
+        ]);
+
+        $payload = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'job_title' => ['required', 'string', 'max:120'],
+            'phone' => ['required', 'string', 'max:40', 'regex:/^\+?[0-9 ()-]{7,20}$/'],
+            'company' => ['required', 'string', 'max:160'],
+            'trading_name' => ['required', 'string', 'max:160'],
+            'website' => ['nullable', 'string', 'max:190'],
+            'industry' => ['required', 'string', Rule::in(array_keys(__('account.industries')))],
+            'tax_id' => ['nullable', 'string', 'max:80'],
+            'registration_number' => ['nullable', 'string', 'max:80'],
+            'billing_address_line_1' => ['required', 'string', 'max:180'],
+            'billing_address_line_2' => ['nullable', 'string', 'max:180'],
+            'billing_city' => ['required', 'string', 'max:120'],
+            'billing_state' => ['required', 'string', 'max:120'],
+            'billing_postcode' => ['required', 'string', 'max:40'],
+            'billing_country' => ['required', 'string', Rule::in(array_keys(config('site.country_options', [])))],
+        ]);
+
+        $website = trim((string) ($payload['website'] ?? ''));
+        if ($website !== '' && ! preg_match('#^https?://#i', $website)) {
+            $website = 'https://' . $website;
+        }
+
+        $user->update([
+            ...$payload,
+            'website' => $website !== '' ? $website : null,
+            'phone' => $payload['phone'],
+        ]);
+
+        return redirect()
+            ->back()
+            ->with('status', __('account.profile_complete_saved'));
+    }
+
     public function settings(Request $request): View
     {
         $user = $request->user();

@@ -1,3 +1,11 @@
 #!/usr/bin/env bash
-# Use the local PHP build with PostgreSQL support (pdo_pgsql).
-exec "$HOME/.config/php-8.5-nts/php.exe" "$@"
+# Use the local PHP build with PostgreSQL + SQLite (and common Laravel extensions).
+# Prefer: bin/php vendor/phpunit/phpunit/phpunit
+# (`php artisan test` re-spawns PHP_BINARY without these -d flags.)
+exec "$HOME/.config/php-8.5-nts/php.exe" \
+  -d extension=openssl \
+  -d extension=fileinfo \
+  -d extension=curl \
+  -d extension=pdo_sqlite \
+  -d extension=sqlite3 \
+  "$@"
