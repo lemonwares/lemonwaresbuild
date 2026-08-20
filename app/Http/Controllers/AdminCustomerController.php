@@ -66,6 +66,7 @@ class AdminCustomerController extends Controller
         $customer->load(['emailOrders.mailboxes', 'contacts', 'whmcsCustomer']);
         $hostingLeads = $customer->hostingLeads;
         $whmcsServiceSummary = $customer->whmcsServices()
+            ->reorder()
             ->selectRaw('LOWER(COALESCE(status, ?)) as status_key, COUNT(*) as total', ['unknown'])
             ->groupBy('status_key')
             ->pluck('total', 'status_key')
@@ -88,6 +89,7 @@ class AdminCustomerController extends Controller
 
         $legacyCustomer->load(['user']);
         $whmcsServiceSummary = $legacyCustomer->services()
+            ->reorder()
             ->selectRaw('LOWER(COALESCE(status, ?)) as status_key, COUNT(*) as total', ['unknown'])
             ->groupBy('status_key')
             ->pluck('total', 'status_key')
