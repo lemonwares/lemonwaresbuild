@@ -33,7 +33,30 @@ class EmailOrderController extends Controller
         }
 
         $plans = collect(EmailPricing::plans())
-            ->map(fn (array $plan) => EmailPricing::presentPlan($plan, $selectedCycle))
+            ->map(function (array $plan) use ($cycles, $selectedCycle) {
+                $presented = EmailPricing::presentPlan($plan, $selectedCycle);
+                $pricingByCycle = [];
+
+                foreach ($cycles as $cycleKey) {
+                    $cyclePlan = EmailPricing::presentPlan($plan, $cycleKey);
+                    $discount = (int) ($cyclePlan['discount_percent'] ?? 0);
+                    $cycleLabel = (string) $cyclePlan['billing_cycle_label'];
+
+                    $pricingByCycle[$cycleKey] = [
+                        'period_display' => (string) $cyclePlan['period_display'],
+                        'cycle_meta' => $discount > 0
+                            ? $cycleLabel.' · '.__('hosting.save_percent', ['percent' => $discount])
+                            : $cycleLabel,
+                        'per_mailbox_line' => __('email.per_mailbox_price', [
+                            'price' => $cyclePlan['per_mailbox_display'],
+                        ]),
+                    ];
+                }
+
+                $presented['pricing_by_cycle'] = $pricingByCycle;
+
+                return $presented;
+            })
             ->values()
             ->all();
 
@@ -55,6 +78,7 @@ class EmailOrderController extends Controller
             'selectedCycle' => $selectedCycle,
             'billingCycleOptions' => $billingCycleOptions,
             'enterpriseProducts' => EmailPricing::enterpriseProducts(),
+            'checkoutBaseUrl' => route('email.checkout'),
         ]);
     }
 

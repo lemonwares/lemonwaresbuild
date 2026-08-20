@@ -10,12 +10,12 @@ class TrekMailClient
 {
     public static function isConfigured(): bool
     {
-        return filled(config('services.trekmail.token'));
+        return TrekMailSettings::isConfigured();
     }
 
     public static function webmailUrl(): string
     {
-        return rtrim((string) config('services.trekmail.webmail_url', config('email.webmail_url')), '/');
+        return TrekMailSettings::webmailUrl();
     }
 
     /**
@@ -186,10 +186,10 @@ class TrekMailClient
         }
 
         $pending = Http::timeout(25)
-            ->withToken((string) config('services.trekmail.token'))
+            ->withToken(TrekMailSettings::token())
             ->withHeaders($headers)
             ->acceptJson()
-            ->baseUrl(rtrim((string) config('services.trekmail.base_url'), '/'));
+            ->baseUrl(TrekMailSettings::baseUrl());
 
         $method = strtolower($method);
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\AdminEmailCatalogController;
+use App\Http\Controllers\AdminEmailProviderSettingsController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\AdminCustomerController;
 use App\Http\Controllers\AdminDashboardController;
@@ -962,6 +963,9 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::post('/flutterwave-settings/test-connection', [AdminFlutterwaveSettingsController::class, 'testConnection'])->name('flutterwave-settings.test-connection');
         Route::get('/email-catalog', [AdminEmailCatalogController::class, 'index'])->name('email-catalog.index');
         Route::put('/email-catalog', [AdminEmailCatalogController::class, 'update'])->name('email-catalog.update');
+        Route::get('/email-provider-settings', [AdminEmailProviderSettingsController::class, 'index'])->name('email-provider-settings.index');
+        Route::put('/email-provider-settings', [AdminEmailProviderSettingsController::class, 'update'])->name('email-provider-settings.update');
+        Route::post('/email-provider-settings/test-connection', [AdminEmailProviderSettingsController::class, 'testConnection'])->name('email-provider-settings.test-connection');
         Route::get('/email-orders', [AdminEmailOrderController::class, 'index'])->name('email-orders.index');
         Route::get('/email-orders/{emailOrder}', [AdminEmailOrderController::class, 'show'])->name('email-orders.show');
         Route::put('/email-orders/{emailOrder}/fulfilment', [AdminEmailOrderController::class, 'updateFulfilment'])->name('email-orders.fulfilment');

@@ -25,14 +25,18 @@ class EmailAccountTest extends TestCase
         $this->get(route('email.plans'))
             ->assertOk()
             ->assertSee('id="email-plans"', false)
-            ->assertSee(route('email.plans', ['billing_cycle' => 'monthly']) . '#email-plans', false)
-            ->assertSee(route('email.plans', ['billing_cycle' => 'semiannual']) . '#email-plans', false)
+            ->assertSee('data-email-plans', false)
+            ->assertSee('data-email-cycle-tab', false)
+            ->assertSee('data-email-plan-card', false)
+            ->assertSee('role="tablist"', false)
             ->assertSee('md:grid-cols-2', false)
-            ->assertDontSee('xl:grid-cols-4', false);
+            ->assertDontSee('xl:grid-cols-4', false)
+            ->assertDontSee(route('email.plans', ['billing_cycle' => 'monthly']) . '#email-plans', false);
 
         $this->get(route('email.plans', ['billing_cycle' => 'annually']))
             ->assertOk()
-            ->assertSee(__('hosting.cycles.annually'), false);
+            ->assertSee(__('hosting.cycles.annually'), false)
+            ->assertSee('data-selected-cycle="annually"', false);
     }
 
     public function test_guest_can_open_email_checkout(): void
