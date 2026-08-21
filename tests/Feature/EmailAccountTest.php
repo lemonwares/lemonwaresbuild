@@ -565,6 +565,12 @@ class EmailAccountTest extends TestCase
             }
 
             if (str_contains($path, 'mailboxes/invites')) {
+                $this->assertSame([
+                    'domain_id' => 44,
+                    'local_part' => 'hello',
+                    'recipient_email' => 'owner@example.com',
+                ], $request->data());
+
                 return Http::response(['data' => ['id' => 9, 'mailbox_id' => 77]], 201);
             }
 

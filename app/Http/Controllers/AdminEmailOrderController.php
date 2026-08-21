@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\EmailOrder;
+use App\Notifications\EmailOrderProvisioned;
+use App\Support\AccountNotifier;
+use App\Support\EmailLifecycle;
 use App\Support\EmailProviderSettings;
 use App\Support\EmailProvisioner;
 use Illuminate\Http\RedirectResponse;
@@ -72,15 +75,60 @@ class AdminEmailOrderController extends Controller
                 : 'awaiting_manual_fulfilment',
         ]);
 
+        if ($validated['fulfilment_status'] === 'completed') {
+            $emailOrder->applyPaidPeriod();
+            $emailOrder->loadMissing('user');
+            AccountNotifier::send($emailOrder->user, new EmailOrderProvisioned($emailOrder));
+        }
+
         return redirect()
             ->route('admin.email-orders.show', $emailOrder)
             ->with('status', 'Fulfilment status updated.');
+    }
+
+    public function deactivate(EmailOrder $emailOrder): RedirectResponse
+    {
+        abort_unless($emailOrder->canBeDeactivated(), 404);
+
+        EmailLifecycle::deactivate($emailOrder, 'admin');
+
+        return redirect()
+            ->route('admin.email-orders.show', $emailOrder)
+            ->with('status', 'Email service deactivated.');
+    }
+
+    public function reactivate(EmailOrder $emailOrder): RedirectResponse
+    {
+        abort_unless($emailOrder->canBeReactivated(), 404);
+
+        EmailLifecycle::reactivate($emailOrder);
+
+        return redirect()
+            ->route('admin.email-orders.show', $emailOrder)
+            ->with('status', 'Email service reactivated.');
+    }
+
+    public function extend(EmailOrder $emailOrder): RedirectResponse
+    {
+        abort_unless($emailOrder->canBeRenewed(), 404);
+
+        $wasDeactivated = $emailOrder->isDeactivated();
+        $emailOrder->extendPaidPeriod();
+
+        if ($wasDeactivated) {
+            EmailLifecycle::reactivate($emailOrder->fresh(), force: true);
+        }
+
+        return redirect()
+            ->route('admin.email-orders.show', $emailOrder)
+            ->with('status', 'Service period extended by one billing cycle.');
     }
 
     public function provision(EmailOrder $emailOrder): RedirectResponse
     {
         abort_unless($emailOrder->isPaid(), 404);
         abort_unless(! $emailOrder->isManualFulfilment(), 404);
+        abort_unless(! $emailOrder->isDeactivated(), 404);
 
         EmailProvisioner::provision($emailOrder);
 

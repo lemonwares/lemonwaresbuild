@@ -5,6 +5,9 @@ namespace App\Support;
 use App\Models\EmailOrder;
 use App\Models\HostingLead;
 use App\Models\IntegrationSetting;
+use App\Notifications\EmailOrderPaid;
+use App\Notifications\EmailOrderRenewed;
+use App\Notifications\HostingOrderPaid;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -127,6 +130,9 @@ class FlutterwavePayment
             WhmcsLeadSync::syncPayment($lead->fresh());
         }
 
+        $lead = $lead->fresh(['user']);
+        AccountNotifier::send($lead?->user, new HostingOrderPaid($lead));
+
         return [
             'ok' => true,
             'message' => $lead->isShared()
@@ -173,13 +179,6 @@ class FlutterwavePayment
                 return [
                     'ok' => false,
                     'message' => 'No email order matched this payment reference.',
-                ];
-            }
-
-            if ($order->isPaid()) {
-                return [
-                    'ok' => true,
-                    'message' => 'Payment already processed.',
                 ];
             }
 
@@ -244,13 +243,21 @@ class FlutterwavePayment
         return hash_equals($secretHash, $signature);
     }
 
-    public static function createEmailPaymentLink(EmailOrder $order): ?string
+    public static function createEmailPaymentLink(EmailOrder $order, string $kind = 'initial'): ?string
     {
         if (! self::isConfigured()) {
             return null;
         }
 
-        $txRef = $order->payment_reference ?: ('LW-MAIL-' . $order->id . '-' . Str::upper(Str::random(8)));
+        $kind = $kind === 'renewal' ? 'renewal' : 'initial';
+
+        if ($kind === 'renewal' && ! $order->canBeRenewed()) {
+            return null;
+        }
+
+        $txRef = $kind === 'renewal'
+            ? ('LW-MAIL-R-' . $order->id . '-' . Str::upper(Str::random(8)))
+            : ($order->payment_reference ?: ('LW-MAIL-' . $order->id . '-' . Str::upper(Str::random(8))));
         $amountNgn = max(1, (int) round((float) ($order->amount_ngn ?? 0)));
         $order->loadMissing('user');
 
@@ -265,12 +272,13 @@ class FlutterwavePayment
                 'name' => $order->user?->name,
                 'phonenumber' => $order->user?->phone,
             ], fn ($value) => filled($value)),
-            'customizations' => self::emailCustomization($order),
+            'customizations' => self::emailCustomization($order, $kind),
             'meta' => [
                 'email_order_id' => $order->id,
                 'plan_key' => $order->plan_key,
                 'domain' => $order->domain,
                 'billing_cycle' => $order->billing_cycle,
+                'payment_kind' => $kind,
             ],
         ];
 
@@ -282,6 +290,7 @@ class FlutterwavePayment
         if (! $response->successful() || data_get($response->json(), 'status') !== 'success') {
             Log::warning('Flutterwave email payment init failed', [
                 'order_id' => $order->id,
+                'kind' => $kind,
                 'body' => $response->json(),
             ]);
 
@@ -293,18 +302,24 @@ class FlutterwavePayment
         if (! is_string($link) || ! preg_match('#/hosted/pay/[A-Za-z0-9_-]+#', $link)) {
             Log::warning('Flutterwave email payment returned an invalid checkout link', [
                 'order_id' => $order->id,
+                'kind' => $kind,
                 'link' => $link,
             ]);
 
             return null;
         }
 
-        $order->update([
+        $updates = [
             'payment_reference' => $txRef,
             'payment_provider' => 'flutterwave',
             'checkout_url' => $link,
-            'status' => 'awaiting_payment',
-        ]);
+        ];
+
+        if ($kind === 'initial') {
+            $updates['status'] = 'awaiting_payment';
+        }
+
+        $order->update($updates);
 
         return $link;
     }
@@ -314,7 +329,21 @@ class FlutterwavePayment
      */
     public static function confirmEmailOrderPayment(EmailOrder $order, array $verified): array
     {
-        if ($order->isPaid()) {
+        $transactionId = (string) data_get($verified, 'id', '');
+        $metaKind = strtolower((string) data_get($verified, 'meta.payment_kind', ''));
+        $isRenewal = $metaKind === 'renewal' || $order->isPendingRenewal();
+
+        if ($transactionId !== '' && (string) $order->flutterwave_transaction_id === $transactionId) {
+            return [
+                'ok' => true,
+                'already_paid' => true,
+                'message' => $isRenewal
+                    ? __('email.renewal_already_confirmed')
+                    : __('email.payment_already_confirmed'),
+            ];
+        }
+
+        if (! $isRenewal && $order->isPaid()) {
             return [
                 'ok' => true,
                 'already_paid' => true,
@@ -323,10 +352,12 @@ class FlutterwavePayment
         }
 
         if (! in_array(strtolower((string) data_get($verified, 'status')), ['successful', 'completed'], true)) {
-            $order->update([
-                'payment_status' => strtolower((string) data_get($verified, 'status', 'failed')),
-                'status' => 'payment_failed',
-            ]);
+            if (! $isRenewal) {
+                $order->update([
+                    'payment_status' => strtolower((string) data_get($verified, 'status', 'failed')),
+                    'status' => 'payment_failed',
+                ]);
+            }
 
             return [
                 'ok' => false,
@@ -339,11 +370,13 @@ class FlutterwavePayment
         $currency = strtoupper((string) data_get($verified, 'currency', ''));
 
         if ($currency !== 'NGN' || abs($paidAmount - $expected) > 1) {
-            $order->update([
-                'payment_status' => 'amount_mismatch',
-                'status' => 'payment_failed',
-                'flutterwave_transaction_id' => (string) data_get($verified, 'id', ''),
-            ]);
+            if (! $isRenewal) {
+                $order->update([
+                    'payment_status' => 'amount_mismatch',
+                    'status' => 'payment_failed',
+                    'flutterwave_transaction_id' => $transactionId,
+                ]);
+            }
 
             return [
                 'ok' => false,
@@ -351,11 +384,20 @@ class FlutterwavePayment
             ];
         }
 
+        if ($isRenewal) {
+            return self::confirmEmailOrderRenewal($order, $verified);
+        }
+
         $order->update([
             'payment_status' => 'successful',
             'status' => 'paid',
-            'flutterwave_transaction_id' => (string) data_get($verified, 'id', ''),
+            'flutterwave_transaction_id' => $transactionId,
         ]);
+
+        $order->refresh();
+        $order->applyPaidPeriod();
+        $order->loadMissing('user');
+        AccountNotifier::send($order->user, new EmailOrderPaid($order));
 
         if (! $order->isManualFulfilment()) {
             EmailProvisioner::provision($order->fresh(['mailboxes', 'user']));
@@ -366,6 +408,38 @@ class FlutterwavePayment
             'message' => $order->isManualFulfilment()
                 ? __('email.manual_fulfilment_paid')
                 : __('email.payment_confirmed'),
+        ];
+    }
+
+    /**
+     * @return array{ok:bool,already_paid?:bool,message:string}
+     */
+    protected static function confirmEmailOrderRenewal(EmailOrder $order, array $verified): array
+    {
+        $wasDeactivated = $order->isDeactivated();
+
+        $order->extendPaidPeriod();
+        $order->update([
+            'payment_status' => 'successful',
+            'flutterwave_transaction_id' => (string) data_get($verified, 'id', ''),
+            'checkout_url' => null,
+        ]);
+
+        $order->refresh();
+
+        if ($wasDeactivated) {
+            EmailLifecycle::reactivate($order, force: true);
+        }
+
+        $order->refresh();
+        $order->loadMissing('user');
+        AccountNotifier::send($order->user, new EmailOrderRenewed($order));
+
+        return [
+            'ok' => true,
+            'message' => __('email.renewal_confirmed', [
+                'date' => $order->period_ends_at?->format('d M Y') ?? '',
+            ]),
         ];
     }
 
@@ -418,10 +492,14 @@ class FlutterwavePayment
     /**
      * @return array{title:string,description:string,logo?:string}
      */
-    protected static function emailCustomization(EmailOrder $order): array
+    protected static function emailCustomization(EmailOrder $order, string $kind = 'initial'): array
     {
+        $title = $kind === 'renewal'
+            ? config('site.short_name') . ' Lemon Mail renewal'
+            : config('site.short_name') . ' Lemon Mail';
+
         return self::checkoutCustomization(
-            config('site.short_name') . ' Lemon Mail',
+            $title,
             trim($order->plan_name . ' - ' . $order->domain),
         );
     }

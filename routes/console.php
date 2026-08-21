@@ -9,3 +9,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('whmcs:sync')->everyFifteenMinutes();
+Schedule::command('email:expire-orders')->dailyAt('01:15');
