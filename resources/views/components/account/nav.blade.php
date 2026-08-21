@@ -5,6 +5,7 @@
         ['label' => __('account.nav_vps'), 'route' => 'account.vps.index', 'match' => 'account.vps.*'],
         ['label' => __('account.nav_hosting'), 'route' => 'account.hosting.index', 'match' => 'account.hosting.*'],
         ['label' => __('account.nav_profile'), 'route' => 'account.profile', 'match' => 'account.profile'],
+        ['label' => __('account.nav_notifications'), 'route' => 'account.notifications.index', 'match' => 'account.notifications.*'],
         ['label' => __('account.nav_settings'), 'route' => 'account.settings', 'match' => 'account.settings'],
     ];
 @endphp

@@ -12,6 +12,14 @@
         <p class="section-label mb-2">{{ $order->plan_name }}</p>
         <h1 class="text-3xl font-bold tracking-tight text-black sm:text-4xl">{{ $order->domain }}</h1>
         <p class="lede mt-2">{{ $order->statusLabel() }} · {{ __('hosting.cycles.' . $order->billing_cycle) }}</p>
+        @if ($order->period_starts_at && $order->period_ends_at && ! $order->isDeactivated())
+            <p class="mt-2 text-sm text-on-blush/65">
+                {{ __('email.service_period', [
+                    'start' => $order->period_starts_at->format('d M Y'),
+                    'end' => $order->period_ends_at->format('d M Y'),
+                ]) }}
+            </p>
+        @endif
     </div>
 
     @if ($order->isAwaitingPayment())
@@ -23,6 +31,27 @@
                 @csrf
                 <x-ui.submit-button :label="__('email.pay_with_flutterwave')" :loading="__('account.starting_payment')" class="btn btn-primary" />
             </form>
+        </section>
+    @elseif ($order->isDeactivated())
+        <section class="mb-6 rounded-3xl border border-rose/20 bg-rose/5 p-6 sm:p-8">
+            <p class="text-xs font-semibold uppercase tracking-widest text-rose">{{ __('account.next_step') }}</p>
+            <h2 class="mt-2 text-2xl font-bold text-black">{{ __('email.service_inactive_title') }}</h2>
+            <p class="mt-2 body-text">{{ __('email.service_inactive_lede') }}</p>
+            @if ($order->period_ends_at)
+                <p class="mt-3 text-sm font-semibold text-on-blush/70">
+                    {{ __('email.service_period_ended', ['date' => $order->period_ends_at->format('d M Y')]) }}
+                </p>
+            @endif
+            @if ($order->canBeRenewed())
+                <form method="POST" action="{{ route('email.renew', $order) }}" class="mt-5" data-submit-form>
+                    @csrf
+                    <p class="mb-4 text-sm text-on-blush/70">
+                        {{ __('email.renew_lede_inactive', ['cycle' => __('hosting.cycles.' . $order->billing_cycle)]) }}
+                        · {{ \App\Support\HostingPricing::dualPriceDisplay((float) $order->amount_usd) }}
+                    </p>
+                    <x-ui.submit-button :label="__('email.renew_cta')" :loading="__('account.starting_payment')" class="btn btn-primary" />
+                </form>
+            @endif
         </section>
     @elseif ($order->isManualFulfilment() && $order->fulfilment_status !== 'completed' && $order->status === 'awaiting_manual_fulfilment')
         <section class="mb-6 rounded-3xl border border-sky-200 bg-sky-50 p-6 sm:p-8">
@@ -49,6 +78,24 @@
                 {{ __('email.open_webmail') }}
             </a>
         </section>
+        @if ($order->canBeRenewed())
+            <section class="mb-6 rounded-3xl border border-border bg-white p-6 sm:p-8">
+                <h2 class="text-xl font-bold text-black">{{ __('email.renew_title') }}</h2>
+                <p class="mt-2 body-text">
+                    {{ __('email.renew_lede', [
+                        'cycle' => __('hosting.cycles.' . $order->billing_cycle),
+                        'date' => $order->period_ends_at
+                            ? $order->period_ends_at->copy()->addMonthsNoOverflow($order->billingCycleMonths())->format('d M Y')
+                            : now()->addMonthsNoOverflow($order->billingCycleMonths())->format('d M Y'),
+                    ]) }}
+                </p>
+                <p class="mt-2 text-sm font-semibold text-rose">{{ \App\Support\HostingPricing::dualPriceDisplay((float) $order->amount_usd) }}</p>
+                <form method="POST" action="{{ route('email.renew', $order) }}" class="mt-5" data-submit-form>
+                    @csrf
+                    <x-ui.submit-button :label="__('email.renew_cta')" :loading="__('account.starting_payment')" class="btn btn-primary" />
+                </form>
+            </section>
+        @endif
     @else
         <section class="mb-6 rounded-3xl bg-rose p-6 text-white sm:p-8">
             <p class="text-xs font-semibold uppercase tracking-widest text-white/75">{{ __('account.next_step') }}</p>

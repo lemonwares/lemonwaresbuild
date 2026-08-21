@@ -43,6 +43,7 @@
                     <a href="{{ route('home') }}" class="hidden text-sm font-semibold text-on-blush/70 transition hover:text-rose sm:inline">
                         {{ __('account.nav_website') }}
                     </a>
+                    <x-account.notification-bell :unread-count="auth()->user()?->unreadNotifications()->count() ?? 0" />
                     <x-layout.account-session tone="button" :account-link="false" />
                 </div>
             </div>
@@ -54,6 +55,7 @@
             </div>
 
             <x-ui.flash show-status />
+            <x-ui.flash />
             <x-ui.flash key="hosting_feedback" />
             @yield('content')
         </div>

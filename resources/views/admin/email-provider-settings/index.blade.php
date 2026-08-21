@@ -49,6 +49,22 @@
                 @endif
             </div>
 
+            <div class="mt-5 rounded-2xl border border-border bg-blush-soft/50 px-4 py-3 text-sm text-on-blush/80">
+                <p class="font-semibold text-black">Required ops-token scopes</p>
+                <p class="mt-1">
+                    Create a <code class="rounded bg-white px-1">tm_live_</code> token in
+                    <a href="https://trekmail.net/docs/ai-agents-api/creating-api-tokens" target="_blank" rel="noopener noreferrer" class="font-semibold text-rose hover:underline">TrekMail → AI Agents &amp; API</a>
+                    on a <strong>Pro or Agency</strong> plan, then enable at least:
+                </p>
+                <ul class="mt-2 list-disc space-y-1 pl-5 font-mono text-xs text-black">
+                    <li>domains:read · domains:create · domains:dns:read · domains:dns:recheck</li>
+                    <li>mailboxes:create · mailboxes:invites:create</li>
+                </ul>
+                <p class="mt-2 text-xs">
+                    Starter tokens are read-only and cannot provision Lemon Mail. After updating scopes, paste the new token here, save, run the connection test, then retry provision on the order.
+                </p>
+            </div>
+
             <div class="mt-5 grid gap-4 sm:grid-cols-2">
                 <div class="sm:col-span-2">
                     <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">API Token</label>

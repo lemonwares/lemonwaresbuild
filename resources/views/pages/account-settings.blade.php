@@ -15,6 +15,33 @@
     @endif
 
     <section class="mb-6 rounded-3xl border border-border bg-white p-6 sm:p-8">
+        <h2 class="text-lg font-bold text-black">{{ __('account.notification_prefs_title') }}</h2>
+        <p class="mt-2 text-sm text-on-blush/70">{{ __('account.notification_prefs_lede') }}</p>
+
+        <form method="POST" action="{{ route('account.notifications.update') }}" class="mt-6 space-y-4" data-submit-form>
+            @csrf
+            @method('PUT')
+            <label class="flex items-start gap-3 text-sm text-black">
+                <input type="hidden" name="notify_in_app" value="0">
+                <input type="checkbox" name="notify_in_app" value="1" class="mt-0.5 size-4 rounded border-border text-rose focus:ring-rose" @checked(old('notify_in_app', $user->notify_in_app ?? true))>
+                <span>
+                    <span class="font-semibold">{{ __('account.notify_in_app') }}</span>
+                    <span class="mt-1 block text-on-blush/65">{{ __('account.notify_in_app_help') }}</span>
+                </span>
+            </label>
+            <label class="flex items-start gap-3 text-sm text-black">
+                <input type="hidden" name="notify_email" value="0">
+                <input type="checkbox" name="notify_email" value="1" class="mt-0.5 size-4 rounded border-border text-rose focus:ring-rose" @checked(old('notify_email', $user->notify_email ?? true))>
+                <span>
+                    <span class="font-semibold">{{ __('account.notify_email') }}</span>
+                    <span class="mt-1 block text-on-blush/65">{{ __('account.notify_email_help') }}</span>
+                </span>
+            </label>
+            <x-ui.submit-button :label="__('account.notification_prefs_save')" :loading="__('account.saving')" class="btn btn-primary" />
+        </form>
+    </section>
+
+    <section class="mb-6 rounded-3xl border border-border bg-white p-6 sm:p-8">
         <h2 class="text-lg font-bold text-black">{{ __('account.contacts_title') }}</h2>
         <p class="mt-2 text-sm text-on-blush/70">{{ __('account.contacts_lede') }}</p>
 

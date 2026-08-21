@@ -396,6 +396,25 @@ class EmailOrderController extends Controller
         return redirect()->away($link);
     }
 
+    public function renew(Request $request, EmailOrder $order): RedirectResponse
+    {
+        abort_unless($order->user_id === $request->user()->id, 404);
+        abort_unless($order->canBeRenewed(), 404);
+
+        $link = FlutterwavePayment::createEmailPaymentLink($order, 'renewal');
+
+        if (! $link) {
+            return redirect()
+                ->route('account.email.show', $order)
+                ->with('email_feedback', [
+                    'type' => 'error',
+                    'message' => __('email.pay_unavailable'),
+                ]);
+        }
+
+        return redirect()->away($link);
+    }
+
     public function callback(Request $request): RedirectResponse
     {
         $status = strtolower((string) $request->query('status', ''));
@@ -416,12 +435,15 @@ class EmailOrderController extends Controller
         }
 
         $accountUrl = route('account.email.show', $order);
+        $isRenewal = str_starts_with($txRef, 'LW-MAIL-R-');
 
         if ($transactionId === '') {
-            $order->update([
-                'payment_status' => $status ?: 'failed',
-                'status' => 'payment_failed',
-            ]);
+            if (! $isRenewal) {
+                $order->update([
+                    'payment_status' => $status ?: 'failed',
+                    'status' => 'payment_failed',
+                ]);
+            }
 
             return redirect()->to($accountUrl)->with('email_feedback', [
                 'type' => 'error',
@@ -430,10 +452,12 @@ class EmailOrderController extends Controller
         }
 
         if (in_array($status, ['failed', 'cancelled', 'abandoned'], true)) {
-            $order->update([
-                'payment_status' => $status,
-                'status' => 'payment_failed',
-            ]);
+            if (! $isRenewal) {
+                $order->update([
+                    'payment_status' => $status,
+                    'status' => 'payment_failed',
+                ]);
+            }
 
             return redirect()->to($accountUrl)->with('email_feedback', [
                 'type' => 'error',
@@ -444,10 +468,12 @@ class EmailOrderController extends Controller
         $verified = FlutterwavePayment::verifyTransaction($transactionId);
 
         if (! $verified) {
-            $order->update([
-                'payment_status' => 'unverified',
-                'status' => 'payment_failed',
-            ]);
+            if (! $isRenewal) {
+                $order->update([
+                    'payment_status' => 'unverified',
+                    'status' => 'payment_failed',
+                ]);
+            }
 
             return redirect()->to($accountUrl)->with('email_feedback', [
                 'type' => 'error',

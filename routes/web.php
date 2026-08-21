@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AccountNotificationController;
 use App\Http\Controllers\AdminEmailCatalogController;
 use App\Http\Controllers\AdminEmailProviderSettingsController;
 use App\Http\Controllers\AdminAuthController;
@@ -108,11 +109,16 @@ Route::middleware('auth')->group(function (): void {
         ->middleware('throttle:20,1')
         ->name('account.profile.business');
     Route::get('/account/settings', [AccountController::class, 'settings'])->name('account.settings');
+    Route::put('/account/settings/notifications', [AccountController::class, 'updateNotificationPreferences'])->name('account.notifications.update');
+    Route::get('/account/notifications', [AccountNotificationController::class, 'index'])->name('account.notifications.index');
+    Route::post('/account/notifications/read-all', [AccountNotificationController::class, 'markAllRead'])->name('account.notifications.read-all');
+    Route::post('/account/notifications/{notification}/read', [AccountNotificationController::class, 'markRead'])->name('account.notifications.read');
     Route::post('/account/settings/contacts', [AccountController::class, 'storeContact'])->middleware('throttle:20,1')->name('account.contacts.store');
     Route::delete('/account/settings/contacts/{contact}', [AccountController::class, 'destroyContact'])->name('account.contacts.destroy');
     Route::get('/account/email', [AccountController::class, 'email'])->name('account.email.index');
     Route::get('/account/email/{order}', [EmailOrderController::class, 'show'])->name('account.email.show');
     Route::post('/account/email/{order}/pay', [EmailOrderController::class, 'pay'])->middleware('throttle:10,1')->name('email.pay');
+    Route::post('/account/email/{order}/renew', [EmailOrderController::class, 'renew'])->middleware('throttle:10,1')->name('email.renew');
     Route::post('/account/email/{order}/provision', [EmailOrderController::class, 'provision'])->middleware('throttle:5,1')->name('email.provision');
     Route::get('/account/vps', [AccountController::class, 'vps'])->name('account.vps.index');
     Route::get('/account/vps/{lead}', [AccountController::class, 'vpsShow'])->name('account.vps.show');
@@ -970,5 +976,8 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/email-orders/{emailOrder}', [AdminEmailOrderController::class, 'show'])->name('email-orders.show');
         Route::put('/email-orders/{emailOrder}/fulfilment', [AdminEmailOrderController::class, 'updateFulfilment'])->name('email-orders.fulfilment');
         Route::post('/email-orders/{emailOrder}/provision', [AdminEmailOrderController::class, 'provision'])->name('email-orders.provision');
+        Route::post('/email-orders/{emailOrder}/deactivate', [AdminEmailOrderController::class, 'deactivate'])->name('email-orders.deactivate');
+        Route::post('/email-orders/{emailOrder}/reactivate', [AdminEmailOrderController::class, 'reactivate'])->name('email-orders.reactivate');
+        Route::post('/email-orders/{emailOrder}/extend', [AdminEmailOrderController::class, 'extend'])->name('email-orders.extend');
     });
 });

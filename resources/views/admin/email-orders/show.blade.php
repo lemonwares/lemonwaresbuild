@@ -34,6 +34,27 @@
                 <dt class="text-on-blush/60">Amount</dt>
                 <dd class="font-semibold">{{ \App\Support\HostingPricing::dualPriceDisplay((float) $order->amount_usd) }}</dd>
             </div>
+            <div class="flex justify-between gap-4 border-b border-border pb-3">
+                <dt class="text-on-blush/60">Service period</dt>
+                <dd class="font-semibold text-right">
+                    @if ($order->period_starts_at && $order->period_ends_at)
+                        {{ $order->period_starts_at->format('d M Y') }} → {{ $order->period_ends_at->format('d M Y') }}
+                    @else
+                        —
+                    @endif
+                </dd>
+            </div>
+            @if ($order->isDeactivated())
+                <div class="flex justify-between gap-4 border-b border-border pb-3">
+                    <dt class="text-on-blush/60">Deactivated</dt>
+                    <dd class="font-semibold text-right text-rose">
+                        {{ $order->deactivated_at?->format('d M Y H:i') ?: '—' }}
+                        @if ($order->deactivated_reason)
+                            · {{ $order->deactivated_reason }}
+                        @endif
+                    </dd>
+                </div>
+            @endif
             @if ($order->isManualFulfilment())
                 <div class="flex justify-between gap-4 border-b border-border pb-3">
                     <dt class="text-on-blush/60">Fulfilment</dt>
@@ -126,10 +147,28 @@
         @endif
 
         <div class="mt-6 flex flex-wrap gap-3">
-            @if ($order->isPaid() && ! $order->isManualFulfilment())
+            @if ($order->isPaid() && ! $order->isManualFulfilment() && ! $order->isDeactivated())
                 <form method="POST" action="{{ route('admin.email-orders.provision', $order) }}">
                     @csrf
                     <button type="submit" class="btn btn-primary">Retry TrekMail provision</button>
+                </form>
+            @endif
+            @if ($order->canBeDeactivated())
+                <form method="POST" action="{{ route('admin.email-orders.deactivate', $order) }}" onsubmit="return confirm('Deactivate this email service? Mailboxes will be paused where possible.');">
+                    @csrf
+                    <button type="submit" class="btn btn-ghost text-rose">Deactivate service</button>
+                </form>
+            @endif
+            @if ($order->canBeReactivated())
+                <form method="POST" action="{{ route('admin.email-orders.reactivate', $order) }}">
+                    @csrf
+                    <button type="submit" class="btn btn-primary">Reactivate service</button>
+                </form>
+            @endif
+            @if ($order->canBeRenewed())
+                <form method="POST" action="{{ route('admin.email-orders.extend', $order) }}" onsubmit="return confirm('Extend this service by one billing cycle without charging?');">
+                    @csrf
+                    <button type="submit" class="btn btn-ghost">Extend period</button>
                 </form>
             @endif
             <a href="{{ route('admin.email-orders.index') }}" class="btn btn-ghost">Back to list</a>

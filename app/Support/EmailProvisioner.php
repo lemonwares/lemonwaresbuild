@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\EmailMailbox;
 use App\Models\EmailOrder;
+use App\Notifications\EmailOrderProvisioned;
 use Illuminate\Support\Facades\Log;
 
 class EmailProvisioner
@@ -56,6 +57,8 @@ class EmailProvisioner
 
             $failed = $order->mailboxes()->where('status', 'failed')->exists();
 
+            $order->applyPaidPeriod($order->period_starts_at);
+
             $order->update([
                 'trekmail_domain_id' => $domainId,
                 'dns_records' => $dns,
@@ -63,6 +66,11 @@ class EmailProvisioner
                 'status' => $failed ? 'paid_pending_setup' : 'provisioned',
                 'provisioned_at' => $failed ? null : now(),
             ]);
+
+            if (! $failed) {
+                $order->loadMissing('user');
+                AccountNotifier::send($order->user, new EmailOrderProvisioned($order->fresh()));
+            }
         } catch (TrekMailException $exception) {
             Log::warning('Email provisioning failed', [
                 'order_id' => $order->id,

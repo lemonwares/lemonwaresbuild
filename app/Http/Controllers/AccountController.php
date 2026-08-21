@@ -146,6 +146,18 @@ class AccountController extends Controller
         ]);
     }
 
+    public function updateNotificationPreferences(Request $request): RedirectResponse
+    {
+        $request->user()->update([
+            'notify_in_app' => $request->boolean('notify_in_app'),
+            'notify_email' => $request->boolean('notify_email'),
+        ]);
+
+        return redirect()
+            ->route('account.settings')
+            ->with('status', __('account.notification_prefs_saved'));
+    }
+
     public function storeContact(Request $request): RedirectResponse
     {
         $user = $request->user();

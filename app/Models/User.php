@@ -30,6 +30,8 @@ use Illuminate\Notifications\Notifiable;
     'billing_state',
     'billing_postcode',
     'billing_country',
+    'notify_in_app',
+    'notify_email',
     'password',
 ])]
 #[Hidden(['password', 'remember_token'])]
@@ -46,7 +48,32 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'notify_in_app' => 'boolean',
+            'notify_email' => 'boolean',
         ];
+    }
+
+    public function wantsInAppNotifications(): bool
+    {
+        return (bool) ($this->notify_in_app ?? true);
+    }
+
+    public function wantsEmailNotifications(): bool
+    {
+        return (bool) ($this->notify_email ?? true);
+    }
+
+    /**
+     * Route mail notifications to the account email plus opted-in contacts.
+     *
+     * @param  \Illuminate\Notifications\Notification  $notification
+     * @return list<string>|string
+     */
+    public function routeNotificationForMail($notification): array|string
+    {
+        $emails = $this->notificationEmails();
+
+        return $emails !== [] ? $emails : $this->email;
     }
 
     public function isAdmin(): bool

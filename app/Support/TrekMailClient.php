@@ -4,7 +4,6 @@ namespace App\Support;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 
 class TrekMailClient
 {
@@ -118,6 +117,20 @@ class TrekMailClient
         ]);
     }
 
+    public static function pauseMailbox(int|string $mailboxId, string $idempotencyKey): void
+    {
+        self::request('post', '/mailboxes/' . $mailboxId . ':pause', [
+            'idempotency' => $idempotencyKey,
+        ]);
+    }
+
+    public static function resumeMailbox(int|string $mailboxId, string $idempotencyKey): void
+    {
+        self::request('post', '/mailboxes/' . $mailboxId . ':resume', [
+            'idempotency' => $idempotencyKey,
+        ]);
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -129,8 +142,7 @@ class TrekMailClient
     ): array {
         $body = [
             'domain_id' => (int) $domainId,
-            'local_part' => $localPart,
-            'display_name' => Str::headline($localPart),
+            'local_part' => strtolower(trim($localPart)),
         ];
 
         if ($storageMb && $storageMb > 0) {
@@ -153,14 +165,20 @@ class TrekMailClient
         string $localPart,
         string $notifyEmail,
         string $idempotencyKey,
+        ?int $storageMb = null,
     ): array {
+        $body = [
+            'domain_id' => (int) $domainId,
+            'local_part' => strtolower(trim($localPart)),
+            'recipient_email' => strtolower(trim($notifyEmail)),
+        ];
+
+        if ($storageMb && $storageMb > 0) {
+            $body['storage_allocation_mb'] = $storageMb;
+        }
+
         $payload = self::request('post', '/mailboxes/invites', [
-            'json' => [
-                'domain_id' => (int) $domainId,
-                'local_part' => $localPart,
-                'email' => $notifyEmail,
-                'display_name' => Str::headline($localPart),
-            ],
+            'json' => $body,
             'idempotency' => $idempotencyKey,
         ]);
 
@@ -208,16 +226,17 @@ class TrekMailClient
         }
 
         if ($response->failed()) {
-            $message = (string) data_get($response->json(), 'error.message', 'TrekMail request failed.');
+            $json = $response->json();
+            $message = self::errorMessage($json) ?: 'TrekMail request failed.';
 
             Log::warning('TrekMail API error', [
                 'method' => $method,
                 'path' => $path,
                 'status' => $response->status(),
-                'body' => $response->json(),
+                'body' => $json,
             ]);
 
-            throw new TrekMailException($message, $response->status(), $response->json());
+            throw new TrekMailException($message, $response->status(), $json);
         }
 
         $json = $response->json();
@@ -249,5 +268,34 @@ class TrekMailClient
         $data = $payload['data'] ?? $payload;
 
         return is_array($data) ? $data : $payload;
+    }
+
+    protected static function errorMessage(mixed $json): string
+    {
+        if (! is_array($json)) {
+            return '';
+        }
+
+        $message = (string) data_get($json, 'error.message', data_get($json, 'message', ''));
+        $errors = data_get($json, 'errors', data_get($json, 'error.errors'));
+
+        if (! is_array($errors) || $errors === []) {
+            return $message;
+        }
+
+        $details = [];
+        foreach ($errors as $field => $messages) {
+            if (is_array($messages)) {
+                $details[] = $field . ': ' . implode(', ', array_map('strval', $messages));
+            } else {
+                $details[] = $field . ': ' . (string) $messages;
+            }
+        }
+
+        if ($details === []) {
+            return $message;
+        }
+
+        return trim($message . ' (' . implode('; ', $details) . ')');
     }
 }
