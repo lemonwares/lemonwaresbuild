@@ -132,6 +132,121 @@ class TrekMailClient
     }
 
     /**
+     * Apply Lemonwares (or admin-configured) branding so TrekMail invites use your name/colors/logo.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function applyConfiguredBranding(int|string $domainId, string $idempotencyKey): ?array
+    {
+        if (! TrekMailSettings::brandingEnabled()) {
+            return null;
+        }
+
+        $body = array_filter([
+            'mode' => 'custom',
+            'name' => TrekMailSettings::brandName(),
+            'primary_color' => TrekMailSettings::brandPrimaryColor(),
+            'accent_color' => TrekMailSettings::brandAccentColor(),
+            'support_email' => TrekMailSettings::brandSupportEmail() ?: null,
+            'support_url' => TrekMailSettings::brandSupportUrl() ?: null,
+            'sender_email' => TrekMailSettings::brandSenderEmail() ?: null,
+            // Keep hosts off by default — email branding does not require white-label DNS.
+            'dashboard_enabled' => false,
+            'webmail_enabled' => false,
+        ], fn ($value) => $value !== null && $value !== '');
+
+        $payload = self::request('patch', '/domains/' . $domainId . '/branding', [
+            'json' => $body,
+            'idempotency' => $idempotencyKey,
+        ]);
+
+        $logoPath = TrekMailSettings::brandLogoPath() ?? self::defaultLogoPath();
+        if ($logoPath) {
+            try {
+                self::uploadBrandLogo($domainId, 'light', $logoPath, $idempotencyKey . '-logo-light');
+                self::uploadBrandLogo($domainId, 'dark', $logoPath, $idempotencyKey . '-logo-dark');
+            } catch (TrekMailException $exception) {
+                Log::warning('TrekMail brand logo upload failed', [
+                    'domain_id' => $domainId,
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
+
+        return self::resource($payload);
+    }
+
+    public static function uploadBrandLogo(
+        int|string $domainId,
+        string $slot,
+        string $absolutePath,
+        string $idempotencyKey,
+    ): void {
+        $base64 = self::logoToBase64PngOrJpeg($absolutePath);
+        if ($base64 === null) {
+            throw new TrekMailException('Unable to encode brand logo for TrekMail (use PNG or JPG, max 1MB).');
+        }
+
+        self::request('put', '/domains/' . $domainId . '/branding/logo/' . $slot, [
+            'json' => [
+                'content_base64' => $base64,
+            ],
+            'idempotency' => $idempotencyKey,
+        ]);
+    }
+
+    protected static function defaultLogoPath(): ?string
+    {
+        foreach (['lemonwareslogo.png', 'lemonwareslogo.jpg', 'lemonwareslogo.jpeg', 'lemonwareslogo.webp'] as $file) {
+            $path = public_path($file);
+            if (is_file($path)) {
+                return $path;
+            }
+        }
+
+        return null;
+    }
+
+    protected static function logoToBase64PngOrJpeg(string $absolutePath): ?string
+    {
+        if (! is_file($absolutePath) || filesize($absolutePath) > 1024 * 1024) {
+            return null;
+        }
+
+        $mime = mime_content_type($absolutePath) ?: '';
+        if (in_array($mime, ['image/png', 'image/jpeg'], true)) {
+            $raw = file_get_contents($absolutePath);
+
+            return $raw === false ? null : base64_encode($raw);
+        }
+
+        if (! function_exists('imagecreatefromstring')) {
+            return null;
+        }
+
+        $raw = file_get_contents($absolutePath);
+        if ($raw === false) {
+            return null;
+        }
+
+        $image = @imagecreatefromstring($raw);
+        if ($image === false) {
+            return null;
+        }
+
+        ob_start();
+        imagepng($image);
+        imagedestroy($image);
+        $png = ob_get_clean();
+
+        if ($png === false || strlen($png) > 1024 * 1024) {
+            return null;
+        }
+
+        return base64_encode($png);
+    }
+
+    /**
      * @return array<string, mixed>
      */
     public static function createMailbox(

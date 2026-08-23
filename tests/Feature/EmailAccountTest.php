@@ -564,6 +564,22 @@ class EmailAccountTest extends TestCase
                 return Http::response(['data' => ['ok' => true]], 200);
             }
 
+            if ($request->method() === 'PATCH' && str_contains($path, '/branding')) {
+                return Http::response([
+                    'data' => [
+                        'mode' => 'custom',
+                        'brand' => [
+                            'name' => 'Lemonwares',
+                            'primary_color' => '#e04545',
+                        ],
+                    ],
+                ], 200);
+            }
+
+            if ($request->method() === 'PUT' && str_contains($path, '/branding/logo/')) {
+                return Http::response(['data' => ['mode' => 'custom']], 200);
+            }
+
             if (str_contains($path, 'mailboxes/invites')) {
                 $this->assertSame([
                     'domain_id' => 44,

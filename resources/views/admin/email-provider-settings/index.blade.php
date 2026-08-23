@@ -28,7 +28,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('admin.email-provider-settings.update') }}" class="space-y-6">
+    <form method="POST" action="{{ route('admin.email-provider-settings.update') }}" class="space-y-6" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -57,10 +57,11 @@
                     on a <strong>Pro or Agency</strong> plan, then enable at least:
                 </p>
                 <ul class="mt-2 list-disc space-y-1 pl-5 font-mono text-xs text-black">
-                    <li>domains:read · domains:create · domains:dns:read · domains:dns:recheck</li>
+                    <li>domains:read · domains:create · domains:write · domains:dns:read · domains:dns:recheck</li>
                     <li>mailboxes:create · mailboxes:invites:create</li>
                 </ul>
                 <p class="mt-2 text-xs">
+                    <code class="rounded bg-white px-1">domains:write</code> is required to push Lemonwares branding onto invite emails.
                     Starter tokens are read-only and cannot provision Lemon Mail. After updating scopes, paste the new token here, save, run the connection test, then retry provision on the order.
                 </p>
             </div>
@@ -98,6 +99,103 @@
                         placeholder="https://trekmail.net/webmail"
                         autocomplete="off"
                     >
+                </div>
+            </div>
+        </section>
+
+        <section class="rounded-3xl border border-border bg-white p-6">
+            <h2 class="text-lg font-bold text-black">Lemon Mail · Invite branding</h2>
+            <p class="mt-1 text-sm text-on-blush/65">
+                TrekMail sends the mailbox setup invite itself. These settings push your brand name, colors, and logo into that email via TrekMail’s branding API.
+                Full branded From-address / white-label hosts need TrekMail’s White Label add-on; identity branding still saves without it.
+            </p>
+
+            <label class="mt-5 flex items-start gap-3 text-sm text-black">
+                <input type="hidden" name="trekmail_branding_enabled" value="0">
+                <input type="checkbox" name="trekmail_branding_enabled" value="1" class="mt-0.5 size-4 rounded border-border text-rose focus:ring-rose" @checked(old('trekmail_branding_enabled', $branding['enabled'] ?? true))>
+                <span>
+                    <span class="font-semibold">Apply branding when provisioning</span>
+                    <span class="mt-1 block text-on-blush/65">Runs automatically after a domain is created, before mailbox invites are sent.</span>
+                </span>
+            </label>
+
+            <div class="mt-5 grid gap-4 sm:grid-cols-2">
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Brand name</label>
+                    <input
+                        type="text"
+                        name="trekmail_brand_name"
+                        value="{{ old('trekmail_brand_name', $branding['name']) }}"
+                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        placeholder="Lemonwares"
+                    >
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Support email</label>
+                    <input
+                        type="email"
+                        name="trekmail_brand_support_email"
+                        value="{{ old('trekmail_brand_support_email', $branding['support_email']) }}"
+                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        placeholder="support@lemonwares.com"
+                    >
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Primary color</label>
+                    <input
+                        type="text"
+                        name="trekmail_brand_primary_color"
+                        value="{{ old('trekmail_brand_primary_color', $branding['primary_color']) }}"
+                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        placeholder="#e04545"
+                    >
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Accent color</label>
+                    <input
+                        type="text"
+                        name="trekmail_brand_accent_color"
+                        value="{{ old('trekmail_brand_accent_color', $branding['accent_color']) }}"
+                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        placeholder="#ffeded"
+                    >
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Support / help URL</label>
+                    <input
+                        type="url"
+                        name="trekmail_brand_support_url"
+                        value="{{ old('trekmail_brand_support_url', $branding['support_url']) }}"
+                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        placeholder="https://lemonwares.com"
+                    >
+                </div>
+                <div>
+                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Transactional sender (optional)</label>
+                    <input
+                        type="email"
+                        name="trekmail_brand_sender_email"
+                        value="{{ old('trekmail_brand_sender_email', $branding['sender_email']) }}"
+                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        placeholder="noreply@your-verified-domain.com"
+                    >
+                    <p class="mt-1 text-xs text-on-blush/55">Must be on a TrekMail domain with verified DKIM, or TrekMail will reject it.</p>
+                </div>
+                <div class="sm:col-span-2">
+                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Logo (PNG or JPG, max 1MB)</label>
+                    <input
+                        type="file"
+                        name="trekmail_brand_logo"
+                        accept="image/png,image/jpeg"
+                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                    >
+                    <p class="mt-1 text-xs text-on-blush/55">
+                        @if ($branding['has_logo'] ?? false)
+                            Custom logo uploaded. Leave empty to keep it. Otherwise we fall back to <code class="rounded bg-blush-soft px-1">public/lemonwareslogo.webp</code> (converted to PNG).
+                        @else
+                            Optional. If empty, we use <code class="rounded bg-blush-soft px-1">public/lemonwareslogo.webp</code> when GD can convert it.
+                        @endif
+                    </p>
                 </div>
             </div>
         </section>
