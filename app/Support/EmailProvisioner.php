@@ -41,6 +41,20 @@ class EmailProvisioner
                 throw new TrekMailException('TrekMail did not return a domain id.');
             }
 
+            try {
+                TrekMailClient::applyConfiguredBranding(
+                    $domainId,
+                    'email-order-' . $order->id . '-branding',
+                );
+            } catch (TrekMailException $exception) {
+                Log::warning('TrekMail branding apply failed', [
+                    'order_id' => $order->id,
+                    'domain_id' => $domainId,
+                    'error' => $exception->getMessage(),
+                    'payload' => $exception->payload,
+                ]);
+            }
+
             $dns = TrekMailClient::dnsRequirements($domainId);
 
             try {
