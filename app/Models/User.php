@@ -65,15 +65,29 @@ class User extends Authenticatable
 
     /**
      * Route mail notifications to the account email plus opted-in contacts.
+     * Password resets stay on the login email only.
      *
      * @param  \Illuminate\Notifications\Notification  $notification
      * @return list<string>|string
      */
     public function routeNotificationForMail($notification): array|string
     {
+        if ($notification instanceof \Illuminate\Auth\Notifications\ResetPassword) {
+            return $this->email;
+        }
+
+        if (! $notification instanceof \App\Notifications\AccountNotification) {
+            return $this->email;
+        }
+
         $emails = $this->notificationEmails();
 
         return $emails !== [] ? $emails : $this->email;
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new \App\Notifications\ResetPasswordNotification($token));
     }
 
     public function isAdmin(): bool

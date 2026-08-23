@@ -18,6 +18,7 @@
                 ['label' => 'Email Providers', 'route' => 'admin.email-provider-settings.index', 'match' => 'admin.email-provider-settings.*'],
                 ['label' => 'WHMCS Settings', 'route' => 'admin.whmcs-settings.index', 'match' => 'admin.whmcs-settings.*'],
                 ['label' => 'Flutterwave Settings', 'route' => 'admin.flutterwave-settings.index', 'match' => 'admin.flutterwave-settings.*'],
+                ['label' => 'ZeptoMail Settings', 'route' => 'admin.zeptomail-settings.index', 'match' => 'admin.zeptomail-settings.*'],
             ],
         ],
         [
