@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,7 +26,7 @@ class PasswordResetController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        $email = strtolower((string) $request->input('email'));
+        $email = strtolower(trim((string) $request->input('email')));
         $ip = (string) $request->ip();
         $emailIpKey = 'auth-forgot-password|'.$email.'|'.$ip;
         $ipKey = 'auth-forgot-password-ip|'.$ip;
@@ -44,12 +45,29 @@ class PasswordResetController extends Controller
         RateLimiter::hit($emailIpKey, 900);
         RateLimiter::hit($ipKey, 900);
 
-        $status = Password::sendResetLink(
-            ['email' => $email],
-        );
+        $user = $this->findUserByEmail($email);
 
-        // Broker throttle and unknown emails both get the same success UX so we
-        // do not leak account existence; request volume is capped above.
+        // Same success UX for unknown emails so we do not leak account existence.
+        if (! $user) {
+            return back()->with('status', __('account.reset_sent'));
+        }
+
+        try {
+            $status = Password::sendResetLink([
+                'email' => $user->email,
+            ]);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            // Broker creates the token before sending; remove it so a failed
+            // delivery does not invalidate a previous still-usable link.
+            Password::broker()->deleteToken($user);
+
+            return back()
+                ->withErrors(['email' => __('account.reset_mail_failed')])
+                ->onlyInput('email');
+        }
+
         if (in_array($status, [Password::RESET_LINK_SENT, Password::RESET_THROTTLED], true)) {
             return back()->with('status', __('account.reset_sent'));
         }
@@ -73,9 +91,15 @@ class PasswordResetController extends Controller
             'password' => ['required', 'confirmed', PasswordRule::min(8)],
         ]);
 
+        $user = $this->findUserByEmail($payload['email']);
+
+        if (! $user) {
+            return $this->resetFailed($payload, __('account.reset_invalid'));
+        }
+
         $status = Password::reset(
             [
-                'email' => strtolower($payload['email']),
+                'email' => $user->email,
                 'password' => $payload['password'],
                 'password_confirmation' => $request->input('password_confirmation'),
                 'token' => $payload['token'],
@@ -90,8 +114,44 @@ class PasswordResetController extends Controller
             },
         );
 
-        return $status === Password::PASSWORD_RESET
-            ? redirect()->route('login')->with('status', __('account.reset_complete'))
-            : back()->withErrors(['email' => __('account.reset_failed')]);
+        if ($status === Password::PASSWORD_RESET) {
+            return redirect()->route('login')->with('status', __('account.reset_complete'));
+        }
+
+        $message = match ($status) {
+            Password::INVALID_TOKEN => __('account.reset_invalid'),
+            default => __('account.reset_failed'),
+        };
+
+        return $this->resetFailed($payload, $message);
+    }
+
+    /**
+     * Resolve a user by email without depending on DB collation case rules.
+     */
+    protected function findUserByEmail(string $email): ?User
+    {
+        $email = strtolower(trim($email));
+
+        if ($email === '') {
+            return null;
+        }
+
+        return User::query()
+            ->whereRaw('lower(email) = ?', [$email])
+            ->first();
+    }
+
+    /**
+     * @param  array{token:string,email:string}  $payload
+     */
+    protected function resetFailed(array $payload, string $message): RedirectResponse
+    {
+        return redirect()
+            ->route('password.reset', [
+                'token' => $payload['token'],
+                'email' => $payload['email'],
+            ])
+            ->withErrors(['email' => $message]);
     }
 }

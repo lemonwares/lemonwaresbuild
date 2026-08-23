@@ -34,7 +34,7 @@ abstract class AccountNotification extends Notification
     {
         $payload = $this->payload();
 
-        return (new MailMessage)
+        return \App\Support\LemonwaresMail::message()
             ->subject($payload['title'])
             ->markdown('mail.account-notification', [
                 'title' => $payload['title'],

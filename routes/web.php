@@ -11,6 +11,7 @@ use App\Http\Controllers\AdminEmailOrderController;
 use App\Http\Controllers\AdminHostingLeadController;
 use App\Http\Controllers\AdminHostingPriceController;
 use App\Http\Controllers\AdminFlutterwaveSettingsController;
+use App\Http\Controllers\AdminZeptoMailSettingsController;
 use App\Http\Controllers\AdminWhmcsSettingsController;
 use App\Http\Controllers\AdminSubscriberController;
 use App\Http\Controllers\AdminTeamMemberController;
@@ -967,6 +968,12 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/flutterwave-settings', [AdminFlutterwaveSettingsController::class, 'index'])->name('flutterwave-settings.index');
         Route::put('/flutterwave-settings', [AdminFlutterwaveSettingsController::class, 'update'])->name('flutterwave-settings.update');
         Route::post('/flutterwave-settings/test-connection', [AdminFlutterwaveSettingsController::class, 'testConnection'])->name('flutterwave-settings.test-connection');
+
+        Route::get('/zeptomail-settings', [AdminZeptoMailSettingsController::class, 'index'])->name('zeptomail-settings.index');
+        Route::put('/zeptomail-settings', [AdminZeptoMailSettingsController::class, 'update'])->name('zeptomail-settings.update');
+        Route::post('/zeptomail-settings/test-connection', [AdminZeptoMailSettingsController::class, 'testConnection'])->name('zeptomail-settings.test-connection');
+        Route::post('/zeptomail-settings/send-test', [AdminZeptoMailSettingsController::class, 'sendTest'])->name('zeptomail-settings.send-test');
+
         Route::get('/email-catalog', [AdminEmailCatalogController::class, 'index'])->name('email-catalog.index');
         Route::put('/email-catalog', [AdminEmailCatalogController::class, 'update'])->name('email-catalog.update');
         Route::get('/email-provider-settings', [AdminEmailProviderSettingsController::class, 'index'])->name('email-provider-settings.index');

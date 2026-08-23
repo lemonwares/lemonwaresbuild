@@ -3,7 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use Illuminate\Auth\Notifications\ResetPassword;
+use App\Notifications\ResetPasswordNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -54,7 +54,7 @@ class AuthRateLimitTest extends TestCase
 
         Notification::assertSentTo(
             User::query()->where('email', 'grace@example.com')->first(),
-            ResetPassword::class,
+            ResetPasswordNotification::class,
         );
 
         $response = $this->from(route('password.request'))->post(route('password.email'), [

@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Mail\Transport\ZeptoMailTransport;
+use App\Support\ZeptoMailSettings;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,6 +25,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Mail::extend('zeptomail', function () {
+            ZeptoMailSettings::applyRuntimeConfig();
+
+            $token = ZeptoMailSettings::token();
+
+            if ($token === '') {
+                throw new \RuntimeException('ZEPTOMAIL_TOKEN is not configured.');
+            }
+
+            return new ZeptoMailTransport(
+                $token,
+                ZeptoMailSettings::endpoint(),
+            );
+        });
+
+        ZeptoMailSettings::applyRuntimeConfig();
+
         RateLimiter::for('auth-login', function (Request $request): array {
             $email = strtolower((string) $request->input('email', 'guest'));
             $ip = (string) $request->ip();

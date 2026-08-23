@@ -25,7 +25,7 @@
     <body class="min-h-screen bg-blush-soft text-black">
         <header class="border-b border-border bg-white">
             <div class="container-page flex items-center justify-between gap-4 py-4">
-                <a href="{{ route('login') }}" class="inline-flex items-center gap-3">
+                <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
                     <img
                         src="{{ asset('lemonwareslogo.webp') }}"
                         alt="{{ config('site.name') }}"
@@ -34,7 +34,7 @@
                         class="h-10 w-auto sm:h-11"
                     >
                     <span class="text-sm font-semibold uppercase tracking-[0.12em] text-rose">
-                        {{ __('account.client_area') }}
+                        {{ __('account.auth_area') }}
                     </span>
                 </a>
 
