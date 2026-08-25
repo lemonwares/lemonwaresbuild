@@ -55,6 +55,11 @@ return [
         'webmail_url' => env('TREKMAIL_WEBMAIL_URL', 'https://trekmail.net/webmail'),
     ],
 
+    'cloudflare' => [
+        'api_token' => env('CLOUDFLARE_API_TOKEN'),
+        'account_id' => env('CLOUDFLARE_ACCOUNT_ID'),
+    ],
+
     'hetzner' => [
         'api_token' => env('HETZNER_API_TOKEN'),
     ],

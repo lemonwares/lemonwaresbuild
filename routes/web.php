@@ -12,6 +12,7 @@ use App\Http\Controllers\AdminHostingLeadController;
 use App\Http\Controllers\AdminHostingPriceController;
 use App\Http\Controllers\AdminFlutterwaveSettingsController;
 use App\Http\Controllers\AdminZeptoMailSettingsController;
+use App\Http\Controllers\AdminCloudflareSettingsController;
 use App\Http\Controllers\AdminWhmcsSettingsController;
 use App\Http\Controllers\AdminSubscriberController;
 use App\Http\Controllers\AdminTeamMemberController;
@@ -974,6 +975,10 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::post('/zeptomail-settings/test-connection', [AdminZeptoMailSettingsController::class, 'testConnection'])->name('zeptomail-settings.test-connection');
         Route::post('/zeptomail-settings/send-test', [AdminZeptoMailSettingsController::class, 'sendTest'])->name('zeptomail-settings.send-test');
 
+        Route::get('/cloudflare-settings', [AdminCloudflareSettingsController::class, 'index'])->name('cloudflare-settings.index');
+        Route::put('/cloudflare-settings', [AdminCloudflareSettingsController::class, 'update'])->name('cloudflare-settings.update');
+        Route::post('/cloudflare-settings/test-connection', [AdminCloudflareSettingsController::class, 'testConnection'])->name('cloudflare-settings.test-connection');
+
         Route::get('/email-catalog', [AdminEmailCatalogController::class, 'index'])->name('email-catalog.index');
         Route::put('/email-catalog', [AdminEmailCatalogController::class, 'update'])->name('email-catalog.update');
         Route::get('/email-provider-settings', [AdminEmailProviderSettingsController::class, 'index'])->name('email-provider-settings.index');
@@ -982,6 +987,11 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/email-orders', [AdminEmailOrderController::class, 'index'])->name('email-orders.index');
         Route::get('/email-orders/{emailOrder}', [AdminEmailOrderController::class, 'show'])->name('email-orders.show');
         Route::put('/email-orders/{emailOrder}/fulfilment', [AdminEmailOrderController::class, 'updateFulfilment'])->name('email-orders.fulfilment');
+        Route::post('/email-orders/{emailOrder}/credentials', [AdminEmailOrderController::class, 'sendCredentials'])->name('email-orders.credentials');
+        Route::put('/email-orders/{emailOrder}/dns', [AdminEmailOrderController::class, 'updateDns'])->name('email-orders.dns');
+        Route::post('/email-orders/{emailOrder}/dns/template', [AdminEmailOrderController::class, 'loadDnsTemplate'])->name('email-orders.dns.template');
+        Route::post('/email-orders/{emailOrder}/dns/cloudflare', [AdminEmailOrderController::class, 'applyCloudflareDns'])->name('email-orders.dns.cloudflare');
+        Route::post('/email-orders/{emailOrder}/dns/verify', [AdminEmailOrderController::class, 'verifyDns'])->name('email-orders.dns.verify');
         Route::post('/email-orders/{emailOrder}/provision', [AdminEmailOrderController::class, 'provision'])->name('email-orders.provision');
         Route::post('/email-orders/{emailOrder}/deactivate', [AdminEmailOrderController::class, 'deactivate'])->name('email-orders.deactivate');
         Route::post('/email-orders/{emailOrder}/reactivate', [AdminEmailOrderController::class, 'reactivate'])->name('email-orders.reactivate');

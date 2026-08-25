@@ -19,6 +19,7 @@
                 ['label' => 'WHMCS Settings', 'route' => 'admin.whmcs-settings.index', 'match' => 'admin.whmcs-settings.*'],
                 ['label' => 'Flutterwave Settings', 'route' => 'admin.flutterwave-settings.index', 'match' => 'admin.flutterwave-settings.*'],
                 ['label' => 'ZeptoMail Settings', 'route' => 'admin.zeptomail-settings.index', 'match' => 'admin.zeptomail-settings.*'],
+                ['label' => 'Cloudflare Settings', 'route' => 'admin.cloudflare-settings.index', 'match' => 'admin.cloudflare-settings.*'],
             ],
         ],
         [

@@ -53,27 +53,31 @@
                 </form>
             @endif
         </section>
-    @elseif ($order->isManualFulfilment() && $order->fulfilment_status !== 'completed' && $order->status === 'awaiting_manual_fulfilment')
+    @elseif ($order->isManualFulfilment() && $order->fulfilment_status !== 'completed' && ! $order->isAwaitingPayment())
         <section class="mb-6 rounded-3xl border border-sky-200 bg-sky-50 p-6 sm:p-8">
             <p class="text-xs font-semibold uppercase tracking-widest text-sky-700">{{ __('account.next_step') }}</p>
             <h2 class="mt-2 text-2xl font-bold text-black">{{ __('email.request_setup') }}</h2>
-            <p class="mt-2 body-text">{{ __('email.manual_fulfilment_queued', ['hours' => 4]) }}</p>
+            <p class="mt-2 body-text">
+                @if ($order->isPaid())
+                    {{ __('email.manual_fulfilment_paid', ['hours' => 4]) }}
+                @else
+                    {{ __('email.manual_fulfilment_queued', ['hours' => 4]) }}
+                @endif
+            </p>
             <p class="mt-3 text-sm font-semibold text-sky-800">{{ __('email.fulfilment_progress') }}: {{ $order->fulfilmentStatusLabel() }}</p>
             <p class="mt-1 text-sm text-sky-700/80">{{ __('email.fulfilment_sla') }}</p>
-        </section>
-    @elseif ($order->isManualFulfilment() && $order->isPaid() && $order->fulfilment_status !== 'completed')
-        <section class="mb-6 rounded-3xl border border-emerald-200 bg-emerald-50 p-6 sm:p-8">
-            <p class="text-xs font-semibold uppercase tracking-widest text-emerald-700">{{ __('account.next_step') }}</p>
-            <h2 class="mt-2 text-2xl font-bold text-black">{{ __('email.payment_confirmed') }}</h2>
-            <p class="mt-2 body-text">{{ __('email.manual_fulfilment_paid', ['hours' => 4]) }}</p>
-            <p class="mt-3 text-sm font-semibold text-emerald-800">{{ __('email.fulfilment_progress') }}: {{ $order->fulfilmentStatusLabel() }}</p>
-            <p class="mt-1 text-sm text-emerald-700/80">{{ __('email.fulfilment_sla') }}</p>
         </section>
     @elseif ($order->status === 'provisioned' || $order->trekmail_domain_id || ($order->isManualFulfilment() && $order->fulfilment_status === 'completed'))
         <section class="mb-6 rounded-3xl bg-rose p-6 text-white sm:p-8">
             <p class="text-xs font-semibold uppercase tracking-widest text-white/75">{{ __('account.next_step') }}</p>
             <h2 class="mt-2 text-2xl font-bold">{{ __('account.next_webmail_title') }}</h2>
-            <p class="mt-2 text-base font-light text-white/90">{{ __('email.invite_note') }}</p>
+            <p class="mt-2 text-base font-light text-white/90">
+                @if ($order->provider === 'lemonmail')
+                    {{ __('email.credentials_sent_note') }}
+                @else
+                    {{ __('email.invite_note') }}
+                @endif
+            </p>
             <a href="{{ $webmailUrl }}" target="_blank" rel="noopener noreferrer" class="btn mt-5 bg-white text-rose hover:bg-blush">
                 {{ __('email.open_webmail') }}
             </a>
@@ -101,7 +105,7 @@
             <p class="text-xs font-semibold uppercase tracking-widest text-white/75">{{ __('account.next_step') }}</p>
             <h2 class="mt-2 text-2xl font-bold">{{ __('account.next_dns_title') }}</h2>
             <p class="mt-2 text-base font-light text-white/90">{{ __('email.pending_setup') }}</p>
-            @if ($order->isPaid() && $order->status !== 'provisioned')
+            @if ($order->isPaid() && $order->status !== 'provisioned' && ! $order->isManualFulfilment())
                 <form method="POST" action="{{ route('email.provision', $order) }}" class="mt-5" data-submit-form>
                     @csrf
                     <x-ui.submit-button :label="__('email.retry_setup')" :loading="__('account.retrying_setup')" class="btn bg-white text-rose hover:bg-blush" />
@@ -152,23 +156,91 @@
     </div>
 
     @if (! empty($order->dns_records))
-        <section class="mt-6 rounded-3xl border border-border bg-white p-6 sm:p-8">
-            <h2 class="text-xl font-bold text-black">{{ __('email.dns_title') }}</h2>
-            <p class="mt-2 body-text">{{ __('email.dns_lede') }}</p>
+        <section class="mt-6 rounded-3xl border border-border bg-white p-6 sm:p-8" data-dns-checklist>
+            <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h2 class="text-xl font-bold text-black">{{ __('email.dns_title') }}</h2>
+                    <p class="mt-2 body-text">{{ __('email.dns_lede') }}</p>
+                </div>
+                <button type="button" class="btn btn-ghost text-sm" data-copy-all-dns>
+                    {{ __('email.dns_copy_all') }}
+                </button>
+            </div>
+
+            <div class="mt-4 space-y-3 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+                <p class="font-semibold">{{ __('email.dns_hints_title') }}</p>
+                <ul class="list-disc space-y-1 pl-5 text-sky-900/85">
+                    <li>{{ __('email.dns_hint_namecheap') }}</li>
+                    <li>{{ __('email.dns_hint_cloudflare') }}</li>
+                    <li>{{ __('email.dns_hint_manual') }}</li>
+                </ul>
+            </div>
+
             <div class="mt-4 overflow-x-auto rounded-2xl border border-border">
                 <table class="min-w-full text-left text-sm">
+                    <thead>
+                        <tr class="border-b border-border bg-blush-soft/40 text-xs uppercase tracking-widest text-on-blush/55">
+                            <th class="px-4 py-3 font-semibold">{{ __('email.dns_col_type') }}</th>
+                            <th class="px-4 py-3 font-semibold">{{ __('email.dns_col_host') }}</th>
+                            <th class="px-4 py-3 font-semibold">{{ __('email.dns_col_value') }}</th>
+                            <th class="px-4 py-3 font-semibold">{{ __('email.dns_col_priority') }}</th>
+                            <th class="px-4 py-3 font-semibold"></th>
+                        </tr>
+                    </thead>
                     <tbody>
                         @foreach ($order->dns_records as $record)
-                            @php $row = is_array($record) ? $record : ['value' => $record]; @endphp
-                            <tr class="border-b border-border last:border-0">
-                                <td class="px-4 py-3 font-semibold text-black">{{ $row['type'] ?? $row['record_type'] ?? 'DNS' }}</td>
-                                <td class="px-4 py-3 text-on-blush/80">{{ $row['name'] ?? $row['host'] ?? '@' }}</td>
-                                <td class="px-4 py-3 break-all font-mono text-xs text-black">{{ $row['value'] ?? $row['content'] ?? $row['data'] ?? json_encode($row) }}</td>
+                            @php
+                                $row = is_array($record) ? $record : ['value' => $record];
+                                $type = $row['type'] ?? $row['record_type'] ?? 'DNS';
+                                $host = $row['name'] ?? $row['host'] ?? '@';
+                                $value = $row['value'] ?? $row['content'] ?? $row['data'] ?? '';
+                                $priority = $row['priority'] ?? null;
+                                $copyText = $type === 'MX'
+                                    ? trim($type.' '.$host.' '.$value.' '.(string) ($priority ?: 10))
+                                    : trim($type.' '.$host.' '.$value);
+                            @endphp
+                            <tr class="border-b border-border last:border-0" data-dns-row data-copy-text="{{ e($copyText) }}">
+                                <td class="px-4 py-3 font-semibold text-black">{{ $type }}</td>
+                                <td class="px-4 py-3 text-on-blush/80">{{ $host }}</td>
+                                <td class="px-4 py-3 break-all font-mono text-xs text-black">{{ is_string($value) ? $value : json_encode($value) }}</td>
+                                <td class="px-4 py-3 text-on-blush/70">{{ $type === 'MX' ? ($priority ?: 10) : '—' }}</td>
+                                <td class="px-4 py-3 text-right">
+                                    <button type="button" class="text-xs font-semibold text-rose hover:underline" data-copy-dns>
+                                        {{ __('email.dns_copy') }}
+                                    </button>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
             </div>
+            <p class="mt-3 text-xs text-on-blush/55" data-copy-feedback hidden>{{ __('email.dns_copied') }}</p>
+            <script>
+                (() => {
+                    const root = document.querySelector('[data-dns-checklist]');
+                    if (!root) return;
+                    const feedback = root.querySelector('[data-copy-feedback]');
+                    const copy = async (text) => {
+                        try {
+                            await navigator.clipboard.writeText(text);
+                            if (feedback) {
+                                feedback.hidden = false;
+                                setTimeout(() => { feedback.hidden = true; }, 2000);
+                            }
+                        } catch (e) {}
+                    };
+                    root.querySelectorAll('[data-copy-dns]').forEach((btn) => {
+                        btn.addEventListener('click', () => {
+                            const row = btn.closest('[data-dns-row]');
+                            if (row?.dataset.copyText) copy(row.dataset.copyText);
+                        });
+                    });
+                    root.querySelector('[data-copy-all-dns]')?.addEventListener('click', () => {
+                        const lines = [...root.querySelectorAll('[data-dns-row]')].map((row) => row.dataset.copyText).filter(Boolean);
+                        if (lines.length) copy(lines.join('\n'));
+                    });
+                })();
+            </script>
         </section>
     @endif
 @endsection

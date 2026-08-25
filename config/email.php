@@ -6,6 +6,34 @@ return [
 
     'product_name' => 'Lemon Mail',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Lemon Mail DNS template (TrekMail)
+    |--------------------------------------------------------------------------
+    | Used for the customer checklist and Cloudflare one-click apply.
+    | Update values if TrekMail changes their MX / SPF / DKIM hosts.
+    */
+    'dns_template' => [
+        [
+            'type' => 'MX',
+            'name' => '@',
+            'value' => 'mail.trekmail.net',
+            'priority' => 10,
+        ],
+        [
+            'type' => 'TXT',
+            'name' => '@',
+            'value' => 'v=spf1 include:_spf.trekmail.net ~all',
+            'priority' => null,
+        ],
+        [
+            'type' => 'TXT',
+            'name' => '_dmarc',
+            'value' => 'v=DMARC1; p=none;',
+            'priority' => null,
+        ],
+    ],
+
     'billing_cycles' => [
         [
             'key' => 'monthly',
@@ -33,7 +61,7 @@ return [
         [
             'key' => 'solo',
             'provider' => 'lemonmail',
-            'fulfilment_mode' => 'auto',
+            'fulfilment_mode' => 'manual',
             'mailboxes' => 1,
             'monthly_usd' => 4.99,
             'featured' => false,
@@ -41,7 +69,7 @@ return [
         [
             'key' => 'team',
             'provider' => 'lemonmail',
-            'fulfilment_mode' => 'auto',
+            'fulfilment_mode' => 'manual',
             'mailboxes' => 5,
             'monthly_usd' => 19.99,
             'featured' => true,
@@ -49,7 +77,7 @@ return [
         [
             'key' => 'business',
             'provider' => 'lemonmail',
-            'fulfilment_mode' => 'auto',
+            'fulfilment_mode' => 'manual',
             'mailboxes' => 10,
             'monthly_usd' => 34.99,
             'featured' => false,
@@ -57,7 +85,7 @@ return [
         [
             'key' => 'scale',
             'provider' => 'lemonmail',
-            'fulfilment_mode' => 'auto',
+            'fulfilment_mode' => 'manual',
             'mailboxes' => 25,
             'monthly_usd' => 59.99,
             'featured' => false,
