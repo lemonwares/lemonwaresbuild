@@ -30,7 +30,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'checkout_url',
     'trekmail_domain_id',
     'dns_records',
+    'dns_provider',
+    'dns_applied_at',
     'provision_error',
+    'webmail_url',
     'provisioned_at',
     'period_starts_at',
     'period_ends_at',
@@ -66,6 +69,7 @@ class EmailOrder extends Model
             'period_starts_at' => 'datetime',
             'period_ends_at' => 'datetime',
             'deactivated_at' => 'datetime',
+            'dns_applied_at' => 'datetime',
         ];
     }
 
@@ -82,25 +86,56 @@ class EmailOrder extends Model
     public function isPaid(): bool
     {
         return in_array($this->payment_status, ['successful', 'completed'], true)
-            || in_array($this->status, ['paid', 'provisioned', 'paid_pending_setup', 'deactivated', 'expired'], true);
+            || in_array($this->status, [
+                'paid',
+                'provisioned',
+                'paid_pending_setup',
+                'deactivated',
+                'expired',
+            ], true);
+    }
+
+    /**
+     * Lemon Mail is ops-manual but still paid at checkout.
+     * Partner suites (Titan/GWS/MS365) stay unpaid queue tickets.
+     */
+    public function requiresCheckoutPayment(): bool
+    {
+        return $this->provider === 'lemonmail' || $this->fulfilment_mode !== 'manual';
     }
 
     public function isAwaitingPayment(): bool
     {
-        if ($this->fulfilment_mode === 'manual') {
-            return false;
-        }
-
         if ($this->isDeactivated()) {
             return false;
         }
 
-        return ! $this->isPaid() && $this->status !== 'cancelled';
+        if (! $this->requiresCheckoutPayment()) {
+            return false;
+        }
+
+        if ($this->status === 'cancelled' || $this->status === 'awaiting_manual_fulfilment') {
+            return false;
+        }
+
+        return ! in_array($this->payment_status, ['successful', 'completed'], true)
+            && ! in_array($this->status, ['paid', 'provisioned', 'paid_pending_setup', 'deactivated', 'expired'], true);
     }
 
     public function isManualFulfilment(): bool
     {
         return $this->fulfilment_mode === 'manual';
+    }
+
+    public function resolvedWebmailUrl(): string
+    {
+        $stored = trim((string) $this->webmail_url);
+
+        if ($stored !== '') {
+            return $stored;
+        }
+
+        return \App\Support\TrekMailSettings::webmailUrl();
     }
 
     public function isDeactivated(): bool

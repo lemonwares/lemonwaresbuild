@@ -29,6 +29,13 @@ class EmailCatalogSync
 
             if ($forceDefaults) {
                 $row->update($defaults);
+            } else {
+                // Keep admin-edited pricing, but align fulfilment mode from config
+                // so Lemon Mail switches to manual without a forced reseed.
+                $row->update([
+                    'provider' => $defaults['provider'],
+                    'fulfilment_mode' => $defaults['fulfilment_mode'],
+                ]);
             }
         }
 

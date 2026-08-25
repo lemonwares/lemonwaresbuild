@@ -4,9 +4,12 @@ namespace Tests\Feature;
 
 use App\Models\EmailOrder;
 use App\Models\User;
+use App\Notifications\MailboxCredentialsNotification;
 use App\Support\EmailProvisioner;
+use App\Support\FlutterwavePayment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class EmailAccountTest extends TestCase
@@ -427,6 +430,10 @@ class EmailAccountTest extends TestCase
         $this->assertSame('acme.ng', $order->domain);
         $this->assertSame('hello@acme.ng', $order->mailboxes()->first()?->address);
         $this->assertSame('awaiting_payment', $order->status);
+        $this->assertSame('manual', $order->fulfilment_mode);
+        $this->assertSame('queued', $order->fulfilment_status);
+        $this->assertTrue($order->requiresCheckoutPayment());
+        $this->assertTrue($order->isAwaitingPayment());
         $this->assertSame('solo', $order->plan_key);
     }
 
@@ -497,6 +504,8 @@ class EmailAccountTest extends TestCase
             'user_id' => $user->id,
             'plan_key' => 'solo',
             'plan_name' => 'Solo',
+            'provider' => 'lemonmail',
+            'fulfilment_mode' => 'auto',
             'domain' => 'acme.ng',
             'mailbox_count' => 1,
             'billing_cycle' => 'monthly',
@@ -520,11 +529,15 @@ class EmailAccountTest extends TestCase
 
     public function test_provisioner_creates_domain_and_mailbox_via_trekmail(): void
     {
+        Notification::fake();
+
         $user = User::factory()->create(['email' => 'owner@example.com']);
         $order = EmailOrder::create([
             'user_id' => $user->id,
             'plan_key' => 'solo',
             'plan_name' => 'Solo',
+            'provider' => 'lemonmail',
+            'fulfilment_mode' => 'auto',
             'domain' => 'acme.ng',
             'mailbox_count' => 1,
             'billing_cycle' => 'monthly',
@@ -598,6 +611,116 @@ class EmailAccountTest extends TestCase
         $this->assertSame('provisioned', $fresh->status);
         $this->assertSame(44, (int) $fresh->trekmail_domain_id);
         $this->assertSame('invited', $fresh->mailboxes->first()->status);
+    }
+
+    public function test_lemonmail_payment_queues_manual_fulfilment_without_trekmail(): void
+    {
+        Notification::fake();
+
+        $user = User::factory()->create();
+        $order = EmailOrder::create([
+            'user_id' => $user->id,
+            'plan_key' => 'solo',
+            'plan_name' => 'Solo',
+            'provider' => 'lemonmail',
+            'fulfilment_mode' => 'manual',
+            'fulfilment_status' => 'queued',
+            'domain' => 'acme.ng',
+            'mailbox_count' => 1,
+            'billing_cycle' => 'monthly',
+            'amount_usd' => 4.99,
+            'amount_ngn' => 7485,
+            'status' => 'awaiting_payment',
+            'payment_reference' => 'LW-MAIL-1-test',
+        ]);
+        $order->mailboxes()->create([
+            'local_part' => 'hello',
+            'address' => 'hello@acme.ng',
+            'status' => 'pending',
+        ]);
+
+        Http::fake();
+
+        config(['services.trekmail.token' => 'tm_should_not_be_used']);
+
+        $result = FlutterwavePayment::confirmEmailOrderPayment($order->fresh(), [
+            'id' => 991,
+            'tx_ref' => 'LW-MAIL-1-test',
+            'amount' => 7485,
+            'currency' => 'NGN',
+            'status' => 'successful',
+            'meta' => [
+                'email_order_id' => $order->id,
+                'payment_kind' => 'initial',
+            ],
+        ]);
+
+        $this->assertTrue($result['ok']);
+        $fresh = $order->fresh('mailboxes');
+        $this->assertSame('awaiting_manual_fulfilment', $fresh->status);
+        $this->assertSame('successful', $fresh->payment_status);
+        $this->assertSame('queued', $fresh->fulfilment_status);
+        $this->assertSame('pending', $fresh->mailboxes->first()->status);
+        $this->assertNull($fresh->trekmail_domain_id);
+
+        Http::assertNotSent(fn ($request) => str_contains($request->url(), 'trekmail'));
+    }
+
+    public function test_admin_can_send_lemonmail_credentials_without_storing_passwords(): void
+    {
+        Notification::fake();
+
+        $customer = User::factory()->create(['email' => 'owner@acme.ng']);
+        $order = EmailOrder::create([
+            'user_id' => $customer->id,
+            'plan_key' => 'solo',
+            'plan_name' => 'Solo',
+            'provider' => 'lemonmail',
+            'fulfilment_mode' => 'manual',
+            'fulfilment_status' => 'queued',
+            'domain' => 'acme.ng',
+            'mailbox_count' => 1,
+            'billing_cycle' => 'monthly',
+            'amount_usd' => 4.99,
+            'amount_ngn' => 7485,
+            'status' => 'awaiting_manual_fulfilment',
+            'payment_status' => 'successful',
+            'period_starts_at' => now(),
+            'period_ends_at' => now()->addMonth(),
+        ]);
+        $mailbox = $order->mailboxes()->create([
+            'local_part' => 'hello',
+            'address' => 'hello@acme.ng',
+            'status' => 'pending',
+        ]);
+
+        $this->withSession(['admin_authenticated' => true])
+            ->post(route('admin.email-orders.credentials', $order), [
+                'webmail_url' => 'https://mail.lemonwares.com',
+                'note' => 'DNS is live.',
+                'passwords' => [
+                    $mailbox->id => 'TempPass123!',
+                ],
+            ])
+            ->assertRedirect(route('admin.email-orders.show', $order));
+
+        $fresh = $order->fresh('mailboxes');
+        $this->assertSame('provisioned', $fresh->status);
+        $this->assertSame('completed', $fresh->fulfilment_status);
+        $this->assertSame('https://mail.lemonwares.com', $fresh->webmail_url);
+        $this->assertSame('created', $fresh->mailboxes->first()->status);
+        $this->assertDatabaseMissing('email_mailboxes', [
+            'id' => $mailbox->id,
+            'error_message' => 'TempPass123!',
+        ]);
+        $this->assertNull($fresh->fulfilment_notes);
+
+        Notification::assertSentTo($customer, MailboxCredentialsNotification::class, function (MailboxCredentialsNotification $notification) {
+            return $notification->webmailUrl === 'https://mail.lemonwares.com'
+                && $notification->mailboxes[0]['address'] === 'hello@acme.ng'
+                && $notification->mailboxes[0]['password'] === 'TempPass123!'
+                && $notification->note === 'DNS is live.';
+        });
     }
 
     public function test_header_login_is_on_the_homepage(): void

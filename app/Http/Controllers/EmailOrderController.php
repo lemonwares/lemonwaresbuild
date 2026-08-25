@@ -250,6 +250,7 @@ class EmailOrderController extends Controller
             $provider = (string) ($plan['provider'] ?? 'lemonmail');
             $fulfilmentMode = (string) ($plan['fulfilment_mode'] ?? 'auto');
             $isManual = $fulfilmentMode === 'manual';
+            $requiresPayment = $provider === 'lemonmail' || ! $isManual;
 
             $order = EmailOrder::create([
                 'user_id' => $user->id,
@@ -264,7 +265,7 @@ class EmailOrderController extends Controller
                 'billing_cycle' => $cycle,
                 'amount_usd' => $amountUsd,
                 'amount_ngn' => $amountNgn,
-                'status' => $isManual ? 'awaiting_manual_fulfilment' : 'awaiting_payment',
+                'status' => $requiresPayment ? 'awaiting_payment' : 'awaiting_manual_fulfilment',
                 'ip_address' => $request->ip(),
             ]);
 
@@ -280,7 +281,7 @@ class EmailOrderController extends Controller
             return $order;
         });
 
-        if ($order->isManualFulfilment()) {
+        if (! $order->requiresCheckoutPayment()) {
             return redirect()
                 ->route('account.email.show', $order)
                 ->with('email_feedback', [
@@ -373,7 +374,7 @@ class EmailOrderController extends Controller
 
         return view('pages.account-email-order', [
             'order' => $order,
-            'webmailUrl' => TrekMailClient::webmailUrl(),
+            'webmailUrl' => $order->resolvedWebmailUrl(),
         ]);
     }
 
@@ -493,6 +494,8 @@ class EmailOrderController extends Controller
     {
         abort_unless($order->user_id === $request->user()->id, 404);
         abort_unless($order->isPaid(), 404);
+        abort_unless(! $order->isManualFulfilment(), 404);
+        abort_unless(! $order->isDeactivated(), 404);
 
         EmailProvisioner::provision($order);
 

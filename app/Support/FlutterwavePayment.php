@@ -390,7 +390,7 @@ class FlutterwavePayment
 
         $order->update([
             'payment_status' => 'successful',
-            'status' => 'paid',
+            'status' => $order->isManualFulfilment() ? 'awaiting_manual_fulfilment' : 'paid',
             'flutterwave_transaction_id' => $transactionId,
         ]);
 
@@ -406,7 +406,7 @@ class FlutterwavePayment
         return [
             'ok' => true,
             'message' => $order->isManualFulfilment()
-                ? __('email.manual_fulfilment_paid')
+                ? __('email.manual_fulfilment_paid', ['hours' => 4])
                 : __('email.payment_confirmed'),
         ];
     }
