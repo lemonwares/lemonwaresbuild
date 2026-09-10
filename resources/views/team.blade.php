@@ -8,74 +8,92 @@
         :eyebrow="__('site.pages.team_eyebrow')"
         :title="__('site.pages.team_title')"
         :lede="__('site.pages.team_lede')"
-        cta-href="#page-content"
+        cta-href="#team-grid"
         :cta-label="__('site.pages.team_cta')"
-        :art="true"
-        art-src="images/heroes/team.webp"
     />
 
-    <x-layout.page-content wide>
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            @forelse ($members as $member)
-                <article class="card-tech p-6 text-center">
-                    @if ($member->photo_path)
-                        <img
-                            src="{{ asset('storage/' . $member->photo_path) }}"
-                            alt="{{ $member->name }}"
-                            class="mx-auto mb-4 size-16 rounded-full object-cover"
-                            loading="lazy"
-                        />
-                    @else
-                        <span class="mx-auto mb-4 inline-flex size-16 items-center justify-center rounded-full bg-blush text-xl font-bold text-rose">
-                            {{ \Illuminate\Support\Str::of($member->name)->explode(' ')->map(fn ($part) => \Illuminate\Support\Str::substr($part, 0, 1))->take(2)->join('') }}
-                        </span>
-                    @endif
+    <section id="team-grid" class="border-t bg-white" style="border-color:var(--color-border);">
+        <div class="container-page py-16 sm:py-20">
 
-                    <h2 class="mb-1 text-lg font-semibold text-black">{{ $member->name }}</h2>
-                    <p class="body-text">{{ $member->role }}</p>
-                    @if ($member->quote)
-                        <p class="mt-3 italic body-text">"{{ $member->quote }}"</p>
-                    @endif
-                    @if ($member->bio)
-                        <p class="mt-3 body-text">{{ $member->bio }}</p>
-                    @endif
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                @forelse ($members as $member)
+                    <article class="group relative flex flex-col overflow-hidden rounded-2xl border transition hover:-translate-y-0.5 hover:shadow-lg"
+                             style="border-color:var(--color-border); background:var(--color-surface);">
 
-                    @if ($member->x_url || $member->linkedin_url || $member->instagram_url || $member->facebook_url)
-                        <div class="mt-5 flex items-center justify-center gap-3">
-                            @if ($member->x_url)
-                                <a href="{{ $member->x_url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ $member->name }} on X" class="inline-flex size-9 items-center justify-center rounded-full border border-border text-black transition hover:border-rose hover:text-rose">
-                                    <x-ui.icons.x class="size-4" />
-                                </a>
+                        {{-- Avatar / photo --}}
+                        <div class="flex items-center gap-4 border-b p-5"
+                             style="border-color:var(--color-border); background:var(--color-surface-2);">
+                            @if ($member->photo_path)
+                                <img src="{{ asset('storage/' . $member->photo_path) }}"
+                                     alt="{{ $member->name }}"
+                                     class="size-14 rounded-full object-cover ring-2"
+                                     style="ring-color:var(--color-border);"
+                                     loading="lazy">
+                            @else
+                                <span class="inline-flex size-14 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white"
+                                      style="background:var(--color-red);">
+                                    {{ \Illuminate\Support\Str::of($member->name)->explode(' ')->map(fn($p) => \Illuminate\Support\Str::substr($p,0,1))->take(2)->join('') }}
+                                </span>
                             @endif
-                            @if ($member->linkedin_url)
-                                <a href="{{ $member->linkedin_url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ $member->name }} on LinkedIn" class="inline-flex size-9 items-center justify-center rounded-full border border-border text-black transition hover:border-rose hover:text-rose">
-                                    <x-ui.icons.linkedin class="size-4" />
-                                </a>
+                            <div class="min-w-0">
+                                <p class="truncate text-sm font-bold" style="color:var(--color-ink);">{{ $member->name }}</p>
+                                <p class="mt-0.5 truncate text-xs font-medium" style="color:var(--color-red);">{{ $member->role }}</p>
+                            </div>
+                        </div>
+
+                        {{-- Body --}}
+                        <div class="flex flex-1 flex-col gap-3 p-5">
+                            @if ($member->quote)
+                                <p class="text-sm font-light italic leading-relaxed" style="color:var(--color-ink-2);">
+                                    "{{ $member->quote }}"
+                                </p>
                             @endif
-                            @if ($member->instagram_url)
-                                <a href="{{ $member->instagram_url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ $member->name }} on Instagram" class="inline-flex size-9 items-center justify-center rounded-full border border-border text-black transition hover:border-rose hover:text-rose">
-                                    <x-ui.icons.instagram class="size-4" />
-                                </a>
-                            @endif
-                            @if ($member->facebook_url)
-                                <a href="{{ $member->facebook_url }}" target="_blank" rel="noopener noreferrer" aria-label="{{ $member->name }} on Facebook" class="inline-flex size-9 items-center justify-center rounded-full border border-border text-black transition hover:border-rose hover:text-rose">
-                                    <x-ui.icons.facebook class="size-4" />
-                                </a>
+                            @if ($member->bio)
+                                <p class="text-sm font-light leading-relaxed" style="color:var(--color-ink-3);">
+                                    {{ $member->bio }}
+                                </p>
                             @endif
                         </div>
-                    @endif
-                </article>
-            @empty
-                <article class="card-tech p-6 text-center sm:col-span-2 lg:col-span-3">
-                    <p class="body-text">{{ __('pages.team.empty') }}</p>
-                </article>
-            @endforelse
-        </div>
 
-        <p class="mt-10 text-center body-text">
-            {{ __('pages.team.need_help') }}
-            <a href="{{ route('contact') }}" class="link">{{ __('pages.team.get_in_touch') }}</a>
-            {{ __('pages.team.respond_quickly') }}
-        </p>
-    </x-layout.page-content>
+                        {{-- Social links --}}
+                        @if ($member->x_url || $member->linkedin_url || $member->instagram_url || $member->facebook_url)
+                            <div class="flex items-center gap-2 border-t px-5 py-4"
+                                 style="border-color:var(--color-border);">
+                                @foreach ([
+                                    ['url' => $member->x_url,         'icon' => 'x',         'label' => $member->name . ' on X'],
+                                    ['url' => $member->linkedin_url,  'icon' => 'linkedin',  'label' => $member->name . ' on LinkedIn'],
+                                    ['url' => $member->instagram_url, 'icon' => 'instagram', 'label' => $member->name . ' on Instagram'],
+                                    ['url' => $member->facebook_url,  'icon' => 'facebook',  'label' => $member->name . ' on Facebook'],
+                                ] as $social)
+                                    @if ($social['url'])
+                                        <a href="{{ $social['url'] }}" target="_blank" rel="noopener noreferrer"
+                                           aria-label="{{ $social['label'] }}"
+                                           class="inline-flex size-8 items-center justify-center rounded-full border transition hover:border-red hover:text-red"
+                                           style="border-color:var(--color-border); color:var(--color-ink-3);">
+                                            <x-dynamic-component :component="'ui.icons.' . $social['icon']" class="size-3.5" />
+                                        </a>
+                                    @endif
+                                @endforeach
+                            </div>
+                        @endif
+                    </article>
+                @empty
+                    <div class="rounded-2xl border p-8 text-center sm:col-span-2 lg:col-span-3"
+                         style="border-color:var(--color-border); background:var(--color-surface-2);">
+                        <p class="body-text">{{ __('pages.team.empty') }}</p>
+                    </div>
+                @endforelse
+            </div>
+
+            {{-- Help CTA --}}
+            <p class="mt-12 text-center text-sm font-light" style="color:var(--color-ink-3);">
+                {{ __('pages.team.need_help') }}
+                <a href="{{ route('contact') }}"
+                   class="font-semibold transition hover:underline"
+                   style="color:var(--color-red);">{{ __('pages.team.get_in_touch') }}</a>
+                {{ __('pages.team.respond_quickly') }}
+            </p>
+
+        </div>
+    </section>
 @endsection
