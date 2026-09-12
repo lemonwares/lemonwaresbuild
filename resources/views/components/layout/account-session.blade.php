@@ -1,26 +1,18 @@
 @props([
-    'tone'        => 'header',
+    'tone' => 'link',
     'accountLink' => true,
 ])
 
 @php
-    $ctaClass   = 'nav-contact';
-    $ghostClass = 'inline-flex shrink-0 items-center whitespace-nowrap rounded-full border
-                   px-4 py-2 text-sm font-semibold transition hover:border-red hover:text-red'
-                   . ' border-[var(--color-border-2)] text-[var(--color-ink-2)]';
-
-    if ($tone === 'button') {
-        $ctaClass  = 'inline-flex shrink-0 rounded-full border border-[var(--color-border-2)]
-                      px-4 py-2 text-sm font-semibold text-[var(--color-ink)] transition
-                      hover:border-red hover:text-red';
-        $ghostClass = $ctaClass;
-    }
+    $openClass = $tone === 'button'
+        ? 'inline-flex shrink-0 rounded-full border border-border px-4 py-2 text-sm font-semibold text-black transition hover:border-rose hover:text-rose'
+        : 'nav-contact cursor-pointer border-0 bg-transparent p-0';
 @endphp
 
-<div {{ $attributes->class('flex shrink-0 items-center gap-2') }}>
+<div {{ $attributes->class('flex shrink-0 items-center gap-3') }}>
     @auth
         @if ($accountLink)
-            <a href="{{ route('account.show') }}" class="{{ $ghostClass }}">
+            <a href="{{ route('account.show') }}" class="nav-contact">
                 {{ __('account.account_title') }}
             </a>
         @endif
@@ -31,10 +23,10 @@
             :confirm-label="__('account.sign_out_confirm_yes')"
             :cancel-label="__('account.cancel')"
             :open-label="__('account.sign_out')"
-            :open-class="$ctaClass"
+            :open-class="$openClass"
         />
     @else
-        <a href="{{ route('login') }}" class="{{ $ctaClass }}">
+        <a href="{{ route('login') }}" class="nav-contact">
             {{ __('site.common.client_login') }}
         </a>
     @endauth

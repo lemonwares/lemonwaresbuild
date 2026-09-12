@@ -1,132 +1,93 @@
 @props([
-    'eyebrow'  => null,
+    'eyebrow' => null,
     'title',
-    'lede'     => null,
-    'ctaHref'  => null,
+    'lede' => null,
+    'ctaHref' => null,
     'ctaLabel' => null,
-    'art'      => false,
-    'artSrc'   => 'hero-cutout.webp',
-    'artAlt'   => '',
+    'art' => false,
+    'artSrc' => 'images/hero-cutout.webp',
+    'artAlt' => '',
 ])
 
 @php
     $artEnabled = (bool) $art;
-    $artWebp    = $artEnabled ? asset($artSrc) : null;
-    $artPng     = $artEnabled ? asset(preg_replace('/\.webp$/i', '.png', $artSrc)) : null;
+    $artWebp = $artEnabled ? asset($artSrc) : null;
+    $artPng = $artEnabled
+        ? asset(preg_replace('/\.webp$/i', '.png', $artSrc) ?: $artSrc)
+        : null;
 @endphp
 
-<section {{ $attributes->class(['page-hero-section relative overflow-hidden']) }}>
-
-    {{-- Subtle dot-grid — matches homepage hero texture --}}
-    <div
-        class="pointer-events-none absolute inset-0"
-        aria-hidden="true"
-        style="background-image:radial-gradient(circle, var(--color-border) 1px, transparent 1px);
-               background-size:28px 28px; opacity:0.4;"
-    ></div>
-
-    {{-- Soft red glow top-right --}}
-    <div
-        class="pointer-events-none absolute right-0 top-0 h-full w-1/2"
-        aria-hidden="true"
-        style="background:radial-gradient(ellipse 55% 55% at 80% 15%,
-               rgba(220,38,38,0.07) 0%, transparent 70%);"
-    ></div>
-
-    <div class="container-page relative z-10">
-
-        @if ($artEnabled)
-            {{-- ── Split layout when art is present ── --}}
-            <div class="grid items-center gap-10 py-16 sm:py-20 lg:grid-cols-2 lg:gap-14 lg:py-24">
-
-                {{-- Copy --}}
-                <div>
-                    @if ($eyebrow)
-                        <p class="section-label mb-4">{{ $eyebrow }}</p>
-                    @endif
-
-                    <h1 class="mb-5 text-4xl font-bold tracking-tight sm:text-5xl lg:text-[3.25rem] lg:leading-[1.08]"
-                        style="color:var(--color-ink);">
+<section {{ $attributes->class(['bg-white', 'hero-section' => $artEnabled]) }}>
+    <div @class([
+        'container-page',
+        'hero-container' => $artEnabled,
+        'py-10 sm:py-14' => ! $artEnabled,
+        'hero-container-pad' => $artEnabled,
+    ])>
+        <div @class(['hero-shell' => $artEnabled, 'relative' => $artEnabled])>
+            <div @class([
+                'relative rounded-4xl bg-rose px-8 py-16 text-white sm:px-14 sm:py-24',
+                'overflow-hidden' => ! $artEnabled,
+                'hero-card' => $artEnabled,
+            ])>
+                <div class="hero-copy relative z-10 max-w-xl">
+                    <p class="mb-4 text-base font-medium uppercase tracking-[0.18em] text-white/80">
+                        {{ $eyebrow ?? config('site.tagline') }}
+                    </p>
+                    <h1 class="mb-4 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
                         {{ $title }}
                     </h1>
-
                     @if ($lede)
-                        <p class="lede mb-8">{{ $lede }}</p>
+                        <p class="mb-10 text-lg font-light text-white/90">
+                            {{ $lede }}
+                        </p>
                     @endif
-
                     @if ($ctaHref && $ctaLabel)
-                        <a href="{{ $ctaHref }}"
-                           class="inline-flex items-center gap-2 text-sm font-semibold transition"
-                           style="color:var(--color-ink-3);">
-                            <span class="inline-flex size-8 items-center justify-center rounded-full border transition"
-                                  style="border-color:var(--color-border-2);">
-                                <x-ui.icons.arrow-down class="size-3.5 animate-bounce" />
-                            </span>
+                        <a href="{{ $ctaHref }}" class="inline-flex shrink-0 items-center gap-2 whitespace-nowrap text-base font-medium text-white transition hover:text-blush">
+                            <x-ui.icons.arrow-down class="size-4 animate-bounce" />
                             {{ $ctaLabel }}
                         </a>
                     @endif
 
-                    {{-- Mobile art --}}
-                    <div class="relative mt-10 block lg:hidden" aria-hidden="true">
-                        <div class="absolute inset-0 rounded-full blur-[70px]"
-                             style="background:rgba(220,38,38,0.09);"></div>
-                        <picture>
-                            <source srcset="{{ $artWebp }}" type="image/webp">
-                            <img src="{{ $artPng }}" alt="{{ $artAlt }}"
-                                 class="hero-art relative z-10 mx-auto w-[min(100%,16rem)]"
-                                 loading="eager" decoding="async">
-                        </picture>
-                    </div>
+                    @if ($artEnabled)
+                        <div class="hero-breakout-mobile mt-10 lg:hidden">
+                            <picture>
+                                <source srcset="{{ $artWebp }}" type="image/webp">
+                                <img
+                                    src="{{ $artPng }}"
+                                    alt="{{ $artAlt }}"
+                                    class="hero-breakout-img mx-auto w-[min(100%,18rem)]"
+                                    loading="eager"
+                                    decoding="async"
+                                >
+                            </picture>
+                        </div>
+                    @endif
                 </div>
 
-                {{-- Desktop art --}}
-                <div class="pointer-events-none relative hidden lg:flex lg:items-center lg:justify-end"
-                     aria-hidden="true">
-                    <div class="absolute left-1/2 top-1/2 size-[22rem] -translate-x-1/2 -translate-y-1/2
-                                rounded-full blur-[90px]"
-                         style="background:rgba(220,38,38,0.09);"></div>
+                @unless ($artEnabled)
+                    <div class="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 lg:block" aria-hidden="true">
+                        <div class="absolute bottom-0 right-0 h-[120%] w-[85%] rounded-tl-[4rem] border-[28px] border-white/15"></div>
+                        <div class="absolute bottom-0 right-0 h-[95%] w-[65%] rounded-tl-[3rem] border-[28px] border-white/20"></div>
+                        <div class="absolute bottom-0 right-0 h-[70%] w-[45%] rounded-tl-[2rem] border-[28px] border-white/25"></div>
+                    </div>
+                @endunless
+            </div>
+
+            @if ($artEnabled)
+                <div class="hero-breakout pointer-events-none hidden lg:block" aria-hidden="true">
                     <picture>
                         <source srcset="{{ $artWebp }}" type="image/webp">
-                        <img src="{{ $artPng }}" alt=""
-                             class="hero-art relative z-10 w-full max-w-[26rem]"
-                             loading="eager" decoding="async" fetchpriority="high">
+                        <img
+                            src="{{ $artPng }}"
+                            alt=""
+                            class="hero-breakout-img"
+                            loading="eager"
+                            decoding="async"
+                        >
                     </picture>
                 </div>
-
-            </div>
-
-        @else
-            {{-- ── Single-column layout (no art) ── --}}
-            <div class="max-w-2xl py-14 sm:py-18 lg:py-20">
-
-                @if ($eyebrow)
-                    <p class="section-label mb-4">{{ $eyebrow }}</p>
-                @endif
-
-                <h1 class="mb-5 text-4xl font-bold tracking-tight sm:text-5xl"
-                    style="color:var(--color-ink);">
-                    {{ $title }}
-                </h1>
-
-                @if ($lede)
-                    <p class="lede mb-8">{{ $lede }}</p>
-                @endif
-
-                @if ($ctaHref && $ctaLabel)
-                    <a href="{{ $ctaHref }}"
-                       class="inline-flex items-center gap-2 text-sm font-semibold transition"
-                       style="color:var(--color-ink-3);">
-                        <span class="inline-flex size-8 items-center justify-center rounded-full border transition"
-                              style="border-color:var(--color-border-2);">
-                            <x-ui.icons.arrow-down class="size-3.5 animate-bounce" />
-                        </span>
-                        {{ $ctaLabel }}
-                    </a>
-                @endif
-
-            </div>
-        @endif
-
+            @endif
+        </div>
     </div>
-
 </section>

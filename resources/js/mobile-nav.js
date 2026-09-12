@@ -1,84 +1,121 @@
-/* ─────────────────────────────────────────────────────────
-   Mobile navigation — white slide-down overlay
-───────────────────────────────────────────────────────── */
+const syncSiteHeaderHeight = () => {
+    const bar =
+        document.querySelector('[data-site-header-bar]') ||
+        document.querySelector('.site-header-fixed');
 
-const syncHeaderHeight = () => {
-    const bar = document.querySelector('[data-site-header-bar]');
-    if (!bar) return;
-    const h = Math.ceil(bar.getBoundingClientRect().height);
-    document.documentElement.style.setProperty('--site-header-height', `${h}px`);
+    if (! bar) {
+        return 76;
+    }
+
+    const height = Math.ceil(bar.getBoundingClientRect().height);
+    document.documentElement.style.setProperty('--site-header-height', `${height}px`);
+
+    return height;
 };
 
-syncHeaderHeight();
-window.addEventListener('resize', syncHeaderHeight, { passive: true });
+document.querySelectorAll('[data-site-header-spacer]').forEach((spacer) => {
+    // Height is driven by --site-header-height on :root
+    spacer.style.height = 'var(--site-header-height, 4.75rem)';
+});
 
-document.querySelectorAll('[data-site-header]').forEach((root) => {
-    const toggle = root.querySelector('[data-mobile-nav-toggle]');
-    const panel  = root.querySelector('[data-mobile-nav]');
-    if (!toggle || !panel) return;
+syncSiteHeaderHeight();
+window.addEventListener('resize', syncSiteHeaderHeight);
 
-    // Portal panel to <body> so fixed header blur never clips it
-    if (panel.parentElement !== document.body) document.body.appendChild(panel);
+document.querySelectorAll('[data-site-header]').forEach((header) => {
+    const toggle = header.querySelector('[data-mobile-nav-toggle]');
+    const panel = header.querySelector('[data-mobile-nav]');
+    const openIcon = header.querySelector('[data-mobile-nav-open-icon]');
+    const closeIcon = header.querySelector('[data-mobile-nav-close-icon]');
 
-    const openLabel  = toggle.dataset.openLabel  || 'Open menu';
-    const closeLabel = toggle.dataset.closeLabel || 'Close menu';
+    if (! toggle || ! panel) {
+        return;
+    }
+
+    // Workaround: keep the fullscreen menu outside the fixed/blurred header
+    // so position:fixed is always relative to the viewport.
+    if (panel.parentElement !== document.body) {
+        document.body.appendChild(panel);
+    }
+
+    const openLabel = toggle.getAttribute('data-open-label') || toggle.getAttribute('aria-label') || 'Open menu';
+    const closeLabel = toggle.getAttribute('data-close-label') || 'Close menu';
     let closing = false;
 
     const setOpen = (open) => {
         if (open) {
             closing = false;
-            syncHeaderHeight();
+            syncSiteHeaderHeight();
             toggle.setAttribute('aria-expanded', 'true');
             toggle.setAttribute('aria-label', closeLabel);
             panel.setAttribute('aria-hidden', 'false');
+            openIcon?.classList.add('hidden');
+            closeIcon?.classList.remove('hidden');
             document.body.classList.add('mobile-nav-locked');
+
             panel.classList.remove('is-open');
-            void panel.offsetWidth; // force reflow
-            requestAnimationFrame(() => panel.classList.add('is-open'));
+            void panel.offsetWidth;
+            requestAnimationFrame(() => {
+                panel.classList.add('is-open');
+            });
+
             return;
         }
 
-        if (toggle.getAttribute('aria-expanded') !== 'true' || closing) return;
+        if (toggle.getAttribute('aria-expanded') !== 'true' || closing) {
+            return;
+        }
+
         closing = true;
         toggle.setAttribute('aria-expanded', 'false');
         toggle.setAttribute('aria-label', openLabel);
-        document.body.classList.remove('mobile-nav-locked');
+        openIcon?.classList.remove('hidden');
+        closeIcon?.classList.add('hidden');
         panel.classList.remove('is-open');
+        document.body.classList.remove('mobile-nav-locked');
 
-        const done = (e) => {
-            if (e && e.target !== panel) return;
-            if (e && e.propertyName && e.propertyName !== 'transform') return;
+        const finishClose = (event) => {
+            if (event && event.target !== panel) {
+                return;
+            }
+
+            if (event && event.propertyName && event.propertyName !== 'transform') {
+                return;
+            }
+
             panel.setAttribute('aria-hidden', 'true');
             closing = false;
-            panel.removeEventListener('transitionend', done);
+            panel.removeEventListener('transitionend', finishClose);
         };
-        panel.addEventListener('transitionend', done);
+
+        panel.addEventListener('transitionend', finishClose);
     };
 
     toggle.addEventListener('click', () => {
-        setOpen(toggle.getAttribute('aria-expanded') !== 'true');
+        const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+        setOpen(! isOpen);
     });
 
-    // Close when any link inside is clicked
-    panel.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+    panel.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', () => setOpen(false));
+    });
 
-    // Close on Escape
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
             setOpen(false);
             toggle.focus();
         }
     });
 
-    // Reset on desktop resize
     window.addEventListener('resize', () => {
-        if (window.matchMedia('(min-width: 1024px)').matches) {
+        if (window.matchMedia('(min-width: 768px)').matches) {
             panel.classList.remove('is-open');
             panel.setAttribute('aria-hidden', 'true');
             toggle.setAttribute('aria-expanded', 'false');
             toggle.setAttribute('aria-label', openLabel);
+            openIcon?.classList.remove('hidden');
+            closeIcon?.classList.add('hidden');
             document.body.classList.remove('mobile-nav-locked');
             closing = false;
         }
-    }, { passive: true });
+    });
 });
