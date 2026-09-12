@@ -14,7 +14,7 @@ class ExchangeRate
 
         try {
             return (float) Cache::remember('fx.usd_ngn', now()->addHour(), function () use ($fallback) {
-                $response = Http::timeout(8)
+                $response = Http::timeout(2)
                     ->acceptJson()
                     ->get('https://open.er-api.com/v6/latest/USD');
 
