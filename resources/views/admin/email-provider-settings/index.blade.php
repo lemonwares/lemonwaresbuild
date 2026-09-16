@@ -7,7 +7,7 @@
         <p class="section-label mb-3">Integrations</p>
         <h1 class="heading">Email Provider Settings</h1>
         <p class="mt-3 lede">
-            Configure Lemon Mail (TrekMail) API credentials for auto-provisioning, and store partner portal details for Titan, Google Workspace, and Microsoft 365 manual fulfilment.
+            Configure Lemon Mail (MXRoute) DNS defaults and optional legacy API credentials for auto-provisioning, plus partner portal details for Titan, Google Workspace, and Microsoft 365 manual fulfilment.
             Admin values override <code class="rounded bg-blush-soft px-1">.env</code> fallbacks.
         </p>
     </div>
@@ -35,8 +35,8 @@
         <section class="rounded-3xl border border-border bg-white p-6">
             <div class="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                    <h2 class="text-lg font-bold text-black">Lemon Mail · TrekMail API</h2>
-                    <p class="mt-1 text-sm text-on-blush/65">Used for automatic domain and mailbox provisioning after payment.</p>
+                    <h2 class="text-lg font-bold text-black">Lemon Mail · MXRoute</h2>
+                    <p class="mt-1 text-sm text-on-blush/65">Webmail and optional API credentials used after payment. Mailboxes are provisioned on MXRoute.</p>
                 </div>
                 @if ($is_configured)
                     <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald-800">
@@ -50,19 +50,16 @@
             </div>
 
             <div class="mt-5 rounded-2xl border border-border bg-blush-soft/50 px-4 py-3 text-sm text-on-blush/80">
-                <p class="font-semibold text-black">Required ops-token scopes</p>
+                <p class="font-semibold text-black">MXRoute setup</p>
                 <p class="mt-1">
-                    Create a <code class="rounded bg-white px-1">tm_live_</code> token in
-                    <a href="https://trekmail.net/docs/ai-agents-api/creating-api-tokens" target="_blank" rel="noopener noreferrer" class="font-semibold text-rose hover:underline">TrekMail → AI Agents &amp; API</a>
-                    on a <strong>Pro or Agency</strong> plan, then enable at least:
+                    Set the customer webmail URL to
+                    <a href="https://webmail.mxroute.com" target="_blank" rel="noopener noreferrer" class="font-semibold text-rose hover:underline">webmail.mxroute.com</a>
+                    and point DNS to your assigned <code class="rounded bg-white px-1">*.mxrouting.net</code> MX hosts via
+                    <code class="rounded bg-white px-1">MXROUTE_MX_HOST</code> /
+                    <code class="rounded bg-white px-1">MXROUTE_MX_RELAY</code> in <code class="rounded bg-white px-1">.env</code>.
                 </p>
-                <ul class="mt-2 list-disc space-y-1 pl-5 font-mono text-xs text-black">
-                    <li>domains:read · domains:create · domains:write · domains:dns:read · domains:dns:recheck</li>
-                    <li>mailboxes:create · mailboxes:invites:create</li>
-                </ul>
                 <p class="mt-2 text-xs">
-                    <code class="rounded bg-white px-1">domains:write</code> is required to push Lemonwares branding onto invite emails.
-                    Starter tokens are read-only and cannot provision Lemon Mail. After updating scopes, paste the new token here, save, run the connection test, then retry provision on the order.
+                    API token / base URL fields below are optional legacy hooks. Prefer manual MXRoute fulfilment unless you still run an automated provisioner.
                 </p>
             </div>
 
@@ -74,7 +71,7 @@
                         name="trekmail_token"
                         value="{{ old('trekmail_token', $trekmail['token']) }}"
                         class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
-                        placeholder="tm_live_..."
+                        placeholder="Optional API token"
                         autocomplete="off"
                     >
                 </div>
@@ -85,7 +82,7 @@
                         name="trekmail_base_url"
                         value="{{ old('trekmail_base_url', $trekmail['base_url']) }}"
                         class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
-                        placeholder="https://trekmail.net/api/v1"
+                        placeholder="Optional — leave blank for manual MXRoute"
                         autocomplete="off"
                     >
                 </div>
@@ -96,7 +93,7 @@
                         name="trekmail_webmail_url"
                         value="{{ old('trekmail_webmail_url', $trekmail['webmail_url']) }}"
                         class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
-                        placeholder="https://trekmail.net/webmail"
+                        placeholder="https://webmail.mxroute.com"
                         autocomplete="off"
                     >
                 </div>
@@ -106,8 +103,7 @@
         <section class="rounded-3xl border border-border bg-white p-6">
             <h2 class="text-lg font-bold text-black">Lemon Mail · Invite branding</h2>
             <p class="mt-1 text-sm text-on-blush/65">
-                TrekMail sends the mailbox setup invite itself. These settings push your brand name, colors, and logo into that email via TrekMail’s branding API.
-                Full branded From-address / white-label hosts need TrekMail’s White Label add-on; identity branding still saves without it.
+                Optional branding applied when an automated provisioner creates mailboxes. For MXRoute DirectAdmin setups, brand the panel or welcome email separately.
             </p>
 
             <label class="mt-5 flex items-start gap-3 text-sm text-black">

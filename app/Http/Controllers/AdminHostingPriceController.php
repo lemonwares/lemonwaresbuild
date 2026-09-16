@@ -30,7 +30,7 @@ class AdminHostingPriceController extends Controller
             'prices' => ['required', 'array'],
             'prices.*.id' => ['required', 'integer', 'exists:hosting_plan_prices,id'],
             'prices.*.price_amount' => ['required', 'numeric', 'min:0'],
-            'prices.*.currency' => ['required', 'string', 'max:10'],
+            'prices.*.currency' => ['nullable', 'string', 'max:10'],
             'prices.*.billing_cycle' => ['required', 'string', 'in:monthly,bimonthly,quarterly,annually'],
             'prices.*.display_suffix' => ['nullable', 'string', 'max:40'],
             'prices.*.is_visible' => ['nullable', 'boolean'],
@@ -41,7 +41,7 @@ class AdminHostingPriceController extends Controller
                 ->whereKey($row['id'])
                 ->update([
                     'price_amount' => $row['price_amount'],
-                    'currency' => strtoupper($row['currency']),
+                    'currency' => 'NGN',
                     'billing_cycle' => $row['billing_cycle'],
                     'display_suffix' => $row['display_suffix'] ?: null,
                     'is_visible' => (bool) ($row['is_visible'] ?? false),

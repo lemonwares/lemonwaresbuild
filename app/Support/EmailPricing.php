@@ -21,6 +21,7 @@ class EmailPricing
 
         return EmailPlan::query()
             ->where('is_visible', true)
+            ->where('provider', '!=', 'titan')
             ->orderBy('sort_order')
             ->orderBy('plan_key')
             ->get()
@@ -47,6 +48,7 @@ class EmailPricing
         $plan = EmailPlan::query()
             ->where('plan_key', $key)
             ->where('is_visible', true)
+            ->where('provider', '!=', 'titan')
             ->first();
 
         if (! $plan) {
@@ -150,18 +152,20 @@ class EmailPricing
         $total = self::periodTotalUsd($monthly, $cycleKey);
         $cycle = self::cycle($cycleKey) ?? self::cycle('monthly');
         $discount = (int) ($cycle['discount_percent'] ?? 0);
+        $rate = max(1.0, HostingPricing::usdToNgnRate());
+        $monthlyNgn = round($monthly * $rate, 0);
+        $periodNgn = round($total * $rate, 0);
+        $perMailboxUsd = self::perMailboxUsd($monthly, $mailboxes, $cycleKey);
+        $perMailboxNgn = round($perMailboxUsd * $rate, 0);
 
         return array_merge($plan, [
             'monthly_usd' => $monthly,
             'period_usd' => $total,
-            'period_ngn' => $total * HostingPricing::usdToNgnRate(),
-            'per_mailbox_usd' => self::perMailboxUsd($monthly, $mailboxes, $cycleKey),
-            'price_display' => HostingPricing::dualPriceDisplay($monthly, HostingPricing::monthlySuffix()),
-            'period_display' => HostingPricing::dualPriceDisplay($total),
-            'per_mailbox_display' => HostingPricing::dualPriceDisplay(
-                self::perMailboxUsd($monthly, $mailboxes, $cycleKey),
-                HostingPricing::monthlySuffix(),
-            ),
+            'period_ngn' => $periodNgn,
+            'per_mailbox_usd' => $perMailboxUsd,
+            'price_display' => HostingPricing::ngnPriceDisplay($monthlyNgn, HostingPricing::monthlySuffix()),
+            'period_display' => HostingPricing::ngnPriceDisplay($periodNgn),
+            'per_mailbox_display' => HostingPricing::ngnPriceDisplay($perMailboxNgn, HostingPricing::monthlySuffix()),
             'billing_cycle_label' => self::cycleLabel($cycleKey),
             'discount_percent' => $discount,
             'name' => __('email.plans.' . $plan['key'] . '.name'),
@@ -176,12 +180,22 @@ class EmailPricing
      */
     public static function enterpriseProducts(): array
     {
+        $routes = [
+            'google_workspace' => 'google-workspace',
+            'microsoft_365' => 'microsoft-365',
+        ];
+
         return collect(config('email.enterprise_products', []))
-            ->map(fn (array $product) => [
-                'key' => (string) $product['key'],
-                'name' => (string) $product['name'],
-                'summary' => __('email.enterprise.' . $product['key'] . '.summary'),
-            ])
+            ->map(function (array $product) use ($routes) {
+                $key = (string) $product['key'];
+
+                return [
+                    'key' => $key,
+                    'name' => (string) $product['name'],
+                    'summary' => __('email.enterprise.'.$key.'.summary'),
+                    'href' => isset($routes[$key]) ? route($routes[$key]) : route('contact'),
+                ];
+            })
             ->all();
     }
 }

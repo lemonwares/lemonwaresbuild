@@ -27,7 +27,9 @@ class HostingPlanPrice extends Model
 
     public function formattedPrice(): string
     {
-        return HostingPricing::dualPriceDisplay((float) $this->price_amount, '/mo');
+        $ngn = HostingPricing::amountAsNgn((float) $this->price_amount, (string) $this->currency);
+
+        return HostingPricing::ngnPriceDisplay($ngn, $this->display_suffix ?: '/mo');
     }
 
     public function billingCycleLabel(): string

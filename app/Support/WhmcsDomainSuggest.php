@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Log;
 class WhmcsDomainSuggest
 {
     /**
-     * @return list<array{domain:string,available:bool,label:string}>
+     * @return list<array{domain:string,available:bool,label:string,price_display:?string,amount_ngn:?float}>
      */
     public static function suggest(string $input, int $limit = 6): array
     {
@@ -65,11 +65,14 @@ class WhmcsDomainSuggest
             return [];
         }
 
+        $catalog = WhmcsDomainPricing::catalog();
+
         return collect($domains)
-            ->map(function (string $domain) use ($responses) {
+            ->map(function (string $domain) use ($responses, $catalog) {
                 $response = $responses[$domain] ?? null;
                 $payload = $response && method_exists($response, 'json') ? $response->json() : null;
                 $available = self::isAvailable($payload);
+                $price = self::registerPriceForDomain($domain, $catalog);
 
                 return [
                     'domain' => $domain,
@@ -77,11 +80,46 @@ class WhmcsDomainSuggest
                     'label' => $available
                         ? __('hosting.domain_suggestion_available', ['domain' => $domain])
                         : __('hosting.domain_suggestion_taken', ['domain' => $domain]),
+                    'price_display' => $available ? ($price['display'] ?? null) : null,
+                    'amount_ngn' => $available ? ($price['amount_ngn'] ?? null) : null,
                 ];
             })
             ->sortByDesc(fn (array $item) => $item['available'] ? 1 : 0)
             ->values()
             ->all();
+    }
+
+    /**
+     * @param  array{currency: array<string, mixed>, pricing: array<string, array<string, mixed>>}|null  $catalog
+     * @return array{amount_ngn: float, display: string}|null
+     */
+    protected static function registerPriceForDomain(string $domain, ?array $catalog): ?array
+    {
+        if ($catalog === null) {
+            return null;
+        }
+
+        $parts = DomainName::split($domain);
+        if ($parts === null) {
+            return null;
+        }
+
+        $tldKey = ltrim($parts['tld'], '.');
+        $rawAmount = (float) ($catalog['pricing'][$tldKey]['register']['1'] ?? 0);
+        if ($rawAmount <= 0) {
+            return null;
+        }
+
+        $currencyCode = (string) ($catalog['currency']['code'] ?? 'USD');
+        $rate = max(1.0, HostingPricing::usdToNgnRate());
+        $amountNgn = strtoupper(trim($currencyCode)) === 'NGN'
+            ? round($rawAmount, 2)
+            : round($rawAmount * $rate, 2);
+
+        return [
+            'amount_ngn' => $amountNgn,
+            'display' => HostingPricing::ngnPriceDisplay($amountNgn),
+        ];
     }
 
     protected static function extractSld(string $input): ?string

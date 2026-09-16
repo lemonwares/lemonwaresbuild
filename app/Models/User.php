@@ -110,6 +110,11 @@ class User extends Authenticatable
         return $this->hasMany(EmailOrder::class)->latest();
     }
 
+    public function domainOrders(): HasMany
+    {
+        return $this->hasMany(DomainOrder::class)->latest();
+    }
+
     public function hostingLeads(): HasMany
     {
         return $this->hasMany(HostingLead::class)->latest();
@@ -204,6 +209,46 @@ class User extends Authenticatable
     }
 
     /**
+     * Billing profile required for WHMCS-style site checkout.
+     */
+    public function hasCheckoutBillingProfile(): bool
+    {
+        return filled($this->name)
+            && filled($this->phone)
+            && filled($this->company)
+            && filled($this->billing_country)
+            && filled($this->billing_address_line_1)
+            && filled($this->billing_city)
+            && filled($this->billing_state)
+            && filled($this->billing_postcode);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function missingCheckoutBillingFields(): array
+    {
+        $missing = [];
+
+        foreach ([
+            'name',
+            'phone',
+            'company',
+            'billing_address_line_1',
+            'billing_city',
+            'billing_state',
+            'billing_postcode',
+            'billing_country',
+        ] as $field) {
+            if (! filled($this->{$field})) {
+                $missing[] = $field;
+            }
+        }
+
+        return $missing;
+    }
+
+    /**
      * Fuller customer profile gate for the forced completion modal.
      */
     public function hasCompleteBusinessProfile(): bool
@@ -266,5 +311,67 @@ class User extends Authenticatable
         if ($updates !== []) {
             $this->forceFill($updates)->save();
         }
+    }
+
+    /**
+     * Apply full billing details from site checkout (overwrites with submitted values).
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    public function fillBillingFromCheckout(array $payload): void
+    {
+        $updates = [];
+
+        if (isset($payload['name'])) {
+            $name = trim((string) $payload['name']);
+            if ($name !== '') {
+                $updates['name'] = $name;
+            }
+        }
+
+        foreach ([
+            'company',
+            'phone',
+            'billing_country',
+            'billing_city',
+            'billing_state',
+            'billing_postcode',
+            'billing_address_line_1',
+            'billing_address_line_2',
+        ] as $field) {
+            if (! array_key_exists($field, $payload)) {
+                continue;
+            }
+
+            $value = trim((string) ($payload[$field] ?? ''));
+            $updates[$field] = $value === '' ? null : $value;
+        }
+
+        if (isset($updates['billing_country']) && filled($updates['billing_country'])) {
+            $updates['billing_country'] = strtoupper((string) $updates['billing_country']);
+        }
+
+        if ($updates !== []) {
+            $this->forceFill($updates)->save();
+        }
+    }
+
+    /**
+     * @return array<string, string|null>
+     */
+    public function billingSnapshot(): array
+    {
+        return [
+            'name' => $this->name,
+            'email' => $this->email,
+            'company' => $this->company,
+            'phone' => $this->phone,
+            'billing_address_line_1' => $this->billing_address_line_1,
+            'billing_address_line_2' => $this->billing_address_line_2,
+            'billing_city' => $this->billing_city,
+            'billing_state' => $this->billing_state,
+            'billing_postcode' => $this->billing_postcode,
+            'billing_country' => $this->billing_country,
+        ];
     }
 }

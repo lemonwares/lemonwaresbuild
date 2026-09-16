@@ -1,6 +1,7 @@
 <aside
     class="hosting-intake-summary lg:sticky lg:top-28 h-fit rounded-3xl border border-border bg-white p-5 sm:p-6 shadow-[0_12px_40px_rgba(0,0,0,0.04)]"
     data-hosting-order-summary
+    data-hosting-amount-ngn="{{ number_format((float) ($orderTotalNgn ?? 0), 2, '.', '') }}"
     data-hosting-amount-usd="{{ number_format((float) ($hostingAmountUsd ?? $orderTotalUsd ?? 0), 2, '.', '') }}"
     data-requires-domain="{{ ($requiresDomain ?? false) ? '1' : '0' }}"
 >

@@ -44,12 +44,14 @@ const initChatWidget = () => {
     const openPanel = () => {
         panel.hidden = false;
         toggle.setAttribute('aria-expanded', 'true');
+        toggle.setAttribute('aria-label', 'Close chat');
         widget.classList.add('chat-widget-open');
     };
 
     const closePanel = () => {
         panel.hidden = true;
         toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', 'Open chat');
         widget.classList.remove('chat-widget-open');
     };
 

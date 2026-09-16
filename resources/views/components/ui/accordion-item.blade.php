@@ -2,6 +2,7 @@
     'title',
     'defaultOpen' => false,
     'galleryKey' => null,
+    'logo' => null,
 ])
 
 <div
@@ -16,7 +17,12 @@
         data-accordion-trigger
         aria-expanded="{{ $defaultOpen ? 'true' : 'false' }}"
     >
-        <span>{{ $title }}</span>
+        <span class="accordion-trigger-label">
+            @if ($logo)
+                <img src="{{ asset($logo) }}" alt="" width="18" height="18" class="accordion-trigger-logo">
+            @endif
+            <span>{{ $title }}</span>
+        </span>
         <x-ui.icons.chevron-down class="accordion-chevron size-4 shrink-0" data-accordion-chevron />
     </button>
     <div class="accordion-panel" data-accordion-panel>

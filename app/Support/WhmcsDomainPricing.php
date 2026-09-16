@@ -12,18 +12,23 @@ class WhmcsDomainPricing
      *     ok: bool,
      *     domain?: string,
      *     domain_option?: string,
+     *     reg_period?: int,
+     *     available_periods?: list<int>,
      *     label?: string,
      *     amount_usd?: float,
      *     amount_ngn?: float,
      *     display?: string,
+     *     checkout_url?: string|null,
+     *     cart_add_url?: string|null,
      *     period_label?: string|null,
      *     message?: string|null
      * }
      */
-    public static function quote(string $domain, string $domainOption): array
+    public static function quote(string $domain, string $domainOption, int $regPeriod = 1): array
     {
         $domainOption = strtolower(trim($domainOption));
         $normalized = DomainName::normalize($domain);
+        $regPeriod = max(1, min(10, $regPeriod));
 
         if ($normalized === null) {
             return [
@@ -77,7 +82,21 @@ class WhmcsDomainPricing
         }
 
         $priceType = $domainOption === 'transfer' ? 'transfer' : 'register';
-        $rawAmount = (float) ($tldPricing[$priceType]['1'] ?? 0);
+        $periodMap = is_array($tldPricing[$priceType] ?? null) ? $tldPricing[$priceType] : [];
+        $availablePeriods = self::availablePeriodsFromMap($periodMap, $domainOption);
+
+        if ($availablePeriods === []) {
+            return [
+                'ok' => false,
+                'message' => __('hosting.domain_quote_tld_unavailable', ['tld' => $parts['tld']]),
+            ];
+        }
+
+        if (! in_array($regPeriod, $availablePeriods, true)) {
+            $regPeriod = $availablePeriods[0];
+        }
+
+        $rawAmount = (float) ($periodMap[(string) $regPeriod] ?? $periodMap[$regPeriod] ?? 0);
 
         if ($rawAmount <= 0) {
             return [
@@ -95,14 +114,59 @@ class WhmcsDomainPricing
             'ok' => true,
             'domain' => $normalized,
             'domain_option' => $domainOption,
+            'reg_period' => $regPeriod,
+            'available_periods' => $availablePeriods,
             'label' => __($labelKey, ['domain' => $normalized]),
             'amount_usd' => $amounts['amount_usd'],
             'amount_ngn' => $amounts['amount_ngn'],
-            'display' => HostingPricing::dualPriceDisplay($amounts['amount_usd']),
-            'period_label' => $domainOption === 'transfer'
-                ? __('hosting.order_summary_transfer_period')
-                : __('hosting.order_summary_register_period'),
+            'display' => HostingPricing::ngnPriceDisplay($amounts['amount_ngn']),
+            'checkout_url' => route('cart.domain.add-redirect', [
+                'domain' => $normalized,
+                'option' => $domainOption,
+                'reg_period' => $regPeriod,
+                'buy' => 1,
+            ]),
+            'cart_add_url' => route('domain.cart.add'),
+            'period_label' => self::periodLabel($domainOption, $regPeriod),
         ];
+    }
+
+    /**
+     * @param  array<string|int, mixed>  $periodMap
+     * @return list<int>
+     */
+    public static function availablePeriodsFromMap(array $periodMap, string $domainOption): array
+    {
+        $periods = [];
+        foreach ($periodMap as $years => $amount) {
+            $year = (int) $years;
+            if ($year < 1 || $year > 10) {
+                continue;
+            }
+            if ((float) $amount <= 0) {
+                continue;
+            }
+            $periods[] = $year;
+        }
+
+        $periods = array_values(array_unique($periods));
+        sort($periods);
+
+        // Transfers are almost always 1 year at the registry.
+        if (strtolower($domainOption) === 'transfer' && $periods !== []) {
+            return in_array(1, $periods, true) ? [1] : [$periods[0]];
+        }
+
+        return $periods !== [] ? $periods : [];
+    }
+
+    public static function periodLabel(string $domainOption, int $regPeriod): string
+    {
+        if (strtolower($domainOption) === 'transfer') {
+            return __('domain.period_transfer');
+        }
+
+        return trans_choice('domain.period_years', $regPeriod, ['count' => $regPeriod]);
     }
 
     /**
@@ -160,6 +224,8 @@ class WhmcsDomainPricing
      *     ok: true,
      *     domain: string,
      *     domain_option: string,
+     *     reg_period: int,
+     *     available_periods: list<int>,
      *     label: string,
      *     amount_usd: float,
      *     amount_ngn: float,
@@ -173,6 +239,8 @@ class WhmcsDomainPricing
             'ok' => true,
             'domain' => $domain,
             'domain_option' => $domainOption,
+            'reg_period' => 1,
+            'available_periods' => [1],
             'label' => __('hosting.order_summary_domain_existing', ['domain' => $domain]),
             'amount_usd' => 0.0,
             'amount_ngn' => 0.0,

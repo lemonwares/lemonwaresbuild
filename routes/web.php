@@ -14,6 +14,10 @@ use App\Http\Controllers\AdminFlutterwaveSettingsController;
 use App\Http\Controllers\AdminZeptoMailSettingsController;
 use App\Http\Controllers\AdminCloudflareSettingsController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\DomainCartController;
+use App\Http\Controllers\DomainOrderController;
 use App\Http\Controllers\AdminWhmcsSettingsController;
 use App\Http\Controllers\AdminSubscriberController;
 use App\Http\Controllers\AdminTeamMemberController;
@@ -49,6 +53,147 @@ Route::get('/', function () {
 })->name('home');
 
 Route::view('/about', 'pages.about')->name('about');
+Route::view('/blog', 'pages.blog')->name('blog');
+Route::view('/domain', 'pages.domain')->name('domain');
+Route::get('/cart', [CartController::class, 'show'])->name('cart');
+Route::post('/cart/domain', [CartController::class, 'addDomain'])->middleware('throttle:30,1')->name('cart.domain.add');
+Route::get('/cart/domain/add', [CartController::class, 'addDomainRedirect'])->middleware('throttle:30,1')->name('cart.domain.add-redirect');
+Route::post('/cart/email', [CartController::class, 'addEmail'])->middleware('throttle:30,1')->name('cart.email.add');
+Route::post('/cart/hosting', [CartController::class, 'addHosting'])->middleware('throttle:30,1')->name('cart.hosting.add');
+Route::patch('/cart/{item}', [CartController::class, 'update'])->middleware('throttle:30,1')->name('cart.update');
+Route::delete('/cart/{item}', [CartController::class, 'destroy'])->middleware('throttle:30,1')->name('cart.destroy');
+Route::get('/cart/count', [CartController::class, 'count'])->middleware('throttle:60,1')->name('cart.count');
+Route::get('/checkout', [CheckoutController::class, 'create'])->name('checkout');
+Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:10,1')->name('checkout.store');
+Route::post('/checkout/account-status', [CheckoutController::class, 'accountStatus'])
+    ->middleware('throttle:30,1')
+    ->name('checkout.account-status');
+Route::get('/checkout/payment/flutterwave/callback', [CheckoutController::class, 'callback'])->name('checkout.flutterwave.callback');
+Route::get('/checkout/received/{checkout}', [CheckoutController::class, 'received'])->name('checkout.received');
+Route::post('/checkout/{checkout}/pay', [CheckoutController::class, 'pay'])->middleware('throttle:10,1')->name('checkout.pay');
+Route::get('/domain/cart', [DomainCartController::class, 'show'])->name('domain.cart');
+Route::post('/domain/cart/add', [DomainCartController::class, 'add'])->middleware('throttle:30,1')->name('domain.cart.add');
+Route::get('/domain/cart/add', [DomainCartController::class, 'addRedirect'])->middleware('throttle:30,1')->name('domain.cart.add-redirect');
+Route::patch('/domain/cart/{item}', [DomainCartController::class, 'update'])->middleware('throttle:30,1')->name('domain.cart.update');
+Route::delete('/domain/cart/{item}', [DomainCartController::class, 'destroy'])->middleware('throttle:30,1')->name('domain.cart.destroy');
+Route::get('/domain/cart/count', [DomainCartController::class, 'count'])->middleware('throttle:60,1')->name('domain.cart.count');
+Route::get('/domain/checkout', [DomainOrderController::class, 'create'])->name('domain.checkout');
+Route::post('/domain/checkout', [DomainOrderController::class, 'store'])->middleware('throttle:10,1')->name('domain.checkout.store');
+Route::post('/domain/checkout/account-status', [DomainOrderController::class, 'accountStatus'])
+    ->middleware('throttle:30,1')
+    ->name('domain.checkout.account-status');
+Route::get('/domain/payment/flutterwave/callback', [DomainOrderController::class, 'callback'])->name('domain.flutterwave.callback');
+Route::get('/domain/order/received/{order}', [DomainOrderController::class, 'received'])->name('domain.order-received');
+Route::get('/domain/checkout/received/{checkout}', [DomainOrderController::class, 'receivedCheckout'])->name('domain.checkout-received');
+Route::post('/domain/order/{order}/pay', [DomainOrderController::class, 'pay'])->middleware('throttle:10,1')->name('domain.pay');
+Route::post('/domain/checkout/{checkout}/pay', [DomainOrderController::class, 'payCheckout'])->middleware('throttle:10,1')->name('domain.checkout.pay');
+Route::view('/microservices', 'pages.microservices')->name('microservices');
+Route::view('/development', 'pages.development')->name('development');
+
+Route::view('/cloud-hosting', 'pages.cloud-hosting')->name('cloud-hosting');
+Route::view('/plesk', 'pages.plesk')->name('plesk');
+Route::view('/vps', 'pages.vps')->name('vps');
+
+Route::view('/google-workspace', 'pages.google-workspace')->name('google-workspace');
+Route::view('/microsoft-365', 'pages.microsoft-365')->name('microsoft-365');
+
+Route::get('/web-development', function () {
+    return view('pages.service', [
+        'metaTitle' => __('pages.web_development.meta_title'),
+        'metaDescription' => __('pages.web_development.meta_description'),
+        'eyebrow' => __('pages.web_development.eyebrow'),
+        'title' => __('pages.web_development.title'),
+        'lede' => __('pages.web_development.lede'),
+        'ctaHref' => route('contact'),
+        'ctaLabel' => __('pages.web_development.cta'),
+        'artSrc' => 'images/heroes/about.webp',
+        'body' => __('pages.web_development.body'),
+        'highlights' => __('pages.web_development.highlights'),
+        'cards' => [
+            [
+                'title' => __('site.home.dev_wp_title'),
+                'body' => __('site.home.dev_wp_body'),
+            ],
+            [
+                'title' => __('site.home.dev_custom_title'),
+                'body' => __('site.home.dev_custom_body'),
+            ],
+        ],
+        'helpTitle' => __('pages.web_development.help_title'),
+        'helpLede' => __('pages.web_development.help_lede'),
+        'helpPrimaryHref' => route('contact'),
+        'helpPrimaryLabel' => __('pages.web_development.cta'),
+        'helpSecondaryHref' => route('case-studies'),
+        'helpSecondaryLabel' => __('site.footer.case_studies'),
+    ]);
+})->name('web-development');
+
+Route::get('/mobile-apps', function () {
+    return view('pages.service', [
+        'metaTitle' => __('pages.mobile_apps.meta_title'),
+        'metaDescription' => __('pages.mobile_apps.meta_description'),
+        'eyebrow' => __('pages.mobile_apps.eyebrow'),
+        'title' => __('pages.mobile_apps.title'),
+        'lede' => __('pages.mobile_apps.lede'),
+        'ctaHref' => route('contact'),
+        'ctaLabel' => __('pages.mobile_apps.cta'),
+        'artSrc' => 'images/heroes/about.webp',
+        'body' => __('pages.mobile_apps.body'),
+        'highlights' => __('pages.mobile_apps.highlights'),
+        'cards' => [],
+        'helpTitle' => __('pages.mobile_apps.help_title'),
+        'helpLede' => __('pages.mobile_apps.help_lede'),
+        'helpPrimaryHref' => route('contact'),
+        'helpPrimaryLabel' => __('pages.mobile_apps.cta'),
+        'helpSecondaryHref' => route('case-studies'),
+        'helpSecondaryLabel' => __('site.footer.case_studies'),
+    ]);
+})->name('mobile-apps');
+
+Route::get('/maintenance', function () {
+    return view('pages.service', [
+        'metaTitle' => __('pages.maintenance.meta_title'),
+        'metaDescription' => __('pages.maintenance.meta_description'),
+        'eyebrow' => __('pages.maintenance.eyebrow'),
+        'title' => __('pages.maintenance.title'),
+        'lede' => __('pages.maintenance.lede'),
+        'ctaHref' => route('contact'),
+        'ctaLabel' => __('pages.maintenance.cta'),
+        'artSrc' => 'images/heroes/about.webp',
+        'body' => __('pages.maintenance.body'),
+        'highlights' => __('pages.maintenance.highlights'),
+        'cards' => [],
+        'helpTitle' => __('pages.maintenance.help_title'),
+        'helpLede' => __('pages.maintenance.help_lede'),
+        'helpPrimaryHref' => route('contact'),
+        'helpPrimaryLabel' => __('pages.maintenance.cta'),
+        'helpSecondaryHref' => route('support'),
+        'helpSecondaryLabel' => __('site.nav.support'),
+    ]);
+})->name('maintenance');
+
+Route::get('/support', function () {
+    return view('pages.service', [
+        'metaTitle' => __('pages.support_page.meta_title'),
+        'metaDescription' => __('pages.support_page.meta_description'),
+        'eyebrow' => __('pages.support_page.eyebrow'),
+        'title' => __('pages.support_page.title'),
+        'lede' => __('pages.support_page.lede'),
+        'ctaHref' => route('contact'),
+        'ctaLabel' => __('pages.support_page.cta'),
+        'artSrc' => 'images/heroes/contact.webp',
+        'body' => __('pages.support_page.body'),
+        'highlights' => __('pages.support_page.highlights'),
+        'cards' => [],
+        'helpTitle' => __('pages.support_page.help_title'),
+        'helpLede' => __('pages.support_page.help_lede'),
+        'helpPrimaryHref' => route('contact'),
+        'helpPrimaryLabel' => __('pages.support_page.cta'),
+        'helpSecondaryHref' => config('site.whatsapp'),
+        'helpSecondaryLabel' => __('pages.contact.whatsapp'),
+    ]);
+})->name('support');
+
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])
     ->middleware('throttle:contact-form')
@@ -156,18 +301,28 @@ Route::get('/hosting/request', function (Request $request) {
         ->keyBy('spec_key');
 
     $specifications = collect($plan['specifications'] ?? [])
-        ->map(function (array $spec) use ($priceMap, $selectedBillingCycle) {
+        ->map(function (array $spec) use ($priceMap, $selectedBillingCycle, $planSlug) {
             $price = $priceMap->get($spec['key'] ?? '');
             $hasPrice = $price && (float) $price->price_amount > 0;
 
             if ($hasPrice) {
                 $payload = HostingPricing::pricePayload($price, $selectedBillingCycle);
                 $spec = array_merge($spec, $payload);
-                $spec['price_amount'] = $payload['monthly_usd'];
+                $spec['price_amount'] = $payload['monthly_ngn'];
             } else {
-                $spec['price_display'] = null;
-                $spec['period_display'] = null;
-                $spec['price_amount'] = null;
+                $defaultNgn = HostingPricing::monthlyNgnForSpec($planSlug, (string) ($spec['key'] ?? ''));
+                if ($defaultNgn > 0) {
+                    $periodNgn = HostingPricing::periodTotalNgn($defaultNgn, $selectedBillingCycle);
+                    $spec['price_amount'] = $defaultNgn;
+                    $spec['monthly_ngn'] = $defaultNgn;
+                    $spec['period_ngn'] = $periodNgn;
+                    $spec['price_display'] = HostingPricing::ngnPriceDisplay($defaultNgn, HostingPricing::monthlySuffix());
+                    $spec['period_display'] = HostingPricing::ngnPriceDisplay($periodNgn);
+                } else {
+                    $spec['price_display'] = null;
+                    $spec['period_display'] = null;
+                    $spec['price_amount'] = null;
+                }
                 $spec['billing_cycle_label'] = HostingPricing::cycleLabel($selectedBillingCycle);
                 $spec['discount_percent'] = (int) (HostingPricing::cycle($selectedBillingCycle)['discount_percent'] ?? 0);
             }
@@ -237,8 +392,16 @@ Route::get('/hosting/request/details', function (Request $request) {
         ->all();
 
     if ($selectedSpecKeys === []) {
+        $redirectParams = ['plan' => $selectedPlan];
+        if (filled($request->query('domain'))) {
+            $redirectParams['domain'] = (string) $request->query('domain');
+        }
+        if (filled($request->query('domain_option'))) {
+            $redirectParams['domain_option'] = (string) $request->query('domain_option');
+        }
+
         return redirect()
-            ->route('hosting.specifications', ['plan' => $selectedPlan])
+            ->route('hosting.specifications', $redirectParams)
             ->with('hosting_feedback', [
                 'type' => 'error',
                 'message' => 'Please select at least one hosting specification to continue.',
@@ -251,7 +414,7 @@ Route::get('/hosting/request/details', function (Request $request) {
         ->keyBy(fn ($item) => strtolower((string) $item->spec_key));
 
     $selectedSpecsData = collect($selectedSpecKeys)
-        ->map(function ($key) use ($specMap, $priceMap, $selectedBillingCycle) {
+        ->map(function ($key) use ($specMap, $priceMap, $selectedBillingCycle, $selectedPlan) {
             $spec = $specMap->get($key);
             if (! $spec) {
                 return null;
@@ -264,8 +427,20 @@ Route::get('/hosting/request/details', function (Request $request) {
                 $payload = HostingPricing::pricePayload($price, $selectedBillingCycle);
                 $spec = array_merge($spec, $payload);
             } else {
-                $spec['price_display'] = null;
-                $spec['period_display'] = null;
+                $defaultNgn = HostingPricing::monthlyNgnForSpec($selectedPlan, $key);
+                if ($defaultNgn > 0) {
+                    $periodNgn = HostingPricing::periodTotalNgn($defaultNgn, $selectedBillingCycle);
+                    $rate = max(1.0, HostingPricing::usdToNgnRate());
+                    $spec['monthly_ngn'] = $defaultNgn;
+                    $spec['period_ngn'] = $periodNgn;
+                    $spec['monthly_usd'] = round($defaultNgn / $rate, 2);
+                    $spec['period_usd'] = round($periodNgn / $rate, 2);
+                    $spec['price_display'] = HostingPricing::ngnPriceDisplay($defaultNgn, HostingPricing::monthlySuffix());
+                    $spec['period_display'] = HostingPricing::ngnPriceDisplay($periodNgn);
+                } else {
+                    $spec['price_display'] = null;
+                    $spec['period_display'] = null;
+                }
                 $spec['billing_cycle_label'] = HostingPricing::cycleLabel($selectedBillingCycle);
             }
 
@@ -277,7 +452,9 @@ Route::get('/hosting/request/details', function (Request $request) {
 
     $selectedSpec = implode(',', $selectedSpecKeys);
     $selectedSpecData = $selectedSpecsData[0] ?? null;
-    $orderTotalUsd = collect($selectedSpecsData)->sum(fn ($spec) => (float) ($spec['period_usd'] ?? 0));
+    $orderTotalNgn = collect($selectedSpecsData)->sum(fn ($spec) => (float) ($spec['period_ngn'] ?? 0));
+    $rate = max(1.0, HostingPricing::usdToNgnRate());
+    $orderTotalUsd = round($orderTotalNgn / $rate, 2);
 
     return view('pages.hosting-intake', [
         'planOptions' => $planOptions,
@@ -287,12 +464,14 @@ Route::get('/hosting/request/details', function (Request $request) {
         'selectedSpecKeys' => $selectedSpecKeys,
         'selectedSpecData' => $selectedSpecData,
         'selectedSpecsData' => $selectedSpecsData,
+        'billingCycles' => $billingCycles,
         'selectedBillingCycle' => $selectedBillingCycle,
         'orderTotalUsd' => $orderTotalUsd,
-        'orderTotalDisplay' => HostingPricing::dualPriceDisplay($orderTotalUsd),
+        'orderTotalNgn' => $orderTotalNgn,
+        'orderTotalDisplay' => HostingPricing::ngnPriceDisplay($orderTotalNgn),
         'hostingAmountUsd' => $orderTotalUsd,
-        'hostingAmountDisplay' => HostingPricing::dualPriceDisplay($orderTotalUsd),
-        'usdToNgn' => HostingPricing::usdToNgnRate(),
+        'hostingAmountDisplay' => HostingPricing::ngnPriceDisplay($orderTotalNgn),
+        'usdToNgn' => $rate,
         'requiresDomain' => $selectedPlan !== 'vps',
     ]);
 })->name('hosting.intake');
@@ -464,6 +643,7 @@ Route::post('/hosting/domain/quote', function (Request $request) {
     $validated = Validator::make($request->all(), [
         'domain' => ['required', 'string', 'max:253'],
         'domain_option' => ['required', 'string', 'in:register,transfer,owndomain'],
+        'reg_period' => ['nullable', 'integer', 'min:1', 'max:10'],
     ])->validate();
 
     $domain = DomainName::normalize((string) $validated['domain']);
@@ -474,7 +654,11 @@ Route::post('/hosting/domain/quote', function (Request $request) {
         ], 422);
     }
 
-    $quote = WhmcsDomainPricing::quote($domain, (string) $validated['domain_option']);
+    $quote = WhmcsDomainPricing::quote(
+        $domain,
+        (string) $validated['domain_option'],
+        (int) ($validated['reg_period'] ?? 1),
+    );
 
     return response()->json($quote, ($quote['ok'] ?? false) ? 200 : 422);
 })->middleware('throttle:30,1')->name('hosting.domain.quote');
@@ -564,15 +748,18 @@ Route::post('/hosting/request/details', function (Request $request) {
         ->get()
         ->keyBy(fn ($item) => strtolower((string) $item->spec_key));
 
-    $amountUsd = collect($selectedSpecKeys)->sum(function ($key) use ($priceMap, $billingCycle) {
+    $amountNgn = collect($selectedSpecKeys)->sum(function ($key) use ($priceMap, $billingCycle) {
         $price = $priceMap->get($key);
         if (! $price || (float) $price->price_amount <= 0) {
             return 0;
         }
 
-        return HostingPricing::periodTotalUsd((float) $price->price_amount, $billingCycle);
+        $monthlyNgn = HostingPricing::amountAsNgn((float) $price->price_amount, (string) $price->currency);
+
+        return HostingPricing::periodTotalNgn($monthlyNgn, $billingCycle);
     });
-    $amountNgn = $amountUsd * HostingPricing::usdToNgnRate();
+    $rate = max(1.0, HostingPricing::usdToNgnRate());
+    $amountUsd = round($amountNgn / $rate, 2);
 
     $specLabel = collect($selectedSpecsData)->pluck('label')->filter()->join(', ');
     $specKeyJoined = implode(',', $selectedSpecKeys);

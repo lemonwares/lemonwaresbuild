@@ -1,12 +1,19 @@
 import './chat-widget.js';
 import './reviews-carousel.js';
 import './mobile-nav.js';
+import './locale-switcher.js';
+import './nav-email.js';
 import './scroll-reveal.js';
 import './confirm-modal.js';
 import './complete-profile-modal.js';
 import './email-checkout.js';
+import './site-checkout.js';
 import './email-plans.js';
 import './form-submit.js';
+import './action-loading.js';
+import './domain-search.js';
+import './domain-cart.js';
+import './header-domain-search.js';
 
 document.querySelectorAll('[data-accordion]').forEach((accordion) => {
     const items = accordion.querySelectorAll('[data-accordion-item]');

@@ -69,11 +69,16 @@ function updateCards(root, cycle) {
         if (perMailbox) {
             perMailbox.textContent = entry.per_mailbox_line;
         }
-        if (cta) {
+        if (cta && cta.tagName === 'A') {
             const url = new URL(checkoutBase, window.location.origin);
             url.searchParams.set('plan', card.getAttribute('data-plan-key') || '');
             url.searchParams.set('billing_cycle', cycle);
             cta.setAttribute('href', `${url.pathname}${url.search}`);
+        }
+
+        const cycleInput = card.querySelector('[data-email-plan-cycle-input]');
+        if (cycleInput) {
+            cycleInput.value = cycle;
         }
     });
 }

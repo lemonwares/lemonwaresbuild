@@ -31,24 +31,31 @@ class WhmcsLeadSync
         $client = WhmcsClient::findClientByEmail((string) $lead->email);
         $clientId = (int) data_get($client, 'id', 0);
 
+        $clientPayload = [
+            'firstname' => $firstName,
+            'lastname' => $lastName,
+            'email' => strtolower((string) $lead->email),
+            'phonenumber' => (string) $lead->phone,
+            'companyname' => (string) ($lead->company ?? ''),
+            'address1' => (string) ($lead->billing_address_line_1 ?? ''),
+            'address2' => (string) ($lead->billing_address_line_2 ?? ''),
+            'city' => (string) ($lead->billing_city ?? ''),
+            'state' => (string) ($lead->billing_state ?? ''),
+            'postcode' => (string) ($lead->billing_postcode ?? ''),
+            'country' => strtoupper((string) ($lead->billing_country ?? '')),
+        ];
+
         if ($clientId < 1) {
-            $created = WhmcsClient::createClient([
-                'firstname' => $firstName,
-                'lastname' => $lastName,
-                'email' => strtolower((string) $lead->email),
-                'phonenumber' => (string) $lead->phone,
-                'companyname' => (string) ($lead->company ?? ''),
-                'address1' => (string) ($lead->billing_address_line_1 ?? ''),
-                'address2' => (string) ($lead->billing_address_line_2 ?? ''),
-                'city' => (string) ($lead->billing_city ?? ''),
-                'state' => (string) ($lead->billing_state ?? ''),
-                'postcode' => (string) ($lead->billing_postcode ?? ''),
-                'country' => strtoupper((string) ($lead->billing_country ?? '')),
+            $created = WhmcsClient::createClient(array_merge($clientPayload, [
                 'password2' => 'LW-' . $lead->id . '-Temp#' . random_int(1000, 9999),
                 'skipvalidation' => true,
-            ]);
+            ]));
 
             $clientId = (int) data_get($created, 'clientid', 0);
+        } else {
+            WhmcsClient::updateClient(array_merge($clientPayload, [
+                'clientid' => $clientId,
+            ]));
         }
 
         if ($clientId < 1) {

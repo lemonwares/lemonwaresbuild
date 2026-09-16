@@ -2,34 +2,40 @@
 
 return [
 
-    'webmail_url' => env('TREKMAIL_WEBMAIL_URL', 'https://trekmail.net/webmail'),
+    'webmail_url' => env('MXROUTE_WEBMAIL_URL', env('TREKMAIL_WEBMAIL_URL', 'https://webmail.mxroute.com')),
 
-    'product_name' => 'Lemon Mail',
+    'product_name' => 'Mailemon',
 
     /*
     |--------------------------------------------------------------------------
-    | Lemon Mail DNS template (TrekMail)
+    | Mailemon DNS template (MXRoute)
     |--------------------------------------------------------------------------
     | Used for the customer checklist and Cloudflare one-click apply.
-    | Update values if TrekMail changes their MX / SPF / DKIM hosts.
+    | Set MXROUTE_MX_HOST / MXROUTE_MX_RELAY to your assigned mxrouting.net hosts.
     */
     'dns_template' => [
         [
             'type' => 'MX',
             'name' => '@',
-            'value' => 'mail.trekmail.net',
+            'value' => env('MXROUTE_MX_HOST', 'echo.mxrouting.net'),
             'priority' => 10,
+        ],
+        [
+            'type' => 'MX',
+            'name' => '@',
+            'value' => env('MXROUTE_MX_RELAY', 'echo-relay.mxrouting.net'),
+            'priority' => 20,
         ],
         [
             'type' => 'TXT',
             'name' => '@',
-            'value' => 'v=spf1 include:_spf.trekmail.net ~all',
+            'value' => 'v=spf1 include:mxroute.com -all',
             'priority' => null,
         ],
         [
             'type' => 'TXT',
             'name' => '_dmarc',
-            'value' => 'v=DMARC1; p=none;',
+            'value' => 'v=DMARC1; p=none; sp=none; adkim=r; aspf=r;',
             'priority' => null,
         ],
     ],
@@ -91,14 +97,6 @@ return [
             'featured' => false,
         ],
         [
-            'key' => 'titan_business',
-            'provider' => 'titan',
-            'fulfilment_mode' => 'manual',
-            'mailboxes' => 5,
-            'monthly_usd' => 14.99,
-            'featured' => false,
-        ],
-        [
             'key' => 'google_workspace_business_starter',
             'provider' => 'google_workspace',
             'fulfilment_mode' => 'manual',
@@ -124,10 +122,6 @@ return [
         [
             'key' => 'microsoft_365',
             'name' => 'Microsoft 365',
-        ],
-        [
-            'key' => 'titan',
-            'name' => 'Titan Business Email',
         ],
     ],
 

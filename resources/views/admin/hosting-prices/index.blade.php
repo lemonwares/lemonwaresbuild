@@ -7,7 +7,7 @@
         <div>
             <p class="section-label mb-3">Commerce</p>
             <h1 class="heading">Hosting Prices</h1>
-            <p class="lede mt-3">Update public pricing for each hosting specification without touching code.</p>
+            <p class="lede mt-3">Set public Naira prices for cPanel, Plesk, and VPS. Specs come from config; leave blank amounts to fall back to defaults after sync.</p>
         </div>
     </div>
 
@@ -24,43 +24,37 @@
                 <div class="border-b border-border px-5 py-4 sm:px-6">
                     <p class="text-xs font-semibold uppercase tracking-widest text-rose">{{ $plan['name'] ?? $planSlug }}</p>
                     <h2 class="mt-1 text-xl font-bold text-black">{{ $plan['title'] ?? $planSlug }}</h2>
+                    <p class="mt-1 text-sm text-on-blush/65">Prices are in Naira (₦) and shown on the public site as ₦ only.</p>
                 </div>
 
                 <div class="divide-y divide-border">
                     @forelse ($planPrices as $index => $price)
                         @php
                             $specMeta = collect($plan['specifications'] ?? [])->firstWhere('key', $price->spec_key);
+                            $defaultNgn = (float) ($specMeta['default_price'] ?? 0);
                         @endphp
 
                         <div class="grid gap-4 px-5 py-5 sm:grid-cols-12 sm:items-end sm:px-6">
                             <input type="hidden" name="prices[{{ $price->id }}][id]" value="{{ $price->id }}">
+                            <input type="hidden" name="prices[{{ $price->id }}][currency]" value="NGN">
 
                             <div class="sm:col-span-3">
                                 <p class="text-sm font-semibold text-black">{{ $specMeta['label'] ?? $price->spec_key }}</p>
                                 <p class="mt-1 text-xs text-on-blush/60">{{ $price->spec_key }}</p>
+                                @if ($defaultNgn > 0)
+                                    <p class="mt-1 text-xs text-on-blush/50">Default ₦{{ number_format($defaultNgn, 0) }}/mo</p>
+                                @endif
                             </div>
 
-                            <div class="sm:col-span-2">
-                                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Amount</label>
+                            <div class="sm:col-span-3">
+                                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Amount (₦ / mo)</label>
                                 <input
                                     type="number"
-                                    step="0.01"
+                                    step="1"
                                     min="0"
                                     name="prices[{{ $price->id }}][price_amount]"
                                     value="{{ old("prices.{$price->id}.price_amount", $price->price_amount) }}"
                                     class="footer-input w-full rounded-xl border border-border bg-white px-3 py-2.5"
-                                    required
-                                >
-                            </div>
-
-                            <div class="sm:col-span-2">
-                                <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Currency</label>
-                                <input
-                                    type="text"
-                                    name="prices[{{ $price->id }}][currency]"
-                                    value="{{ old("prices.{$price->id}.currency", $price->currency) }}"
-                                    class="footer-input w-full rounded-xl border border-border bg-white px-3 py-2.5 uppercase"
-                                    maxlength="10"
                                     required
                                 >
                             </div>
@@ -89,7 +83,7 @@
                                 >
                             </div>
 
-                            <div class="sm:col-span-1">
+                            <div class="sm:col-span-2">
                                 <label class="inline-flex items-center gap-2 text-sm font-semibold text-black">
                                     <input
                                         type="checkbox"
@@ -98,8 +92,9 @@
                                         class="size-4 rounded border-border text-rose focus:ring-rose"
                                         @checked(old("prices.{$price->id}.is_visible", $price->is_visible))
                                     >
-                                    Show
+                                    Show on site
                                 </label>
+                                <p class="mt-2 text-xs font-semibold text-rose">{{ $price->formattedPrice() }}</p>
                             </div>
                         </div>
                     @empty

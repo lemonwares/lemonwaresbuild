@@ -107,8 +107,13 @@
         data-chat-toggle
         aria-expanded="false"
         aria-controls="chat-widget-panel"
+        aria-label="Open chat"
     >
-        <x-ui.icons.message-circle class="size-6" />
-        <span class="chat-widget-launcher-label">Chat</span>
+        <span class="chat-widget-launcher-icons" aria-hidden="true">
+            <x-ui.icons.message-circle class="size-6 chat-widget-icon-open" />
+            <x-ui.icons.x class="size-6 chat-widget-icon-close" />
+        </span>
+        <span class="chat-widget-launcher-label chat-widget-label-open">Chat</span>
+        <span class="chat-widget-launcher-label chat-widget-label-close">Close</span>
     </button>
 </div>

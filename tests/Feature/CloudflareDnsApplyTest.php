@@ -192,7 +192,7 @@ class CloudflareDnsApplyTest extends TestCase
             ->get(route('account.email.show', $order))
             ->assertOk()
             ->assertSee(__('email.dns_title'), false)
-            ->assertSee('mail.trekmail.net', false)
+            ->assertSee('echo.mxrouting.net', false)
             ->assertSee(__('email.dns_hint_namecheap'), false)
             ->assertSee(__('email.dns_copy_all'), false);
     }

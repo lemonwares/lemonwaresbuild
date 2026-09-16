@@ -11,7 +11,7 @@ class TrekMailSettings
     {
         return (string) IntegrationSetting::getValue(
             'trekmail.token',
-            (string) config('services.trekmail.token', ''),
+            (string) config('services.mxroute.token', config('services.trekmail.token', '')),
         );
     }
 
@@ -19,7 +19,7 @@ class TrekMailSettings
     {
         return rtrim((string) IntegrationSetting::getValue(
             'trekmail.base_url',
-            (string) config('services.trekmail.base_url', 'https://trekmail.net/api/v1'),
+            (string) config('services.mxroute.base_url', config('services.trekmail.base_url', '')),
         ), '/');
     }
 
@@ -27,7 +27,10 @@ class TrekMailSettings
     {
         return rtrim((string) IntegrationSetting::getValue(
             'trekmail.webmail_url',
-            (string) config('services.trekmail.webmail_url', config('email.webmail_url', 'https://trekmail.net/webmail')),
+            (string) config(
+                'services.mxroute.webmail_url',
+                config('services.trekmail.webmail_url', config('email.webmail_url', 'https://webmail.mxroute.com')),
+            ),
         ), '/');
     }
 
@@ -143,7 +146,7 @@ class TrekMailSettings
         if (! self::isConfigured()) {
             return [
                 'ok' => false,
-                'message' => 'TrekMail API token is missing.',
+                'message' => 'Mail provider API token is missing.',
             ];
         }
 
@@ -156,14 +159,14 @@ class TrekMailSettings
         if ($response->successful()) {
             return [
                 'ok' => true,
-                'message' => 'TrekMail API credentials verified.',
+                'message' => 'Mail provider API credentials verified.',
             ];
         }
 
         $message = (string) data_get(
             $response->json(),
             'error.message',
-            'TrekMail API rejected these credentials.',
+            'Mail provider API rejected these credentials.',
         );
 
         return [

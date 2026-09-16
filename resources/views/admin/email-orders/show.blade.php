@@ -66,7 +66,7 @@
                 </div>
             @endif
             <div class="flex justify-between gap-4">
-                <dt class="text-on-blush/60">TrekMail domain</dt>
+                <dt class="text-on-blush/60">Mail provider domain</dt>
                 <dd class="font-semibold">{{ $order->trekmail_domain_id ?: '—' }}</dd>
             </div>
         </dl>
@@ -150,7 +150,7 @@
                             </div>
                             <div class="sm:col-span-5">
                                 <label class="mb-1 block text-[0.65rem] font-semibold uppercase tracking-widest text-on-blush/55">Value</label>
-                                <input type="text" name="records[{{ $index }}][value]" value="{{ $row['value'] ?? '' }}" class="footer-input w-full rounded-xl border border-border bg-white px-2 py-2 font-mono text-xs" placeholder="mail.trekmail.net">
+                                <input type="text" name="records[{{ $index }}][value]" value="{{ $row['value'] ?? '' }}" class="footer-input w-full rounded-xl border border-border bg-white px-2 py-2 font-mono text-xs" placeholder="echo.mxrouting.net">
                             </div>
                             <div class="sm:col-span-3">
                                 <label class="mb-1 block text-[0.65rem] font-semibold uppercase tracking-widest text-on-blush/55">Priority (MX)</label>
@@ -272,7 +272,7 @@
                     <div>
                         <p class="text-sm font-semibold text-black">Send mailbox credentials</p>
                         <p class="mt-1 text-xs text-on-blush/65">
-                            Create the mailboxes in TrekMail first, then enter temporary passwords here.
+                            Create the mailboxes in MXRoute first, then enter temporary passwords here.
                             We email the customer via ZeptoMail and do not store the passwords.
                         </p>
                     </div>
@@ -320,7 +320,7 @@
             @if ($order->isPaid() && ! $order->isManualFulfilment() && ! $order->isDeactivated())
                 <form method="POST" action="{{ route('admin.email-orders.provision', $order) }}">
                     @csrf
-                    <button type="submit" class="btn btn-primary">Retry TrekMail provision</button>
+                    <button type="submit" class="btn btn-primary">Retry mail provision</button>
                 </form>
             @endif
             @if ($order->canBeDeactivated())

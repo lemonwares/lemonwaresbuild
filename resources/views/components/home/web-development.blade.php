@@ -1,5 +1,5 @@
 <section id="work" {{ $attributes->class('section-band border-t border-border') }}>
-    <div class="container-page grid items-center gap-12 py-16 lg:grid-cols-2 lg:py-20" data-accordion-gallery>
+    <div class="container-page grid items-stretch gap-12 py-16 lg:grid-cols-2 lg:py-20" data-accordion-gallery>
         <div>
             <p class="section-label mb-3">{{ __('site.home.dev_label') }}</p>
             <h2 class="heading mb-4">
@@ -39,7 +39,7 @@
             </div>
         </div>
 
-        <div class="accordion-gallery relative min-h-[20rem] overflow-hidden rounded-3xl border border-border bg-slate lg:min-h-[28rem]">
+        <div class="accordion-gallery relative min-h-[20rem] overflow-hidden rounded-3xl border border-border bg-slate lg:h-full lg:min-h-[28rem]">
             <img
                 src="{{ asset('images/home/dev-wordpress.jpg') }}"
                 alt="{{ __('site.home.dev_wp_title') }}"

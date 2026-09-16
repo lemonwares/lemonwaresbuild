@@ -1,7 +1,6 @@
 @php
     $flags = [
         'en' => [
-            // United Kingdom
             'paths' => <<<'SVG'
                 <rect width="24" height="16" fill="#012169"/>
                 <path d="M0 0 L24 16 M24 0 L0 16" stroke="#fff" stroke-width="3"/>
@@ -25,21 +24,58 @@
             SVG,
         ],
     ];
+
+    $locales = config('site.locales', ['en' => 'English']);
+    $current = app()->getLocale();
+    if (! array_key_exists($current, $locales)) {
+        $current = 'en';
+    }
+    $currentLabel = $locales[$current] ?? 'English';
+    $currentCode = strtoupper($current);
 @endphp
 
-<nav class="flex shrink-0 items-center gap-1.5" aria-label="{{ __('site.common.language') }}" data-locale-switcher>
-    @foreach (config('site.locales', []) as $code => $label)
-        @php $active = app()->getLocale() === $code; @endphp
-        <a
-            href="{{ route('locale.switch', ['locale' => $code]) }}"
-            class="inline-flex size-8 items-center justify-center overflow-hidden rounded-full transition {{ $active ? 'ring-2 ring-rose ring-offset-1 ring-offset-blush-soft' : 'opacity-75 hover:opacity-100' }}"
-            aria-label="{{ $label }}"
-            @if ($active) aria-current="true" @endif
-            title="{{ $label }}"
-        >
-            <svg viewBox="0 0 24 16" class="h-4 w-6" role="img" aria-hidden="true">
-                {!! $flags[$code]['paths'] ?? '' !!}
+<div class="locale-switcher" data-locale-switcher>
+    <button
+        type="button"
+        class="locale-switcher-trigger"
+        data-locale-switcher-trigger
+        aria-expanded="false"
+        aria-haspopup="listbox"
+        aria-controls="locale-switcher-menu"
+        aria-label="{{ __('site.common.language') }}: {{ $currentLabel }}"
+    >
+        <span class="locale-switcher-flag" aria-hidden="true">
+            <svg viewBox="0 0 24 16" class="h-3.5 w-5" role="img">
+                {!! $flags[$current]['paths'] ?? '' !!}
             </svg>
-        </a>
-    @endforeach
-</nav>
+        </span>
+        <span class="locale-switcher-code">{{ $currentCode }}</span>
+        <x-ui.icons.chevron-down class="locale-switcher-chevron size-3.5 shrink-0" aria-hidden="true" />
+    </button>
+
+    <div
+        id="locale-switcher-menu"
+        class="locale-switcher-menu"
+        data-locale-switcher-menu
+        role="listbox"
+        aria-label="{{ __('site.common.language') }}"
+        hidden
+    >
+        @foreach ($locales as $code => $label)
+            @php $active = $current === $code; @endphp
+            <a
+                href="{{ route('locale.switch', ['locale' => $code]) }}"
+                class="locale-switcher-option {{ $active ? 'is-active' : '' }}"
+                role="option"
+                @if ($active) aria-selected="true" @else aria-selected="false" @endif
+            >
+                <span class="locale-switcher-flag" aria-hidden="true">
+                    <svg viewBox="0 0 24 16" class="h-3.5 w-5" role="img">
+                        {!! $flags[$code]['paths'] ?? '' !!}
+                    </svg>
+                </span>
+                <span>{{ $label }}</span>
+            </a>
+        @endforeach
+    </div>
+</div>
