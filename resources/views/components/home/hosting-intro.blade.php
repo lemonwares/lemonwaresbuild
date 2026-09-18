@@ -1,8 +1,6 @@
 <section id="hosting-intro" {{ $attributes->class('bg-white border-t border-border') }}>
-    <div class="container-page grid items-stretch gap-12 py-14 lg:grid-cols-2 lg:gap-16 lg:py-20">
-        <div>
-            <x-home.eyebrow class="mb-6" :label="__('site.home.hosting_eyebrow')" />
-
+    <div class="container-page grid items-center gap-12 py-14 lg:grid-cols-2 lg:gap-16 lg:py-20">
+        <div class="flex flex-col justify-center">
             <h2 class="mb-5 text-4xl font-bold tracking-tight text-on-blush sm:text-5xl lg:text-[3.25rem] lg:leading-[1.1]">
                 {{ __('site.home.hosting_title_before') }}
                 <span class="italic text-rose">{{ __('site.home.hosting_title_accent') }}</span>
@@ -27,6 +25,6 @@
             </div>
         </div>
 
-        <x-home.hero-visual class="h-full" />
+        <x-home.hero-visual class="w-full" />
     </div>
 </section>

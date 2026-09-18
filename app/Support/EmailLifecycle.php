@@ -6,6 +6,7 @@ use App\Models\EmailMailbox;
 use App\Models\EmailOrder;
 use App\Notifications\EmailOrderDeactivated;
 use App\Notifications\EmailOrderExpired;
+use App\Support\AccountActivityLogger;
 use Illuminate\Support\Facades\Log;
 
 class EmailLifecycle
@@ -40,6 +41,17 @@ class EmailLifecycle
             $order->user,
             $reason === 'expired' ? new EmailOrderExpired($order) : new EmailOrderDeactivated($order),
         );
+
+        if ($order->user) {
+            AccountActivityLogger::log(
+                $order->user,
+                $reason === 'expired' ? 'email_expired' : 'email_deactivated',
+                $reason === 'expired' ? 'Email service expired' : 'Email service deactivated',
+                'Mailemon for '.$order->domain.' was '.($reason === 'expired' ? 'expired' : 'deactivated').'.',
+                $reason === 'expired' ? 'system' : 'admin',
+                $order,
+            );
+        }
 
         return $order;
     }

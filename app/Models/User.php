@@ -16,6 +16,10 @@ use Illuminate\Notifications\Notifiable;
     'name',
     'email',
     'role',
+    'is_super_admin',
+    'admin_permissions',
+    'account_owner_id',
+    'account_permissions',
     'phone',
     'company',
     'job_title',
@@ -50,6 +54,9 @@ class User extends Authenticatable
             'password' => 'hashed',
             'notify_in_app' => 'boolean',
             'notify_email' => 'boolean',
+            'is_super_admin' => 'boolean',
+            'admin_permissions' => 'array',
+            'account_permissions' => 'array',
         ];
     }
 
@@ -95,14 +102,100 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function isSuperAdmin(): bool
+    {
+        return $this->isAdmin() && (bool) $this->is_super_admin;
+    }
+
+    public function hasAdminPermission(string $permission): bool
+    {
+        if (! $this->isAdmin()) {
+            return false;
+        }
+
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        $permissions = $this->admin_permissions;
+
+        if (! is_array($permissions) || $permissions === []) {
+            return false;
+        }
+
+        return in_array($permission, $permissions, true);
+    }
+
     public function isCustomer(): bool
     {
         return $this->role !== 'admin';
     }
 
+    public function isAccountOwner(): bool
+    {
+        return $this->isCustomer() && blank($this->account_owner_id);
+    }
+
+    public function isAccountStaff(): bool
+    {
+        return $this->isCustomer() && filled($this->account_owner_id);
+    }
+
+    public function accountOwner(): self
+    {
+        if ($this->isAccountStaff() && $this->account_owner_id) {
+            $owner = $this->relationLoaded('accountOwnerUser')
+                ? $this->accountOwnerUser
+                : $this->accountOwnerUser()->first();
+
+            return $owner instanceof self ? $owner : $this;
+        }
+
+        return $this;
+    }
+
+    public function accountOwnerUser(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(self::class, 'account_owner_id');
+    }
+
+    public function accountStaffMembers(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(self::class, 'account_owner_id');
+    }
+
+    public function accountInvites(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(AccountInvite::class, 'owner_id')->latest();
+    }
+
+    public function accountActivities(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(AccountActivity::class)->latest();
+    }
+
+    public function hasAccountPermission(string $permission): bool
+    {
+        if (! $this->isCustomer()) {
+            return false;
+        }
+
+        if ($this->isAccountOwner()) {
+            return true;
+        }
+
+        $permissions = $this->account_permissions;
+
+        if (! is_array($permissions) || $permissions === []) {
+            return false;
+        }
+
+        return in_array($permission, $permissions, true);
+    }
+
     public function scopeCustomers(Builder $query): Builder
     {
-        return $query->where('role', 'customer');
+        return $query->where('role', 'customer')->whereNull('account_owner_id');
     }
 
     public function emailOrders(): HasMany

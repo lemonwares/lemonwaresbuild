@@ -32,6 +32,8 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'role' => 'admin',
+            'is_super_admin' => true,
+            'admin_permissions' => null,
         ]);
     }
 

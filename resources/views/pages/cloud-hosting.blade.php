@@ -96,24 +96,21 @@
                         </a>
                     </div>
                 </div>
-                <div class="hidden justify-end lg:flex" aria-hidden="true">
-                    <img
-                        src="{{ asset('images/undraw/server.svg') }}"
-                        alt=""
-                        width="420"
-                        height="320"
-                        class="hosting-product-hero-art w-full max-w-md"
-                    >
+                <div class="dev-cutout-hero hidden lg:flex" aria-hidden="true">
+                    <picture>
+                        <source srcset="{{ asset('images/hosting/cloud-hosting-hero.webp') }}" type="image/webp">
+                        <img
+                            src="{{ asset('images/hosting/cloud-hosting-hero.png') }}"
+                            alt=""
+                            width="480"
+                            height="480"
+                            class="dev-cutout-img"
+                            loading="eager"
+                            decoding="async"
+                        >
+                    </picture>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <section class="border-b border-border bg-white">
-        <div class="container-page py-12 sm:py-14">
-            <p class="mx-auto max-w-3xl text-center text-base leading-relaxed text-on-blush/80 sm:text-lg">
-                {{ __('pages.cloud_hosting.body') }}
-            </p>
         </div>
     </section>
 

@@ -48,7 +48,11 @@ class ZeptoMailTransport extends AbstractTransport
         $text = $email->getTextBody();
 
         if (filled($html)) {
+            [$html, $inlineImages] = $this->embedBrandedLogo((string) $html);
             $payload['htmlbody'] = $html;
+            if ($inlineImages !== []) {
+                $payload['inline_images'] = $inlineImages;
+            }
         } elseif (filled($text)) {
             $payload['textbody'] = $text;
         } else {
@@ -114,6 +118,43 @@ class ZeptoMailTransport extends AbstractTransport
 
             throw new \RuntimeException('ZeptoMail send failed: '.$detail);
         }
+    }
+
+    /**
+     * Swap remote logo URLs for a ZeptoMail CID and attach the branded image inline.
+     *
+     * @return array{0:string,1:list<array{content:string,mime_type:string,cid:string}>}
+     */
+    protected function embedBrandedLogo(string $html): array
+    {
+        $inline = \App\Support\ZeptoMailSettings::logoInlineImage();
+        if ($inline === null) {
+            return [$html, []];
+        }
+
+        $cidSrc = 'cid:'.$inline['cid'];
+        $logoUrl = \App\Support\ZeptoMailSettings::logoUrl();
+
+        if ($logoUrl !== '') {
+            $html = str_replace($logoUrl, $cidSrc, $html);
+        }
+
+        $html = preg_replace(
+            '#https?://[^"\'\s>]+lemonwareslogo\.(?:png|webp|jpe?g)#i',
+            $cidSrc,
+            $html,
+        ) ?? $html;
+
+        // Ensure the header always points at the inline asset even if URL variants differed.
+        if (! str_contains($html, $cidSrc) && str_contains($html, 'lemonwareslogo')) {
+            $html = preg_replace(
+                '#src=(["\'])[^"\']*lemonwareslogo\.(?:png|webp|jpe?g)\1#i',
+                'src=$1'.$cidSrc.'$1',
+                $html,
+            ) ?? $html;
+        }
+
+        return [$html, [$inline]];
     }
 
     /**

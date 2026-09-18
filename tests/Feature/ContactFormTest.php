@@ -22,6 +22,13 @@ class ContactFormTest extends TestCase
             ->assertSee(route('contact.store'), false);
     }
 
+    public function test_contact_page_prefills_subject_from_query(): void
+    {
+        $this->get(route('contact', ['subject' => 'Plan a WordPress site']))
+            ->assertOk()
+            ->assertSee('value="Plan a WordPress site"', false);
+    }
+
     public function test_contact_form_sends_team_and_acknowledgement_emails(): void
     {
         Mail::fake();

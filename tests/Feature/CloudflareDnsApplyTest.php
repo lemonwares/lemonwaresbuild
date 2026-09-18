@@ -16,9 +16,19 @@ class CloudflareDnsApplyTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function actingAsAdmin(): static
+    {
+        $admin = User::factory()->admin()->create();
+
+        return $this->withSession([
+            'admin_authenticated' => true,
+            'admin_user_id' => $admin->id,
+        ]);
+    }
+
     public function test_admin_can_save_cloudflare_settings_and_verify_token(): void
     {
-        $this->withSession(['admin_authenticated' => true]);
+        $this->actingAsAdmin();
 
         $this->put(route('admin.cloudflare-settings.update'), [
             'enabled' => '1',
@@ -47,13 +57,13 @@ class CloudflareDnsApplyTest extends TestCase
     {
         $order = $this->makeOrder();
 
-        $this->withSession(['admin_authenticated' => true])
+        $this->actingAsAdmin()
             ->post(route('admin.email-orders.dns.template', $order))
             ->assertRedirect(route('admin.email-orders.show', $order));
 
         $this->assertNotEmpty($order->fresh()->dns_records);
 
-        $this->withSession(['admin_authenticated' => true])
+        $this->actingAsAdmin()
             ->put(route('admin.email-orders.dns', $order), [
                 'records' => [
                     ['type' => 'MX', 'name' => '@', 'value' => 'mail.trekmail.net', 'priority' => 10],
@@ -127,7 +137,7 @@ class CloudflareDnsApplyTest extends TestCase
             return Http::response(['success' => false, 'errors' => [['message' => 'Unfaked '.$url]]], 500);
         });
 
-        $this->withSession(['admin_authenticated' => true])
+        $this->actingAsAdmin()
             ->post(route('admin.email-orders.dns.cloudflare', $order))
             ->assertRedirect(route('admin.email-orders.show', $order))
             ->assertSessionHas('status');
@@ -160,7 +170,7 @@ class CloudflareDnsApplyTest extends TestCase
             ], 200),
         ]);
 
-        $this->withSession(['admin_authenticated' => true])
+        $this->actingAsAdmin()
             ->post(route('admin.email-orders.dns.cloudflare', $order))
             ->assertRedirect(route('admin.email-orders.show', $order))
             ->assertSessionHasErrors('dns');
@@ -192,7 +202,7 @@ class CloudflareDnsApplyTest extends TestCase
             ->get(route('account.email.show', $order))
             ->assertOk()
             ->assertSee(__('email.dns_title'), false)
-            ->assertSee('echo.mxrouting.net', false)
+            ->assertSee('mx.trekmail.net', false)
             ->assertSee(__('email.dns_hint_namecheap'), false)
             ->assertSee(__('email.dns_copy_all'), false);
     }

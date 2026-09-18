@@ -38,7 +38,7 @@ class AccountContact extends Model
 
     public function belongsToCustomer(User $user): bool
     {
-        return $this->user_id === $user->id;
+        return (int) $this->user_id === (int) $user->accountOwner()->id;
     }
 
     public function roleLabel(): string

@@ -1,107 +1,139 @@
 @extends('layouts.admin')
 
 @section('title', ($legacyCustomer->full_name ?: 'Legacy Customer') . ' — CRM')
+@section('hide_auto_breadcrumbs', true)
 
 @section('content')
-    <div class="mb-8">
-        <p class="section-label mb-3">Legacy WHMCS customer</p>
-        <div class="flex flex-wrap items-center gap-3">
-            <h1 class="heading">{{ $legacyCustomer->full_name ?: 'Unknown customer' }}</h1>
-            <span class="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-sky-700">
-                Legacy WHMCS
-            </span>
-            @if ($legacyCustomer->user)
-                <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald-700">
-                    Linked Native
-                </span>
-            @endif
-        </div>
-        <p class="lede mt-3">{{ $legacyCustomer->company ?: 'No company on file' }}</p>
-    </div>
+    <x-admin.page-header
+        :title="$legacyCustomer->full_name ?: 'Unknown customer'"
+        :lede="$legacyCustomer->company ?: 'No company on file'"
+        :back-href="route('admin.customers.index', ['source' => 'legacy'])"
+        back-label="Go back"
+        :breadcrumbs="[
+            ['label' => 'Customers', 'href' => route('admin.customers.index', ['source' => 'legacy'])],
+            ['label' => $legacyCustomer->full_name ?: 'Legacy customer'],
+        ]"
+        class="mb-5"
+    >
+        <x-slot:actions>
+            <div class="admin-customers-toolbar">
+                @if ($legacyCustomer->user)
+                    <a href="{{ route('admin.customers.show', $legacyCustomer->user) }}" class="admin-btn-ghost">Native profile</a>
+                @endif
+            </div>
+        </x-slot:actions>
+    </x-admin.page-header>
 
-    <div class="mb-8 grid gap-6 lg:grid-cols-3">
-        <section class="rounded-3xl border border-border bg-white p-6 lg:col-span-1">
-            <h2 class="text-lg font-bold text-black">Profile</h2>
-            <dl class="mt-4 space-y-3 text-sm">
-                <div>
-                    <dt class="text-on-blush/55">Name</dt>
-                    <dd class="font-semibold">{{ $legacyCustomer->full_name ?: '—' }}</dd>
-                </div>
-                <div>
-                    <dt class="text-on-blush/55">Email</dt>
-                    <dd class="font-semibold">{{ $legacyCustomer->email ?: '—' }}</dd>
-                </div>
-                <div>
-                    <dt class="text-on-blush/55">Phone</dt>
-                    <dd class="font-semibold">{{ $legacyCustomer->phone ?: '—' }}</dd>
-                </div>
-                <div>
-                    <dt class="text-on-blush/55">Status</dt>
-                    <dd class="font-semibold">{{ $legacyCustomer->status ?: '—' }}</dd>
-                </div>
-                <div>
-                    <dt class="text-on-blush/55">WHMCS Client ID</dt>
-                    <dd class="font-semibold">{{ $legacyCustomer->whmcs_client_id }}</dd>
-                </div>
-                <div>
-                    <dt class="text-on-blush/55">Linked Lemonwares account</dt>
-                    <dd class="font-semibold">
+    <div class="admin-customer-detail">
+        <section class="admin-dash-metrics admin-customer-stats" aria-label="Legacy customer snapshot">
+            <div class="admin-metric is-static">
+                <span class="admin-metric-label">WHMCS services</span>
+                <span class="admin-metric-value">{{ array_sum($whmcsServiceSummary) }}</span>
+                <span class="admin-metric-meta">Client #{{ $legacyCustomer->whmcs_client_id }}</span>
+            </div>
+            <div class="admin-metric is-static">
+                <span class="admin-metric-label">Status</span>
+                <span class="admin-metric-value admin-metric-value-sm">{{ $legacyCustomer->status ?: '—' }}</span>
+                <span class="admin-metric-meta">WHMCS client status</span>
+            </div>
+            <div class="admin-metric is-static">
+                <span class="admin-metric-label">Active</span>
+                <span class="admin-metric-value">{{ (int) ($whmcsServiceSummary['active'] ?? 0) }}</span>
+                <span class="admin-metric-meta">Live services</span>
+            </div>
+            <div class="admin-metric is-static">
+                <span class="admin-metric-label">Linked</span>
+                <span class="admin-metric-value admin-metric-value-sm">{{ $legacyCustomer->user ? 'Yes' : 'No' }}</span>
+                <span class="admin-metric-meta">Native Lemonwares account</span>
+            </div>
+        </section>
+
+        <div class="admin-customer-grid">
+            <section class="admin-panel">
+                <div class="admin-panel-toolbar compact">
+                    <h2 class="admin-dash-panel-title">Profile</h2>
+                    <div class="admin-pill-row">
+                        <span class="admin-pill is-info">Legacy WHMCS</span>
                         @if ($legacyCustomer->user)
-                            <a href="{{ route('admin.customers.show', $legacyCustomer->user) }}" class="text-rose hover:underline">
-                                {{ $legacyCustomer->user->name }} ({{ $legacyCustomer->user->email }})
-                            </a>
-                        @else
-                            —
+                            <span class="admin-pill is-ok">Linked Native</span>
                         @endif
-                    </dd>
-                </div>
-            </dl>
-        </section>
-
-        <section class="rounded-3xl border border-border bg-white p-6 lg:col-span-2">
-            <div class="flex flex-wrap items-end justify-between gap-3">
-                <h2 class="text-lg font-bold text-black">Services</h2>
-                <form method="GET" action="{{ route('admin.customers.legacy.show', $legacyCustomer) }}" class="flex items-center gap-2">
-                    <label for="service_status" class="text-xs uppercase tracking-widest text-on-blush/55">Status</label>
-                    <select id="service_status" name="service_status" class="rounded-xl border border-border px-3 py-2 text-sm">
-                        @foreach (['all', 'active', 'pending', 'suspended', 'terminated', 'cancelled'] as $statusOption)
-                            <option value="{{ $statusOption }}" @selected($serviceStatus === $statusOption)>
-                                {{ ucfirst($statusOption) }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <button type="submit" class="btn btn-ghost">Filter</button>
-                </form>
-            </div>
-            <div class="mt-4 flex flex-wrap gap-2">
-                @foreach (['active', 'pending', 'suspended', 'cancelled', 'terminated', 'unknown'] as $statusKey)
-                    <span class="inline-flex items-center rounded-full border border-border bg-blush-soft px-3 py-1 text-xs font-semibold text-on-blush/75">
-                        {{ ucfirst($statusKey) }}: {{ (int) ($whmcsServiceSummary[$statusKey] ?? 0) }}
-                    </span>
-                @endforeach
-            </div>
-            @forelse ($services as $service)
-                <div class="mt-4 rounded-2xl border border-border p-4">
-                    <div class="flex flex-wrap items-start justify-between gap-2">
-                        <div>
-                            <p class="font-semibold text-black">{{ $service->product_name ?: 'Service #' . $service->whmcs_service_id }}</p>
-                            <p class="text-sm text-on-blush/65">
-                                {{ $service->domain ?: ($service->username ?: '—') }}
-                                · {{ $service->billing_cycle ?: '—' }}
-                            </p>
-                        </div>
-                        <p class="text-xs font-semibold uppercase tracking-widest text-rose">{{ $service->status ?: 'unknown' }}</p>
                     </div>
-                    <p class="mt-2 text-sm text-on-blush/70">
-                        Next due: {{ $service->next_due_date?->format('d M Y') ?: '—' }}
-                        · WHMCS Service ID: {{ $service->whmcs_service_id }}
-                    </p>
                 </div>
-            @empty
-                <p class="mt-4 body-text">No WHMCS services found for this customer yet.</p>
-            @endforelse
-        </section>
-    </div>
+                <dl class="admin-dl">
+                    <div><dt>Name</dt><dd>{{ $legacyCustomer->full_name ?: '—' }}</dd></div>
+                    <div><dt>Email</dt><dd>{{ $legacyCustomer->email ?: '—' }}</dd></div>
+                    <div><dt>Phone</dt><dd>{{ $legacyCustomer->phone ?: '—' }}</dd></div>
+                    <div><dt>Company</dt><dd>{{ $legacyCustomer->company ?: '—' }}</dd></div>
+                    <div><dt>Status</dt><dd>{{ $legacyCustomer->status ?: '—' }}</dd></div>
+                    <div><dt>WHMCS Client ID</dt><dd>{{ $legacyCustomer->whmcs_client_id }}</dd></div>
+                    <div class="admin-dl-span">
+                        <dt>Linked Lemonwares account</dt>
+                        <dd>
+                            @if ($legacyCustomer->user)
+                                <a href="{{ route('admin.customers.show', $legacyCustomer->user) }}">
+                                    {{ $legacyCustomer->user->name }} ({{ $legacyCustomer->user->email }})
+                                </a>
+                            @else
+                                —
+                            @endif
+                        </dd>
+                    </div>
+                </dl>
+            </section>
 
-    <a href="{{ route('admin.customers.index', ['source' => 'legacy']) }}" class="btn btn-ghost">Back to customers</a>
+            <section class="admin-panel admin-panel-span">
+                <div class="admin-panel-toolbar">
+                    <div>
+                        <h2 class="admin-dash-panel-title">Services</h2>
+                        <p class="admin-dash-panel-lede">WHMCS services for this legacy client.</p>
+                    </div>
+                    <form method="GET" action="{{ route('admin.customers.legacy.show', $legacyCustomer) }}" class="admin-filter-search">
+                        <select id="service_status" name="service_status" class="admin-input admin-input-sm">
+                            @foreach (['all', 'active', 'pending', 'suspended', 'terminated', 'cancelled'] as $statusOption)
+                                <option value="{{ $statusOption }}" @selected($serviceStatus === $statusOption)>
+                                    {{ ucfirst($statusOption) }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="admin-btn-ghost">Filter</button>
+                    </form>
+                </div>
+
+                <div class="admin-pill-row admin-panel-pad">
+                    @foreach (['active', 'pending', 'suspended', 'cancelled', 'terminated', 'unknown'] as $statusKey)
+                        <span class="admin-pill">{{ ucfirst($statusKey) }}: {{ (int) ($whmcsServiceSummary[$statusKey] ?? 0) }}</span>
+                    @endforeach
+                </div>
+
+                <div class="admin-table-wrap is-full">
+                    <table class="admin-table is-full">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Domain / user</th>
+                                <th>Cycle</th>
+                                <th>Next due</th>
+                                <th>Status</th>
+                                <th>ID</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($services as $service)
+                                <tr>
+                                    <td><strong>{{ $service->product_name ?: 'Service #'.$service->whmcs_service_id }}</strong></td>
+                                    <td>{{ $service->domain ?: ($service->username ?: '—') }}</td>
+                                    <td>{{ $service->billing_cycle ?: '—' }}</td>
+                                    <td>{{ $service->next_due_date?->format('d M Y') ?: '—' }}</td>
+                                    <td><span class="admin-mini-status">{{ $service->status ?: 'unknown' }}</span></td>
+                                    <td>{{ $service->whmcs_service_id }}</td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="6" class="admin-table-empty">No WHMCS services found for this customer yet.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </div>
 @endsection

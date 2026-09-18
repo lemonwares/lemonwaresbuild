@@ -1,20 +1,60 @@
-<div {{ $attributes->class('relative isolate h-full min-h-[22rem] overflow-hidden rounded-4xl border border-white/15 bg-slate sm:min-h-[28rem] lg:min-h-[28rem]') }}>
-    <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(224,69,69,0.35),transparent_55%)]"></div>
-    <div class="absolute inset-0 bg-[linear-gradient(160deg,transparent_40%,rgba(255,237,237,0.08)_100%)]"></div>
+@props([])
 
-    <div class="absolute right-8 top-10 hidden h-24 w-24 rounded-2xl border border-white/15 sm:block" aria-hidden="true"></div>
-    <div class="absolute bottom-10 left-8 h-16 w-16 rounded-full border border-rose/40" aria-hidden="true"></div>
-    <div class="absolute bottom-16 right-12 h-32 w-32 rounded-full bg-rose/20 blur-2xl" aria-hidden="true"></div>
+@php
+    $chips = [
+        [
+            'key' => 'mailemon',
+            'label' => 'Mailemon',
+            'src' => asset('images/brands/mailemon-logo.png'),
+        ],
+        [
+            'key' => 'cpanel',
+            'label' => 'cPanel',
+            'src' => asset('images/brands/cpanel.svg'),
+        ],
+        [
+            'key' => 'plesk',
+            'label' => 'Plesk',
+            'src' => asset('images/brands/plesk.svg'),
+        ],
+    ];
+@endphp
 
-    <div class="relative z-10 flex h-full min-h-[22rem] flex-col justify-end gap-4 p-8 text-ink sm:min-h-[28rem] sm:p-10 lg:min-h-full">
-        <p class="font-mono text-base text-blush">uptime.focus</p>
-        <p class="max-w-xs text-2xl font-semibold tracking-tight text-white">
-            Built for businesses that need to stay online.
-        </p>
-        <div class="flex flex-wrap gap-2 text-base text-ink/70">
-            <span class="rounded-full border border-white/15 px-3 py-1">Hosting</span>
-            <span class="rounded-full border border-white/15 px-3 py-1">Email</span>
-            <span class="rounded-full border border-white/15 px-3 py-1">Dev</span>
+<div {{ $attributes->class('hosting-cutout') }}>
+    <div class="hosting-cutout-glow" aria-hidden="true"></div>
+
+    <div class="hosting-cutout-stage" aria-hidden="true">
+        <picture class="hosting-cutout-picture">
+            <source srcset="{{ asset('images/hosting/home-hosting-cutout.webp') }}" type="image/webp">
+            <img
+                src="{{ asset('images/hosting/home-hosting-cutout.png') }}"
+                alt=""
+                width="640"
+                height="640"
+                class="hosting-cutout-img"
+                loading="lazy"
+                decoding="async"
+            >
+        </picture>
+
+        <div class="hosting-cutout-card is-status">
+            <span class="hosting-cutout-live-dot"></span>
+            <div>
+                <p class="hosting-cutout-card-kicker">{{ __('site.home.visual_live') }}</p>
+                <p class="hosting-cutout-card-title">{{ __('site.home.visual_metric_uptime_value') }} {{ __('site.home.visual_metric_uptime_label') }}</p>
+            </div>
         </div>
+
+        @foreach ($chips as $chip)
+            <div class="hosting-cutout-chip is-{{ $chip['key'] }}">
+                <img
+                    src="{{ $chip['src'] }}"
+                    alt="{{ $chip['label'] }}"
+                    class="hosting-cutout-chip-logo"
+                    loading="lazy"
+                    decoding="async"
+                >
+            </div>
+        @endforeach
     </div>
 </div>

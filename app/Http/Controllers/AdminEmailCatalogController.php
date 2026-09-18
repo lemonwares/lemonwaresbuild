@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\EmailBillingCycle;
 use App\Models\EmailPlan;
 use App\Support\EmailCatalogSync;
+use App\Support\HostingPricing;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -29,7 +30,7 @@ class AdminEmailCatalogController extends Controller
             'plans.*.provider' => ['required', 'string', 'in:lemonmail,titan,google_workspace,ms365'],
             'plans.*.fulfilment_mode' => ['required', 'string', 'in:auto,manual'],
             'plans.*.mailbox_count' => ['required', 'integer', 'min:1', 'max:500'],
-            'plans.*.monthly_usd' => ['required', 'numeric', 'min:0'],
+            'plans.*.monthly_ngn' => ['required', 'numeric', 'min:0'],
             'plans.*.is_visible' => ['nullable', 'boolean'],
             'featured_plan_id' => ['nullable', 'integer', 'exists:email_plans,id'],
             'cycles' => ['required', 'array'],
@@ -39,15 +40,19 @@ class AdminEmailCatalogController extends Controller
         ]);
 
         $featuredId = $validated['featured_plan_id'] ?? null;
+        $rate = max(1.0, HostingPricing::usdToNgnRate());
 
         foreach ($validated['plans'] as $row) {
+            $monthlyNgn = (float) $row['monthly_ngn'];
+            $monthlyUsd = round($monthlyNgn / $rate, 2);
+
             EmailPlan::query()
                 ->whereKey($row['id'])
                 ->update([
                     'provider' => (string) $row['provider'],
                     'fulfilment_mode' => (string) $row['fulfilment_mode'],
                     'mailbox_count' => (int) $row['mailbox_count'],
-                    'monthly_usd' => $row['monthly_usd'],
+                    'monthly_usd' => $monthlyUsd,
                     'featured' => $featuredId !== null && (int) $row['id'] === (int) $featuredId,
                     'is_visible' => (bool) ($row['is_visible'] ?? false),
                 ]);

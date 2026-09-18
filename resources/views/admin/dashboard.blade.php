@@ -1,105 +1,204 @@
 @extends('layouts.admin')
 
-@section('title', 'Staff CRM — ' . config('site.short_name'))
+@section('title', 'Admin overview — ' . config('site.short_name'))
+@section('hide_auto_breadcrumbs', true)
 
 @section('content')
-    <div class="mb-8">
-        <p class="section-label mb-3">Lemonwares</p>
-        <h1 class="heading">Staff CRM</h1>
-        <p class="lede mt-3">Monitor customers, email orders, hosting requests, and subscribers from one place.</p>
-    </div>
+    <x-admin.page-header
+        title="Overview"
+        lede="Everything moving across Lemonwares — customers, orders, leads, and support — at a glance."
+        :back-href="url('/')"
+        back-label="Go back"
+        :breadcrumbs="[['label' => 'Overview']]"
+        class="mb-5"
+    />
 
-    <div class="mb-8 grid gap-4 sm:grid-cols-2">
-        <a href="{{ route('admin.customers.index') }}" class="rounded-3xl border border-border bg-white p-5 transition hover:border-rose/40">
-            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-rose">Customers</p>
-            <p class="mt-2 text-3xl font-bold text-black">{{ $customersCount }}</p>
-        </a>
-        <a href="{{ route('admin.email-orders.index') }}" class="rounded-3xl border border-border bg-white p-5 transition hover:border-rose/40">
-            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-rose">Email Orders</p>
-            <p class="mt-2 text-3xl font-bold text-black">{{ $emailOrdersCount }}</p>
-            <p class="mt-1 text-sm text-on-blush/60">{{ $paidEmailOrdersCount }} paid · {{ $pendingEmailSetupCount }} pending setup</p>
-        </a>
-        <a href="{{ route('admin.hosting-leads.index') }}" class="rounded-3xl border border-border bg-white p-5 transition hover:border-rose/40">
-            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-rose">Hosting Leads</p>
-            <p class="mt-2 text-3xl font-bold text-black">{{ $hostingLeadsCount }}</p>
-        </a>
-        <a href="{{ route('admin.subscribers.index') }}" class="rounded-3xl border border-border bg-white p-5 transition hover:border-rose/40">
-            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-rose">Subscribers</p>
-            <p class="mt-2 text-3xl font-bold text-black">{{ $subscribersCount }}</p>
-        </a>
-    </div>
-
-    <div class="mb-8 grid gap-5 lg:grid-cols-2">
-        <section class="rounded-3xl border border-border bg-white p-6">
-            <div class="mb-4 flex items-center justify-between gap-3">
-                <h2 class="text-lg font-bold text-black">Recent customers</h2>
-                <a href="{{ route('admin.customers.index') }}" class="text-sm font-semibold text-rose hover:underline">View all</a>
-            </div>
-            @forelse ($recentCustomers as $customer)
-                <a href="{{ route('admin.customers.show', $customer) }}" class="flex items-center justify-between gap-3 border-b border-border py-3 last:border-0 hover:text-rose">
-                    <span>
-                        <span class="block font-semibold text-black">{{ $customer->name }}</span>
-                        <span class="text-sm text-on-blush/65">{{ $customer->email }}</span>
-                    </span>
-                    <span class="text-xs text-on-blush/50">{{ $customer->created_at?->diffForHumans() }}</span>
-                </a>
-            @empty
-                <p class="body-text">No customers yet.</p>
-            @endforelse
-        </section>
-
-        <section class="rounded-3xl border border-border bg-white p-6">
-            <div class="mb-4 flex items-center justify-between gap-3">
-                <h2 class="text-lg font-bold text-black">Recent email orders</h2>
-                <a href="{{ route('admin.email-orders.index') }}" class="text-sm font-semibold text-rose hover:underline">View all</a>
-            </div>
-            @forelse ($recentEmailOrders as $order)
-                <a href="{{ route('admin.email-orders.show', $order) }}" class="flex items-center justify-between gap-3 border-b border-border py-3 last:border-0">
-                    <span>
-                        <span class="block font-semibold text-black">{{ $order->domain }}</span>
-                        <span class="text-sm text-on-blush/65">{{ $order->user?->name }} · {{ $order->plan_name }}</span>
-                    </span>
-                    <span class="text-xs font-semibold uppercase tracking-widest text-rose">{{ str_replace('_', ' ', $order->status) }}</span>
-                </a>
-            @empty
-                <p class="body-text">No email orders yet.</p>
-            @endforelse
-        </section>
-    </div>
-
-    <section class="mb-8 rounded-3xl border border-border bg-white p-6">
-        <div class="mb-4 flex items-center justify-between gap-3">
-            <h2 class="text-lg font-bold text-black">Hosting leads</h2>
-            <a href="{{ route('admin.hosting-leads.index') }}" class="text-sm font-semibold text-rose hover:underline">View all</a>
-        </div>
-        @forelse ($recentHostingLeads as $lead)
-            <a href="{{ route('admin.hosting-leads.show', $lead) }}" class="flex flex-wrap items-center justify-between gap-3 border-b border-border py-3 last:border-0">
-                <span>
-                    <span class="block font-semibold text-black">{{ $lead->full_name }}</span>
-                    <span class="text-sm text-on-blush/65">{{ $lead->plan_name }} · {{ $lead->email }}</span>
-                </span>
-                <span class="text-xs font-semibold uppercase tracking-widest text-rose">{{ str_replace('_', ' ', $lead->status ?: 'pending') }}</span>
+    <div class="admin-dash">
+        <section class="admin-dash-metrics" aria-label="Key metrics">
+            <a href="{{ route('admin.customers.index') }}" class="admin-metric">
+                <span class="admin-metric-label">Customers</span>
+                <span class="admin-metric-value">{{ $customersCount }}</span>
+                <span class="admin-metric-meta">+{{ $newCustomersWeek }} this week</span>
             </a>
-        @empty
-            <p class="body-text">No hosting leads yet.</p>
-        @endforelse
-    </section>
+            <a href="{{ route('admin.email-orders.index') }}" class="admin-metric">
+                <span class="admin-metric-label">Email orders</span>
+                <span class="admin-metric-value">{{ $emailOrdersCount }}</span>
+                <span class="admin-metric-meta">{{ $paidEmailOrdersCount }} paid · {{ $pendingEmailSetupCount }} setup</span>
+            </a>
+            <a href="{{ route('admin.hosting-leads.index') }}" class="admin-metric">
+                <span class="admin-metric-label">Hosting leads</span>
+                <span class="admin-metric-value">{{ $hostingLeadsCount }}</span>
+                <span class="admin-metric-meta">+{{ $newLeadsWeek }} this week</span>
+            </a>
+            <a href="{{ route('admin.support-tickets.index') }}" class="admin-metric">
+                <span class="admin-metric-label">Open tickets</span>
+                <span class="admin-metric-value">{{ $openTicketsCount }}</span>
+                <span class="admin-metric-meta">Needs attention</span>
+            </a>
+            <a href="{{ route('admin.subscribers.index') }}" class="admin-metric">
+                <span class="admin-metric-label">Subscribers</span>
+                <span class="admin-metric-value">{{ $subscribersCount }}</span>
+                <span class="admin-metric-meta">Newsletter list</span>
+            </a>
+            <a href="{{ route('admin.team-members.index') }}" class="admin-metric">
+                <span class="admin-metric-label">Team / careers</span>
+                <span class="admin-metric-value">{{ $teamMembersCount }}</span>
+                <span class="admin-metric-meta">{{ $careerOpeningsCount }} live openings</span>
+            </a>
+        </section>
 
-    <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-        <a href="{{ route('admin.team-members.index') }}" class="group rounded-3xl border border-border bg-white p-6 transition hover:border-rose/40">
-            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-rose">Site</p>
-            <h2 class="mt-2 text-2xl font-bold text-black">Team page</h2>
-            <p class="mt-3 body-text">{{ $teamMembersCount }} profiles · manage the public Team page.</p>
-        </a>
-        <a href="{{ route('admin.hosting-prices.index') }}" class="group rounded-3xl border border-border bg-white p-6 transition hover:border-rose/40">
-            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-rose">Hosting</p>
-            <h2 class="mt-2 text-2xl font-bold text-black">Plan prices</h2>
-            <p class="mt-3 body-text">{{ $pricedSpecsCount }} priced specs on the public hosting catalog.</p>
-        </a>
-        <a href="{{ route('admin.subscribers.index') }}" class="group rounded-3xl border border-border bg-white p-6 transition hover:border-rose/40">
-            <p class="text-xs font-semibold uppercase tracking-[0.12em] text-rose">Marketing</p>
-            <h2 class="mt-2 text-2xl font-bold text-black">Newsletter</h2>
-            <p class="mt-3 body-text">{{ $subscribersCount }} people on the footer list.</p>
-        </a>
+        <section class="admin-dash-chart" aria-label="Activity chart">
+            <div class="admin-dash-panel-head">
+                <div>
+                    <h2 class="admin-dash-panel-title">14-day pulse</h2>
+                    <p class="admin-dash-panel-lede">Orders, hosting leads, and new customers.</p>
+                </div>
+                <div class="admin-chart-legend" aria-hidden="true">
+                    <span><i class="admin-chart-swatch is-orders"></i> Orders</span>
+                    <span><i class="admin-chart-swatch is-leads"></i> Leads</span>
+                    <span><i class="admin-chart-swatch is-customers"></i> Customers</span>
+                </div>
+            </div>
+
+            @php
+                $w = 560;
+                $h = 160;
+                $padX = 8;
+                $padY = 12;
+                $plotW = $w - ($padX * 2);
+                $plotH = $h - ($padY * 2);
+                $n = max(count($orderSeries) - 1, 1);
+
+                $toPoints = function (array $series) use ($n, $plotW, $plotH, $padX, $padY, $chartMax): string {
+                    return collect($series)->map(function ($value, $i) use ($n, $plotW, $plotH, $padX, $padY, $chartMax) {
+                        $x = $padX + ($i / $n) * $plotW;
+                        $y = $padY + $plotH - (($value / $chartMax) * $plotH);
+
+                        return round($x, 1) . ',' . round($y, 1);
+                    })->implode(' ');
+                };
+
+                $orderPoints = $toPoints($orderSeries);
+                $leadPoints = $toPoints($leadSeries);
+                $customerPoints = $toPoints($customerSeries);
+            @endphp
+
+            <div class="admin-chart-frame">
+                <svg class="admin-chart-svg" viewBox="0 0 {{ $w }} {{ $h }}" role="img" aria-label="Activity over the last 14 days">
+                    @for ($i = 0; $i < 4; $i++)
+                        @php $gy = $padY + ($plotH / 3) * $i; @endphp
+                        <line class="admin-chart-grid" x1="{{ $padX }}" y1="{{ $gy }}" x2="{{ $w - $padX }}" y2="{{ $gy }}" />
+                    @endfor
+                    <polyline class="admin-chart-line is-orders" fill="none" points="{{ $orderPoints }}" />
+                    <polyline class="admin-chart-line is-leads" fill="none" points="{{ $leadPoints }}" />
+                    <polyline class="admin-chart-line is-customers" fill="none" points="{{ $customerPoints }}" />
+                </svg>
+                <div class="admin-chart-x">
+                    <span>{{ $chartDays->first()->format('M j') }}</span>
+                    <span>{{ $chartDays->get(7)?->format('M j') }}</span>
+                    <span>{{ $chartDays->last()->format('M j') }}</span>
+                </div>
+            </div>
+
+            <div class="admin-chart-stats">
+                <div>
+                    <span class="admin-chart-stat-label">Orders / 7d</span>
+                    <strong>{{ $newOrdersWeek }}</strong>
+                </div>
+                <div>
+                    <span class="admin-chart-stat-label">Leads / 7d</span>
+                    <strong>{{ $newLeadsWeek }}</strong>
+                </div>
+                <div>
+                    <span class="admin-chart-stat-label">Customers / 7d</span>
+                    <strong>{{ $newCustomersWeek }}</strong>
+                </div>
+                <div>
+                    <span class="admin-chart-stat-label">Priced specs</span>
+                    <strong>{{ $pricedSpecsCount }}</strong>
+                </div>
+            </div>
+        </section>
+
+        <section class="admin-dash-activity" aria-label="Live activity">
+            <div class="admin-dash-panel-head">
+                <div>
+                    <h2 class="admin-dash-panel-title">Live feed</h2>
+                    <p class="admin-dash-panel-lede">Latest movement across the platform.</p>
+                </div>
+            </div>
+            <ul class="admin-activity-list">
+                @forelse ($activity as $item)
+                    <li>
+                        <a href="{{ $item['href'] }}" class="admin-activity-item">
+                            <span class="admin-activity-dot" aria-hidden="true"></span>
+                            <span class="admin-activity-copy">
+                                <span class="admin-activity-label">{{ $item['label'] }}</span>
+                                <span class="admin-activity-meta">{{ $item['meta'] }}</span>
+                            </span>
+                            <time datetime="{{ $item['at']?->toIso8601String() }}">{{ $item['at']?->diffForHumans(short: true) }}</time>
+                        </a>
+                    </li>
+                @empty
+                    <li class="admin-activity-empty">Nothing yet — activity will show up here.</li>
+                @endforelse
+            </ul>
+        </section>
+
+        <section class="admin-dash-lists" aria-label="Recent records">
+            <div class="admin-dash-list-card">
+                <div class="admin-dash-panel-head compact">
+                    <h2 class="admin-dash-panel-title">Customers</h2>
+                    <a href="{{ route('admin.customers.index') }}" class="admin-dash-link">All</a>
+                </div>
+                @forelse ($recentCustomers as $customer)
+                    <a href="{{ route('admin.customers.show', $customer) }}" class="admin-mini-row">
+                        <span>
+                            <strong>{{ $customer->name }}</strong>
+                            <span>{{ $customer->email }}</span>
+                        </span>
+                        <time>{{ $customer->created_at?->diffForHumans(short: true) }}</time>
+                    </a>
+                @empty
+                    <p class="admin-empty">No customers yet.</p>
+                @endforelse
+            </div>
+
+            <div class="admin-dash-list-card">
+                <div class="admin-dash-panel-head compact">
+                    <h2 class="admin-dash-panel-title">Email orders</h2>
+                    <a href="{{ route('admin.email-orders.index') }}" class="admin-dash-link">All</a>
+                </div>
+                @forelse ($recentEmailOrders as $order)
+                    <a href="{{ route('admin.email-orders.show', $order) }}" class="admin-mini-row">
+                        <span>
+                            <strong>{{ $order->domain }}</strong>
+                            <span>{{ $order->plan_name }}</span>
+                        </span>
+                        <span class="admin-mini-status">{{ str_replace('_', ' ', $order->status) }}</span>
+                    </a>
+                @empty
+                    <p class="admin-empty">No orders yet.</p>
+                @endforelse
+            </div>
+
+            <div class="admin-dash-list-card">
+                <div class="admin-dash-panel-head compact">
+                    <h2 class="admin-dash-panel-title">Support</h2>
+                    <a href="{{ route('admin.support-tickets.index') }}" class="admin-dash-link">All</a>
+                </div>
+                @forelse ($recentTickets as $ticket)
+                    <a href="{{ route('admin.support-tickets.show', $ticket) }}" class="admin-mini-row">
+                        <span>
+                            <strong>{{ \Illuminate\Support\Str::limit($ticket->subject ?: $ticket->reference, 28) }}</strong>
+                            <span>{{ $ticket->full_name ?: $ticket->email }}</span>
+                        </span>
+                        <span class="admin-mini-status">{{ str_replace('_', ' ', $ticket->status) }}</span>
+                    </a>
+                @empty
+                    <p class="admin-empty">No tickets yet.</p>
+                @endforelse
+            </div>
+        </section>
     </div>
 @endsection

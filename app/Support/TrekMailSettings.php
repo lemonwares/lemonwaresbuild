@@ -11,7 +11,7 @@ class TrekMailSettings
     {
         return (string) IntegrationSetting::getValue(
             'trekmail.token',
-            (string) config('services.mxroute.token', config('services.trekmail.token', '')),
+            (string) config('services.trekmail.token', config('services.mxroute.token', '')),
         );
     }
 
@@ -19,7 +19,7 @@ class TrekMailSettings
     {
         return rtrim((string) IntegrationSetting::getValue(
             'trekmail.base_url',
-            (string) config('services.mxroute.base_url', config('services.trekmail.base_url', '')),
+            (string) config('services.trekmail.base_url', config('services.mxroute.base_url', '')),
         ), '/');
     }
 
@@ -28,8 +28,8 @@ class TrekMailSettings
         return rtrim((string) IntegrationSetting::getValue(
             'trekmail.webmail_url',
             (string) config(
-                'services.mxroute.webmail_url',
-                config('services.trekmail.webmail_url', config('email.webmail_url', 'https://webmail.mxroute.com')),
+                'services.trekmail.webmail_url',
+                config('services.mxroute.webmail_url', config('email.webmail_url', 'https://mail.trekmail.net')),
             ),
         ), '/');
     }

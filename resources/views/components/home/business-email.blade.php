@@ -18,7 +18,7 @@
             <x-ui.accordion>
                 <x-ui.accordion-item
                     :title="__('site.home.email_lw_title')"
-                    logo="images/brands/mailemon.svg"
+                    logo="images/brands/mailemon-logo.png"
                     :default-open="true"
                 >
                     {{ __('site.home.email_lw') }}

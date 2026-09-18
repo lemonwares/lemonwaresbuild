@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'meta_title' => 'Mailemon',
-    'meta_description' => 'Mailemon — professionelle E-Mail auf Ihrer Domain. Vier Tarife, vier Abrechnungszeiträume, sofortige Einrichtung mit DNS-Hilfe von Lemonwares.',
+    'meta_title' => 'Mailemon Business-E-Mail | Marken-E-Mail auf Ihrer Domain',
+    'meta_description' => 'Mailemon von Lemonwares: Marken-E-Mail mit MX/SPF/DKIM/DMARC/MTA-STS, IMAP-Migration, Posteingangsschutz und Validierungs-API.',
     'eyebrow' => 'Mailemon',
     'title' => 'Marken-E-Mail, die zu Ihrem Unternehmen passt',
     'lede' => 'Mailemon ist die Business-E-Mail von Lemonwares — hier bestellen, sicher zahlen, und wir richten Postfächer auf Ihrer Domain mit DNS-Einträgen ein.',
@@ -10,7 +10,7 @@ return [
     'body' => 'Mailemon ist die Business-E-Mail von Lemonwares — Marken-Postfächer auf Ihrer Domain mit klaren Tarifen, sicherem Checkout und DNS-Hilfe, damit Mail ohne Rätselraten live geht. Heute online bestellen; fragen Sie uns, wenn Sie stattdessen Google Workspace oder Microsoft 365 brauchen.',
     'intro_eyebrow' => 'So funktioniert es',
     'intro_title' => 'Tarif, Domain, dann Postfächer',
-    'intro_lede' => 'Drei klare Schritte vom Stöbern bis zu Marken-Adressen auf Ihrer Domain.',
+    'intro_lede' => 'Vier klare Schritte vom Tarifvergleich bis zu Marken-Adressen auf Ihrer Domain.',
     'steps' => [
         [
             'title' => 'Mailemon-Tarif wählen',
@@ -21,9 +21,141 @@ return [
             'body' => 'Nutzen Sie eine Domain, die Sie schon besitzen, und wählen Sie Postfachnamen wie info oder sales — daraus werden Adressen auf dieser Domain.',
         ],
         [
-            'title' => 'Zahlen und DNS-Einträge setzen',
-            'body' => 'Schließen Sie den sicheren Checkout ab. Wir richten Postfächer ein und liefern MX-, SPF-, DKIM- und DMARC-Einträge, damit Mail fließen kann.',
+            'title' => 'Sicher zahlen',
+            'body' => 'Schließen Sie den Checkout online ab. Wir erstellen Ihre Bestellung, bestätigen die Zahlung und stellen die Postfächer in die Warteschlange.',
         ],
+        [
+            'title' => 'DNS hinzufügen und live gehen',
+            'body' => 'Wir erzeugen und prüfen MX, SPF, DKIM, DMARC und MTA-STS. CSV einfügen, Cloudflare auf uns zeigen oder Einträge manuell setzen — danach fließt die Mail.',
+        ],
+    ],
+    'apps_eyebrow' => 'Was Sie nutzen können',
+    'apps_title' => 'Webmail und die Apps, die Ihr Team schon kennt',
+    'apps_lede' => 'Mailemon ist nicht an einen Client gebunden — lesen Sie im Webmail oder verbinden Sie die Mail-Apps, die Ihre Leute bereits nutzen.',
+    'apps' => [
+        [
+            'title' => 'Webmail',
+            'body' => 'Mail im Browser von jedem Gerät aus prüfen, ohne Software zu installieren.',
+        ],
+        [
+            'title' => 'Outlook',
+            'body' => 'Desktop- oder Mobile-Outlook mit Standard-IMAP- und SMTP-Einstellungen verbinden.',
+        ],
+        [
+            'title' => 'Apple Mail',
+            'body' => 'Mailemon-Postfächer auf iPhone, iPad und Mac über den üblichen Konto-Flow hinzufügen.',
+        ],
+        [
+            'title' => 'Android-Mail',
+            'body' => 'Gmail-App oder andere Android-Clients mit IMAP/SMTP nutzen — dieselben Zugangsdaten wie im Webmail.',
+        ],
+        [
+            'title' => 'Marken-Adressen',
+            'body' => 'info@, sales@ und Teamnamen auf Ihrer Domain, damit jede Antwort professionell wirkt.',
+        ],
+        [
+            'title' => 'DNS-Hilfe',
+            'body' => 'MX, SPF, DKIM, DMARC und MTA-STS nach der Zahlung, damit die Zustellbarkeit kein Rätselraten ist.',
+        ],
+    ],
+    'setup_eyebrow' => 'DNS, der wirklich live geht',
+    'setup_title' => 'CSV einfügen, Cloudflare zeigen oder manuell hinzufügen',
+    'setup_lede' => 'Wir erzeugen und prüfen MX, SPF, DKIM, DMARC und MTA-STS — und beobachten die Propagation, damit Mail ankommt.',
+    'setup_items' => [
+        [
+            'title' => 'CSV, Cloudflare oder von Hand',
+            'body' => 'CSV mit Domains einfügen, Cloudflare auf uns zeigen oder Einträge selbst setzen. Ergebnis: verifiziertes Mail-DNS ohne Rätselraten.',
+        ],
+        [
+            'title' => 'MX bis MTA-STS',
+            'body' => 'Wir erzeugen und prüfen MX, SPF, DKIM, DMARC und MTA-STS und überwachen die Propagation, bis sie sitzen.',
+        ],
+        [
+            'title' => 'Client-Einrichtung',
+            'body' => 'Sofort Webmail nutzen, dann Outlook, Apple Mail oder Android verbinden, wenn Sie bereit sind.',
+        ],
+        [
+            'title' => 'Lemonwares-Support',
+            'body' => 'Hängen Sie bei DNS oder Login? Dasselbe Team wie beim Hosting hilft per WhatsApp, Telefon und E-Mail.',
+        ],
+    ],
+    'platform_eyebrow' => 'Für echte Mail-Ops',
+    'platform_title' => 'Migrieren, relayen und aus dem Spam bleiben',
+    'platform_lede' => 'Mailemon ist mehr als ein Postfach-Tarif — Migration, Provider-Routing, Reputation und ein Posteingang fürs ganze Team.',
+    'platform_items' => [
+        [
+            'title' => 'IMAP-Sync-Migration',
+            'body' => 'Von Google Workspace, Microsoft 365, Zoho oder jedem Anbieter mit Zugangsdaten. Millionen Nachrichten in Stunden migrieren.',
+        ],
+        [
+            'title' => 'Eigenen Provider mitbringen',
+            'body' => 'Jede Domain über Postmark, Resend, SES, Mailgun oder unser Managed Relay routen — ein Stack, Wahl pro Domain.',
+        ],
+        [
+            'title' => 'Alten Posteingang mitbringen',
+            'body' => 'Gmail, Outlook, Yahoo, iCloud oder jedes IMAP. In wenigen Minuten Historie übertragen.',
+        ],
+        [
+            'title' => 'Im Posteingang landen, nicht im Spam',
+            'body' => 'Rspamd-Scoring, Greylisting, Absenderpolitik und FBL-Ingestion. Wir überwachen die Reputation für Sie.',
+        ],
+        [
+            'title' => 'Alle Konten, ein Posteingang',
+            'body' => 'Ihr Postfach, geteilte Team-Postfächer und verbundenes Gmail, Outlook & iCloud — in einem Live-Stream.',
+        ],
+        [
+            'title' => 'Vor dem Senden prüfen, ob es echt ist',
+            'body' => '25 Prüfungen pro Adresse: Syntax, MX, SMTP-Probe, Rollen, Catch-all, Disposable und Trap-Risiko.',
+        ],
+    ],
+    'validation_eyebrow' => 'E-Mail-Validierung',
+    'validation_title' => 'Adressen prüfen, bevor sie bouncen',
+    'validation_lede' => 'API und Bulk-CSV-Upload für saubere Listen — Credits verfallen nie, kein Monatsminimum.',
+    'validation_points' => [
+        'Einzel-Check-API · 50 ms Medianlatenz',
+        'Bulk-CSV-Upload bis 1M Zeilen',
+        'Deep Check mit SMTP-Mailbox-Probing',
+        'Credits verfallen nie · kein Monatsminimum',
+    ],
+    'auth_eyebrow' => 'Authentifizierungs-Stack',
+    'auth_title' => 'SPF, DKIM, DMARC, MTA-STS und TLS-RPT',
+    'auth_lede' => 'Zustellbarkeits-Einträge, die erzeugt, veröffentlicht und lesbar sind — kein TXT-Haufen für später.',
+    'auth_items' => [
+        [
+            'code' => 'SPF',
+            'title' => 'Sender Policy Framework',
+            'body' => 'Automatisch pro Domain erzeugt und unter dem Lookup-Limit gehalten.',
+        ],
+        [
+            'code' => 'DKIM',
+            'title' => 'DomainKeys Identified Mail',
+            'body' => 'Rotierende 2048-Bit-Schlüssel, automatisch im DNS veröffentlicht.',
+        ],
+        [
+            'code' => 'DMARC',
+            'title' => 'DMARC-Alignment',
+            'body' => 'Authentifiziert jede Nachricht und macht aus täglichen DMARC-Reports ein lesbares Diagramm.',
+        ],
+        [
+            'code' => 'MTA-STS',
+            'title' => 'MTA-STS-Policy',
+            'body' => 'TLS für eingehend erzwingen. Policy-Datei von unserem CDN.',
+        ],
+        [
+            'code' => 'TLS-RPT',
+            'title' => 'TLS-Reporting',
+            'body' => 'Berichte zu TLS-Fehlern empfangen und auswerten.',
+        ],
+    ],
+    'audience_eyebrow' => 'Für wen es passt',
+    'audience_eyebrow' => 'Für wen es passt',
+    'audience_title' => 'Für Teams, die jetzt Marken-Mail brauchen',
+    'audience_lede' => 'Mailemon ist der Self-Service-Weg, wenn Sie @ihrefirma.com wollen, ohne auf ein Enterprise-Suite-Angebot zu warten.',
+    'audience_items' => [
+        'Gründer und KMU, die diese Woche info@ und sales@ brauchen',
+        'Agenturen, die kundenorientierte Adressen wollen, ohne schon Google- oder Microsoft-Lizenzen',
+        'Teams, die von kostenlosem Gmail oder Yahoo wechseln für ein professionelleres Auftreten',
+        'Alle, die klare Preise und Online-Checkout wollen, bevor sie eine volle Produktivitäts-Suite brauchen',
     ],
     'plans_eyebrow' => 'Mailemon-Tarife',
     'plans_title' => 'Klare Tarife für Marken-Postfächer',
@@ -41,12 +173,12 @@ return [
             'body' => 'Nutzen Sie Browser-Webmail oder verbinden Sie Outlook, Apple Mail und Android über Standard-IMAP und SMTP.',
         ],
         [
-            'title' => 'DNS-Einträge inklusive',
-            'body' => 'Wir liefern MX-, SPF-, DKIM- und DMARC-Hilfe, damit die Zustellbarkeit von Tag eins korrekt eingerichtet ist.',
+            'title' => 'Vollständiges Mail-DNS',
+            'body' => 'MX, SPF, DKIM, DMARC und MTA-STS — erzeugt, geprüft und bis zur Propagation überwacht.',
         ],
         [
-            'title' => 'Self-Service-Checkout',
-            'body' => 'Online bestellen und zahlen — kein Warten auf ein individuelles Angebot, wenn Sie nur Marken-E-Mail brauchen.',
+            'title' => 'Migration & Validierung',
+            'body' => 'IMAP-Sync von großen Anbietern plus 25 Adressprüfungen per API oder Bulk-CSV.',
         ],
         [
             'title' => 'Flexible Abrechnungszeiträume',
@@ -56,6 +188,14 @@ return [
             'title' => 'Lemonwares-Setup-Support',
             'body' => 'Nach der Zahlung helfen wir bei DNS-Fragen und Postfach-Setup per WhatsApp, Telefon und E-Mail.',
         ],
+    ],
+    'highlights' => [
+        'Marken-Postfächer auf Ihrer Domain',
+        'Webmail plus Outlook, Apple Mail und Android',
+        'MX, SPF, DKIM, DMARC und MTA-STS nach der Zahlung',
+        'IMAP-Migration von Google, Microsoft, Zoho und mehr',
+        'Posteingangsschutz mit Rspamd, Greylisting und FBL',
+        'Dasselbe Lemonwares-Support-Team wie beim Hosting',
     ],
     'enterprise_heading' => 'Enterprise-Suites auf Anfrage',
     'faq_title' => 'Mailemon-FAQ',
@@ -74,7 +214,23 @@ return [
         ],
         [
             'question' => 'Welche DNS-Einträge brauche ich?',
-            'answer' => 'Nach der Zahlung zeigen wir MX-, SPF-, DKIM- und DMARC-Einträge für Ihren DNS-Host. Mail fließt, sobald sie propagiert sind.',
+            'answer' => 'Nach der Zahlung erzeugen und prüfen wir MX, SPF, DKIM, DMARC und MTA-STS. CSV einfügen, Cloudflare zeigen oder manuell setzen — Mail fließt nach der Propagation.',
+        ],
+        [
+            'question' => 'Kann ich von Google Workspace oder Microsoft 365 migrieren?',
+            'answer' => 'Ja. IMAP-Sync von Google Workspace, Microsoft 365, Zoho oder jedem Anbieter mit Zugangsdaten — inklusive Gmail, Outlook, Yahoo und iCloud.',
+        ],
+        [
+            'question' => 'Unterstützen Sie eigene Versand-Provider?',
+            'answer' => 'Ja. Jede Domain über Postmark, Resend, SES, Mailgun oder unser Managed Relay routen.',
+        ],
+        [
+            'question' => 'Wie lange dauert es, bis Mail funktioniert?',
+            'answer' => 'Postfächer werden nach der Zahlung bereitgestellt. Sobald die DNS-Einträge propagiert sind (oft Minuten bis wenige Stunden), fließt die Mail.',
+        ],
+        [
+            'question' => 'Kann ich später weitere Postfächer hinzufügen?',
+            'answer' => 'Wählen Sie einen Tarif, der zu Ihrer aktuellen Postfachanzahl passt. Kontaktieren Sie uns, wenn Sie einen Tarif überwachsen und mehr Plätze brauchen.',
         ],
         [
             'question' => 'Wann Google Workspace oder Microsoft 365 wählen?',
@@ -86,14 +242,14 @@ return [
         ],
     ],
     'help_title' => 'Bereit für Marken-E-Mail?',
-    'help_lede' => 'Mailemon-Tarif wählen, Domain hinzufügen — wir richten mit DNS-Hilfe ein.',
+    'help_lede' => 'Mailemon-Tarif wählen, Domain hinzufügen — wir richten mit DNS, Migration und Zustellbarkeit ein.',
     'choose_period' => 'Abrechnungszeitraum',
     'mailboxes' => ':count Postfach|:count Postfächer',
     'per_mailbox' => 'Enthält :count Marken-Postfach auf Ihrer Domain.|Enthält :count Marken-Postfächer auf Ihrer Domain.',
     'per_mailbox_price' => ':price pro Postfach / Monat',
     'standard_rate' => 'Standardtarif',
     'outlook_apps' => 'Funktioniert mit Outlook, Apple Mail und Android',
-    'dns_included' => 'MX-, SPF-, DKIM- und DMARC-Einträge inklusive',
+    'dns_included' => 'MX, SPF, DKIM, DMARC und MTA-STS inklusive',
     'webmail_included' => 'Webmail plus IMAP/SMTP für jedes Postfach',
     'support_included' => 'Lemonwares-Setup-Support nach der Zahlung',
     'get_started' => 'Diesen Tarif wählen',

@@ -2,15 +2,44 @@
 
 @section('title', __('email.meta_title') . ' — ' . config('site.short_name'))
 @section('meta_description', __('email.meta_description'))
+@section('meta_image', asset('images/brands/mailemon-logo.png'))
 
 @php
     $steps = __('email.steps');
     if (! is_array($steps)) {
         $steps = [];
     }
+    $apps = __('email.apps');
+    if (! is_array($apps)) {
+        $apps = [];
+    }
+    $setupItems = __('email.setup_items');
+    if (! is_array($setupItems)) {
+        $setupItems = [];
+    }
+    $platformItems = __('email.platform_items');
+    if (! is_array($platformItems)) {
+        $platformItems = [];
+    }
+    $validationPoints = __('email.validation_points');
+    if (! is_array($validationPoints)) {
+        $validationPoints = [];
+    }
+    $authItems = __('email.auth_items');
+    if (! is_array($authItems)) {
+        $authItems = [];
+    }
+    $audienceItems = __('email.audience_items');
+    if (! is_array($audienceItems)) {
+        $audienceItems = [];
+    }
     $features = __('email.features');
     if (! is_array($features)) {
         $features = [];
+    }
+    $highlights = __('email.highlights');
+    if (! is_array($highlights)) {
+        $highlights = [];
     }
     $faqItems = __('email.faq_items');
     if (! is_array($faqItems)) {
@@ -48,48 +77,65 @@
                         </a>
                     </div>
                 </div>
-                <div class="hidden justify-end lg:flex" aria-hidden="true">
-                    <img
-                        src="{{ asset('images/brands/mailemon.svg') }}"
-                        alt=""
-                        width="240"
-                        height="240"
-                        class="w-full max-w-[15rem] brightness-0 invert opacity-95"
-                    >
+                <div class="dev-cutout-hero hidden lg:flex" aria-hidden="true">
+                    <div class="flex w-full max-w-md items-center justify-center rounded-[2rem] bg-white px-8 py-10 shadow-[0_24px_60px_rgba(0,0,0,0.18)]">
+                        <img
+                            src="{{ asset('images/brands/mailemon-logo.png') }}"
+                            alt="Mailemon"
+                            width="420"
+                            height="60"
+                            class="h-auto w-full max-w-[18rem]"
+                            loading="eager"
+                            decoding="async"
+                        >
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <section class="border-b border-border bg-white">
-        <div class="container-page py-12 sm:py-14">
-            <x-ui.flash />
-            <p class="mx-auto max-w-3xl text-center text-base leading-relaxed text-on-blush/80 sm:text-lg">
-                {{ __('email.body') }}
-            </p>
-        </div>
-    </section>
-
-    <section class="section-band border-t border-border">
+    <section class="section-band border-t border-border" data-reveal>
         <div class="container-page py-16 sm:py-20">
+            <x-ui.flash />
             <div class="mx-auto mb-10 max-w-2xl text-center">
                 <p class="section-label mb-3">{{ __('email.intro_eyebrow') }}</p>
                 <h2 class="heading">{{ __('email.intro_title') }}</h2>
                 <p class="lede mx-auto mt-3">{{ __('email.intro_lede') }}</p>
             </div>
-            <ol class="hosting-steps-grid">
+            <ol class="hosting-steps-grid" data-reveal-stagger>
                 @foreach ($steps as $index => $step)
                     <li class="hosting-step-card">
                         <span class="hosting-step-num">{{ $index + 1 }}</span>
                         <h3 class="mt-4 text-lg font-bold text-black">{{ $step['title'] ?? '' }}</h3>
-                        <p class="mt-2 text-sm leading-relaxed text-on-blush/75">{{ $step['body'] ?? '' }}</p>
+                        <p class="mt-2 text-sm font-light leading-relaxed text-on-blush/75">{{ $step['body'] ?? '' }}</p>
                     </li>
                 @endforeach
             </ol>
         </div>
     </section>
 
-    <section id="email-plans" class="border-t border-border bg-blush-soft/40 scroll-mt-28">
+    <section id="email-apps" class="scroll-mt-28 border-t border-border bg-blush-soft/40" data-reveal>
+        <div class="container-page py-16 sm:py-20">
+            <div class="mx-auto mb-10 max-w-2xl text-center">
+                <p class="section-label mb-3">{{ __('email.apps_eyebrow') }}</p>
+                <h2 class="heading">{{ __('email.apps_title') }}</h2>
+                <p class="lede mx-auto mt-3">{{ __('email.apps_lede') }}</p>
+            </div>
+            <div class="hosting-feature-grid" data-reveal-stagger>
+                @foreach ($apps as $app)
+                    <article class="hosting-feature-card">
+                        <span class="dev-icon-badge mb-4" aria-hidden="true">
+                            <x-ui.icons.mail class="size-5 text-rose" />
+                        </span>
+                        <h3 class="text-base font-bold text-black">{{ $app['title'] ?? '' }}</h3>
+                        <p class="mt-2 text-sm font-light leading-relaxed text-on-blush/75">{{ $app['body'] ?? '' }}</p>
+                    </article>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <section id="email-plans" class="border-t border-border bg-white scroll-mt-28">
         <div class="container-page py-16 sm:py-20">
             <div class="mb-10 max-w-2xl">
                 <p class="section-label mb-3">{{ __('email.plans_eyebrow') }}</p>
@@ -242,7 +288,84 @@
         </div>
     </section>
 
-    <section class="section-band border-t border-border">
+    <section class="section-band border-t border-border" data-reveal>
+        <div class="container-page py-16 sm:py-20">
+            <div class="mb-10 max-w-2xl">
+                <p class="section-label mb-3">{{ __('email.setup_eyebrow') }}</p>
+                <h2 class="heading">{{ __('email.setup_title') }}</h2>
+                <p class="lede mt-3">{{ __('email.setup_lede') }}</p>
+            </div>
+            <div class="hosting-feature-grid" data-reveal-stagger>
+                @foreach ($setupItems as $item)
+                    <article class="hosting-feature-card">
+                        <h3 class="text-base font-bold text-black">{{ $item['title'] ?? '' }}</h3>
+                        <p class="mt-2 text-sm font-light leading-relaxed text-on-blush/75">{{ $item['body'] ?? '' }}</p>
+                    </article>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <section class="border-t border-border bg-blush-soft/40" data-reveal>
+        <div class="container-page py-16 sm:py-20">
+            <div class="mb-10 max-w-2xl">
+                <p class="section-label mb-3">{{ __('email.platform_eyebrow') }}</p>
+                <h2 class="heading">{{ __('email.platform_title') }}</h2>
+                <p class="lede mt-3">{{ __('email.platform_lede') }}</p>
+            </div>
+            <div class="hosting-feature-grid" data-reveal-stagger>
+                @foreach ($platformItems as $item)
+                    <article class="hosting-feature-card">
+                        <span class="dev-icon-badge mb-4" aria-hidden="true">
+                            <x-ui.icons.mail class="size-5 text-rose" />
+                        </span>
+                        <h3 class="text-base font-bold text-black">{{ $item['title'] ?? '' }}</h3>
+                        <p class="mt-2 text-sm font-light leading-relaxed text-on-blush/75">{{ $item['body'] ?? '' }}</p>
+                    </article>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <section class="border-t border-border bg-white" data-reveal>
+        <div class="container-page py-16 sm:py-20">
+            <div class="grid items-start gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
+                <div>
+                    <p class="section-label mb-3">{{ __('email.validation_eyebrow') }}</p>
+                    <h2 class="heading">{{ __('email.validation_title') }}</h2>
+                    <p class="lede mt-3">{{ __('email.validation_lede') }}</p>
+                </div>
+                <ul class="check-list grid gap-3 sm:grid-cols-2">
+                    @foreach ($validationPoints as $point)
+                        <li>{{ $point }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="border-t border-border bg-blush-soft/40" data-reveal>
+        <div class="container-page py-16 sm:py-20">
+            <div class="mb-10 max-w-2xl">
+                <p class="section-label mb-3">{{ __('email.auth_eyebrow') }}</p>
+                <h2 class="heading">{{ __('email.auth_title') }}</h2>
+                <p class="lede mt-3">{{ __('email.auth_lede') }}</p>
+            </div>
+            <div class="hosting-feature-grid" data-reveal-stagger>
+                @foreach ($authItems as $item)
+                    <article class="hosting-feature-card">
+                        <p class="inline-flex rounded-full bg-blush-soft px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-widest text-rose">
+                            {{ $item['code'] ?? '' }}
+                        </p>
+                        <h3 class="mt-3 text-base font-bold text-black">{{ $item['title'] ?? '' }}</h3>
+                        <p class="mt-2 text-sm font-light leading-relaxed text-on-blush/75">{{ $item['body'] ?? '' }}</p>
+                    </article>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <section class="border-t border-border bg-white" data-reveal>
         <div class="container-page py-16 sm:py-20">
             <div class="mb-10 max-w-2xl">
                 <p class="section-label mb-3">{{ __('email.features_eyebrow') }}</p>
@@ -253,14 +376,34 @@
                 @foreach ($features as $feature)
                     <article class="hosting-feature-card">
                         <h3 class="text-base font-bold text-black">{{ $feature['title'] ?? '' }}</h3>
-                        <p class="mt-2 text-sm leading-relaxed text-on-blush/75">{{ $feature['body'] ?? '' }}</p>
+                        <p class="mt-2 text-sm font-light leading-relaxed text-on-blush/75">{{ $feature['body'] ?? '' }}</p>
                     </article>
                 @endforeach
             </div>
+            <ul class="check-list mt-10 grid gap-3 md:grid-cols-2">
+                @foreach ($highlights as $item)
+                    <li>{{ $item }}</li>
+                @endforeach
+            </ul>
         </div>
     </section>
 
-    <section id="email-suites" class="border-t border-border bg-blush-soft/40 scroll-mt-28">
+    <section class="border-t border-border bg-blush-soft/40" data-reveal>
+        <div class="container-page py-16 sm:py-20">
+            <div class="mb-10 max-w-2xl">
+                <p class="section-label mb-3">{{ __('email.audience_eyebrow') }}</p>
+                <h2 class="heading">{{ __('email.audience_title') }}</h2>
+                <p class="lede mt-3">{{ __('email.audience_lede') }}</p>
+            </div>
+            <ul class="check-list grid gap-3 sm:grid-cols-2">
+                @foreach ($audienceItems as $item)
+                    <li>{{ $item }}</li>
+                @endforeach
+            </ul>
+        </div>
+    </section>
+
+    <section id="email-suites" class="border-t border-border bg-white scroll-mt-28" data-reveal>
         <div class="container-page py-16 sm:py-20">
             <div class="mb-10 max-w-2xl">
                 <p class="section-label mb-3">{{ __('email.enterprise_title') }}</p>

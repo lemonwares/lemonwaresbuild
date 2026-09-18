@@ -74,6 +74,19 @@ class WhmcsClient
         return $response;
     }
 
+    public static function closeClient(int $clientId): bool
+    {
+        if ($clientId < 1) {
+            return false;
+        }
+
+        $response = self::request('CloseClient', [
+            'clientid' => $clientId,
+        ]);
+
+        return (bool) $response && ($response['result'] ?? null) === 'success';
+    }
+
     /**
      * @param  array<string, mixed>  $payload
      * @return array<string, mixed>|null
@@ -128,6 +141,40 @@ class WhmcsClient
         }
 
         return $response;
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public static function getInvoices(int $clientId, int $limit = 50): array
+    {
+        if ($clientId <= 0) {
+            return [];
+        }
+
+        $response = self::request('GetInvoices', [
+            'userid' => $clientId,
+            'limitnum' => $limit,
+            'limitstart' => 0,
+            'orderby' => 'date',
+            'order' => 'desc',
+        ]);
+
+        if (! $response || ($response['result'] ?? null) !== 'success') {
+            return [];
+        }
+
+        $invoices = $response['invoices']['invoice'] ?? [];
+
+        if (! is_array($invoices)) {
+            return [];
+        }
+
+        if (isset($invoices['id'])) {
+            return [$invoices];
+        }
+
+        return array_values(array_filter($invoices, 'is_array'));
     }
 
     /**

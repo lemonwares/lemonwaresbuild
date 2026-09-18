@@ -7,6 +7,8 @@
             $seoImage = asset('lemonwareslogo.webp');
             $seoUrl = url()->current();
             $adminAuthed = session('admin_authenticated');
+            $adminNotifications = $adminNotifications ?? [];
+            $adminNotificationCount = $adminNotificationCount ?? 0;
         @endphp
 
         <meta charset="utf-8">
@@ -22,54 +24,140 @@
         <link rel="apple-touch-icon" href="{{ asset('lemonwareslogo.webp') }}">
         @fonts
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <script>
+            (function () {
+                try {
+                    if (localStorage.getItem('lemonwares.admin-sidebar') === 'collapsed') {
+                        document.documentElement.classList.add('admin-sidebar-collapsed');
+                    }
+                } catch (e) {}
+            })();
+        </script>
     </head>
     <body @class(['min-h-screen text-black', 'bg-blush-soft' => $adminAuthed, 'bg-white' => ! $adminAuthed])>
         @if ($adminAuthed)
-            <div class="admin-shell">
-                <aside class="admin-sidebar">
-                    <div class="border-b border-border px-5 py-5">
-                        <a href="{{ route('admin.dashboard') }}" class="block">
+            <div class="admin-shell" data-admin-shell>
+                <aside class="admin-sidebar" data-admin-sidebar id="admin-sidebar">
+                    <div class="admin-sidebar-brand">
+                        <a href="{{ route('admin.dashboard') }}" class="admin-sidebar-brand-link" title="{{ config('site.name') }}">
                             <img
                                 src="{{ asset('lemonwareslogo.webp') }}"
                                 alt="{{ config('site.name') }}"
-                                width="176"
-                                height="40"
+                                width="220"
+                                height="52"
                                 class="admin-sidebar-logo"
                             >
-                            <p class="mt-3 text-xs font-semibold uppercase tracking-[0.16em] text-rose">Staff CRM</p>
                         </a>
                     </div>
-                    <div class="flex-1 overflow-y-auto px-3 py-5">
+
+                    <div class="admin-sidebar-scroll">
                         <x-admin.nav />
+                    </div>
+
+                    <div class="admin-sidebar-footer">
+                        <button
+                            type="button"
+                            class="admin-sidebar-toggle"
+                            data-admin-sidebar-toggle
+                            aria-expanded="true"
+                            aria-controls="admin-sidebar"
+                            title="Collapse sidebar"
+                        >
+                            <svg class="admin-sidebar-toggle-icon is-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                <path d="M9 3v18" />
+                                <path d="m15 9-3 3 3 3" />
+                            </svg>
+                            <svg class="admin-sidebar-toggle-icon is-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <rect x="3" y="3" width="18" height="18" rx="2" />
+                                <path d="M9 3v18" />
+                                <path d="m13 15 3-3-3-3" />
+                            </svg>
+                            <span class="admin-nav-label">Collapse</span>
+                        </button>
                     </div>
                 </aside>
 
                 <div class="admin-main">
-                    <header class="border-b border-border bg-white">
-                        <div class="flex items-center justify-between gap-3 px-5 py-4 sm:px-8">
-                            <div class="flex min-w-0 items-center gap-3 lg:hidden">
-                                <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center gap-3">
-                                    <img
-                                        src="{{ asset('lemonwareslogo.webp') }}"
-                                        alt="{{ config('site.name') }}"
-                                        width="176"
-                                        height="40"
-                                        class="admin-sidebar-logo"
-                                    >
-                                </a>
-                                <span class="text-xs font-semibold uppercase tracking-[0.12em] text-rose">Staff CRM</span>
+                    <header class="admin-topbar">
+                        <div class="admin-topbar-inner">
+                            <div class="admin-topbar-left">
+                                <div class="admin-topbar-mobile-brand lg:hidden">
+                                    <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center">
+                                        <img
+                                            src="{{ asset('lemonwareslogo.webp') }}"
+                                            alt="{{ config('site.name') }}"
+                                            width="160"
+                                            height="40"
+                                            class="admin-topbar-mobile-logo"
+                                        >
+                                    </a>
+                                </div>
                             </div>
-                            <p class="hidden text-sm font-semibold text-on-blush/55 lg:block">Staff workspace</p>
-                            <button
-                                type="button"
-                                data-signout-open
-                                class="rounded-full border border-border px-4 py-2 text-sm font-semibold text-black transition hover:border-rose hover:text-rose"
-                            >
-                                Sign Out
-                            </button>
-                            <form id="signout-form" method="POST" action="{{ route('admin.logout') }}" class="hidden">
-                                @csrf
-                            </form>
+
+                            <div class="admin-topbar-actions">
+                                <button
+                                    type="button"
+                                    class="admin-icon-btn"
+                                    data-admin-search-open
+                                    aria-label="Search admin"
+                                    title="Search (Ctrl/⌘ K)"
+                                >
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <circle cx="11" cy="11" r="7" />
+                                        <path d="m20 20-3.5-3.5" />
+                                    </svg>
+                                </button>
+
+                                <div class="admin-notif">
+                                    <button
+                                        type="button"
+                                        class="admin-icon-btn"
+                                        data-admin-notif-open
+                                        aria-label="Notifications"
+                                        aria-expanded="false"
+                                        aria-haspopup="true"
+                                    >
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+                                            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+                                        </svg>
+                                        @if ($adminNotificationCount > 0)
+                                            <span class="admin-notif-badge">{{ $adminNotificationCount > 9 ? '9+' : $adminNotificationCount }}</span>
+                                        @endif
+                                    </button>
+
+                                    <div class="admin-notif-panel" data-admin-notif-panel hidden>
+                                        <div class="admin-notif-head">
+                                            <strong>Notifications</strong>
+                                            <span>{{ $adminNotificationCount }} open</span>
+                                        </div>
+                                        <ul class="admin-notif-list">
+                                            @forelse ($adminNotifications as $note)
+                                                <li>
+                                                    <a href="{{ $note['href'] }}">
+                                                        <span class="admin-notif-title">{{ $note['title'] }}</span>
+                                                        <span class="admin-notif-meta">{{ $note['meta'] }}</span>
+                                                    </a>
+                                                </li>
+                                            @empty
+                                                <li class="admin-notif-empty">You're all caught up.</li>
+                                            @endforelse
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    data-signout-open
+                                    class="admin-topbar-signout"
+                                >
+                                    Sign Out
+                                </button>
+                                <form id="signout-form" method="POST" action="{{ route('admin.logout') }}" class="hidden">
+                                    @csrf
+                                </form>
+                            </div>
                         </div>
                     </header>
 
@@ -77,7 +165,11 @@
                         <x-admin.nav />
                     </div>
 
-                    <main class="px-5 py-8 sm:px-8 sm:py-10">
+                    <main class="admin-content">
+                        @unless ($__env->hasSection('hide_auto_breadcrumbs'))
+                            <x-admin.breadcrumbs :items="\App\Support\AdminBreadcrumbs::fromCurrentRoute()" class="mb-5" />
+                        @endunless
+
                         @if (session('status'))
                             <p class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('status') }}</p>
                         @endif
@@ -86,13 +178,37 @@
                     </main>
                 </div>
             </div>
-        @else
-            <main>
-                @yield('content')
-            </main>
-        @endif
 
-        @if ($adminAuthed)
+            <div
+                class="admin-search-modal"
+                data-admin-search-modal
+                data-search-url="{{ route('admin.search') }}"
+                hidden
+                role="dialog"
+                aria-modal="true"
+                aria-label="Search"
+            >
+                <div class="admin-search-dialog">
+                    <div class="admin-search-bar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="11" cy="11" r="7" />
+                            <path d="m20 20-3.5-3.5" />
+                        </svg>
+                        <input
+                            type="search"
+                            data-admin-search-input
+                            placeholder="Search customers, orders, leads, tickets, pages…"
+                            autocomplete="off"
+                            spellcheck="false"
+                        >
+                        <button type="button" class="admin-search-esc" data-admin-search-close>Esc</button>
+                    </div>
+                    <div class="admin-search-results" data-admin-search-results>
+                        <p class="admin-search-hint">Type to search anything on the platform.</p>
+                    </div>
+                </div>
+            </div>
+
             <div id="signout-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 px-4">
                 <div class="w-full max-w-md rounded-3xl border border-border bg-white p-6 shadow-2xl">
                     <h3 class="text-xl font-bold text-black">Confirm Sign Out</h3>
@@ -108,6 +224,10 @@
                     </div>
                 </div>
             </div>
+        @else
+            <main>
+                @yield('content')
+            </main>
         @endif
 
         <script>
@@ -164,5 +284,6 @@
                 });
             }
         </script>
+        @stack('scripts')
     </body>
 </html>

@@ -3,6 +3,8 @@
 
     $businessLinks = [
         ['label' => __('site.nav.about'), 'href' => route('about')],
+        ['label' => __('site.nav.team'), 'href' => route('team')],
+        ['label' => __('site.nav.careers'), 'href' => route('careers')],
         ['label' => __('site.footer.hosting_plans'), 'href' => route('domain')],
         ['label' => __('site.nav.email'), 'href' => route('email.plans')],
         ['label' => __('site.common.contact_us'), 'href' => route('contact')],
@@ -15,19 +17,28 @@
     ];
 
     $legalLinks = [
-        ['label' => __('site.footer.terms'), 'href' => route('terms')],
         ['label' => __('site.footer.refund'), 'href' => route('refund-policy')],
         ['label' => __('site.footer.privacy'), 'href' => route('privacy-policy')],
         ['label' => __('site.footer.usage'), 'href' => route('usage-terms')],
+        ['label' => __('site.footer.terms'), 'href' => route('terms')],
     ];
 @endphp
 
 <footer {{ $attributes->class('site-footer') }}>
     <div class="container-page py-14 sm:py-16">
         <div class="grid gap-10 lg:grid-cols-12 lg:gap-8 xl:gap-10">
-            {{-- Brand & address --}}
+            {{-- Brand, Mailemon CTA & address --}}
             <div class="flex flex-col gap-6 lg:col-span-3">
                 <x-layout.logo />
+
+                <div class="rounded-2xl border border-border bg-blush-soft/60 p-4">
+                    <p class="text-sm font-semibold text-black">{{ __('site.footer.mailemon') }}</p>
+                    <p class="mt-1 text-sm font-light leading-relaxed text-on-blush/70">{{ __('site.footer.mailemon_lede') }}</p>
+                    <a href="{{ route('email.plans') }}" class="btn btn-primary mt-4 w-fit">
+                        <span>{{ __('site.nav.email_get_started') }}</span>
+                        <x-ui.icons.arrow-up-right class="size-4" />
+                    </a>
+                </div>
 
                 <div class="flex items-center gap-3">
                     @foreach (config('site.social') as $social)
@@ -118,7 +129,8 @@
             {{-- Newsletter --}}
             <div class="lg:col-span-3">
                 <div id="footer-newsletter" class="footer-newsletter py-1 scroll-mt-28">
-                    <h2 class="footer-heading mb-4">{{ __('site.footer.newsletter') }}</h2>
+                    <h2 class="footer-heading mb-2">{{ __('site.footer.newsletter') }}</h2>
+                    <p class="mb-4 text-sm font-light leading-relaxed text-on-blush/70">{{ __('site.footer.newsletter_lede') }}</p>
 
                     @php
                         $newsletterFeedback = session('newsletter_feedback');
@@ -188,17 +200,21 @@
     </div>
 
     <div class="border-t border-border">
-        <div class="container-page flex flex-col gap-3 py-6 text-sm text-on-blush/60 sm:flex-row sm:items-center sm:justify-between">
+        <div class="container-page flex flex-col gap-4 py-6 text-sm text-on-blush/60 sm:flex-row sm:items-center sm:justify-between">
             <p>
                 &copy; {{ date('Y') }}
                 <a href="{{ config('site.url') }}" class="link font-medium text-on-blush/80 hover:text-rose">{{ config('site.domain') }}</a>
                 · {{ __('site.common.all_rights_reserved') }}
             </p>
-            <p>
-                {{ __('site.common.built_by') }}
-                <span class="font-medium text-on-blush/80">{{ config('site.name') }}</span>
-                · {{ config('site.tagline') }}
-            </p>
+
+            <div class="flex flex-wrap items-center gap-3 sm:justify-end">
+                <x-layout.theme-switcher class="footer-theme-switcher" />
+                <p>
+                    {{ __('site.common.built_by') }}
+                    <span class="font-medium text-on-blush/80">{{ config('site.name') }}</span>
+                    · {{ config('site.tagline') }}
+                </p>
+            </div>
         </div>
     </div>
 </footer>

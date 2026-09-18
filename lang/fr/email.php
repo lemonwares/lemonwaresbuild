@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'meta_title' => 'Mailemon',
-    'meta_description' => 'Mailemon — email professionnel sur votre domaine. Quatre offres, quatre périodes de facturation, mise en service instantanée avec aide DNS par Lemonwares.',
+    'meta_title' => 'Mailemon Email Pro | Email de marque sur votre domaine',
+    'meta_description' => 'Mailemon par Lemonwares : email de marque avec MX/SPF/DKIM/DMARC/MTA-STS, migration IMAP, protection boîte et API de validation.',
     'eyebrow' => 'Mailemon',
     'title' => 'Un email de marque à la hauteur de votre entreprise',
     'lede' => 'Mailemon est l’email professionnel de Lemonwares — commandez ici, payez en toute sécurité, et nous créons les boîtes sur votre domaine avec les enregistrements DNS.',
@@ -10,7 +10,7 @@ return [
     'body' => 'Mailemon est l’email professionnel de Lemonwares — des boîtes de marque sur votre domaine avec des offres claires, un paiement sécurisé et une aide DNS pour mettre le mail en ligne sans approximation. Commandez en ligne dès aujourd’hui ; contactez-nous si vous avez besoin de Google Workspace ou Microsoft 365 à la place.',
     'intro_eyebrow' => 'Comment ça marche',
     'intro_title' => 'Offre, domaine, puis boîtes',
-    'intro_lede' => 'Trois étapes claires de la consultation des offres aux adresses de marque sur votre domaine.',
+    'intro_lede' => 'Quatre étapes claires, de la consultation des offres aux adresses de marque sur votre domaine.',
     'steps' => [
         [
             'title' => 'Choisissez une offre Mailemon',
@@ -21,9 +21,141 @@ return [
             'body' => 'Utilisez un domaine que vous possédez déjà, puis choisissez des noms de boîtes comme info ou sales qui deviennent des adresses sur ce domaine.',
         ],
         [
-            'title' => 'Payez et ajoutez les enregistrements DNS',
-            'body' => 'Terminez le paiement sécurisé. Nous créons les boîtes et vous fournissons les enregistrements MX, SPF, DKIM et DMARC pour que le mail puisse circuler.',
+            'title' => 'Payez en toute sécurité',
+            'body' => 'Terminez le checkout en ligne. Nous créons votre commande, confirmons le paiement et mettons les boîtes en file de provisionnement.',
         ],
+        [
+            'title' => 'Ajoutez le DNS et passez en production',
+            'body' => 'Nous générons et vérifions MX, SPF, DKIM, DMARC et MTA-STS. Collez un CSV, pointez Cloudflare vers nous, ou ajoutez les enregistrements à la main — le mail circule après propagation.',
+        ],
+    ],
+    'apps_eyebrow' => 'Ce que vous pouvez utiliser',
+    'apps_title' => 'Webmail et les apps que votre équipe connaît déjà',
+    'apps_lede' => 'Mailemon n’est pas lié à un seul client — consultez le webmail ou connectez les apps mail que vos équipes utilisent déjà.',
+    'apps' => [
+        [
+            'title' => 'Webmail',
+            'body' => 'Consultez vos mails dans le navigateur depuis n’importe quel appareil, sans installer de logiciel.',
+        ],
+        [
+            'title' => 'Outlook',
+            'body' => 'Connectez Outlook bureau ou mobile avec les paramètres IMAP et SMTP standard.',
+        ],
+        [
+            'title' => 'Apple Mail',
+            'body' => 'Ajoutez les boîtes Mailemon sur iPhone, iPad et Mac via le flux habituel de compte mail.',
+        ],
+        [
+            'title' => 'Mail Android',
+            'body' => 'Utilisez l’app Gmail ou d’autres clients Android via IMAP/SMTP — mêmes identifiants que le webmail.',
+        ],
+        [
+            'title' => 'Adresses de marque',
+            'body' => 'info@, sales@ et noms d’équipe sur votre domaine pour que chaque réponse paraisse professionnelle.',
+        ],
+        [
+            'title' => 'Aide DNS',
+            'body' => 'MX, SPF, DKIM, DMARC et MTA-STS après paiement pour que la délivrabilité ne soit pas une approximation.',
+        ],
+    ],
+    'setup_eyebrow' => 'Un DNS qui part vraiment',
+    'setup_title' => 'Collez un CSV, pointez Cloudflare, ou ajoutez à la main',
+    'setup_lede' => 'Nous générons et vérifions MX, SPF, DKIM, DMARC et MTA-STS — puis surveillons la propagation pour que le mail arrive.',
+    'setup_items' => [
+        [
+            'title' => 'CSV, Cloudflare ou à la main',
+            'body' => 'Collez un CSV de domaines, pointez Cloudflare vers nous, ou ajoutez les enregistrements vous-même. Même résultat : un DNS mail vérifié sans approximation.',
+        ],
+        [
+            'title' => 'MX jusqu’à MTA-STS',
+            'body' => 'Nous générons et vérifions MX, SPF, DKIM, DMARC et MTA-STS, puis suivons la propagation jusqu’à ce qu’ils tiennent.',
+        ],
+        [
+            'title' => 'Configuration des clients',
+            'body' => 'Utilisez le webmail immédiatement, puis connectez Outlook, Apple Mail ou Android quand vous êtes prêt.',
+        ],
+        [
+            'title' => 'Support Lemonwares',
+            'body' => 'Bloqué sur le DNS ou la connexion ? La même équipe que pour l’hébergement vous aide par WhatsApp, téléphone et e-mail.',
+        ],
+    ],
+    'platform_eyebrow' => 'Pensé pour de vraies ops mail',
+    'platform_title' => 'Migrer, relayer, et rester hors spam',
+    'platform_lede' => 'Mailemon, ce n’est pas seulement une offre de boîtes — migration, routage fournisseur, réputation et une boîte pour toute l’équipe.',
+    'platform_items' => [
+        [
+            'title' => 'Migration IMAP-sync',
+            'body' => 'Depuis Google Workspace, Microsoft 365, Zoho ou tout fournisseur avec identifiants. Migrez des millions de messages en quelques heures.',
+        ],
+        [
+            'title' => 'Apportez votre fournisseur',
+            'body' => 'Routez chaque domaine via Postmark, Resend, SES, Mailgun ou notre relais managé — une stack, un choix par domaine.',
+        ],
+        [
+            'title' => 'Apportez votre ancienne boîte',
+            'body' => 'Gmail, Outlook, Yahoo, iCloud ou tout IMAP. Quelques minutes pour démarrer le transfert d’historique.',
+        ],
+        [
+            'title' => 'Arrivez en boîte, pas en spam',
+            'body' => 'Scoring Rspamd, greylisting, politique d’expéditeur et ingestion FBL. Nous surveillons la réputation pour vous.',
+        ],
+        [
+            'title' => 'Tous les comptes, une boîte',
+            'body' => 'Votre boîte, les boîtes d’équipe partagées et Gmail, Outlook & iCloud connectés — fusionnés dans un flux unique.',
+        ],
+        [
+            'title' => 'Savoir si c’est réel avant d’envoyer',
+            'body' => '25 contrôles par adresse : syntaxe, MX, sonde SMTP, rôle, catch-all, jetable et risque de piège.',
+        ],
+    ],
+    'validation_eyebrow' => 'Validation d’email',
+    'validation_title' => 'Vérifiez les adresses avant les rebonds',
+    'validation_lede' => 'API et upload CSV en masse pour garder des listes propres — crédits sans expiration, sans minimum mensuel.',
+    'validation_points' => [
+        'API unitaire · latence médiane 50 ms',
+        'Upload CSV jusqu’à 1M de lignes',
+        'Deep Check avec sonde SMTP de boîte',
+        'Crédits sans expiration · pas de minimum mensuel',
+    ],
+    'auth_eyebrow' => 'Pile d’authentification',
+    'auth_title' => 'SPF, DKIM, DMARC, MTA-STS et TLS-RPT',
+    'auth_lede' => 'Des enregistrements de délivrabilité générés, publiés et lisibles — pas une pile de TXT laissée pour plus tard.',
+    'auth_items' => [
+        [
+            'code' => 'SPF',
+            'title' => 'Sender Policy Framework',
+            'body' => 'Généré automatiquement par domaine, sous la limite de lookups.',
+        ],
+        [
+            'code' => 'DKIM',
+            'title' => 'DomainKeys Identified Mail',
+            'body' => 'Clés 2048 bits en rotation, publiées automatiquement dans le DNS.',
+        ],
+        [
+            'code' => 'DMARC',
+            'title' => 'Alignement DMARC',
+            'body' => 'Authentifie chaque message et transforme les rapports DMARC quotidiens en un graphique lisible.',
+        ],
+        [
+            'code' => 'MTA-STS',
+            'title' => 'Politique MTA-STS',
+            'body' => 'Force le TLS en entrée. Fichier de politique servi depuis notre CDN.',
+        ],
+        [
+            'code' => 'TLS-RPT',
+            'title' => 'Rapports TLS',
+            'body' => 'Recevez et décodez les rapports d’échecs TLS.',
+        ],
+    ],
+    'audience_eyebrow' => 'Pour qui c’est fait',
+    'audience_eyebrow' => 'Pour qui c’est fait',
+    'audience_title' => 'Conçu pour les équipes qui ont besoin d’un mail de marque maintenant',
+    'audience_lede' => 'Mailemon est le parcours en libre-service quand vous voulez @votreentreprise.com sans attendre un devis de suite entreprise.',
+    'audience_items' => [
+        'Fondateurs et PME qui ont besoin de info@ et sales@ cette semaine',
+        'Agences qui veulent des adresses client sans licences Google ou Microsoft pour l’instant',
+        'Équipes qui quittent Gmail ou Yahoo gratuits pour une image plus professionnelle',
+        'Toute personne qui veut des tarifs clairs et un checkout en ligne avant une suite de productivité complète',
     ],
     'plans_eyebrow' => 'Offres Mailemon',
     'plans_title' => 'Des offres claires pour des boîtes de marque',
@@ -41,12 +173,12 @@ return [
             'body' => 'Utilisez le webmail navigateur ou connectez Outlook, Apple Mail et Android via IMAP et SMTP standard.',
         ],
         [
-            'title' => 'Enregistrements DNS inclus',
-            'body' => 'Nous fournissons l’aide MX, SPF, DKIM et DMARC pour que la délivrabilité soit correctement configurée dès le premier jour.',
+            'title' => 'DNS mail complet',
+            'body' => 'MX, SPF, DKIM, DMARC et MTA-STS — générés, vérifiés et suivis jusqu’à la propagation.',
         ],
         [
-            'title' => 'Checkout en libre-service',
-            'body' => 'Commandez et payez en ligne — sans attendre un devis personnalisé quand vous n’avez besoin que d’un email de marque.',
+            'title' => 'Migration et validation',
+            'body' => 'IMAP-sync depuis les grands fournisseurs, plus 25 contrôles d’adresse via API ou CSV.',
         ],
         [
             'title' => 'Périodes de facturation flexibles',
@@ -56,6 +188,14 @@ return [
             'title' => 'Support de mise en place Lemonwares',
             'body' => 'Après paiement, nous aidons pour les questions DNS et la configuration des boîtes par WhatsApp, téléphone et e-mail.',
         ],
+    ],
+    'highlights' => [
+        'Boîtes de marque sur votre domaine',
+        'Webmail plus Outlook, Apple Mail et Android',
+        'MX, SPF, DKIM, DMARC et MTA-STS après paiement',
+        'Migration IMAP depuis Google, Microsoft, Zoho et plus',
+        'Protection boîte avec Rspamd, greylisting et FBL',
+        'La même équipe support Lemonwares que pour l’hébergement',
     ],
     'enterprise_heading' => 'Suites entreprise sur demande',
     'faq_title' => 'FAQ Mailemon',
@@ -74,7 +214,23 @@ return [
         ],
         [
             'question' => 'Quels enregistrements DNS faut-il ?',
-            'answer' => 'Après paiement, nous affichons les enregistrements MX, SPF, DKIM et DMARC à ajouter chez votre hébergeur DNS. Le mail commence à circuler après propagation.',
+            'answer' => 'Après paiement, nous générons et vérifions MX, SPF, DKIM, DMARC et MTA-STS. Collez un CSV, pointez Cloudflare, ou ajoutez à la main — le mail circule après propagation.',
+        ],
+        [
+            'question' => 'Puis-je migrer depuis Google Workspace ou Microsoft 365 ?',
+            'answer' => 'Oui. IMAP-sync depuis Google Workspace, Microsoft 365, Zoho ou tout fournisseur avec identifiants — y compris Gmail, Outlook, Yahoo et iCloud.',
+        ],
+        [
+            'question' => 'Supportez-vous vos propres fournisseurs d’envoi ?',
+            'answer' => 'Oui. Routez chaque domaine via Postmark, Resend, SES, Mailgun ou notre relais managé.',
+        ],
+        [
+            'question' => 'Combien de temps avant que le mail fonctionne ?',
+            'answer' => 'Les boîtes sont provisionnées après paiement. Une fois les enregistrements DNS propagés (souvent quelques minutes à quelques heures), le mail commence à circuler.',
+        ],
+        [
+            'question' => 'Puis-je ajouter des boîtes plus tard ?',
+            'answer' => 'Choisissez une offre adaptée au nombre de boîtes dont vous avez besoin maintenant. Contactez-nous si vous dépassez une offre et avez besoin de plus de sièges.',
         ],
         [
             'question' => 'Quand choisir Google Workspace ou Microsoft 365 ?',
@@ -86,14 +242,14 @@ return [
         ],
     ],
     'help_title' => 'Prêt pour un email de marque ?',
-    'help_lede' => 'Choisissez une offre Mailemon, ajoutez votre domaine — nous provisionnons avec une aide DNS.',
+    'help_lede' => 'Choisissez une offre Mailemon, ajoutez votre domaine — nous provisionnons avec DNS, migration et délivrabilité.',
     'choose_period' => 'Période de facturation',
     'mailboxes' => ':count boîte|:count boîtes',
     'per_mailbox' => 'Inclut :count boîte de marque sur votre domaine.|Inclut :count boîtes de marque sur votre domaine.',
     'per_mailbox_price' => ':price par boîte / mois',
     'standard_rate' => 'Tarif standard',
     'outlook_apps' => 'Compatible Outlook, Apple Mail et Android',
-    'dns_included' => 'Enregistrements MX, SPF, DKIM et DMARC inclus',
+    'dns_included' => 'MX, SPF, DKIM, DMARC et MTA-STS inclus',
     'webmail_included' => 'Webmail plus IMAP/SMTP pour chaque boîte',
     'support_included' => 'Support Lemonwares après le paiement',
     'get_started' => 'Choisir cette offre',

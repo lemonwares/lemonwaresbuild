@@ -423,8 +423,10 @@ return [
         ['name' => 'TypeScript', 'logo' => 'images/tech/typescript.svg'],
         ['name' => 'Python', 'logo' => 'images/tech/python.svg'],
         ['name' => 'Node.js', 'logo' => 'images/tech/nodejs.svg'],
+        ['name' => 'Express', 'logo' => 'images/tech/express.svg'],
         ['name' => 'React', 'logo' => 'images/tech/react.svg'],
         ['name' => 'Next.js', 'logo' => 'images/tech/nextjs.svg'],
+        ['name' => 'Vue', 'logo' => 'images/tech/vue.svg'],
         ['name' => 'Vite', 'logo' => 'images/tech/vite.svg'],
         ['name' => 'React Native', 'logo' => 'images/tech/reactnative.svg'],
         ['name' => 'PWA', 'logo' => 'images/tech/pwa.svg'],
@@ -434,8 +436,6 @@ return [
         ['name' => 'PostgreSQL', 'logo' => 'images/tech/postgresql.svg'],
         ['name' => 'MySQL', 'logo' => 'images/tech/mysql.svg'],
         ['name' => 'MongoDB', 'logo' => 'images/tech/mongodb.svg'],
-        ['name' => 'Flutter', 'logo' => 'images/tech/flutter.svg'],
-        ['name' => 'CMS', 'logo' => null],
     ],
 
     'partners' => [

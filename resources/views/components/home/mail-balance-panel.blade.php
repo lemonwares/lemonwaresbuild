@@ -23,9 +23,8 @@
 
     <div class="mail-balance-top">
         <span class="mail-balance-mark">
-            <img src="{{ asset('images/brands/mailemon.svg') }}" alt="" width="22" height="22">
+            <img src="{{ asset('images/brands/mailemon-logo.png') }}" alt="" width="140" height="32" class="mail-balance-logo">
         </span>
-        <span class="mail-balance-brand">{{ __('site.nav.email') }}</span>
         <span class="mail-balance-live">{{ __('site.home.email_stage_live') }}</span>
     </div>
 

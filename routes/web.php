@@ -1,7 +1,13 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AccountActivityController;
+use App\Http\Controllers\AccountDomainController;
+use App\Http\Controllers\AccountInvoiceController;
 use App\Http\Controllers\AccountNotificationController;
+use App\Http\Controllers\AccountProductController;
+use App\Http\Controllers\AccountStaffController;
+use App\Http\Controllers\AccountSubscriptionController;
 use App\Http\Controllers\AdminEmailCatalogController;
 use App\Http\Controllers\AdminEmailProviderSettingsController;
 use App\Http\Controllers\AdminAuthController;
@@ -13,14 +19,25 @@ use App\Http\Controllers\AdminHostingPriceController;
 use App\Http\Controllers\AdminFlutterwaveSettingsController;
 use App\Http\Controllers\AdminZeptoMailSettingsController;
 use App\Http\Controllers\AdminCloudflareSettingsController;
+use App\Http\Controllers\AdminSearchController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\SupportController;
+use App\Http\Controllers\AdminSupportTicketController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DomainCartController;
 use App\Http\Controllers\DomainOrderController;
 use App\Http\Controllers\AdminWhmcsSettingsController;
 use App\Http\Controllers\AdminSubscriberController;
+use App\Http\Controllers\AdminCareerOpeningController;
 use App\Http\Controllers\AdminTeamMemberController;
+use App\Http\Controllers\AdminStaffController;
+use App\Http\Controllers\AdminBlogPostController;
+use App\Http\Controllers\AdminProjectController;
+use App\Http\Controllers\AdminNewsletterCampaignController;
+use App\Http\Controllers\BlogController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\CareerController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -52,8 +69,49 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
+Route::get('/sitemap.xml', function () {
+    $urls = collect([
+        ['loc' => route('home'), 'changefreq' => 'weekly', 'priority' => '1.0'],
+        ['loc' => route('email.plans'), 'changefreq' => 'weekly', 'priority' => '0.95'],
+        ['loc' => route('cloud-hosting'), 'changefreq' => 'weekly', 'priority' => '0.9'],
+        ['loc' => route('plesk'), 'changefreq' => 'weekly', 'priority' => '0.85'],
+        ['loc' => route('vps'), 'changefreq' => 'weekly', 'priority' => '0.85'],
+        ['loc' => route('domain'), 'changefreq' => 'weekly', 'priority' => '0.9'],
+        ['loc' => route('development'), 'changefreq' => 'monthly', 'priority' => '0.8'],
+        ['loc' => route('google-workspace'), 'changefreq' => 'monthly', 'priority' => '0.75'],
+        ['loc' => route('microsoft-365'), 'changefreq' => 'monthly', 'priority' => '0.75'],
+        ['loc' => route('about'), 'changefreq' => 'monthly', 'priority' => '0.6'],
+        ['loc' => route('team'), 'changefreq' => 'monthly', 'priority' => '0.55'],
+        ['loc' => route('careers'), 'changefreq' => 'weekly', 'priority' => '0.55'],
+        ['loc' => route('contact'), 'changefreq' => 'monthly', 'priority' => '0.7'],
+        ['loc' => route('support'), 'changefreq' => 'monthly', 'priority' => '0.7'],
+        ['loc' => route('faq'), 'changefreq' => 'monthly', 'priority' => '0.65'],
+        ['loc' => route('blog'), 'changefreq' => 'weekly', 'priority' => '0.6'],
+        ['loc' => route('projects'), 'changefreq' => 'monthly', 'priority' => '0.55'],
+        ['loc' => route('case-studies'), 'changefreq' => 'monthly', 'priority' => '0.55'],
+        ['loc' => route('microservices'), 'changefreq' => 'monthly', 'priority' => '0.55'],
+        ['loc' => route('web-development'), 'changefreq' => 'monthly', 'priority' => '0.55'],
+        ['loc' => route('mobile-apps'), 'changefreq' => 'monthly', 'priority' => '0.55'],
+        ['loc' => route('terms'), 'changefreq' => 'yearly', 'priority' => '0.3'],
+        ['loc' => route('privacy-policy'), 'changefreq' => 'yearly', 'priority' => '0.3'],
+    ])->map(function (array $url) {
+        $url['lastmod'] = now()->toAtomString();
+
+        return $url;
+    });
+
+    return response()
+        ->view('sitemap', ['urls' => $urls])
+        ->header('Content-Type', 'application/xml; charset=UTF-8');
+})->name('sitemap');
+
 Route::view('/about', 'pages.about')->name('about');
-Route::view('/blog', 'pages.blog')->name('blog');
+Route::get('/blog', [BlogController::class, 'index'])->name('blog');
+Route::get('/blog/{blogPost}', [BlogController::class, 'show'])->name('blog.show');
+Route::get('/projects', [ProjectController::class, 'index'])->name('projects');
+Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+Route::get('/careers', [CareerController::class, 'index'])->name('careers');
+Route::get('/careers/{careerOpening}', [CareerController::class, 'show'])->name('careers.show');
 Route::view('/domain', 'pages.domain')->name('domain');
 Route::get('/cart', [CartController::class, 'show'])->name('cart');
 Route::post('/cart/domain', [CartController::class, 'addDomain'])->middleware('throttle:30,1')->name('cart.domain.add');
@@ -172,27 +230,10 @@ Route::get('/maintenance', function () {
     ]);
 })->name('maintenance');
 
-Route::get('/support', function () {
-    return view('pages.service', [
-        'metaTitle' => __('pages.support_page.meta_title'),
-        'metaDescription' => __('pages.support_page.meta_description'),
-        'eyebrow' => __('pages.support_page.eyebrow'),
-        'title' => __('pages.support_page.title'),
-        'lede' => __('pages.support_page.lede'),
-        'ctaHref' => route('contact'),
-        'ctaLabel' => __('pages.support_page.cta'),
-        'artSrc' => 'images/heroes/contact.webp',
-        'body' => __('pages.support_page.body'),
-        'highlights' => __('pages.support_page.highlights'),
-        'cards' => [],
-        'helpTitle' => __('pages.support_page.help_title'),
-        'helpLede' => __('pages.support_page.help_lede'),
-        'helpPrimaryHref' => route('contact'),
-        'helpPrimaryLabel' => __('pages.support_page.cta'),
-        'helpSecondaryHref' => config('site.whatsapp'),
-        'helpSecondaryLabel' => __('pages.contact.whatsapp'),
-    ]);
-})->name('support');
+Route::get('/support', [SupportController::class, 'show'])->name('support');
+Route::post('/support/ticket', [SupportController::class, 'store'])
+    ->middleware('throttle:support-ticket')
+    ->name('support.ticket.store');
 
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])
@@ -212,7 +253,7 @@ Route::get('/team', function () {
         ->orderBy('name')
         ->get();
 
-    return view('team', compact('members'));
+    return view('pages.team', compact('members'));
 })->name('team');
 
 Route::get('/locale/{locale}', function (string $locale) {
@@ -253,29 +294,50 @@ Route::post('/email/checkout/account-status', [EmailOrderController::class, 'acc
 Route::get('/email/payment/flutterwave/callback', [EmailOrderController::class, 'callback'])->name('email.flutterwave.callback');
 
 Route::middleware('auth')->group(function (): void {
-    Route::get('/account', [AccountController::class, 'show'])->name('account.show');
-    Route::get('/account/profile', [AccountController::class, 'profile'])->name('account.profile');
-    Route::put('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');
-    Route::put('/account/profile/business', [AccountController::class, 'updateBusinessProfile'])
-        ->middleware('throttle:20,1')
-        ->name('account.profile.business');
-    Route::get('/account/settings', [AccountController::class, 'settings'])->name('account.settings');
-    Route::put('/account/settings/notifications', [AccountController::class, 'updateNotificationPreferences'])->name('account.notifications.update');
-    Route::get('/account/notifications', [AccountNotificationController::class, 'index'])->name('account.notifications.index');
-    Route::post('/account/notifications/read-all', [AccountNotificationController::class, 'markAllRead'])->name('account.notifications.read-all');
-    Route::post('/account/notifications/{notification}/read', [AccountNotificationController::class, 'markRead'])->name('account.notifications.read');
-    Route::post('/account/settings/contacts', [AccountController::class, 'storeContact'])->middleware('throttle:20,1')->name('account.contacts.store');
-    Route::delete('/account/settings/contacts/{contact}', [AccountController::class, 'destroyContact'])->name('account.contacts.destroy');
-    Route::get('/account/email', [AccountController::class, 'email'])->name('account.email.index');
-    Route::get('/account/email/{order}', [EmailOrderController::class, 'show'])->name('account.email.show');
-    Route::post('/account/email/{order}/pay', [EmailOrderController::class, 'pay'])->middleware('throttle:10,1')->name('email.pay');
-    Route::post('/account/email/{order}/renew', [EmailOrderController::class, 'renew'])->middleware('throttle:10,1')->name('email.renew');
-    Route::post('/account/email/{order}/provision', [EmailOrderController::class, 'provision'])->middleware('throttle:5,1')->name('email.provision');
-    Route::get('/account/vps', [AccountController::class, 'vps'])->name('account.vps.index');
-    Route::get('/account/vps/{lead}', [AccountController::class, 'vpsShow'])->name('account.vps.show');
-    Route::get('/account/hosting', [AccountController::class, 'hosting'])->name('account.hosting.index');
-    Route::get('/account/hosting/{lead}', [AccountController::class, 'hostingShow'])->name('account.hosting.show');
+    Route::middleware(\App\Http\Middleware\EnsureAccountPermission::class)->group(function (): void {
+        Route::get('/account', [AccountController::class, 'show'])->name('account.show');
+        Route::get('/account/products', [AccountProductController::class, 'index'])->name('account.products.index');
+        Route::get('/account/domains', [AccountDomainController::class, 'index'])->name('account.domains.index');
+        Route::get('/account/domains/{order}', [AccountDomainController::class, 'show'])->name('account.domains.show');
+        Route::get('/account/subscriptions', [AccountSubscriptionController::class, 'index'])->name('account.subscriptions.index');
+        Route::get('/account/invoices', [AccountInvoiceController::class, 'index'])->name('account.invoices.index');
+        Route::get('/account/invoices/{invoice}', [AccountInvoiceController::class, 'show'])->name('account.invoices.show');
+        Route::get('/account/activity', [AccountActivityController::class, 'index'])->name('account.activity.index');
+        Route::get('/account/profile', [AccountController::class, 'profile'])->name('account.profile');
+        Route::put('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');
+        Route::put('/account/profile/password', [AccountController::class, 'updatePassword'])
+            ->middleware('throttle:10,1')
+            ->name('account.profile.password');
+        Route::put('/account/profile/business', [AccountController::class, 'updateBusinessProfile'])
+            ->middleware('throttle:20,1')
+            ->name('account.profile.business');
+        Route::get('/account/settings', [AccountController::class, 'settings'])->name('account.settings');
+        Route::put('/account/settings/notifications', [AccountController::class, 'updateNotificationPreferences'])->name('account.notifications.update');
+        Route::get('/account/notifications', [AccountNotificationController::class, 'index'])->name('account.notifications.index');
+        Route::post('/account/notifications/read-all', [AccountNotificationController::class, 'markAllRead'])->name('account.notifications.read-all');
+        Route::post('/account/notifications/{notification}/read', [AccountNotificationController::class, 'markRead'])->name('account.notifications.read');
+        Route::post('/account/settings/contacts', [AccountController::class, 'storeContact'])->middleware('throttle:20,1')->name('account.contacts.store');
+        Route::delete('/account/settings/contacts/{contact}', [AccountController::class, 'destroyContact'])->name('account.contacts.destroy');
+        Route::get('/account/staff', [AccountStaffController::class, 'index'])->name('account.staff.index');
+        Route::post('/account/staff', [AccountStaffController::class, 'store'])->middleware('throttle:10,1')->name('account.staff.store');
+        Route::delete('/account/staff/invites/{invite}', [AccountStaffController::class, 'destroyInvite'])->name('account.staff.invites.destroy');
+        Route::delete('/account/staff/{member}', [AccountStaffController::class, 'destroy'])->name('account.staff.destroy');
+        Route::get('/account/email', [AccountController::class, 'email'])->name('account.email.index');
+        Route::get('/account/email/{order}', [EmailOrderController::class, 'show'])->name('account.email.show');
+        Route::post('/account/email/{order}/pay', [EmailOrderController::class, 'pay'])->middleware('throttle:10,1')->name('email.pay');
+        Route::post('/account/email/{order}/renew', [EmailOrderController::class, 'renew'])->middleware('throttle:10,1')->name('email.renew');
+        Route::post('/account/email/{order}/provision', [EmailOrderController::class, 'provision'])->middleware('throttle:5,1')->name('email.provision');
+        Route::get('/account/vps', [AccountController::class, 'vps'])->name('account.vps.index');
+        Route::get('/account/vps/{lead}', [AccountController::class, 'vpsShow'])->name('account.vps.show');
+        Route::get('/account/hosting', [AccountController::class, 'hosting'])->name('account.hosting.index');
+        Route::get('/account/hosting/{lead}', [AccountController::class, 'hostingShow'])->name('account.hosting.show');
+    });
 });
+
+Route::get('/account/invites/{token}', [AccountStaffController::class, 'showInvite'])->name('account.invites.show');
+Route::post('/account/invites/{token}', [AccountStaffController::class, 'acceptInvite'])
+    ->middleware('throttle:10,1')
+    ->name('account.invites.accept');
 
 Route::get('/hosting/request', function (Request $request) {
     $planOptions = config('site.hosting_plans', []);
@@ -1139,19 +1201,38 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         ->middleware('throttle:5,1')
         ->name('login.submit');
 
-    Route::middleware([EnsureAdminAuthenticated::class])->group(function (): void {
+    Route::middleware([EnsureAdminAuthenticated::class, \App\Http\Middleware\EnsureAdminPermission::class])->group(function (): void {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
+        Route::get('/search', AdminSearchController::class)->name('search');
 
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
         Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
         Route::post('/customers/sync-whmcs', [AdminCustomerController::class, 'syncWhmcs'])->name('customers.sync-whmcs');
         Route::get('/customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
+        Route::put('/customers/{customer}', [AdminCustomerController::class, 'update'])->name('customers.update');
+        Route::delete('/customers/{customer}', [AdminCustomerController::class, 'destroy'])->name('customers.destroy');
         Route::get('/legacy-customers/{legacyCustomer}', [AdminCustomerController::class, 'showLegacy'])->name('customers.legacy.show');
         Route::get('/hosting-leads', [AdminHostingLeadController::class, 'index'])->name('hosting-leads.index');
         Route::get('/hosting-leads/{hostingLead}', [AdminHostingLeadController::class, 'show'])->name('hosting-leads.show');
         Route::post('/hosting-leads/{hostingLead}/retry-whmcs-sync', [AdminHostingLeadController::class, 'retryWhmcsSync'])->name('hosting-leads.retry-whmcs-sync');
+        Route::get('/support-tickets', [AdminSupportTicketController::class, 'index'])->name('support-tickets.index');
+        Route::get('/support-tickets/{supportTicket}', [AdminSupportTicketController::class, 'show'])->name('support-tickets.show');
+        Route::put('/support-tickets/{supportTicket}', [AdminSupportTicketController::class, 'update'])->name('support-tickets.update');
+        Route::post('/support-tickets/{supportTicket}/reply', [AdminSupportTicketController::class, 'reply'])->name('support-tickets.reply');
         Route::get('/subscribers', [AdminSubscriberController::class, 'index'])->name('subscribers.index');
+        Route::resource('staff', AdminStaffController::class)->except(['show']);
+        Route::resource('blog-posts', AdminBlogPostController::class)->except(['show']);
+        Route::resource('projects', AdminProjectController::class)->except(['show']);
+        Route::get('/newsletter-campaigns', [AdminNewsletterCampaignController::class, 'index'])->name('newsletter-campaigns.index');
+        Route::get('/newsletter-campaigns/create', [AdminNewsletterCampaignController::class, 'create'])->name('newsletter-campaigns.create');
+        Route::post('/newsletter-campaigns', [AdminNewsletterCampaignController::class, 'store'])->name('newsletter-campaigns.store');
+        Route::get('/newsletter-campaigns/{newsletterCampaign}', [AdminNewsletterCampaignController::class, 'show'])->name('newsletter-campaigns.show');
+        Route::get('/newsletter-campaigns/{newsletterCampaign}/edit', [AdminNewsletterCampaignController::class, 'edit'])->name('newsletter-campaigns.edit');
+        Route::put('/newsletter-campaigns/{newsletterCampaign}', [AdminNewsletterCampaignController::class, 'update'])->name('newsletter-campaigns.update');
+        Route::delete('/newsletter-campaigns/{newsletterCampaign}', [AdminNewsletterCampaignController::class, 'destroy'])->name('newsletter-campaigns.destroy');
+        Route::post('/newsletter-campaigns/{newsletterCampaign}/send', [AdminNewsletterCampaignController::class, 'send'])->name('newsletter-campaigns.send');
         Route::resource('team-members', AdminTeamMemberController::class)->except(['show']);
+        Route::resource('career-openings', AdminCareerOpeningController::class)->except(['show']);
         Route::get('/hosting-prices', [AdminHostingPriceController::class, 'index'])->name('hosting-prices.index');
         Route::put('/hosting-prices', [AdminHostingPriceController::class, 'update'])->name('hosting-prices.update');
         Route::get('/whmcs-settings', [AdminWhmcsSettingsController::class, 'index'])->name('whmcs-settings.index');

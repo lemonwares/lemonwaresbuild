@@ -62,7 +62,7 @@
         :trigger-label="__('site.nav.business')"
         :title="__('site.nav.email')"
         :description="__('site.nav.email_mail_lemon_desc')"
-        :logo="'images/brands/mailemon.svg'"
+        :logo="'images/brands/mailemon-logo.png'"
         :cta-href="route('email.plans')"
         :cta-label="__('site.nav.email_mail_lemon_cta')"
         :links="$businessLinks"

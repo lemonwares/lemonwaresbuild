@@ -52,14 +52,14 @@ return [
     'mxroute' => [
         'token' => env('MXROUTE_API_TOKEN', env('TREKMAIL_API_TOKEN')),
         'base_url' => rtrim(env('MXROUTE_BASE_URL', env('TREKMAIL_BASE_URL', 'https://trekmail.net/api/v1')), '/'),
-        'webmail_url' => env('MXROUTE_WEBMAIL_URL', env('TREKMAIL_WEBMAIL_URL', 'https://webmail.mxroute.com')),
+        'webmail_url' => env('MXROUTE_WEBMAIL_URL', env('TREKMAIL_WEBMAIL_URL', 'https://mail.trekmail.net')),
     ],
 
-    // Legacy alias — prefer mxroute above.
+    // Prefer trekmail — mxroute keys remain as optional aliases.
     'trekmail' => [
-        'token' => env('MXROUTE_API_TOKEN', env('TREKMAIL_API_TOKEN')),
-        'base_url' => rtrim(env('MXROUTE_BASE_URL', env('TREKMAIL_BASE_URL', 'https://trekmail.net/api/v1')), '/'),
-        'webmail_url' => env('MXROUTE_WEBMAIL_URL', env('TREKMAIL_WEBMAIL_URL', 'https://webmail.mxroute.com')),
+        'token' => env('TREKMAIL_API_TOKEN', env('MXROUTE_API_TOKEN')),
+        'base_url' => rtrim(env('TREKMAIL_BASE_URL', env('MXROUTE_BASE_URL', 'https://trekmail.net/api/v1')), '/'),
+        'webmail_url' => env('TREKMAIL_WEBMAIL_URL', env('MXROUTE_WEBMAIL_URL', 'https://mail.trekmail.net')),
     ],
 
     'cloudflare' => [

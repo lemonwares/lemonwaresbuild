@@ -10,10 +10,17 @@ import './email-checkout.js';
 import './site-checkout.js';
 import './email-plans.js';
 import './form-submit.js';
+import './contact-form.js';
 import './action-loading.js';
 import './domain-search.js';
 import './domain-cart.js';
 import './header-domain-search.js';
+import './theme.js';
+import './admin-sidebar.js';
+import './account-sidebar.js';
+import './admin-chrome.js';
+import './admin-customer.js';
+import './admin-whmcs-mappings.js';
 
 document.querySelectorAll('[data-accordion]').forEach((accordion) => {
     const items = accordion.querySelectorAll('[data-accordion-item]');

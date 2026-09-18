@@ -1,16 +1,16 @@
 <?php
 
 return [
-    'meta_title' => 'Mailemon',
-    'meta_description' => 'Mailemon — branded email on your domain. Four simple plans, four billing periods, instant setup with DNS guidance from Lemonwares.',
+    'meta_title' => 'Mailemon Business Email | Branded Email on Your Domain',
+    'meta_description' => 'Mailemon by Lemonwares: branded business email on your domain with MX/SPF/DKIM/DMARC/MTA-STS, IMAP migration, inbox protection, and validation API.',
     'eyebrow' => 'Mailemon',
     'title' => 'Branded Email That Looks as Good as Your Business',
     'lede' => 'Mailemon is Lemonwares-owned business email — order here, pay securely, and we provision mailboxes on your domain with the DNS records to go live.',
     'cta' => 'See Mailemon plans',
-    'body' => 'Mailemon is Lemonwares-owned business email — branded inboxes on your domain with clear plans, secure checkout, and DNS guidance so mail goes live without guesswork. Order online today; ask us when you need Google Workspace or Microsoft 365 instead.',
+    'body' => 'Mailemon is Lemonwares-owned business email — branded inboxes on your domain with clear plans, secure checkout, full mail authentication, IMAP migration, and DNS guidance so mail goes live without guesswork.',
     'intro_eyebrow' => 'How it works',
     'intro_title' => 'Plan, domain, then mailboxes',
-    'intro_lede' => 'Three clear steps from browsing plans to branded addresses on your domain.',
+    'intro_lede' => 'Four clear steps from browsing plans to branded addresses on your domain.',
     'steps' => [
         [
             'title' => 'Choose a Mailemon plan',
@@ -21,9 +21,140 @@ return [
             'body' => 'Use a domain you already own, then choose mailbox names like info or sales that become addresses on that domain.',
         ],
         [
-            'title' => 'Pay and add DNS records',
-            'body' => 'Complete secure checkout. We provision mailboxes and give you MX, SPF, DKIM, and DMARC records so mail can flow.',
+            'title' => 'Pay securely',
+            'body' => 'Complete checkout online. We create your order, confirm payment, and queue mailbox provisioning.',
         ],
+        [
+            'title' => 'Add DNS and go live',
+            'body' => 'We generate and verify MX, SPF, DKIM, DMARC, and MTA-STS. Paste a CSV, point Cloudflare at us, or add records by hand — then mail starts after propagation.',
+        ],
+    ],
+    'apps_eyebrow' => 'What you can use',
+    'apps_title' => 'Webmail and the apps your team already has',
+    'apps_lede' => 'Mailemon is not locked to one client — browse in webmail or connect the mail apps people already know.',
+    'apps' => [
+        [
+            'title' => 'Webmail',
+            'body' => 'Check mail in the browser from any device without installing software.',
+        ],
+        [
+            'title' => 'Outlook',
+            'body' => 'Connect desktop or mobile Outlook with standard IMAP and SMTP settings.',
+        ],
+        [
+            'title' => 'Apple Mail',
+            'body' => 'Add Mailemon mailboxes on iPhone, iPad, and Mac with the usual mail account flow.',
+        ],
+        [
+            'title' => 'Android mail',
+            'body' => 'Use Gmail app or other Android clients with IMAP/SMTP — same credentials as webmail.',
+        ],
+        [
+            'title' => 'Branded addresses',
+            'body' => 'info@, sales@, and team names on your domain so every reply looks professional.',
+        ],
+        [
+            'title' => 'DNS guidance',
+            'body' => 'MX, SPF, DKIM, DMARC, and MTA-STS after payment so deliverability is not guesswork.',
+        ],
+    ],
+    'setup_eyebrow' => 'DNS that actually ships',
+    'setup_title' => 'Paste a CSV, point Cloudflare, or add records by hand',
+    'setup_lede' => 'We generate and verify MX, SPF, DKIM, DMARC, and MTA-STS — then watch them propagate so mail can land.',
+    'setup_items' => [
+        [
+            'title' => 'CSV, Cloudflare, or by hand',
+            'body' => 'Paste a CSV of domains, point Cloudflare at us, or add records yourself. Same outcome: verified mail DNS without guesswork.',
+        ],
+        [
+            'title' => 'MX through MTA-STS',
+            'body' => 'We generate and verify MX, SPF, DKIM, DMARC, and MTA-STS records, then monitor propagation until they stick.',
+        ],
+        [
+            'title' => 'Client setup',
+            'body' => 'Use webmail immediately, then connect Outlook, Apple Mail, or Android when you are ready.',
+        ],
+        [
+            'title' => 'Lemonwares support',
+            'body' => 'Stuck on DNS or login? The same team behind hosting helps on WhatsApp, phone, and email.',
+        ],
+    ],
+    'platform_eyebrow' => 'Built for real mail ops',
+    'platform_title' => 'Migrate, relay, and keep mail out of spam',
+    'platform_lede' => 'Mailemon is more than a mailbox plan — it covers migration, provider routing, reputation, and one inbox for the whole team.',
+    'platform_items' => [
+        [
+            'title' => 'IMAP-sync migration',
+            'body' => 'Pull from Google Workspace, Microsoft 365, Zoho, or any provider with credentials. Migrate millions of messages in hours.',
+        ],
+        [
+            'title' => 'Bring your own provider',
+            'body' => 'Route each domain through Postmark, Resend, SES, Mailgun, or our managed relay — one stack, per-domain choice.',
+        ],
+        [
+            'title' => 'Bring your old inbox',
+            'body' => 'Gmail, Outlook, Yahoo, iCloud, or any IMAP. A few minutes to start moving history across.',
+        ],
+        [
+            'title' => 'Land in inbox, not spam',
+            'body' => 'Rspamd-tuned scoring, greylisting, sender-policy enforcement, and FBL ingestion. We monitor reputation so you do not have to.',
+        ],
+        [
+            'title' => 'Every account, one inbox',
+            'body' => 'Your mailbox, shared team inboxes, and connected Gmail, Outlook & iCloud — merged into one live stream.',
+        ],
+        [
+            'title' => 'Know if it is real before you hit send',
+            'body' => 'Twenty-five validation checks per address — syntax, MX, SMTP probe, role-detection, catch-all, disposable, and trap risk.',
+        ],
+    ],
+    'validation_eyebrow' => 'Email validation',
+    'validation_title' => 'Check addresses before they bounce',
+    'validation_lede' => 'API and bulk CSV upload so lists stay clean — credits never expire, and there is no monthly minimum.',
+    'validation_points' => [
+        'Single-check API · 50 ms median latency',
+        'Bulk CSV upload up to 1M rows',
+        'Deep Check with SMTP mailbox probing',
+        'Credits never expire · no monthly minimum',
+    ],
+    'auth_eyebrow' => 'Authentication stack',
+    'auth_title' => 'SPF, DKIM, DMARC, MTA-STS, and TLS-RPT',
+    'auth_lede' => 'Deliverability records that are generated, published, and readable — not a pile of TXT strings left for later.',
+    'auth_items' => [
+        [
+            'code' => 'SPF',
+            'title' => 'Sender Policy Framework',
+            'body' => 'Auto-generated per domain and kept under the lookup limit.',
+        ],
+        [
+            'code' => 'DKIM',
+            'title' => 'DomainKeys Identified Mail',
+            'body' => 'Rotating 2048-bit keys, auto-published to DNS.',
+        ],
+        [
+            'code' => 'DMARC',
+            'title' => 'DMARC alignment',
+            'body' => 'Authenticates every message and turns daily DMARC reports into a chart you can actually read.',
+        ],
+        [
+            'code' => 'MTA-STS',
+            'title' => 'MTA-STS policy',
+            'body' => 'Force TLS on inbound. Policy file served from our CDN.',
+        ],
+        [
+            'code' => 'TLS-RPT',
+            'title' => 'TLS reporting',
+            'body' => 'Receive and decode reports on TLS failures.',
+        ],
+    ],
+    'audience_eyebrow' => 'Who it fits',
+    'audience_title' => 'Built for teams that need branded mail now',
+    'audience_lede' => 'Mailemon is the self-serve path when you want @yourcompany.com without waiting on an enterprise suite quote.',
+    'audience_items' => [
+        'Founders and SMEs that need info@ and sales@ this week',
+        'Agencies that want client-facing addresses without Google or Microsoft seats yet',
+        'Teams migrating off free Gmail or Yahoo for a more professional look',
+        'Anyone who wants clear pricing and online checkout before a full productivity suite',
     ],
     'plans_eyebrow' => 'Mailemon plans',
     'plans_title' => 'Clear plans for branded inboxes',
@@ -41,12 +172,12 @@ return [
             'body' => 'Use browser webmail or connect Outlook, Apple Mail, and Android with standard IMAP and SMTP.',
         ],
         [
-            'title' => 'DNS records included',
-            'body' => 'We provide MX, SPF, DKIM, and DMARC guidance so deliverability is set up correctly from day one.',
+            'title' => 'Full mail DNS',
+            'body' => 'MX, SPF, DKIM, DMARC, and MTA-STS — generated, verified, and watched through propagation.',
         ],
         [
-            'title' => 'Self-serve checkout',
-            'body' => 'Order and pay online — no waiting for a custom quote when all you need is branded email.',
+            'title' => 'Migration & validation',
+            'body' => 'IMAP-sync from major providers, plus 25-point address checks via API or bulk CSV.',
         ],
         [
             'title' => 'Flexible billing periods',
@@ -56,6 +187,14 @@ return [
             'title' => 'Lemonwares setup support',
             'body' => 'After payment we help with DNS questions and mailbox setup on WhatsApp, phone, and email.',
         ],
+    ],
+    'highlights' => [
+        'Branded mailboxes on your domain',
+        'Webmail plus Outlook, Apple Mail, and Android',
+        'MX, SPF, DKIM, DMARC, and MTA-STS after payment',
+        'IMAP migration from Google, Microsoft, Zoho, and more',
+        'Inbox protection with Rspamd, greylisting, and FBL',
+        'Same Lemonwares support team as hosting',
     ],
     'enterprise_heading' => 'Enterprise suites on request',
     'faq_title' => 'Mailemon FAQ',
@@ -74,7 +213,23 @@ return [
         ],
         [
             'question' => 'What DNS records do I need?',
-            'answer' => 'After payment we show MX, SPF, DKIM, and DMARC records to add at your DNS host. Mail starts flowing after they propagate.',
+            'answer' => 'After payment we generate and verify MX, SPF, DKIM, DMARC, and MTA-STS. Paste a CSV, point Cloudflare at us, or add records by hand — mail starts after they propagate.',
+        ],
+        [
+            'question' => 'Can I migrate from Google Workspace or Microsoft 365?',
+            'answer' => 'Yes. IMAP-sync from Google Workspace, Microsoft 365, Zoho, or any provider with credentials — including Gmail, Outlook, Yahoo, and iCloud. Large mailboxes can move in hours.',
+        ],
+        [
+            'question' => 'Do you support bring-your-own sending providers?',
+            'answer' => 'Yes. Route each domain through Postmark, Resend, SES, Mailgun, or our managed relay.',
+        ],
+        [
+            'question' => 'How long until mail works?',
+            'answer' => 'Mailboxes are provisioned after payment. Once DNS records propagate (often minutes to a few hours), mail starts flowing.',
+        ],
+        [
+            'question' => 'Can I add more mailboxes later?',
+            'answer' => 'Choose a plan that matches how many mailboxes you need now. Contact us if you outgrow a plan and need a larger seat count.',
         ],
         [
             'question' => 'When should I choose Google Workspace or Microsoft 365?',
@@ -86,14 +241,14 @@ return [
         ],
     ],
     'help_title' => 'Ready for branded email?',
-    'help_lede' => 'Pick a Mailemon plan, add your domain, and we will provision with DNS guidance.',
+    'help_lede' => 'Pick a Mailemon plan, add your domain, and we will provision with DNS, migration, and deliverability guidance.',
     'choose_period' => 'Billing period',
     'mailboxes' => ':count mailbox|:count mailboxes',
     'per_mailbox' => 'Includes :count branded mailbox on your domain.|Includes :count branded mailboxes on your domain.',
     'per_mailbox_price' => ':price per mailbox / mo',
     'standard_rate' => 'Standard rate',
     'outlook_apps' => 'Works with Outlook, Apple Mail, and Android',
-    'dns_included' => 'MX, SPF, DKIM, and DMARC records included',
+    'dns_included' => 'MX, SPF, DKIM, DMARC, and MTA-STS included',
     'webmail_included' => 'Webmail plus IMAP/SMTP for every mailbox',
     'support_included' => 'Lemonwares setup support after payment',
     'get_started' => 'Get this plan',

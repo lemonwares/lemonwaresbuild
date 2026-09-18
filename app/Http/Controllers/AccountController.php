@@ -7,7 +7,10 @@ use App\Models\HostingLead;
 use App\Support\TrekMailClient;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class AccountController extends Controller
@@ -84,6 +87,30 @@ class AccountController extends Controller
             ->with('status', __('account.profile_saved'));
     }
 
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+
+        $payload = $request->validate([
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'confirmed', Password::defaults()],
+        ]);
+
+        if (! Hash::check($payload['current_password'], $user->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => __('account.password_current_invalid'),
+            ]);
+        }
+
+        $user->update([
+            'password' => $payload['password'],
+        ]);
+
+        return redirect()
+            ->route('account.profile')
+            ->with('status', __('account.password_changed'));
+    }
+
     public function updateBusinessProfile(Request $request): RedirectResponse
     {
         $user = $request->user();
@@ -137,11 +164,11 @@ class AccountController extends Controller
 
     public function settings(Request $request): View
     {
-        $user = $request->user();
+        $owner = $request->user()->accountOwner();
 
         return view('pages.account-settings', [
-            'user' => $user,
-            'contacts' => $user->contacts,
+            'user' => $request->user(),
+            'contacts' => $owner->contacts,
             'roles' => AccountContact::ROLES,
         ]);
     }
@@ -160,7 +187,7 @@ class AccountController extends Controller
 
     public function storeContact(Request $request): RedirectResponse
     {
-        $user = $request->user();
+        $user = $request->user()->accountOwner();
 
         if ($user->contacts()->count() >= AccountContact::MAX_PER_ACCOUNT) {
             return back()->withInput()->with('email_feedback', [
@@ -247,7 +274,7 @@ class AccountController extends Controller
      */
     protected function workspace(Request $request): array
     {
-        $user = $request->user();
+        $user = $request->user()->accountOwner();
         HostingLead::claimFor($user);
 
         $orders = $user->emailOrders()->with('mailboxes')->limit(20)->get();
@@ -274,7 +301,7 @@ class AccountController extends Controller
         }
 
         return [
-            'user' => $user,
+            'user' => $request->user(),
             'orders' => $orders,
             'latestOrder' => $latestOrder,
             'mailboxes' => $mailboxes,

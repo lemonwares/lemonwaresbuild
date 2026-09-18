@@ -45,10 +45,12 @@
             <div class="nav-mega-left">
                 @if ($logo)
                     <span class="nav-mega-left-logo" aria-hidden="true">
-                        <img src="{{ asset($logo) }}" alt="" width="28" height="28">
+                        <img src="{{ asset($logo) }}" alt="" width="140" height="32" class="nav-mega-left-logo-img">
                     </span>
                 @endif
-                <p class="nav-mega-left-heading">{{ $title }}</p>
+                @if (! str_contains((string) $logo, 'mailemon-logo'))
+                    <p class="nav-mega-left-heading">{{ $title }}</p>
+                @endif
                 <p class="nav-mega-left-desc">{{ $description }}</p>
                 @if (count($links) > 0)
                     <div class="nav-mega-left-links">

@@ -4,23 +4,15 @@
 @section('meta_description', __('account.forgot_lede'))
 
 @section('content')
-    {{-- Heading --}}
-    <div class="mb-8">
-        <p class="section-label mb-3">{{ __('account.auth_area') }}</p>
-        <h1 class="text-3xl font-bold tracking-tight" style="color:var(--color-ink);">
-            {{ __('account.forgot_title') }}
-        </h1>
-        <p class="mt-2 text-sm font-light" style="color:var(--color-ink-3);">
-            {{ __('account.forgot_lede') }}
-        </p>
+    <div class="auth-heading">
+        <h1 class="font-bold tracking-tight text-black">{{ __('account.forgot_title') }}</h1>
+        <p class="font-light text-on-blush/65">{{ __('account.forgot_lede') }}</p>
     </div>
 
-    {{-- Success status --}}
     <x-ui.flash show-status />
 
-    {{-- Error --}}
     @if ($errors->any())
-        <div class="auth-error mb-6" role="alert">
+        <div class="auth-error" role="alert">
             <svg xmlns="http://www.w3.org/2000/svg" class="mt-0.5 size-4 shrink-0" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                  stroke-linejoin="round" aria-hidden="true">
@@ -31,8 +23,7 @@
         </div>
     @endif
 
-    {{-- Form --}}
-    <form method="POST" action="{{ route('password.email') }}" class="space-y-5" data-submit-form>
+    <form method="POST" action="{{ route('password.email') }}" class="auth-form-fields" data-submit-form>
         @csrf
 
         <div>
@@ -41,28 +32,22 @@
                 id="email" name="email" type="email"
                 value="{{ old('email') }}"
                 required autocomplete="email"
-                class="auth-input @error('email') border-red @enderror"
+                class="auth-input @error('email') border-rose/50 @enderror"
                 placeholder="you@company.com"
             >
         </div>
 
-        <div class="pt-1">
-            <x-ui.submit-button
-                :label="__('account.send_reset')"
-                :loading="__('account.processing')"
-                class="btn btn-primary w-full py-3.5 text-sm"
-            />
-        </div>
+        <x-ui.submit-button
+            :label="__('account.send_reset')"
+            :loading="__('account.processing')"
+            class="btn btn-primary auth-submit"
+        />
     </form>
 
-    {{-- Divider --}}
     <div class="auth-divider"></div>
 
-    {{-- Back to login --}}
-    <p class="text-center text-sm" style="color:var(--color-ink-3);">
-        <a href="{{ route('login') }}"
-           class="font-bold transition hover:underline"
-           style="color:var(--color-ink);">
+    <p class="text-center text-sm text-on-blush/60">
+        <a href="{{ route('login') }}" class="font-bold text-black transition hover:text-rose">
             ← {{ __('account.sign_in') }}
         </a>
     </p>

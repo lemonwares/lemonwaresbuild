@@ -94,8 +94,13 @@
     <div class="mail-mockup-shell">
         <div class="mail-mockup-chrome">
             <div class="mail-mockup-brand">
-                <span class="mail-mockup-lemon"></span>
-                <span class="mail-mockup-brand-text">Mailemon</span>
+                <img
+                    src="{{ asset('images/brands/mailemon-logo.png') }}"
+                    alt=""
+                    width="120"
+                    height="28"
+                    class="mail-mockup-mark"
+                >
             </div>
             <div class="mail-mockup-tools">
                 <span class="mail-mockup-tool" title="Search">

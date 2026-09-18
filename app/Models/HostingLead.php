@@ -85,11 +85,13 @@ class HostingLead extends Model
 
     public function belongsToCustomer(User $user): bool
     {
-        if ($this->user_id && (int) $this->user_id === (int) $user->id) {
+        $owner = $user->accountOwner();
+
+        if ($this->user_id && (int) $this->user_id === (int) $owner->id) {
             return true;
         }
 
-        return strtolower((string) $this->email) === strtolower($user->email);
+        return strtolower((string) $this->email) === strtolower($owner->email);
     }
 
     public function isVps(): bool

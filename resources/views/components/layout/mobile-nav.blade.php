@@ -48,7 +48,7 @@
             'featuredDesc' => __('site.nav.email_mail_lemon_desc'),
             'featuredCta' => __('site.nav.email_mail_lemon_cta'),
             'featuredHref' => route('email.plans'),
-            'featuredLogo' => 'images/brands/mailemon.svg',
+            'featuredLogo' => 'images/brands/mailemon-logo.png',
             'partnersLabel' => __('site.nav.email_partners_label'),
             'partners' => $businessPartners,
             'active' => $businessActive,
@@ -128,6 +128,11 @@
             'active' => request()->routeIs('team'),
         ],
         [
+            'label' => __('site.nav.careers'),
+            'href' => route('careers'),
+            'active' => request()->routeIs('careers'),
+        ],
+        [
             'label' => __('site.common.contact_us'),
             'href' => route('contact'),
             'active' => request()->routeIs('contact'),
@@ -189,9 +194,17 @@
                 <div id="mobile-nav-{{ $section['key'] }}-menu" class="mobile-nav-mega-menu" data-nav-mega-menu hidden>
                     <div class="mobile-nav-mega-featured">
                         @if (! empty($section['featuredLogo']))
-                            <img src="{{ asset($section['featuredLogo']) }}" alt="" width="24" height="24" class="mb-2">
+                            <img
+                                src="{{ asset($section['featuredLogo']) }}"
+                                alt=""
+                                width="140"
+                                height="32"
+                                class="mb-2 h-7 w-auto max-w-[9rem] object-contain object-left"
+                            >
                         @endif
-                        <span class="mobile-nav-mega-featured-title">{{ $section['featuredTitle'] }}</span>
+                        @if (($section['featuredLogo'] ?? '') !== 'images/brands/mailemon-logo.png')
+                            <span class="mobile-nav-mega-featured-title">{{ $section['featuredTitle'] }}</span>
+                        @endif
                         <span class="mobile-nav-mega-featured-desc">{{ $section['featuredDesc'] }}</span>
                         <a href="{{ $section['featuredHref'] }}" class="mobile-nav-mega-featured-cta">
                             <span>{{ $section['featuredCta'] }}</span>

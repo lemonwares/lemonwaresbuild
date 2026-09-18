@@ -10,9 +10,16 @@ use Illuminate\View\View;
 
 class ContactController extends Controller
 {
-    public function show(): View
+    public function show(Request $request): View
     {
-        return view('pages.contact');
+        $prefillSubject = trim((string) $request->query('subject', ''));
+        if (mb_strlen($prefillSubject) > 200) {
+            $prefillSubject = mb_substr($prefillSubject, 0, 200);
+        }
+
+        return view('pages.contact', [
+            'prefillSubject' => $prefillSubject !== '' ? $prefillSubject : null,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse

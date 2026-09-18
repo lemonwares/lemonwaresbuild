@@ -253,37 +253,26 @@
                         </a>
                     </div>
                     <div class="domain-landing-feature-art">
-                        @if ($feature['art'] === 'search')
+                        @php
+                            $artMap = [
+                                'search' => 'images/domain/domain-search',
+                                'transfer' => 'images/domain/domain-transfer',
+                                'manage' => 'images/domain/domain-manage',
+                            ];
+                            $artBase = $artMap[$feature['art']] ?? 'images/domain/domain-search';
+                        @endphp
+                        <picture>
+                            <source srcset="{{ asset($artBase.'.webp') }}" type="image/webp">
                             <img
-                                src="{{ asset('images/undraw/web-search.svg') }}"
+                                src="{{ asset($artBase.'.png') }}"
                                 alt=""
                                 width="480"
-                                height="385"
+                                height="480"
                                 loading="lazy"
                                 decoding="async"
-                                class="domain-landing-feature-img"
+                                class="domain-landing-feature-img domain-landing-feature-cutout"
                             >
-                        @elseif ($feature['art'] === 'transfer')
-                            <img
-                                src="{{ asset('images/undraw/data-transfer.svg') }}"
-                                alt=""
-                                width="480"
-                                height="168"
-                                loading="lazy"
-                                decoding="async"
-                                class="domain-landing-feature-img"
-                            >
-                        @else
-                            <img
-                                src="{{ asset('images/undraw/server.svg') }}"
-                                alt=""
-                                width="480"
-                                height="360"
-                                loading="lazy"
-                                decoding="async"
-                                class="domain-landing-feature-img"
-                            >
-                        @endif
+                        </picture>
                     </div>
                 </div>
             @endforeach

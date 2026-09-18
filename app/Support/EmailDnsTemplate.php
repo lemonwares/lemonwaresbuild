@@ -5,7 +5,7 @@ namespace App\Support;
 class EmailDnsTemplate
 {
     /**
-     * Canonical Lemon Mail / MXRoute DNS checklist.
+     * Canonical Lemon Mail / TrekMail DNS checklist.
      *
      * @return list<array{type:string,name:string,value:string,priority:?int}>
      */
@@ -18,19 +18,13 @@ class EmailDnsTemplate
                 [
                     'type' => 'MX',
                     'name' => '@',
-                    'value' => 'echo.mxrouting.net',
+                    'value' => 'mx.trekmail.net',
                     'priority' => 10,
-                ],
-                [
-                    'type' => 'MX',
-                    'name' => '@',
-                    'value' => 'echo-relay.mxrouting.net',
-                    'priority' => 20,
                 ],
                 [
                     'type' => 'TXT',
                     'name' => '@',
-                    'value' => 'v=spf1 include:mxroute.com -all',
+                    'value' => 'v=spf1 include:_spf.trekmail.net ~all',
                     'priority' => null,
                 ],
                 [
