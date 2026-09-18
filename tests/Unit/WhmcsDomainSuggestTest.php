@@ -19,7 +19,19 @@ class WhmcsDomainSuggestTest extends TestCase
 
         Http::fake([
             'https://billing.example.test/includes/api.php' => function ($request) {
+                $action = (string) data_get($request->data(), 'action', '');
                 $domain = (string) data_get($request->data(), 'domain', '');
+
+                if ($action === 'GetTLDPricing') {
+                    return Http::response([
+                        'result' => 'success',
+                        'currency' => ['code' => 'NGN'],
+                        'pricing' => [
+                            'com' => ['register' => ['1' => '15000']],
+                            'org' => ['register' => ['1' => '12000']],
+                        ],
+                    ], 200);
+                }
 
                 return Http::response([
                     'result' => 'success',
@@ -33,5 +45,7 @@ class WhmcsDomainSuggestTest extends TestCase
         $this->assertCount(2, $suggestions);
         $this->assertTrue(collect($suggestions)->firstWhere('domain', 'fran.org')['available'] ?? false);
         $this->assertFalse(collect($suggestions)->firstWhere('domain', 'fran.com')['available'] ?? true);
+        $this->assertSame('₦12,000', collect($suggestions)->firstWhere('domain', 'fran.org')['price_display'] ?? null);
+        $this->assertNull(collect($suggestions)->firstWhere('domain', 'fran.com')['price_display']);
     }
 }

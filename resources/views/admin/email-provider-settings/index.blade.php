@@ -1,22 +1,17 @@
 @extends('layouts.admin')
 
-@section('title', 'Email Provider Settings — Admin')
+@section('title', 'Email Provider Settings — ' . config('site.short_name'))
+@section('hide_auto_breadcrumbs', true)
 
 @section('content')
-    <div class="mb-8">
-        <p class="section-label mb-3">Integrations</p>
-        <h1 class="heading">Email Provider Settings</h1>
-        <p class="mt-3 lede">
-            Configure Lemon Mail (TrekMail) API credentials for auto-provisioning, and store partner portal details for Titan, Google Workspace, and Microsoft 365 manual fulfilment.
-            Admin values override <code class="rounded bg-blush-soft px-1">.env</code> fallbacks.
-        </p>
-    </div>
-
-    @if (session('status'))
-        <p class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            {{ session('status') }}
-        </p>
-    @endif
+    <x-admin.page-header
+        title="Email Provider Settings"
+        lede="Configure Lemon Mail (powered by TrekMail) API credentials for auto-provisioning, plus partner portal details for Titan, Google Workspace, and Microsoft 365 manual fulfilment. Admin values override .env fallbacks."
+        :back-href="route('admin.dashboard')"
+        back-label="Go back"
+        :breadcrumbs="[['label' => 'Email Provider Settings']]"
+        class="mb-5"
+    />
 
     @if ($errors->any())
         <div class="mb-6 rounded-xl border border-rose/20 bg-rose/5 px-4 py-3 text-sm text-rose">
@@ -28,264 +23,276 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('admin.email-provider-settings.update') }}" class="space-y-6" enctype="multipart/form-data">
+    <form
+        method="POST"
+        action="{{ route('admin.email-provider-settings.update') }}"
+        class="admin-page-stack"
+        enctype="multipart/form-data"
+        data-submit-form
+    >
         @csrf
         @method('PUT')
 
-        <section class="rounded-3xl border border-border bg-white p-6">
-            <div class="flex flex-wrap items-start justify-between gap-4">
+        <section class="admin-panel">
+            <div class="admin-panel-toolbar compact">
                 <div>
-                    <h2 class="text-lg font-bold text-black">Lemon Mail · TrekMail API</h2>
-                    <p class="mt-1 text-sm text-on-blush/65">Used for automatic domain and mailbox provisioning after payment.</p>
+                    <h2 class="admin-dash-panel-title">Lemon Mail · TrekMail</h2>
+                    <p class="admin-dash-panel-lede">Webmail and optional API credentials used after payment. Mailboxes are provisioned on TrekMail.</p>
                 </div>
                 @if ($is_configured)
-                    <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald-800">
-                        Token configured
-                    </span>
+                    <span class="admin-pill is-ok">Token configured</span>
                 @else
-                    <span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-amber-800">
-                        Not configured
-                    </span>
+                    <span class="admin-pill is-info">Not configured</span>
                 @endif
             </div>
 
-            <div class="mt-5 rounded-2xl border border-border bg-blush-soft/50 px-4 py-3 text-sm text-on-blush/80">
-                <p class="font-semibold text-black">Required ops-token scopes</p>
+            <div class="mb-5 rounded-xl border border-border bg-blush-soft/40 px-4 py-3 text-sm text-on-blush/80">
+                <p class="font-semibold text-black">TrekMail setup</p>
                 <p class="mt-1">
-                    Create a <code class="rounded bg-white px-1">tm_live_</code> token in
-                    <a href="https://trekmail.net/docs/ai-agents-api/creating-api-tokens" target="_blank" rel="noopener noreferrer" class="font-semibold text-rose hover:underline">TrekMail → AI Agents &amp; API</a>
-                    on a <strong>Pro or Agency</strong> plan, then enable at least:
+                    Set the API token and base URL from your TrekMail account
+                    (<code class="rounded bg-white px-1">https://trekmail.net/api/v1</code>),
+                    and the customer webmail URL (default
+                    <a href="https://mail.trekmail.net" target="_blank" rel="noopener noreferrer" class="font-semibold text-rose hover:underline">mail.trekmail.net</a>).
+                    DNS defaults use <code class="rounded bg-white px-1">mx.trekmail.net</code> /
+                    <code class="rounded bg-white px-1">_spf.trekmail.net</code>.
                 </p>
-                <ul class="mt-2 list-disc space-y-1 pl-5 font-mono text-xs text-black">
-                    <li>domains:read · domains:create · domains:write · domains:dns:read · domains:dns:recheck</li>
-                    <li>mailboxes:create · mailboxes:invites:create</li>
-                </ul>
                 <p class="mt-2 text-xs">
-                    <code class="rounded bg-white px-1">domains:write</code> is required to push Lemonwares branding onto invite emails.
-                    Starter tokens are read-only and cannot provision Lemon Mail. After updating scopes, paste the new token here, save, run the connection test, then retry provision on the order.
+                    Lemon Mail plans provision automatically when TrekMail is configured. Partner providers stay manual.
                 </p>
             </div>
 
-            <div class="mt-5 grid gap-4 sm:grid-cols-2">
-                <div class="sm:col-span-2">
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">API Token</label>
+            <div class="admin-edit-grid">
+                <label class="admin-field admin-field-span">
+                    <span>API Token</span>
                     <input
                         type="text"
                         name="trekmail_token"
                         value="{{ old('trekmail_token', $trekmail['token']) }}"
-                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
-                        placeholder="tm_live_..."
+                        class="admin-input"
+                        placeholder="TrekMail API token"
                         autocomplete="off"
                     >
-                </div>
-                <div>
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">API Base URL</label>
+                </label>
+                <label class="admin-field">
+                    <span>API Base URL</span>
                     <input
                         type="url"
                         name="trekmail_base_url"
                         value="{{ old('trekmail_base_url', $trekmail['base_url']) }}"
-                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        class="admin-input"
                         placeholder="https://trekmail.net/api/v1"
                         autocomplete="off"
                     >
-                </div>
-                <div>
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Webmail URL</label>
+                </label>
+                <label class="admin-field">
+                    <span>Webmail URL</span>
                     <input
                         type="url"
                         name="trekmail_webmail_url"
                         value="{{ old('trekmail_webmail_url', $trekmail['webmail_url']) }}"
-                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
-                        placeholder="https://trekmail.net/webmail"
+                        class="admin-input"
+                        placeholder="https://mail.trekmail.net"
                         autocomplete="off"
                     >
-                </div>
+                </label>
             </div>
         </section>
 
-        <section class="rounded-3xl border border-border bg-white p-6">
-            <h2 class="text-lg font-bold text-black">Lemon Mail · Invite branding</h2>
-            <p class="mt-1 text-sm text-on-blush/65">
-                TrekMail sends the mailbox setup invite itself. These settings push your brand name, colors, and logo into that email via TrekMail’s branding API.
-                Full branded From-address / white-label hosts need TrekMail’s White Label add-on; identity branding still saves without it.
-            </p>
+        <section class="admin-panel">
+            <div class="admin-panel-toolbar compact">
+                <div>
+                    <h2 class="admin-dash-panel-title">Lemon Mail · Invite branding</h2>
+                    <p class="admin-dash-panel-lede">
+                        Optional branding applied when TrekMail creates mailboxes / sends invites.
+                    </p>
+                </div>
+            </div>
 
-            <label class="mt-5 flex items-start gap-3 text-sm text-black">
-                <input type="hidden" name="trekmail_branding_enabled" value="0">
-                <input type="checkbox" name="trekmail_branding_enabled" value="1" class="mt-0.5 size-4 rounded border-border text-rose focus:ring-rose" @checked(old('trekmail_branding_enabled', $branding['enabled'] ?? true))>
-                <span>
-                    <span class="font-semibold">Apply branding when provisioning</span>
-                    <span class="mt-1 block text-on-blush/65">Runs automatically after a domain is created, before mailbox invites are sent.</span>
-                </span>
+            <input type="hidden" name="trekmail_branding_enabled" value="0">
+            <label class="admin-check" style="margin-top:0">
+                <input type="checkbox" name="trekmail_branding_enabled" value="1" @checked(old('trekmail_branding_enabled', $branding['enabled'] ?? true))>
+                <span>Apply branding when provisioning — runs automatically after a domain is created, before mailbox invites are sent.</span>
             </label>
 
-            <div class="mt-5 grid gap-4 sm:grid-cols-2">
-                <div>
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Brand name</label>
+            <div class="admin-edit-grid mt-5">
+                <label class="admin-field">
+                    <span>Brand name</span>
                     <input
                         type="text"
                         name="trekmail_brand_name"
                         value="{{ old('trekmail_brand_name', $branding['name']) }}"
-                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        class="admin-input"
                         placeholder="Lemonwares"
                     >
-                </div>
-                <div>
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Support email</label>
+                </label>
+                <label class="admin-field">
+                    <span>Support email</span>
                     <input
                         type="email"
                         name="trekmail_brand_support_email"
                         value="{{ old('trekmail_brand_support_email', $branding['support_email']) }}"
-                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        class="admin-input"
                         placeholder="support@lemonwares.com"
                     >
-                </div>
-                <div>
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Primary color</label>
+                </label>
+                <label class="admin-field">
+                    <span>Primary color</span>
                     <input
                         type="text"
                         name="trekmail_brand_primary_color"
                         value="{{ old('trekmail_brand_primary_color', $branding['primary_color']) }}"
-                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        class="admin-input"
                         placeholder="#e04545"
                     >
-                </div>
-                <div>
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Accent color</label>
+                </label>
+                <label class="admin-field">
+                    <span>Accent color</span>
                     <input
                         type="text"
                         name="trekmail_brand_accent_color"
                         value="{{ old('trekmail_brand_accent_color', $branding['accent_color']) }}"
-                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        class="admin-input"
                         placeholder="#ffeded"
                     >
-                </div>
-                <div>
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Support / help URL</label>
+                </label>
+                <label class="admin-field">
+                    <span>Support / help URL</span>
                     <input
                         type="url"
                         name="trekmail_brand_support_url"
                         value="{{ old('trekmail_brand_support_url', $branding['support_url']) }}"
-                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        class="admin-input"
                         placeholder="https://lemonwares.com"
                     >
-                </div>
-                <div>
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Transactional sender (optional)</label>
+                </label>
+                <label class="admin-field">
+                    <span>Transactional sender (optional)</span>
                     <input
                         type="email"
                         name="trekmail_brand_sender_email"
                         value="{{ old('trekmail_brand_sender_email', $branding['sender_email']) }}"
-                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        class="admin-input"
                         placeholder="noreply@your-verified-domain.com"
                     >
-                    <p class="mt-1 text-xs text-on-blush/55">Must be on a TrekMail domain with verified DKIM, or TrekMail will reject it.</p>
-                </div>
-                <div class="sm:col-span-2">
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Logo (PNG or JPG, max 1MB)</label>
+                    <p class="admin-muted text-xs">Must be on a TrekMail domain with verified DKIM, or TrekMail will reject it.</p>
+                </label>
+                <label class="admin-field admin-field-span">
+                    <span>Logo (PNG or JPG, max 1MB)</span>
                     <input
                         type="file"
                         name="trekmail_brand_logo"
                         accept="image/png,image/jpeg"
-                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        class="admin-input"
                     >
-                    <p class="mt-1 text-xs text-on-blush/55">
+                    <p class="admin-muted text-xs">
                         @if ($branding['has_logo'] ?? false)
                             Custom logo uploaded. Leave empty to keep it. Otherwise we fall back to <code class="rounded bg-blush-soft px-1">public/lemonwareslogo.webp</code> (converted to PNG).
                         @else
                             Optional. If empty, we use <code class="rounded bg-blush-soft px-1">public/lemonwareslogo.webp</code> when GD can convert it.
                         @endif
                     </p>
-                </div>
+                </label>
             </div>
         </section>
 
         @foreach ($manualProviders as $provider => $pack)
             @php($settings = $pack['settings'])
-            <section class="rounded-3xl border border-border bg-white p-6">
-                <div class="mb-1 flex flex-wrap items-center gap-3">
-                    <h2 class="text-lg font-bold text-black">{{ $pack['label'] }}</h2>
-                    <span class="inline-flex rounded-full bg-blush-soft px-3 py-1 text-xs font-semibold uppercase tracking-widest text-on-blush/70">
-                        Manual fulfilment
-                    </span>
-                </div>
-                <p class="text-sm text-on-blush/65">
-                    No auto-provisioning yet. Store partner portal login details and API keys here for the fulfilment team. Orders still move through the Email Orders queue.
-                </p>
-
-                <div class="mt-5 grid gap-4 sm:grid-cols-2">
+            <section class="admin-panel">
+                <div class="admin-panel-toolbar compact">
                     <div>
-                        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Partner portal URL</label>
+                        <h2 class="admin-dash-panel-title">{{ $pack['label'] }}</h2>
+                        <p class="admin-dash-panel-lede">
+                            No auto-provisioning yet. Store partner portal login details and API keys here for the fulfilment team. Orders still move through the Email Orders queue.
+                        </p>
+                    </div>
+                    <span class="admin-pill is-info">Manual fulfilment</span>
+                </div>
+
+                <div class="admin-edit-grid">
+                    <label class="admin-field">
+                        <span>Partner portal URL</span>
                         <input
                             type="text"
                             name="providers[{{ $provider }}][portal_url]"
                             value="{{ old("providers.{$provider}.portal_url", $settings['portal_url']) }}"
-                            class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                            class="admin-input"
                             placeholder="https://..."
                             autocomplete="off"
                         >
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Account / reseller ref</label>
+                    </label>
+                    <label class="admin-field">
+                        <span>Account / reseller ref</span>
                         <input
                             type="text"
                             name="providers[{{ $provider }}][account_ref]"
                             value="{{ old("providers.{$provider}.account_ref", $settings['account_ref']) }}"
-                            class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                            class="admin-input"
                             placeholder="Reseller ID or login email"
                             autocomplete="off"
                         >
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">API key (optional)</label>
+                    </label>
+                    <label class="admin-field">
+                        <span>API key (optional)</span>
                         <input
                             type="text"
                             name="providers[{{ $provider }}][api_key]"
                             value="{{ old("providers.{$provider}.api_key", $settings['api_key']) }}"
-                            class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                            class="admin-input"
                             autocomplete="off"
                         >
-                    </div>
-                    <div>
-                        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">API secret (optional)</label>
+                    </label>
+                    <label class="admin-field">
+                        <span>API secret (optional)</span>
                         <input
                             type="text"
                             name="providers[{{ $provider }}][api_secret]"
                             value="{{ old("providers.{$provider}.api_secret", $settings['api_secret']) }}"
-                            class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                            class="admin-input"
                             autocomplete="off"
                         >
-                    </div>
-                    <div class="sm:col-span-2">
-                        <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Internal notes</label>
+                    </label>
+                    <label class="admin-field admin-field-span">
+                        <span>Internal notes</span>
                         <textarea
                             name="providers[{{ $provider }}][notes]"
                             rows="3"
-                            class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                            class="admin-input"
                             placeholder="How we provision this provider, contacts, SKUs…"
                         >{{ old("providers.{$provider}.notes", $settings['notes']) }}</textarea>
-                    </div>
+                    </label>
                 </div>
             </section>
         @endforeach
 
         <div class="flex flex-wrap justify-end gap-3">
-            <button type="submit" class="btn btn-primary">Save Email Provider Settings</button>
+            <button type="submit" class="admin-btn-primary inline-flex items-center gap-2" data-submit-button>
+                <span class="admin-btn-spinner hidden" data-submit-spinner></span>
+                <span data-submit-label>Save Email Provider Settings</span>
+                <span class="hidden" data-submit-loading>Saving…</span>
+            </button>
         </div>
     </form>
 
-    <section class="mt-8 rounded-3xl border border-border bg-white p-6">
-        <h2 class="text-lg font-bold text-black">Test TrekMail Connection</h2>
-        <p class="mt-2 text-sm text-on-blush/65">Calls the TrekMail domains endpoint with your saved API token.</p>
+    <section class="admin-panel mt-6">
+        <div class="admin-panel-toolbar compact">
+            <div>
+                <h2 class="admin-dash-panel-title">Test TrekMail Connection</h2>
+                <p class="admin-dash-panel-lede">Calls the TrekMail domains endpoint with your saved API token.</p>
+            </div>
+        </div>
 
-        <form method="POST" action="{{ route('admin.email-provider-settings.test-connection') }}" class="mt-5">
+        <form method="POST" action="{{ route('admin.email-provider-settings.test-connection') }}" data-submit-form>
             @csrf
-            <button type="submit" class="btn btn-ghost">Run Connection Test</button>
+            <button type="submit" class="admin-btn-ghost inline-flex items-center gap-2" data-submit-button>
+                <span class="admin-btn-spinner hidden" data-submit-spinner></span>
+                <span data-submit-label>Run Connection Test</span>
+                <span class="hidden" data-submit-loading>Testing…</span>
+            </button>
         </form>
 
         @if (session('connection_test_result'))
             @php($test = session('connection_test_result'))
-            <div class="mt-6 rounded-2xl border border-border bg-blush-soft p-4 text-sm">
+            <div class="mt-6 rounded-xl border border-border bg-blush-soft/40 px-4 py-3 text-sm">
                 <p @class([
                     'font-semibold',
                     'text-emerald-700' => $test['ok'] ?? false,

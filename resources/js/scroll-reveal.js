@@ -18,8 +18,8 @@ document.querySelectorAll('[data-reveal]').forEach((el) => {
             });
         },
         {
-            threshold: 0.14,
-            rootMargin: '0px 0px -6% 0px',
+            threshold: 0.18,
+            rootMargin: '0px 0px -8% 0px',
         },
     );
 

@@ -2,9 +2,13 @@
 
 namespace App\Support;
 
+use App\Models\DomainCheckout;
+use App\Models\DomainOrder;
 use App\Models\EmailOrder;
 use App\Models\HostingLead;
 use App\Models\IntegrationSetting;
+use App\Models\SiteCheckout;
+use App\Notifications\DomainOrderPaid;
 use App\Notifications\EmailOrderPaid;
 use App\Notifications\EmailOrderRenewed;
 use App\Notifications\HostingOrderPaid;
@@ -173,6 +177,31 @@ class FlutterwavePayment
             ];
         }
 
+        if (str_starts_with($txRef, 'LW-CART-')) {
+            $checkout = SiteCheckout::query()->where('payment_reference', $txRef)->first();
+            if (! $checkout) {
+                return [
+                    'ok' => false,
+                    'message' => 'No site checkout matched this payment reference.',
+                ];
+            }
+
+            $verified = self::verifyTransaction($transactionId);
+            if (! $verified) {
+                return [
+                    'ok' => false,
+                    'message' => 'Unable to verify Flutterwave transaction.',
+                ];
+            }
+
+            $result = self::confirmSiteCheckoutPayment($checkout->fresh(['items', 'user']), $verified);
+
+            return [
+                'ok' => (bool) ($result['ok'] ?? false),
+                'message' => (string) ($result['message'] ?? 'Payment processed.'),
+            ];
+        }
+
         if (str_starts_with($txRef, 'LW-MAIL-')) {
             $order = EmailOrder::query()->where('payment_reference', $txRef)->first();
             if (! $order) {
@@ -191,6 +220,49 @@ class FlutterwavePayment
             }
 
             $result = self::confirmEmailOrderPayment($order->fresh(), $verified);
+
+            return [
+                'ok' => (bool) ($result['ok'] ?? false),
+                'message' => (string) ($result['message'] ?? 'Payment processed.'),
+            ];
+        }
+
+        if (str_starts_with($txRef, 'LW-DOM-') || str_starts_with($txRef, 'LW-DCART-')) {
+            $checkout = DomainCheckout::query()->where('payment_reference', $txRef)->first();
+            if ($checkout) {
+                $verified = self::verifyTransaction($transactionId);
+                if (! $verified) {
+                    return [
+                        'ok' => false,
+                        'message' => 'Unable to verify Flutterwave transaction.',
+                    ];
+                }
+
+                $result = self::confirmDomainCheckoutPayment($checkout->fresh(['orders', 'user']), $verified);
+
+                return [
+                    'ok' => (bool) ($result['ok'] ?? false),
+                    'message' => (string) ($result['message'] ?? 'Payment processed.'),
+                ];
+            }
+
+            $order = DomainOrder::query()->where('payment_reference', $txRef)->first();
+            if (! $order) {
+                return [
+                    'ok' => false,
+                    'message' => 'No domain order matched this payment reference.',
+                ];
+            }
+
+            $verified = self::verifyTransaction($transactionId);
+            if (! $verified) {
+                return [
+                    'ok' => false,
+                    'message' => 'Unable to verify Flutterwave transaction.',
+                ];
+            }
+
+            $result = self::confirmDomainOrderPayment($order->fresh(), $verified);
 
             return [
                 'ok' => (bool) ($result['ok'] ?? false),
@@ -241,6 +313,456 @@ class FlutterwavePayment
         $signature = trim((string) $request->header('verif-hash', ''));
 
         return hash_equals($secretHash, $signature);
+    }
+
+    public static function createDomainPaymentLink(DomainOrder $order): ?string
+    {
+        if ($order->domain_checkout_id) {
+            $checkout = DomainCheckout::query()->find($order->domain_checkout_id);
+            if ($checkout) {
+                return self::createDomainCheckoutPaymentLink($checkout);
+            }
+        }
+
+        if (! self::isConfigured()) {
+            return null;
+        }
+
+        $txRef = $order->payment_reference ?: ('LW-DOM-' . $order->id . '-' . Str::upper(Str::random(8)));
+        $amountNgn = max(1, (int) round((float) ($order->amount_ngn ?? 0)));
+        $order->loadMissing('user');
+
+        $payload = [
+            'tx_ref' => $txRef,
+            'amount' => $amountNgn,
+            'currency' => 'NGN',
+            'redirect_url' => route('domain.flutterwave.callback'),
+            'payment_options' => 'card,banktransfer,ussd,account',
+            'customer' => array_filter([
+                'email' => $order->user?->email,
+                'name' => $order->user?->name,
+                'phonenumber' => $order->user?->phone,
+            ], fn ($value) => filled($value)),
+            'customizations' => self::domainCustomization($order),
+            'meta' => [
+                'domain_order_id' => $order->id,
+                'domain' => $order->domain,
+                'domain_option' => $order->option,
+                'whmcs_order_id' => $order->whmcs_order_id,
+                'whmcs_invoice_id' => $order->whmcs_invoice_id,
+            ],
+        ];
+
+        $response = Http::timeout(20)
+            ->withToken(FlutterwaveSettings::secretKey())
+            ->acceptJson()
+            ->post('https://api.flutterwave.com/v3/payments', $payload);
+
+        if (! $response->successful() || data_get($response->json(), 'status') !== 'success') {
+            Log::warning('Flutterwave domain payment init failed', [
+                'domain_order_id' => $order->id,
+                'body' => $response->json(),
+            ]);
+
+            return null;
+        }
+
+        $link = data_get($response->json(), 'data.link');
+
+        if (! is_string($link) || ! preg_match('#/hosted/pay/[A-Za-z0-9_-]+#', $link)) {
+            Log::warning('Flutterwave domain payment returned an invalid checkout link', [
+                'domain_order_id' => $order->id,
+                'link' => $link,
+            ]);
+
+            return null;
+        }
+
+        $order->update([
+            'payment_reference' => $txRef,
+            'payment_provider' => 'flutterwave',
+            'checkout_url' => $link,
+            'status' => 'awaiting_payment',
+        ]);
+
+        return $link;
+    }
+
+    public static function createSiteCheckoutPaymentLink(SiteCheckout $checkout): ?string
+    {
+        if (! self::isConfigured()) {
+            return null;
+        }
+
+        $txRef = $checkout->payment_reference ?: ('LW-CART-'.$checkout->id.'-'.Str::upper(Str::random(8)));
+        $amountNgn = max(1, (int) round((float) ($checkout->amount_ngn ?? 0)));
+        $checkout->loadMissing(['user', 'items']);
+
+        $labels = $checkout->items->pluck('label')->filter()->take(4)->implode(', ');
+
+        $payload = [
+            'tx_ref' => $txRef,
+            'amount' => $amountNgn,
+            'currency' => 'NGN',
+            'redirect_url' => route('checkout.flutterwave.callback'),
+            'payment_options' => 'card,banktransfer,ussd,account',
+            'customer' => array_filter([
+                'email' => $checkout->user?->email,
+                'name' => $checkout->user?->name,
+                'phonenumber' => $checkout->user?->phone,
+            ], fn ($value) => filled($value)),
+            'customizations' => self::checkoutCustomization(
+                config('site.short_name').' Cart',
+                trim(($checkout->item_count ?: $checkout->items->count()).' item(s) · '.$labels),
+            ),
+            'meta' => [
+                'site_checkout_id' => $checkout->id,
+                'item_count' => $checkout->item_count,
+            ],
+        ];
+
+        $response = Http::timeout(20)
+            ->withToken(FlutterwaveSettings::secretKey())
+            ->acceptJson()
+            ->post('https://api.flutterwave.com/v3/payments', $payload);
+
+        if (! $response->successful() || data_get($response->json(), 'status') !== 'success') {
+            Log::warning('Flutterwave site cart payment init failed', [
+                'site_checkout_id' => $checkout->id,
+                'body' => $response->json(),
+            ]);
+
+            return null;
+        }
+
+        $link = data_get($response->json(), 'data.link');
+
+        if (! is_string($link) || ! preg_match('#/hosted/pay/[A-Za-z0-9_-]+#', $link)) {
+            Log::warning('Flutterwave site cart payment returned an invalid checkout link', [
+                'site_checkout_id' => $checkout->id,
+                'link' => $link,
+            ]);
+
+            return null;
+        }
+
+        $checkout->update([
+            'payment_reference' => $txRef,
+            'payment_provider' => 'flutterwave',
+            'checkout_url' => $link,
+            'status' => 'awaiting_payment',
+        ]);
+
+        return $link;
+    }
+
+    /**
+     * @return array{ok:bool,already_paid?:bool,message:string}
+     */
+    public static function confirmSiteCheckoutPayment(SiteCheckout $checkout, array $verified): array
+    {
+        $transactionId = (string) data_get($verified, 'id', '');
+
+        if ($transactionId !== '' && (string) $checkout->flutterwave_transaction_id === $transactionId) {
+            return [
+                'ok' => true,
+                'already_paid' => true,
+                'message' => __('domain.payment_already_confirmed'),
+            ];
+        }
+
+        if ($checkout->isPaid()) {
+            return [
+                'ok' => true,
+                'already_paid' => true,
+                'message' => __('domain.payment_already_confirmed'),
+            ];
+        }
+
+        if (! in_array(strtolower((string) data_get($verified, 'status')), ['successful', 'completed'], true)) {
+            $checkout->update([
+                'payment_status' => strtolower((string) data_get($verified, 'status', 'failed')),
+                'status' => 'payment_failed',
+            ]);
+
+            return [
+                'ok' => false,
+                'message' => __('domain.payment_incomplete'),
+            ];
+        }
+
+        $paidAmount = (float) data_get($verified, 'amount', 0);
+        $expected = (float) ($checkout->amount_ngn ?? 0);
+        $currency = strtoupper((string) data_get($verified, 'currency', ''));
+
+        if ($currency !== 'NGN' || abs($paidAmount - $expected) > 1) {
+            $checkout->update([
+                'payment_status' => 'amount_mismatch',
+                'status' => 'payment_failed',
+                'flutterwave_transaction_id' => $transactionId,
+            ]);
+
+            return [
+                'ok' => false,
+                'message' => __('domain.payment_mismatch'),
+            ];
+        }
+
+        $checkout->update([
+            'payment_status' => 'successful',
+            'status' => 'paid',
+            'flutterwave_transaction_id' => $transactionId,
+        ]);
+
+        CartFulfillment::fulfill($checkout->fresh(['items', 'user']));
+
+        return [
+            'ok' => true,
+            'message' => __('cart.payment_confirmed', [
+                'count' => $checkout->item_count ?: $checkout->items()->count(),
+            ]),
+        ];
+    }
+
+    public static function createDomainCheckoutPaymentLink(DomainCheckout $checkout): ?string
+    {
+        if (! self::isConfigured()) {
+            return null;
+        }
+
+        $txRef = $checkout->payment_reference ?: ('LW-DCART-' . $checkout->id . '-' . Str::upper(Str::random(8)));
+        $amountNgn = max(1, (int) round((float) ($checkout->amount_ngn ?? 0)));
+        $checkout->loadMissing(['user', 'orders']);
+
+        $domains = $checkout->orders->pluck('domain')->filter()->implode(', ');
+
+        $payload = [
+            'tx_ref' => $txRef,
+            'amount' => $amountNgn,
+            'currency' => 'NGN',
+            'redirect_url' => route('domain.flutterwave.callback'),
+            'payment_options' => 'card,banktransfer,ussd,account',
+            'customer' => array_filter([
+                'email' => $checkout->user?->email,
+                'name' => $checkout->user?->name,
+                'phonenumber' => $checkout->user?->phone,
+            ], fn ($value) => filled($value)),
+            'customizations' => self::checkoutCustomization(
+                config('site.short_name') . ' Domains',
+                trim(($checkout->item_count ?: $checkout->orders->count()) . ' domain(s) · ' . $domains),
+            ),
+            'meta' => [
+                'domain_checkout_id' => $checkout->id,
+                'item_count' => $checkout->item_count,
+                'whmcs_order_id' => $checkout->whmcs_order_id,
+                'whmcs_invoice_id' => $checkout->whmcs_invoice_id,
+            ],
+        ];
+
+        $response = Http::timeout(20)
+            ->withToken(FlutterwaveSettings::secretKey())
+            ->acceptJson()
+            ->post('https://api.flutterwave.com/v3/payments', $payload);
+
+        if (! $response->successful() || data_get($response->json(), 'status') !== 'success') {
+            Log::warning('Flutterwave domain cart payment init failed', [
+                'domain_checkout_id' => $checkout->id,
+                'body' => $response->json(),
+            ]);
+
+            return null;
+        }
+
+        $link = data_get($response->json(), 'data.link');
+
+        if (! is_string($link) || ! preg_match('#/hosted/pay/[A-Za-z0-9_-]+#', $link)) {
+            Log::warning('Flutterwave domain cart payment returned an invalid checkout link', [
+                'domain_checkout_id' => $checkout->id,
+                'link' => $link,
+            ]);
+
+            return null;
+        }
+
+        $checkout->update([
+            'payment_reference' => $txRef,
+            'payment_provider' => 'flutterwave',
+            'checkout_url' => $link,
+            'status' => 'awaiting_payment',
+        ]);
+
+        $checkout->orders()->update([
+            'payment_reference' => $txRef,
+            'payment_provider' => 'flutterwave',
+            'checkout_url' => $link,
+            'status' => 'awaiting_payment',
+        ]);
+
+        return $link;
+    }
+
+    /**
+     * @return array{ok:bool,already_paid?:bool,message:string}
+     */
+    public static function confirmDomainCheckoutPayment(DomainCheckout $checkout, array $verified): array
+    {
+        $transactionId = (string) data_get($verified, 'id', '');
+
+        if ($transactionId !== '' && (string) $checkout->flutterwave_transaction_id === $transactionId) {
+            return [
+                'ok' => true,
+                'already_paid' => true,
+                'message' => __('domain.payment_already_confirmed'),
+            ];
+        }
+
+        if ($checkout->isPaid()) {
+            return [
+                'ok' => true,
+                'already_paid' => true,
+                'message' => __('domain.payment_already_confirmed'),
+            ];
+        }
+
+        if (! in_array(strtolower((string) data_get($verified, 'status')), ['successful', 'completed'], true)) {
+            $checkout->update([
+                'payment_status' => strtolower((string) data_get($verified, 'status', 'failed')),
+                'status' => 'payment_failed',
+            ]);
+            $checkout->orders()->update([
+                'payment_status' => strtolower((string) data_get($verified, 'status', 'failed')),
+                'status' => 'payment_failed',
+            ]);
+
+            return [
+                'ok' => false,
+                'message' => __('domain.payment_incomplete'),
+            ];
+        }
+
+        $paidAmount = (float) data_get($verified, 'amount', 0);
+        $expected = (float) ($checkout->amount_ngn ?? 0);
+        $currency = strtoupper((string) data_get($verified, 'currency', ''));
+
+        if ($currency !== 'NGN' || abs($paidAmount - $expected) > 1) {
+            $checkout->update([
+                'payment_status' => 'amount_mismatch',
+                'status' => 'payment_failed',
+                'flutterwave_transaction_id' => $transactionId,
+            ]);
+            $checkout->orders()->update([
+                'payment_status' => 'amount_mismatch',
+                'status' => 'payment_failed',
+                'flutterwave_transaction_id' => $transactionId,
+            ]);
+
+            return [
+                'ok' => false,
+                'message' => __('domain.payment_mismatch'),
+            ];
+        }
+
+        $checkout->update([
+            'payment_status' => 'successful',
+            'status' => 'paid',
+            'flutterwave_transaction_id' => $transactionId,
+        ]);
+
+        $checkout->orders()->update([
+            'payment_status' => 'successful',
+            'status' => 'paid',
+            'flutterwave_transaction_id' => $transactionId,
+        ]);
+
+        WhmcsDomainOrderSync::syncPaymentBundle($checkout->fresh(['orders', 'user']));
+
+        $checkout = $checkout->fresh(['user', 'orders']);
+        AccountNotifier::send($checkout?->user, new DomainOrderPaid($checkout));
+
+        return [
+            'ok' => true,
+            'message' => __('domain.payment_confirmed_cart', [
+                'count' => $checkout->item_count ?: $checkout->orders->count(),
+            ]),
+        ];
+    }
+
+    /**
+     * @return array{ok:bool,already_paid?:bool,message:string}
+     */
+    public static function confirmDomainOrderPayment(DomainOrder $order, array $verified): array
+    {
+        if ($order->domain_checkout_id) {
+            $checkout = DomainCheckout::query()->with('orders')->find($order->domain_checkout_id);
+            if ($checkout) {
+                return self::confirmDomainCheckoutPayment($checkout, $verified);
+            }
+        }
+
+        $transactionId = (string) data_get($verified, 'id', '');
+
+        if ($transactionId !== '' && (string) $order->flutterwave_transaction_id === $transactionId) {
+            return [
+                'ok' => true,
+                'already_paid' => true,
+                'message' => __('domain.payment_already_confirmed'),
+            ];
+        }
+
+        if ($order->isPaid()) {
+            return [
+                'ok' => true,
+                'already_paid' => true,
+                'message' => __('domain.payment_already_confirmed'),
+            ];
+        }
+
+        if (! in_array(strtolower((string) data_get($verified, 'status')), ['successful', 'completed'], true)) {
+            $order->update([
+                'payment_status' => strtolower((string) data_get($verified, 'status', 'failed')),
+                'status' => 'payment_failed',
+            ]);
+
+            return [
+                'ok' => false,
+                'message' => __('domain.payment_incomplete'),
+            ];
+        }
+
+        $paidAmount = (float) data_get($verified, 'amount', 0);
+        $expected = (float) ($order->amount_ngn ?? 0);
+        $currency = strtoupper((string) data_get($verified, 'currency', ''));
+
+        if ($currency !== 'NGN' || abs($paidAmount - $expected) > 1) {
+            $order->update([
+                'payment_status' => 'amount_mismatch',
+                'status' => 'payment_failed',
+                'flutterwave_transaction_id' => $transactionId,
+            ]);
+
+            return [
+                'ok' => false,
+                'message' => __('domain.payment_mismatch'),
+            ];
+        }
+
+        $order->update([
+            'payment_status' => 'successful',
+            'status' => 'paid',
+            'flutterwave_transaction_id' => $transactionId,
+        ]);
+
+        WhmcsDomainOrderSync::syncPayment($order->fresh());
+
+        $order = $order->fresh(['user']);
+        AccountNotifier::send($order?->user, new DomainOrderPaid($order));
+
+        return [
+            'ok' => true,
+            'message' => $order->isTransfer()
+                ? __('domain.payment_confirmed_transfer')
+                : __('domain.payment_confirmed_register'),
+        ];
     }
 
     public static function createEmailPaymentLink(EmailOrder $order, string $kind = 'initial'): ?string
@@ -502,6 +1024,19 @@ class FlutterwavePayment
             $title,
             trim($order->plan_name . ' - ' . $order->domain),
         );
+    }
+
+    /**
+     * @return array{title:string,description:string,logo?:string}
+     */
+    protected static function domainCustomization(DomainOrder $order): array
+    {
+        $title = config('site.short_name') . ' Domain';
+        $label = $order->isTransfer()
+            ? 'Transfer · ' . $order->domain
+            : 'Register · ' . $order->domain;
+
+        return self::checkoutCustomization($title, $label);
     }
 
     /**

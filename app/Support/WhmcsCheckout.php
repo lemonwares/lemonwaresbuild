@@ -21,6 +21,22 @@ class WhmcsCheckout
         return rtrim(WhmcsSettings::baseUrl(), '/') . '/cart.php?' . http_build_query($params);
     }
 
+    public static function domainCartUrl(string $domain, string $domainOption): ?string
+    {
+        $base = WhmcsSettings::baseUrl();
+        if ($base === '') {
+            return null;
+        }
+
+        $option = strtolower(trim($domainOption)) === 'transfer' ? 'transfer' : 'register';
+
+        return self::cartUrl([
+            'a' => 'add',
+            'domain' => $option,
+            'query' => $domain,
+        ]);
+    }
+
     public static function paymentRedirectUrl(int $clientId, int $invoiceId): ?string
     {
         $sso = WhmcsClient::createSsoToken($clientId, 'viewinvoice.php?id=' . $invoiceId);

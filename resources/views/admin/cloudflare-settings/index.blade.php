@@ -1,22 +1,17 @@
 @extends('layouts.admin')
 
-@section('title', 'Cloudflare Settings — Admin')
+@section('title', 'Cloudflare Settings — ' . config('site.short_name'))
+@section('hide_auto_breadcrumbs', true)
 
 @section('content')
-    <div class="mb-8">
-        <p class="section-label mb-3">Integrations</p>
-        <h1 class="heading">Cloudflare Settings</h1>
-        <p class="mt-3 lede">
-            One-click Lemon Mail DNS apply for domains on Cloudflare. Token here is the default;
-            you can paste a one-off zone token on an email order when the domain is on a customer’s account.
-        </p>
-    </div>
-
-    @if (session('status'))
-        <p class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            {{ session('status') }}
-        </p>
-    @endif
+    <x-admin.page-header
+        title="Cloudflare Settings"
+        lede="One-click Lemon Mail DNS apply for domains on Cloudflare (TrekMail records). Token here is the default; you can paste a one-off zone token on an email order when the domain is on a customer’s account."
+        :back-href="route('admin.dashboard')"
+        back-label="Go back"
+        :breadcrumbs="[['label' => 'Cloudflare Settings']]"
+        class="mb-5"
+    />
 
     @if ($errors->any())
         <div class="mb-6 rounded-xl border border-rose/20 bg-rose/5 px-4 py-3 text-sm text-rose">
@@ -28,88 +23,92 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('admin.cloudflare-settings.update') }}" class="space-y-6">
+    <form method="POST" action="{{ route('admin.cloudflare-settings.update') }}" class="admin-page-stack" data-submit-form>
         @csrf
         @method('PUT')
 
-        <section class="rounded-3xl border border-border bg-white p-6">
-            <div class="flex flex-wrap items-start justify-between gap-4">
+        <section class="admin-panel">
+            <div class="admin-panel-toolbar compact">
                 <div>
-                    <h2 class="text-lg font-bold text-black">API credentials</h2>
-                    <p class="mt-1 text-sm text-on-blush/65">
-                        Create an API token with <strong>Zone → DNS → Edit</strong> (and Zone → Zone → Read).
+                    <h2 class="admin-dash-panel-title">API credentials</h2>
+                    <p class="admin-dash-panel-lede">
+                        Create an API token with Zone → DNS → Edit (and Zone → Zone → Read).
                         Domains must use Cloudflare nameservers for apply to work.
                     </p>
                 </div>
                 @if ($is_configured)
-                    <span class="inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-emerald-800">
-                        Ready
-                    </span>
+                    <span class="admin-pill is-ok">Ready</span>
                 @else
-                    <span class="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-amber-800">
-                        Not configured
-                    </span>
+                    <span class="admin-pill is-info">Not configured</span>
                 @endif
             </div>
 
-            <div class="mt-5 space-y-4">
-                <label class="inline-flex items-start gap-3 rounded-xl border border-border bg-blush-soft/40 px-4 py-3">
-                    <input type="hidden" name="enabled" value="0">
-                    <input
-                        type="checkbox"
-                        name="enabled"
-                        value="1"
-                        class="mt-1 rounded border-border text-rose focus:ring-rose/20"
-                        @checked(old('enabled', $settings['enabled']))
-                    />
-                    <span>
-                        <span class="block text-sm font-semibold text-black">Enable Cloudflare DNS apply</span>
-                        <span class="mt-1 block text-xs text-on-blush/65">When off, admin email orders only show the copy checklist.</span>
-                    </span>
-                </label>
+            <input type="hidden" name="enabled" value="0">
+            <label class="admin-check" style="margin-top:0">
+                <input
+                    type="checkbox"
+                    name="enabled"
+                    value="1"
+                    @checked(old('enabled', $settings['enabled']))
+                />
+                <span>Enable Cloudflare DNS apply — when off, admin email orders only show the copy checklist.</span>
+            </label>
 
-                <div>
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">API token</label>
+            <div class="admin-edit-grid mt-5">
+                <label class="admin-field admin-field-span">
+                    <span>API token</span>
                     <textarea
                         name="api_token"
                         rows="3"
-                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5 font-mono text-sm"
+                        class="admin-input admin-mono text-sm"
                         placeholder="Cloudflare API token"
                         autocomplete="off"
                     >{{ old('api_token', $settings['api_token']) }}</textarea>
-                </div>
+                </label>
 
-                <div>
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Account ID (optional)</label>
+                <label class="admin-field admin-field-span">
+                    <span>Account ID (optional)</span>
                     <input
                         type="text"
                         name="account_id"
                         value="{{ old('account_id', $settings['account_id']) }}"
-                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5 font-mono text-sm"
+                        class="admin-input admin-mono text-sm"
                         placeholder="Only needed if the token can see multiple accounts"
                         autocomplete="off"
                     >
-                </div>
+                </label>
             </div>
         </section>
 
         <div class="flex flex-wrap justify-end gap-3">
-            <button type="submit" class="btn btn-primary">Save Cloudflare settings</button>
+            <button type="submit" class="admin-btn-primary inline-flex items-center gap-2" data-submit-button>
+                <span class="admin-btn-spinner hidden" data-submit-spinner></span>
+                <span data-submit-label>Save Cloudflare settings</span>
+                <span class="hidden" data-submit-loading>Saving…</span>
+            </button>
         </div>
     </form>
 
-    <section class="mt-8 rounded-3xl border border-border bg-white p-6">
-        <h2 class="text-lg font-bold text-black">Test API connection</h2>
-        <p class="mt-2 text-sm text-on-blush/65">Verifies the saved token with Cloudflare (no DNS changes).</p>
+    <section class="admin-panel mt-6">
+        <div class="admin-panel-toolbar compact">
+            <div>
+                <h2 class="admin-dash-panel-title">Test API connection</h2>
+                <p class="admin-dash-panel-lede">Verifies the saved token with Cloudflare (no DNS changes).</p>
+            </div>
+        </div>
 
-        <form method="POST" action="{{ route('admin.cloudflare-settings.test-connection') }}" class="mt-5">
+        <form method="POST" action="{{ route('admin.cloudflare-settings.test-connection') }}" data-submit-form>
             @csrf
-            <button type="submit" class="btn btn-ghost">Run connection test</button>
+            <button type="submit" class="admin-btn-ghost inline-flex items-center gap-2" data-submit-button>
+                <span class="admin-btn-spinner hidden" data-submit-spinner></span>
+                <span data-submit-label>Run connection test</span>
+                <span class="hidden" data-submit-loading>Testing…</span>
+            </button>
         </form>
 
         @if (session('connection_test_result'))
             @php($test = session('connection_test_result'))
-            <div class="mt-6 rounded-2xl border border-border bg-blush-soft p-4 text-sm">
+            <div class="mt-6 rounded-xl border border-border bg-blush-soft/40 px-4 py-3 text-sm">
                 <p @class([
                     'font-semibold',
                     'text-emerald-700' => $test['ok'] ?? false,

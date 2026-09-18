@@ -2,34 +2,34 @@
 
 return [
 
-    'webmail_url' => env('TREKMAIL_WEBMAIL_URL', 'https://trekmail.net/webmail'),
+    'webmail_url' => env('TREKMAIL_WEBMAIL_URL', env('MXROUTE_WEBMAIL_URL', 'https://mail.trekmail.net')),
 
-    'product_name' => 'Lemon Mail',
+    'product_name' => 'Mailemon',
 
     /*
     |--------------------------------------------------------------------------
-    | Lemon Mail DNS template (TrekMail)
+    | Mailemon DNS template (TrekMail)
     |--------------------------------------------------------------------------
     | Used for the customer checklist and Cloudflare one-click apply.
-    | Update values if TrekMail changes their MX / SPF / DKIM hosts.
+    | Override TREKMAIL_MX_HOST / TREKMAIL_SPF_INCLUDE if your account differs.
     */
     'dns_template' => [
         [
             'type' => 'MX',
             'name' => '@',
-            'value' => 'mail.trekmail.net',
+            'value' => env('TREKMAIL_MX_HOST', env('MXROUTE_MX_HOST', 'mx.trekmail.net')),
             'priority' => 10,
         ],
         [
             'type' => 'TXT',
             'name' => '@',
-            'value' => 'v=spf1 include:_spf.trekmail.net ~all',
+            'value' => 'v=spf1 include:'.env('TREKMAIL_SPF_INCLUDE', env('MXROUTE_SPF_INCLUDE', '_spf.trekmail.net')).' ~all',
             'priority' => null,
         ],
         [
             'type' => 'TXT',
             'name' => '_dmarc',
-            'value' => 'v=DMARC1; p=none;',
+            'value' => 'v=DMARC1; p=none; sp=none; adkim=r; aspf=r;',
             'priority' => null,
         ],
     ],
@@ -61,7 +61,7 @@ return [
         [
             'key' => 'solo',
             'provider' => 'lemonmail',
-            'fulfilment_mode' => 'manual',
+            'fulfilment_mode' => 'auto',
             'mailboxes' => 1,
             'monthly_usd' => 4.99,
             'featured' => false,
@@ -69,7 +69,7 @@ return [
         [
             'key' => 'team',
             'provider' => 'lemonmail',
-            'fulfilment_mode' => 'manual',
+            'fulfilment_mode' => 'auto',
             'mailboxes' => 5,
             'monthly_usd' => 19.99,
             'featured' => true,
@@ -77,7 +77,7 @@ return [
         [
             'key' => 'business',
             'provider' => 'lemonmail',
-            'fulfilment_mode' => 'manual',
+            'fulfilment_mode' => 'auto',
             'mailboxes' => 10,
             'monthly_usd' => 34.99,
             'featured' => false,
@@ -85,17 +85,9 @@ return [
         [
             'key' => 'scale',
             'provider' => 'lemonmail',
-            'fulfilment_mode' => 'manual',
+            'fulfilment_mode' => 'auto',
             'mailboxes' => 25,
             'monthly_usd' => 59.99,
-            'featured' => false,
-        ],
-        [
-            'key' => 'titan_business',
-            'provider' => 'titan',
-            'fulfilment_mode' => 'manual',
-            'mailboxes' => 5,
-            'monthly_usd' => 14.99,
             'featured' => false,
         ],
         [
@@ -124,10 +116,6 @@ return [
         [
             'key' => 'microsoft_365',
             'name' => 'Microsoft 365',
-        ],
-        [
-            'key' => 'titan',
-            'name' => 'Titan Business Email',
         ],
     ],
 

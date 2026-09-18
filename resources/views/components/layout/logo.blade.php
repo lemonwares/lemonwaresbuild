@@ -1,6 +1,10 @@
-@props(['alt' => null])
+@props([
+    'alt' => null,
+])
 
-@php $alt ??= config('site.name'); @endphp
+@php
+    $alt ??= config('site.name');
+@endphp
 
 <a href="{{ url('/') }}" {{ $attributes->class('site-logo') }}>
     <img

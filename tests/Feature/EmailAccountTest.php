@@ -484,7 +484,12 @@ class EmailAccountTest extends TestCase
             'status' => 'awaiting_manual_fulfilment',
         ]);
 
-        $this->withSession(['admin_authenticated' => true])
+        $admin = User::factory()->admin()->create();
+
+        $this->withSession([
+            'admin_authenticated' => true,
+            'admin_user_id' => $admin->id,
+        ])
             ->put(route('admin.email-orders.fulfilment', $order), [
                 'fulfilment_status' => 'completed',
                 'fulfilment_notes' => 'Accounts created in Titan.',
@@ -694,7 +699,12 @@ class EmailAccountTest extends TestCase
             'status' => 'pending',
         ]);
 
-        $this->withSession(['admin_authenticated' => true])
+        $admin = User::factory()->admin()->create();
+
+        $this->withSession([
+            'admin_authenticated' => true,
+            'admin_user_id' => $admin->id,
+        ])
             ->post(route('admin.email-orders.credentials', $order), [
                 'webmail_url' => 'https://mail.lemonwares.com',
                 'note' => 'DNS is live.',

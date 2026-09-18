@@ -25,6 +25,8 @@ class DatabaseSeeder extends Seeder
             [
                 'name' => 'Lemonwares Admin',
                 'role' => 'admin',
+                'is_super_admin' => true,
+                'admin_permissions' => null,
                 'phone' => '+234 906 732 2844',
                 'company' => 'Lemonwares Technology',
                 'password' => $adminPassword,
@@ -182,5 +184,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'amara@brightmedia.ng'],
             ['full_name' => 'Amara Okonkwo'],
         );
+
+        $this->call(CareerOpeningSeeder::class);
     }
 }

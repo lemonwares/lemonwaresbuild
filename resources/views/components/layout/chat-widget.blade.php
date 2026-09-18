@@ -1,19 +1,26 @@
-<div class="chat-widget" data-chat-widget data-whatsapp="{{ config('site.whatsapp') }}">
-
+<div
+    class="chat-widget"
+    data-chat-widget
+    data-whatsapp="{{ config('site.whatsapp') }}"
+>
     {{-- Panel --}}
-    <div class="chat-widget-panel" data-chat-panel hidden
-         role="dialog" aria-label="Chat with Lemonwares" aria-modal="true">
-
+    <div
+        class="chat-widget-panel"
+        data-chat-panel
+        hidden
+        role="dialog"
+        aria-label="Chat with Lemonwares"
+        aria-modal="true"
+    >
         {{-- Header --}}
         <div class="chat-widget-header">
             <div class="min-w-0 flex-1" data-chat-header-text>
-                <p class="text-sm font-bold" style="color:var(--color-ink);">Chat With Us</p>
-                <p class="text-xs font-light" style="color:var(--color-ink-3);">We're here to help</p>
+                <p class="text-sm font-semibold text-on-blush">Chat With Us</p>
+                <p class="truncate text-xs text-on-blush/60">We're here to help</p>
             </div>
             <button type="button" class="chat-widget-icon-btn" data-chat-back hidden aria-label="Go back">
-                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <path d="m15 18-6-6 6-6"/>
+                <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m15 18-6-6 6-6" />
                 </svg>
             </button>
             <button type="button" class="chat-widget-icon-btn" data-chat-close aria-label="Close chat">
@@ -23,24 +30,26 @@
 
         {{-- Mode picker --}}
         <div class="chat-widget-body" data-chat-picker>
-            <p class="mb-4 text-xs font-medium" style="color:var(--color-ink-3);">Choose how you'd like to reach us:</p>
-            <div class="flex flex-col gap-2.5">
+            <p class="mb-4 text-sm text-on-blush/70">Choose how you'd like to reach us:</p>
+
+            <div class="flex flex-col gap-3">
                 <button type="button" class="chat-widget-option" data-chat-mode="ai">
                     <span class="chat-widget-option-icon chat-widget-option-icon-ai">
                         <x-ui.icons.bot class="size-5" />
                     </span>
                     <span class="min-w-0 text-left">
-                        <span class="block text-sm font-bold" style="color:var(--color-ink);">AI Assistant</span>
-                        <span class="block text-xs font-light" style="color:var(--color-ink-3);">Instant answers about hosting &amp; services</span>
+                        <span class="block text-sm font-semibold text-on-blush">AI Assistant</span>
+                        <span class="block text-xs text-on-blush/60">Instant answers about hosting &amp; services</span>
                     </span>
                 </button>
+
                 <button type="button" class="chat-widget-option" data-chat-mode="representative">
                     <span class="chat-widget-option-icon chat-widget-option-icon-live">
                         <x-ui.icons.headset class="size-5" />
                     </span>
                     <span class="min-w-0 text-left">
-                        <span class="block text-sm font-bold" style="color:var(--color-ink);">Live Representative</span>
-                        <span class="block text-xs font-light" style="color:var(--color-ink-3);">Chat with our team on WhatsApp</span>
+                        <span class="block text-sm font-semibold text-on-blush">Live Representative</span>
+                        <span class="block text-xs text-on-blush/60">Chat with our team on WhatsApp</span>
                     </span>
                 </button>
             </div>
@@ -52,47 +61,59 @@
             <form class="chat-widget-form" data-chat-form>
                 <label class="sr-only" for="chat-widget-input">Your message</label>
                 <input
-                    id="chat-widget-input" type="text" name="message"
-                    placeholder="Ask about hosting, email, or development…"
+                    id="chat-widget-input"
+                    type="text"
+                    name="message"
+                    placeholder="Ask about hosting, email, web, or mobile…"
                     autocomplete="off"
-                    class="footer-input flex-1 rounded-full py-2.5 text-sm"
+                    class="footer-input !rounded-full !py-2.5 text-sm"
                 >
-                <button type="submit" class="btn btn-primary px-4 py-2.5 text-sm" aria-label="Send message">
+                <button type="submit" class="btn btn-primary !px-4 !py-2.5 text-sm" aria-label="Send message">
                     <x-ui.icons.send class="size-4" />
                 </button>
             </form>
         </div>
 
-        {{-- WhatsApp representative --}}
+        {{-- Representative --}}
         <div class="chat-widget-body" data-chat-representative hidden>
-            <div class="rounded-xl border p-5 text-center" style="border-color:var(--color-border);">
+            <div class="card-tech p-5 text-center">
                 <span class="chat-widget-option-icon chat-widget-option-icon-live mx-auto mb-4">
                     <x-ui.icons.headset class="size-6" />
                 </span>
-                <h3 class="mb-2 text-sm font-bold" style="color:var(--color-ink);">Talk to Our Team</h3>
-                <p class="mb-5 text-xs font-light leading-relaxed" style="color:var(--color-ink-3);">
-                    A Lemonwares representative will reply on WhatsApp — usually within minutes during business hours.
+                <h3 class="mb-2 text-base font-semibold text-on-blush">Talk to Our Team</h3>
+                <p class="mb-5 text-sm leading-relaxed text-on-blush/70">
+                    A Lemonwares representative will reply on WhatsApp — usually within a few minutes during business hours.
                 </p>
-                <a href="{{ config('site.whatsapp') }}" target="_blank" rel="noopener noreferrer"
-                   class="btn btn-primary w-full text-sm">
+                <a
+                    href="{{ config('site.whatsapp') }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="btn btn-primary w-full"
+                >
                     <x-ui.icons.message-circle class="size-4" />
                     <span>Continue on WhatsApp</span>
                 </a>
-                <p class="mt-4 text-xs" style="color:var(--color-ink-3);">
-                    Or call
-                    <a href="tel:{{ config('site.phone_e164') }}"
-                       class="font-semibold transition hover:underline"
-                       style="color:var(--color-red);">{{ config('site.phone') }}</a>
+                <p class="mt-4 text-xs text-on-blush/50">
+                    Or call <a href="tel:{{ config('site.phone_e164') }}" class="link">{{ config('site.phone') }}</a>
                 </p>
             </div>
         </div>
     </div>
 
-    {{-- Launcher button --}}
-    <button type="button" class="chat-widget-launcher" data-chat-toggle
-            aria-expanded="false" aria-controls="chat-widget-panel">
-        <x-ui.icons.message-circle class="size-5" />
-        <span class="chat-widget-launcher-label">Chat</span>
+    {{-- Launcher --}}
+    <button
+        type="button"
+        class="chat-widget-launcher"
+        data-chat-toggle
+        aria-expanded="false"
+        aria-controls="chat-widget-panel"
+        aria-label="Open chat"
+    >
+        <span class="chat-widget-launcher-icons" aria-hidden="true">
+            <x-ui.icons.message-circle class="size-6 chat-widget-icon-open" />
+            <x-ui.icons.x class="size-6 chat-widget-icon-close" />
+        </span>
+        <span class="chat-widget-launcher-label chat-widget-label-open">Chat</span>
+        <span class="chat-widget-launcher-label chat-widget-label-close">Close</span>
     </button>
-
 </div>

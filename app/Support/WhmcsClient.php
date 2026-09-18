@@ -63,6 +63,34 @@ class WhmcsClient
      * @param  array<string, mixed>  $payload
      * @return array<string, mixed>|null
      */
+    public static function updateClient(array $payload): ?array
+    {
+        $response = self::request('UpdateClient', $payload);
+
+        if (! $response || ($response['result'] ?? null) !== 'success') {
+            return null;
+        }
+
+        return $response;
+    }
+
+    public static function closeClient(int $clientId): bool
+    {
+        if ($clientId < 1) {
+            return false;
+        }
+
+        $response = self::request('CloseClient', [
+            'clientid' => $clientId,
+        ]);
+
+        return (bool) $response && ($response['result'] ?? null) === 'success';
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>|null
+     */
     public static function createOrder(array $payload): ?array
     {
         $response = self::request('AddOrder', $payload);
@@ -74,11 +102,11 @@ class WhmcsClient
         return $response;
     }
 
-    public static function acceptOrder(int $orderId): bool
+    public static function acceptOrder(int $orderId, bool $autoSetup = false): bool
     {
         $response = self::request('AcceptOrder', [
             'orderid' => $orderId,
-            'autosetup' => false,
+            'autosetup' => $autoSetup,
             'sendemail' => false,
         ]);
 
@@ -97,6 +125,56 @@ class WhmcsClient
         ]);
 
         return (bool) $response && ($response['result'] ?? null) === 'success';
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public static function getInvoice(int $invoiceId): ?array
+    {
+        $response = self::request('GetInvoice', [
+            'invoiceid' => $invoiceId,
+        ]);
+
+        if (! $response || ($response['result'] ?? null) !== 'success') {
+            return null;
+        }
+
+        return $response;
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public static function getInvoices(int $clientId, int $limit = 50): array
+    {
+        if ($clientId <= 0) {
+            return [];
+        }
+
+        $response = self::request('GetInvoices', [
+            'userid' => $clientId,
+            'limitnum' => $limit,
+            'limitstart' => 0,
+            'orderby' => 'date',
+            'order' => 'desc',
+        ]);
+
+        if (! $response || ($response['result'] ?? null) !== 'success') {
+            return [];
+        }
+
+        $invoices = $response['invoices']['invoice'] ?? [];
+
+        if (! is_array($invoices)) {
+            return [];
+        }
+
+        if (isset($invoices['id'])) {
+            return [$invoices];
+        }
+
+        return array_values(array_filter($invoices, 'is_array'));
     }
 
     /**

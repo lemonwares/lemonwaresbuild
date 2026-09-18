@@ -6,6 +6,7 @@ use App\Models\EmailMailbox;
 use App\Models\EmailOrder;
 use App\Notifications\EmailOrderProvisioned;
 use App\Notifications\MailboxCredentialsNotification;
+use App\Support\AccountActivityLogger;
 use App\Support\AccountNotifier;
 use App\Support\CloudflareDnsClient;
 use App\Support\CloudflareDnsException;
@@ -47,7 +48,25 @@ class AdminEmailOrderController extends Controller
 
         $orders = $ordersQuery->paginate(20)->withQueryString();
 
-        return view('admin.email-orders.index', compact('orders', 'provider', 'mode', 'fulfilmentStatus'));
+        $totalOrders = EmailOrder::count();
+        $paidOrders = EmailOrder::query()->whereIn('status', ['paid', 'provisioned', 'paid_pending_setup'])->count();
+        $pendingSetup = EmailOrder::query()->where('status', 'paid_pending_setup')->count();
+        $manualQueue = EmailOrder::query()->where('fulfilment_mode', 'manual')->whereIn('fulfilment_status', ['queued', 'in_progress'])->count();
+        $provisioned = EmailOrder::query()->where('status', 'provisioned')->count();
+        $newWeek = EmailOrder::query()->where('created_at', '>=', now()->subDays(7))->count();
+
+        return view('admin.email-orders.index', compact(
+            'orders',
+            'provider',
+            'mode',
+            'fulfilmentStatus',
+            'totalOrders',
+            'paidOrders',
+            'pendingSetup',
+            'manualQueue',
+            'provisioned',
+            'newWeek',
+        ));
     }
 
     public function show(EmailOrder $emailOrder): View
@@ -95,6 +114,16 @@ class AdminEmailOrderController extends Controller
             $emailOrder->applyPaidPeriod();
             $emailOrder->loadMissing('user');
             AccountNotifier::send($emailOrder->user, new EmailOrderProvisioned($emailOrder));
+            if ($emailOrder->user) {
+                AccountActivityLogger::log(
+                    $emailOrder->user,
+                    'email_provisioned',
+                    'Email service provisioned',
+                    'Mailemon for '.$emailOrder->domain.' was marked ready.',
+                    'admin',
+                    $emailOrder,
+                );
+            }
         }
 
         return redirect()
@@ -177,6 +206,15 @@ class AdminEmailOrderController extends Controller
             $credentialRows,
             $note,
         ));
+
+        AccountActivityLogger::log(
+            $emailOrder->user,
+            'credentials_sent',
+            'Mailbox credentials sent',
+            'Login details for '.$emailOrder->domain.' were emailed to the account.',
+            'admin',
+            $emailOrder,
+        );
 
         return redirect()
             ->route('admin.email-orders.show', $emailOrder)
@@ -316,6 +354,18 @@ class AdminEmailOrderController extends Controller
             EmailLifecycle::reactivate($emailOrder->fresh(), force: true);
         }
 
+        $emailOrder->loadMissing('user');
+        if ($emailOrder->user) {
+            AccountActivityLogger::log(
+                $emailOrder->user,
+                'email_renewed',
+                'Email service renewed',
+                'Service period for '.$emailOrder->domain.' was extended by one billing cycle.',
+                'admin',
+                $emailOrder,
+            );
+        }
+
         return redirect()
             ->route('admin.email-orders.show', $emailOrder)
             ->with('status', 'Service period extended by one billing cycle.');
@@ -328,6 +378,18 @@ class AdminEmailOrderController extends Controller
         abort_unless(! $emailOrder->isDeactivated(), 404);
 
         EmailProvisioner::provision($emailOrder);
+
+        $emailOrder->loadMissing('user');
+        if ($emailOrder->user) {
+            AccountActivityLogger::log(
+                $emailOrder->user,
+                'email_provision_run',
+                'Email provisioning ran',
+                'Provisioning was run for '.$emailOrder->domain.'.',
+                'admin',
+                $emailOrder,
+            );
+        }
 
         return redirect()
             ->route('admin.email-orders.show', $emailOrder)

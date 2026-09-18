@@ -12,10 +12,15 @@ use Illuminate\View\View;
 
 class LoginController extends Controller
 {
-    public function create(): View|RedirectResponse
+    public function create(Request $request): View|RedirectResponse
     {
         if (Auth::check()) {
             return redirect()->route('account.show');
+        }
+
+        $redirect = (string) $request->query('redirect', '');
+        if ($redirect !== '' && str_starts_with($redirect, '/') && ! str_starts_with($redirect, '//')) {
+            $request->session()->put('url.intended', url($redirect));
         }
 
         return view('auth.login');
@@ -27,6 +32,13 @@ class LoginController extends Controller
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
         ]);
+
+        if ($request->filled('redirect')) {
+            $redirect = (string) $request->input('redirect');
+            if (str_starts_with($redirect, '/') && ! str_starts_with($redirect, '//')) {
+                $request->session()->put('url.intended', url($redirect));
+            }
+        }
 
         $email = strtolower((string) $credentials['email']);
         $ip = (string) $request->ip();

@@ -1,9 +1,11 @@
-const form = document.querySelector('[data-email-checkout]');
+const form = document.querySelector('[data-email-checkout], [data-domain-checkout]');
 
 if (form) {
+    const isDomainCheckout = form.hasAttribute('data-domain-checkout');
     const domainInput = form.querySelector('[data-email-domain-input]');
     const suffixes = form.querySelectorAll('[data-email-domain-suffix]');
     const mailboxInputs = () => [...form.querySelectorAll('input[name="mailboxes[]"]')];
+    const eppInput = form.querySelector('[data-domain-epp]');
 
     if (domainInput && suffixes.length) {
         const placeholder = domainInput.dataset.domainPlaceholder ?? '@yourdomain.com';
@@ -48,8 +50,8 @@ if (form) {
     const companyInput = form.querySelector('#company');
     const phoneInput = form.querySelector('#phone');
     const countryInput = form.querySelector('#billing_country');
-    const submitButton = form.querySelector('[data-submit-button]');
-    const continueHint = form.querySelector('[data-checkout-hint]');
+    const submitButtons = [...form.querySelectorAll('[data-submit-button]')];
+    const continueHints = [...form.querySelectorAll('[data-checkout-hint]')];
     const csrfToken = form.querySelector('input[name="_token"]')?.value;
     const helpNew = form.dataset.passwordHelpNew || '';
     const helpExisting = form.dataset.passwordHelpExisting || '';
@@ -91,6 +93,14 @@ if (form) {
         }
 
         mailboxInputs().forEach((input) => {
+            input.required = visible;
+        });
+
+        if (eppInput) {
+            eppInput.required = visible;
+        }
+
+        form.querySelectorAll('[data-domain-epp]').forEach((input) => {
             input.required = visible;
         });
     };
@@ -148,6 +158,15 @@ if (form) {
     };
 
     const mailGatePassed = () => {
+        if (isDomainCheckout) {
+            const eppInputs = [...form.querySelectorAll('[data-domain-epp]')];
+            if (eppInputs.length) {
+                return eppInputs.every((input) => filled(input));
+            }
+
+            return true;
+        }
+
         if (! filled(domainInput)) {
             return false;
         }
@@ -158,19 +177,22 @@ if (form) {
     const formIsReady = () => accountGatePassed() && mailGatePassed();
 
     const syncSubmitButton = () => {
-        if (! submitButton) {
+        if (submitButtons.length === 0) {
             return;
         }
 
         const ready = formIsReady();
-        submitButton.disabled = ! ready;
-        submitButton.classList.toggle('opacity-50', ! ready);
-        submitButton.classList.toggle('cursor-not-allowed', ! ready);
-        submitButton.setAttribute('aria-disabled', ready ? 'false' : 'true');
 
-        if (continueHint) {
+        submitButtons.forEach((submitButton) => {
+            submitButton.disabled = ! ready;
+            submitButton.classList.toggle('opacity-50', ! ready);
+            submitButton.classList.toggle('cursor-not-allowed', ! ready);
+            submitButton.setAttribute('aria-disabled', ready ? 'false' : 'true');
+        });
+
+        continueHints.forEach((continueHint) => {
             continueHint.classList.toggle('hidden', ready);
-        }
+        });
     };
 
     const syncProgressiveSections = () => {
@@ -179,11 +201,12 @@ if (form) {
             setBusinessVisible(showBusiness);
 
             if (businessStepLabel) {
-                businessStepLabel.textContent = '2.';
+                businessStepLabel.textContent = businessStepLabel.classList.contains('site-checkout-step-num') ? '2' : '2.';
             }
 
             if (mailStepLabel) {
-                mailStepLabel.textContent = showBusiness ? '3.' : '2.';
+                const step = showBusiness ? 3 : 2;
+                mailStepLabel.textContent = mailStepLabel.classList.contains('site-checkout-step-num') ? String(step) : `${step}.`;
             }
 
             // Domain/mailboxes only after account (+ business when needed) is complete.

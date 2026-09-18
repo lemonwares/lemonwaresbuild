@@ -3,120 +3,236 @@
 @section('title', __('pages.contact.meta_title') . ' — ' . config('site.short_name'))
 @section('meta_description', __('pages.contact.meta_description'))
 
+@php
+    $channels = __('pages.contact.channels');
+    if (! is_array($channels)) {
+        $channels = [];
+    }
+    $steps = __('pages.contact.form_steps');
+    if (! is_array($steps)) {
+        $steps = [];
+    }
+    $topics = __('pages.contact.topics');
+    if (! is_array($topics)) {
+        $topics = [];
+    }
+@endphp
+
 @section('content')
-    <x-layout.page-hero
-        :eyebrow="__('site.pages.contact_eyebrow')"
-        :title="__('site.pages.contact_title')"
-        :lede="__('site.pages.contact_lede')"
-        cta-href="#contact-content"
-        :cta-label="__('site.pages.contact_cta')"
-    />
-
-    <section id="contact-content" class="border-t bg-white" style="border-color:var(--color-border);">
-        <div class="container-page py-16 sm:py-20">
-            <div class="grid gap-10 lg:grid-cols-2 lg:gap-16">
-
-                {{-- Left: contact channels --}}
+    <section class="hosting-product-hero">
+        <div class="domain-landing-hero-glow" aria-hidden="true"></div>
+        <div class="container-page relative z-10 py-16 sm:py-20">
+            <div class="grid items-center gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
                 <div>
-                    <p class="mb-8 body-text">{{ __('pages.contact.intro') }}</p>
-
-                    <div class="flex flex-col gap-0 divide-y" style="border-color:var(--color-border);">
-                        {{-- Email --}}
-                        <div class="flex items-start gap-4 py-5">
-                            <span class="mt-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-xl"
-                                  style="background:var(--color-red-light); color:var(--color-red);">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7"/></svg>
-                            </span>
-                            <div>
-                                <p class="text-xs font-bold uppercase tracking-[0.15em]" style="color:var(--color-ink-3);">{{ __('pages.contact.email') }}</p>
-                                <a href="mailto:{{ config('site.email') }}"
-                                   class="mt-1 block text-sm font-semibold transition hover:underline"
-                                   style="color:var(--color-red);">{{ config('site.email') }}</a>
-                            </div>
-                        </div>
-                        {{-- Phone --}}
-                        <div class="flex items-start gap-4 py-5">
-                            <span class="mt-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-xl"
-                                  style="background:var(--color-red-light); color:var(--color-red);">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.8 19.79 19.79 0 012 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92l-.08 2z"/></svg>
-                            </span>
-                            <div>
-                                <p class="text-xs font-bold uppercase tracking-[0.15em]" style="color:var(--color-ink-3);">{{ __('pages.contact.phone') }}</p>
-                                <a href="tel:{{ config('site.phone_e164') }}"
-                                   class="mt-1 block text-sm font-semibold transition hover:underline"
-                                   style="color:var(--color-red);">{{ config('site.phone') }}</a>
-                            </div>
-                        </div>
-                        {{-- WhatsApp --}}
-                        <div class="flex items-start gap-4 py-5">
-                            <span class="mt-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-xl"
-                                  style="background:var(--color-red-light); color:var(--color-red);">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-                            </span>
-                            <div>
-                                <p class="text-xs font-bold uppercase tracking-[0.15em]" style="color:var(--color-ink-3);">{{ __('pages.contact.whatsapp') }}</p>
-                                <a href="{{ config('site.whatsapp') }}" target="_blank" rel="noopener noreferrer"
-                                   class="mt-1 block text-sm font-semibold transition hover:underline"
-                                   style="color:var(--color-red);">{{ __('pages.contact.chat_whatsapp') }}</a>
-                            </div>
-                        </div>
-                        {{-- Address --}}
-                        <div class="flex items-start gap-4 py-5">
-                            <span class="mt-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-xl"
-                                  style="background:var(--color-red-light); color:var(--color-red);">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                            </span>
-                            <div>
-                                <p class="text-xs font-bold uppercase tracking-[0.15em]" style="color:var(--color-ink-3);">{{ __('pages.contact.address') }}</p>
-                                <p class="mt-1 text-sm font-light" style="color:var(--color-ink-2);">{{ config('site.address') }}</p>
-                                <a href="https://www.google.com/maps/search/?api=1&query={{ urlencode(config('site.address')) }}"
-                                   target="_blank" rel="noopener noreferrer"
-                                   class="mt-2 inline-flex items-center gap-1.5 text-xs font-bold transition hover:underline"
-                                   style="color:var(--color-red);">
-                                    {{ __('site.footer.get_directions') }}
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"/></svg>
-                                </a>
-                            </div>
-                        </div>
+                    <p class="text-xs font-semibold uppercase tracking-widest text-white/75">
+                        {{ __('pages.contact.eyebrow') }}
+                    </p>
+                    <h1 class="mt-4 max-w-2xl text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                        {{ __('pages.contact.title') }}
+                    </h1>
+                    <p class="mt-5 max-w-xl text-lg font-light text-white/90">
+                        {{ __('pages.contact.lede') }}
+                    </p>
+                    <div class="mt-8 flex flex-wrap items-center gap-3">
+                        <a href="#contact-form" class="btn bg-white text-rose hover:bg-blush">
+                            <span>{{ __('pages.contact.cta') }}</span>
+                        </a>
+                        <a href="{{ config('site.whatsapp') }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-sm font-semibold text-white/90 transition hover:text-white">
+                            <x-ui.icons.message-circle class="size-4" />
+                            {{ __('pages.contact.whatsapp') }}
+                        </a>
                     </div>
                 </div>
+                <div class="dev-cutout-hero hidden lg:flex" aria-hidden="true">
+                    <picture>
+                        <source srcset="{{ asset('images/heroes/contact.webp') }}" type="image/webp">
+                        <img
+                            src="{{ asset('images/heroes/contact.png') }}"
+                            alt=""
+                            width="480"
+                            height="480"
+                            class="dev-cutout-img is-on-rose"
+                            loading="eager"
+                            decoding="async"
+                        >
+                    </picture>
+                </div>
+            </div>
+        </div>
+    </section>
 
-                {{-- Right: contact form --}}
-                <div class="rounded-2xl border p-6 sm:p-8"
-                     style="border-color:var(--color-border); background:var(--color-surface-2);">
-                    <h2 class="mb-6 text-xl font-bold" style="color:var(--color-ink);">{{ __('pages.contact.form_title') }}</h2>
-                    <form action="#" method="post" class="flex flex-col gap-4">
+    <section class="section-band border-t border-border" data-reveal>
+        <div class="container-page py-16 sm:py-20">
+            <div class="mx-auto mb-10 max-w-2xl text-center">
+                <p class="section-label mb-3">{{ __('pages.contact.channels_eyebrow') }}</p>
+                <h2 class="heading">{{ __('pages.contact.channels_title') }}</h2>
+                <p class="lede mx-auto mt-3">{{ __('pages.contact.channels_lede') }}</p>
+            </div>
+            <div class="hosting-feature-grid" data-reveal-stagger>
+                @foreach ($channels as $channel)
+                    <article class="hosting-feature-card">
+                        <span class="dev-icon-badge mb-4" aria-hidden="true">
+                            @if (($channel['icon'] ?? '') === 'whatsapp')
+                                <x-ui.icons.message-circle class="size-5 text-rose" />
+                            @elseif (($channel['icon'] ?? '') === 'phone')
+                                <x-ui.icons.phone class="size-5 text-rose" />
+                            @elseif (($channel['icon'] ?? '') === 'map')
+                                <x-ui.icons.map-pin class="size-5 text-rose" />
+                            @else
+                                <x-ui.icons.mail class="size-5 text-rose" />
+                            @endif
+                        </span>
+                        <h3 class="text-lg font-bold text-black">{{ $channel['title'] ?? '' }}</h3>
+                        <p class="mt-2 text-sm font-light leading-relaxed text-on-blush/75">{{ $channel['body'] ?? '' }}</p>
+                        @if (! empty($channel['href']))
+                            <a href="{{ $channel['href'] }}" @if (($channel['external'] ?? false)) target="_blank" rel="noopener noreferrer" @endif class="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-rose hover:underline">
+                                <span>{{ $channel['cta'] ?? '' }}</span>
+                                <x-ui.icons.arrow-up-right class="size-3.5" />
+                            </a>
+                        @endif
+                    </article>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <section id="contact-form" class="scroll-mt-28 border-t border-border bg-blush-soft/40" data-reveal>
+        <div class="container-page py-16 sm:py-20">
+            <div class="grid gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)] lg:items-start">
+                <div>
+                    <p class="section-label mb-3">{{ __('pages.contact.form_eyebrow') }}</p>
+                    <h2 class="heading">{{ __('pages.contact.form_section_title') }}</h2>
+                    <p class="lede mt-3">{{ __('pages.contact.form_section_lede') }}</p>
+                    <ol class="mt-8 space-y-5">
+                        @foreach ($steps as $index => $step)
+                            <li class="flex gap-4">
+                                <span class="hosting-step-num shrink-0">{{ $index + 1 }}</span>
+                                <div>
+                                    <p class="text-base font-semibold text-black">{{ $step['title'] ?? '' }}</p>
+                                    <p class="mt-1 text-sm font-light leading-relaxed text-on-blush/75">{{ $step['body'] ?? '' }}</p>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ol>
+                </div>
+
+                <div class="card-tech p-6 sm:p-8">
+                    <h3 class="footer-heading mb-4">{{ __('pages.contact.form_title') }}</h3>
+
+                    @php($contactFeedback = session('contact_feedback'))
+                    @if ($contactFeedback)
+                        <p @class([
+                            'mb-4 rounded-2xl px-4 py-3 text-sm',
+                            'border border-emerald-200 bg-emerald-50 text-emerald-800' => ($contactFeedback['type'] ?? null) === 'success',
+                            'border border-rose/20 bg-rose/5 text-rose' => ($contactFeedback['type'] ?? null) === 'error',
+                        ])>{{ $contactFeedback['message'] ?? '' }}</p>
+                    @endif
+
+                    <form action="{{ route('contact.store') }}" method="post" class="flex flex-col gap-3" data-contact-form>
                         @csrf
-                        <div>
-                            <label class="auth-label">{{ __('pages.contact.full_name') }}</label>
-                            <input type="text" name="full_name"
-                                   placeholder="{{ __('pages.contact.full_name') }}"
-                                   autocomplete="name" class="auth-input bg-white">
+
+                        <div class="absolute left-[-9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+                            <label for="contact-company">Company</label>
+                            <input type="text" name="company" id="contact-company" value="" tabindex="-1" autocomplete="off">
                         </div>
-                        <div>
-                            <label class="auth-label">{{ __('pages.contact.email') }}</label>
-                            <input type="email" name="email"
-                                   placeholder="{{ __('pages.contact.email') }}"
-                                   autocomplete="email" class="auth-input bg-white">
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <input
+                                    type="text"
+                                    name="full_name"
+                                    value="{{ old('full_name', auth()->user()->name ?? '') }}"
+                                    placeholder="{{ __('pages.contact.full_name') }}"
+                                    autocomplete="name"
+                                    required
+                                    class="footer-input @error('full_name') border-rose/50 @enderror"
+                                >
+                                @error('full_name')
+                                    <p class="mt-1 text-sm text-rose">{{ $message }}</p>
+                                @enderror
+                            </div>
+                            <div>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value="{{ old('email', auth()->user()->email ?? '') }}"
+                                    placeholder="{{ __('pages.contact.email') }}"
+                                    autocomplete="email"
+                                    required
+                                    class="footer-input @error('email') border-rose/50 @enderror"
+                                >
+                                @error('email')
+                                    <p class="mt-1 text-sm text-rose">{{ $message }}</p>
+                                @enderror
+                            </div>
                         </div>
+
                         <div>
-                            <label class="auth-label">{{ __('pages.contact.subject') }}</label>
-                            <input type="text" name="subject"
-                                   placeholder="{{ __('pages.contact.subject') }}"
-                                   class="auth-input bg-white">
+                            <input
+                                type="text"
+                                name="subject"
+                                id="contact-subject"
+                                value="{{ old('subject', $prefillSubject ?? '') }}"
+                                placeholder="{{ __('pages.contact.subject') }}"
+                                required
+                                class="footer-input @error('subject') border-rose/50 @enderror"
+                            >
+                            @error('subject')
+                                <p class="mt-1 text-sm text-rose">{{ $message }}</p>
+                            @enderror
                         </div>
+
                         <div>
-                            <label class="auth-label">{{ __('pages.contact.message') }}</label>
-                            <textarea name="message" rows="5"
-                                      placeholder="{{ __('pages.contact.message') }}"
-                                      class="auth-input min-h-[8rem] resize-y bg-white"></textarea>
+                            <textarea
+                                name="message"
+                                rows="5"
+                                placeholder="{{ __('pages.contact.message') }}"
+                                required
+                                class="footer-input min-h-[8rem] resize-y @error('message') border-rose/50 @enderror"
+                            >{{ old('message') }}</textarea>
+                            @error('message')
+                                <p class="mt-1 text-sm text-rose">{{ $message }}</p>
+                            @enderror
                         </div>
-                        <button type="submit" class="btn btn-primary w-full py-3.5 text-sm">
-                            {{ __('pages.contact.send') }}
+
+                        <button type="submit" class="btn btn-primary w-fit" data-contact-button>
+                            <span class="hidden size-4 animate-spin rounded-full border-2 border-white/35 border-t-white" data-contact-spinner></span>
+                            <span data-contact-label>{{ __('pages.contact.send') }}</span>
+                            <span class="hidden" data-contact-loading>{{ __('pages.contact.sending') }}</span>
                         </button>
                     </form>
                 </div>
+            </div>
+        </div>
+    </section>
 
+    <section class="border-t border-border bg-white" data-reveal>
+        <div class="container-page py-16 sm:py-20">
+            <div class="mx-auto mb-10 max-w-2xl text-center">
+                <p class="section-label mb-3">{{ __('pages.contact.topics_eyebrow') }}</p>
+                <h2 class="heading">{{ __('pages.contact.topics_title') }}</h2>
+                <p class="lede mx-auto mt-3">{{ __('pages.contact.topics_lede') }}</p>
+            </div>
+            <ul class="check-list grid gap-3 sm:grid-cols-2">
+                @foreach ($topics as $topic)
+                    <li>{{ $topic }}</li>
+                @endforeach
+            </ul>
+        </div>
+    </section>
+
+    <section class="border-t border-border bg-blush-soft/40">
+        <div class="container-page py-14 sm:py-16">
+            <h2 class="heading mb-3">{{ __('pages.contact.help_title') }}</h2>
+            <p class="lede mb-6">{{ __('pages.contact.help_lede') }}</p>
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="{{ route('support') }}" class="btn btn-primary">
+                    <x-ui.icons.arrow-up-right class="size-4" />
+                    <span>{{ __('pages.contact.help_cta') }}</span>
+                </a>
+                <a href="{{ config('site.whatsapp') }}" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">
+                    <span>{{ __('pages.contact.whatsapp') }}</span>
+                </a>
             </div>
         </div>
     </section>

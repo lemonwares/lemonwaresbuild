@@ -4,20 +4,13 @@
 @section('meta_description', __('account.register_lede'))
 
 @section('content')
-    {{-- Heading --}}
-    <div class="mb-8">
-        <p class="section-label mb-3">{{ __('account.auth_area') }}</p>
-        <h1 class="text-3xl font-bold tracking-tight" style="color:var(--color-ink);">
-            {{ __('account.register_title') }}
-        </h1>
-        <p class="mt-2 text-sm font-light" style="color:var(--color-ink-3);">
-            {{ __('account.register_lede') }}
-        </p>
+    <div class="auth-heading">
+        <h1 class="font-bold tracking-tight text-black">{{ __('account.register_title') }}</h1>
+        <p class="font-light text-on-blush/65">{{ __('account.register_lede') }}</p>
     </div>
 
-    {{-- Error --}}
     @if ($errors->any())
-        <div class="auth-error mb-6" role="alert">
+        <div class="auth-error" role="alert">
             <svg xmlns="http://www.w3.org/2000/svg" class="mt-0.5 size-4 shrink-0" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                  stroke-linejoin="round" aria-hidden="true">
@@ -28,8 +21,7 @@
         </div>
     @endif
 
-    {{-- Form --}}
-    <form method="POST" action="{{ route('register.store') }}" class="space-y-5">
+    <form method="POST" action="{{ route('register.store') }}" class="auth-form-fields" data-submit-form>
         @csrf
 
         <div>
@@ -38,7 +30,7 @@
                 id="name" name="name" type="text"
                 value="{{ old('name', $prefillName ?? '') }}"
                 required autocomplete="name"
-                class="auth-input @error('name') border-red @enderror"
+                class="auth-input @error('name') border-rose/50 @enderror"
                 placeholder="Jane Smith"
             >
         </div>
@@ -49,7 +41,7 @@
                 id="email" name="email" type="email"
                 value="{{ old('email', $prefillEmail ?? '') }}"
                 required autocomplete="email"
-                class="auth-input @error('email') border-red @enderror"
+                class="auth-input @error('email') border-rose/50 @enderror"
                 placeholder="you@company.com"
             >
         </div>
@@ -59,7 +51,7 @@
             <input
                 id="password" name="password" type="password"
                 required autocomplete="new-password"
-                class="auth-input @error('password') border-red @enderror"
+                class="auth-input @error('password') border-rose/50 @enderror"
                 placeholder="••••••••"
             >
         </div>
@@ -74,22 +66,18 @@
             >
         </div>
 
-        <div class="pt-1">
-            <button type="submit" class="btn btn-primary w-full py-3.5 text-sm">
-                {{ __('account.create_account') }}
-            </button>
-        </div>
+        <x-ui.submit-button
+            :label="__('account.create_account')"
+            :loading="__('account.processing')"
+            class="btn btn-primary auth-submit"
+        />
     </form>
 
-    {{-- Divider --}}
     <div class="auth-divider"></div>
 
-    {{-- Footer link --}}
-    <p class="text-center text-sm" style="color:var(--color-ink-3);">
+    <p class="text-center text-sm text-on-blush/60">
         {{ __('account.has_account') }}
-        <a href="{{ route('login') }}"
-           class="ml-1 font-bold transition hover:underline"
-           style="color:var(--color-ink);">
+        <a href="{{ route('login') }}" class="ml-1 font-bold text-black transition hover:text-rose">
             {{ __('account.sign_in') }}
         </a>
     </p>

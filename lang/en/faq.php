@@ -9,22 +9,32 @@ return [
     'cta' => 'Browse Questions',
     'home_label' => 'FAQ',
     'home_title' => 'Questions Clients Ask Before Getting Started',
-    'home_lede' => 'A few quick answers — explore the full FAQ if you need more detail.',
+    'home_lede' => 'Quick answers while you browse — open any question, or view the full FAQ for more detail.',
     'view_all' => 'View all FAQs',
     'still_title' => 'Still have a question?',
     'still_lede' => 'Tell us what you need and we will point you in the right direction.',
     'still_cta' => 'Contact Us',
-    'email_cta' => 'View Lemon Mail plans',
+    'email_cta' => 'View Mailemon plans',
     'items' => [
         [
-            'question' => 'What hosting plans do you offer?',
-            'answer' => 'We offer cPanel and Plesk shared cloud hosting for everyday websites, plus VPS root servers when you need more power, control, and room to grow.',
+            'question' => 'What is Mailemon?',
+            'answer' => 'Mailemon is Lemonwares business email on your domain — order online, pay securely, and we provision branded mailboxes with webmail, Outlook, and phone apps.',
+            'href' => 'email.plans',
+            'cta' => 'View Mailemon plans',
         ],
         [
             'question' => 'Can you set up business email on my domain?',
-            'answer' => 'Yes. Order Lemon Mail on your domain from this site — we create the mailboxes and give you the DNS records. Microsoft 365, Google Workspace, and Titan are available on request if you need a full productivity suite.',
+            'answer' => 'Yes. Order Mailemon on your domain from this site — we create the mailboxes and give you the DNS records. Microsoft 365 and Google Workspace are available on request if you need a full productivity suite.',
             'href' => 'email.plans',
-            'cta' => 'Order Lemon Mail',
+            'cta' => 'Order Mailemon',
+        ],
+        [
+            'question' => 'How long does Mailemon setup take?',
+            'answer' => 'After payment we provision mailboxes quickly. Mail starts flowing once you add the DNS records we provide — often within minutes to a few hours depending on your DNS host.',
+        ],
+        [
+            'question' => 'What hosting plans do you offer?',
+            'answer' => 'We offer cPanel and Plesk shared cloud hosting for everyday websites, plus VPS root servers when you need more power, control, and room to grow.',
         ],
         [
             'question' => 'Do you build WordPress sites and custom apps?',
@@ -36,7 +46,7 @@ return [
         ],
         [
             'question' => 'What billing cycles are available?',
-            'answer' => 'Hosting can be billed monthly, every 2 months, quarterly, or annually. Longer cycles usually include better pricing. Exact totals are shown before you confirm your order.',
+            'answer' => 'Hosting and email can be billed monthly, every 2 months, quarterly, or annually. Longer cycles usually include better pricing. Exact totals are shown before you confirm your order.',
         ],
         [
             'question' => 'How do I get support after I go live?',

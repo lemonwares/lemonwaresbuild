@@ -1,38 +1,68 @@
 @extends('layouts.admin')
 
 @section('title', 'Subscribers — ' . config('site.short_name'))
+@section('hide_auto_breadcrumbs', true)
 
 @section('content')
-    <div class="mb-8">
-        <p class="section-label mb-3">CRM</p>
-        <h1 class="heading">Newsletter subscribers</h1>
-        <p class="lede mt-3">People who joined from the site footer.</p>
-    </div>
+    <x-admin.page-header
+        title="Newsletter subscribers"
+        lede="People who joined from the site footer."
+        :back-href="route('admin.dashboard')"
+        back-label="Go back"
+        :breadcrumbs="[['label' => 'Subscribers']]"
+        class="mb-5"
+    />
 
-    <div class="overflow-x-auto rounded-3xl border border-border bg-white">
-        <table class="min-w-full text-left text-sm">
-            <thead class="border-b border-border text-xs uppercase tracking-widest text-on-blush/50">
-                <tr>
-                    <th class="px-4 py-3">Name</th>
-                    <th class="px-4 py-3">Email</th>
-                    <th class="px-4 py-3">Joined</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse ($subscribers as $subscriber)
-                    <tr class="border-b border-border last:border-0">
-                        <td class="px-4 py-3 font-semibold">{{ $subscriber->full_name }}</td>
-                        <td class="px-4 py-3">{{ $subscriber->email }}</td>
-                        <td class="px-4 py-3">{{ $subscriber->created_at?->format('d M Y') }}</td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="3" class="px-4 py-8 text-on-blush/60">No subscribers yet.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+    <div class="admin-page-stack">
+        <section class="admin-dash-metrics admin-customers-metrics" aria-label="Subscriber metrics">
+            <div class="admin-metric is-static">
+                <span class="admin-metric-label">Total</span>
+                <span class="admin-metric-value">{{ method_exists($subscribers, 'total') ? $subscribers->total() : $subscribers->count() }}</span>
+                <span class="admin-metric-meta">All subscribers</span>
+            </div>
+            <div class="admin-metric is-static">
+                <span class="admin-metric-label">On this page</span>
+                <span class="admin-metric-value">{{ $subscribers->count() }}</span>
+                <span class="admin-metric-meta">Current results</span>
+            </div>
+        </section>
 
-    <div class="mt-6">{{ $subscribers->links() }}</div>
+        <section class="admin-panel admin-panel-flush" aria-label="Subscribers">
+            <div class="admin-panel-toolbar">
+                <div>
+                    <h2 class="admin-dash-panel-title">Subscribers</h2>
+                    <p class="admin-dash-panel-lede">Latest newsletter signups.</p>
+                </div>
+            </div>
+
+            <div class="admin-table-wrap is-full">
+                <table class="admin-table is-full">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Joined</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($subscribers as $subscriber)
+                            <tr>
+                                <td><strong>{{ $subscriber->full_name }}</strong></td>
+                                <td><a href="mailto:{{ $subscriber->email }}">{{ $subscriber->email }}</a></td>
+                                <td>{{ $subscriber->created_at?->format('d M Y') }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="3" class="admin-table-empty">No subscribers yet.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            @if (method_exists($subscribers, 'hasPages') && $subscribers->hasPages())
+                <div class="admin-pagination">{{ $subscribers->links() }}</div>
+            @endif
+        </section>
+    </div>
 @endsection

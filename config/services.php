@@ -49,10 +49,17 @@ return [
         'secret_hash' => env('FLW_SECRET_HASH'),
     ],
 
+    'mxroute' => [
+        'token' => env('MXROUTE_API_TOKEN', env('TREKMAIL_API_TOKEN')),
+        'base_url' => rtrim(env('MXROUTE_BASE_URL', env('TREKMAIL_BASE_URL', 'https://trekmail.net/api/v1')), '/'),
+        'webmail_url' => env('MXROUTE_WEBMAIL_URL', env('TREKMAIL_WEBMAIL_URL', 'https://mail.trekmail.net')),
+    ],
+
+    // Prefer trekmail — mxroute keys remain as optional aliases.
     'trekmail' => [
-        'token' => env('TREKMAIL_API_TOKEN'),
-        'base_url' => rtrim(env('TREKMAIL_BASE_URL', 'https://trekmail.net/api/v1'), '/'),
-        'webmail_url' => env('TREKMAIL_WEBMAIL_URL', 'https://trekmail.net/webmail'),
+        'token' => env('TREKMAIL_API_TOKEN', env('MXROUTE_API_TOKEN')),
+        'base_url' => rtrim(env('TREKMAIL_BASE_URL', env('MXROUTE_BASE_URL', 'https://trekmail.net/api/v1')), '/'),
+        'webmail_url' => env('TREKMAIL_WEBMAIL_URL', env('MXROUTE_WEBMAIL_URL', 'https://mail.trekmail.net')),
     ],
 
     'cloudflare' => [

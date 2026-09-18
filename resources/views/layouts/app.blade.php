@@ -4,8 +4,40 @@
         @php
             $seoTitle = trim($__env->yieldContent('title', config('site.short_name')));
             $seoDescription = trim($__env->yieldContent('meta_description', 'Lemonwares delivers reliable hosting, business email, and web & mobile development for growing businesses.'));
-            $seoImage = asset('lemonwareslogo.webp');
+            $seoImage = trim($__env->yieldContent('meta_image', asset('lemonwareslogo.webp')));
             $seoUrl = url()->current();
+            $seoJsonLd = [
+                '@context' => 'https://schema.org',
+                '@graph' => [
+                    [
+                        '@type' => 'Organization',
+                        '@id' => rtrim((string) config('site.url'), '/').'/#organization',
+                        'name' => config('site.name'),
+                        'url' => config('site.url'),
+                        'logo' => asset('lemonwareslogo.webp'),
+                    ],
+                    [
+                        '@type' => 'WebSite',
+                        '@id' => rtrim((string) config('site.url'), '/').'/#website',
+                        'url' => config('site.url'),
+                        'name' => config('site.short_name'),
+                        'publisher' => ['@id' => rtrim((string) config('site.url'), '/').'/#organization'],
+                        'inLanguage' => str_replace('_', '-', app()->getLocale()),
+                    ],
+                    [
+                        '@type' => 'WebPage',
+                        '@id' => $seoUrl.'#webpage',
+                        'url' => $seoUrl,
+                        'name' => $seoTitle,
+                        'description' => $seoDescription,
+                        'isPartOf' => ['@id' => rtrim((string) config('site.url'), '/').'/#website'],
+                        'primaryImageOfPage' => [
+                            '@type' => 'ImageObject',
+                            'url' => $seoImage,
+                        ],
+                    ],
+                ],
+            ];
         @endphp
 
         <meta charset="utf-8">
@@ -13,11 +45,12 @@
         <title>{{ $seoTitle }}</title>
 
         <meta name="description" content="{{ $seoDescription }}">
-        <meta name="robots" content="index,follow">
+        <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
         <link rel="canonical" href="{{ $seoUrl }}">
 
         <meta property="og:type" content="website">
         <meta property="og:site_name" content="{{ config('site.name') }}">
+        <meta property="og:locale" content="{{ str_replace('-', '_', str_replace('_', '-', app()->getLocale())) }}">
         <meta property="og:title" content="{{ $seoTitle }}">
         <meta property="og:description" content="{{ $seoDescription }}">
         <meta property="og:url" content="{{ $seoUrl }}">
@@ -30,6 +63,22 @@
 
         <link rel="icon" type="image/webp" href="{{ asset('lemonwareslogo.webp') }}">
         <link rel="apple-touch-icon" href="{{ asset('lemonwareslogo.webp') }}">
+
+        <script>
+            (function () {
+                try {
+                    var theme = localStorage.getItem('lemonwares.theme');
+                    if (theme !== 'dark' && theme !== 'light') {
+                        theme = 'light';
+                    }
+                    document.documentElement.setAttribute('data-theme', theme);
+                } catch (e) {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                }
+            })();
+        </script>
+
+        <script type="application/ld+json">{!! json_encode($seoJsonLd, JSON_UNESCAPED_SLASHES|JSON_UNESCAPED_UNICODE) !!}</script>
 
         @fonts
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -68,6 +117,26 @@
                         input.setAttribute('aria-disabled', 'true');
                         input.classList.add('opacity-80');
                     });
+
+                    if (button) {
+                        button.setAttribute('disabled', 'disabled');
+                        button.classList.add('opacity-80', 'cursor-not-allowed');
+                    }
+
+                    if (spinner) spinner.classList.remove('hidden');
+                    if (label) label.classList.add('hidden');
+                    if (loading) loading.classList.remove('hidden');
+                });
+            }
+
+            const contactForm = document.querySelector('[data-contact-form]');
+
+            if (contactForm) {
+                contactForm.addEventListener('submit', () => {
+                    const button = contactForm.querySelector('[data-contact-button]');
+                    const spinner = contactForm.querySelector('[data-contact-spinner]');
+                    const label = contactForm.querySelector('[data-contact-label]');
+                    const loading = contactForm.querySelector('[data-contact-loading]');
 
                     if (button) {
                         button.setAttribute('disabled', 'disabled');

@@ -52,5 +52,8 @@ class WhmcsDomainPricingTest extends TestCase
         $this->assertSame('francisuzoigwe.com', $quote['domain']);
         $this->assertGreaterThan(0, $quote['amount_ngn']);
         $this->assertGreaterThan(0, $quote['amount_usd']);
+        $this->assertStringStartsWith('₦', (string) $quote['display']);
+        $this->assertStringNotContainsString('$', (string) $quote['display']);
+        $this->assertNotEmpty($quote['checkout_url']);
     }
 }

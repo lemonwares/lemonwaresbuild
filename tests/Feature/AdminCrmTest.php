@@ -44,7 +44,7 @@ class AdminCrmTest extends TestCase
 
         $this->get(route('admin.dashboard'))
             ->assertOk()
-            ->assertSee('Staff CRM', false)
+            ->assertSee('Overview', false)
             ->assertSee('Amara Okonkwo', false);
 
         $customer = User::query()->where('email', 'amara@brightmedia.ng')->firstOrFail();
@@ -179,8 +179,14 @@ class AdminCrmTest extends TestCase
     {
         $this->seed(DatabaseSeeder::class);
 
+        config([
+            'site.whmcs.base_url' => 'https://billing.example.test',
+            'site.whmcs.api_identifier' => 'identifier',
+            'site.whmcs.api_secret' => 'secret',
+        ]);
+
         Http::fake([
-            'https://my.lemonwares.com/includes/api.php' => Http::sequence()
+            'https://billing.example.test/includes/api.php' => Http::sequence()
                 ->push([
                     'result' => 'success',
                     'totalresults' => 1,
@@ -232,5 +238,116 @@ class AdminCrmTest extends TestCase
             ->assertOk()
             ->assertSee('Legacy Customer', false)
             ->assertSee('legacy.ng', false);
+    }
+
+    public function test_admin_can_update_customer_and_sync_whmcs(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        config([
+            'site.whmcs.base_url' => 'https://billing.example.test',
+            'site.whmcs.api_identifier' => 'identifier',
+            'site.whmcs.api_secret' => 'secret',
+        ]);
+
+        Http::fake([
+            'https://billing.example.test/includes/api.php' => Http::response([
+                'result' => 'success',
+                'clientid' => 42,
+            ], 200),
+        ]);
+
+        $customer = User::query()->where('email', 'amara@brightmedia.ng')->firstOrFail();
+
+        WhmcsCustomer::query()->create([
+            'user_id' => $customer->id,
+            'whmcs_client_id' => 42,
+            'full_name' => $customer->name,
+            'email' => $customer->email,
+            'status' => 'Active',
+        ]);
+
+        $this->post(route('admin.login.submit'), [
+            'email' => 'admin@example.com',
+            'password' => 'password',
+        ])->assertRedirect(route('admin.dashboard'));
+
+        $this->put(route('admin.customers.update', $customer), [
+            'name' => 'Amara Updated',
+            'email' => 'amara@brightmedia.ng',
+            'phone' => '+2348011111111',
+            'company' => 'Bright Media Ltd',
+            'job_title' => 'Founder',
+            'trading_name' => 'Bright',
+            'website' => 'https://brightmedia.ng',
+            'industry' => 'advertising',
+            'tax_id' => '',
+            'registration_number' => '',
+            'billing_address_line_1' => '14 Admiralty Way',
+            'billing_address_line_2' => '',
+            'billing_city' => 'Lagos',
+            'billing_state' => 'LA',
+            'billing_postcode' => '100001',
+            'billing_country' => 'NG',
+            'sync_whmcs' => '1',
+        ])->assertRedirect(route('admin.customers.show', $customer));
+
+        $this->assertDatabaseHas('users', [
+            'id' => $customer->id,
+            'name' => 'Amara Updated',
+            'company' => 'Bright Media Ltd',
+        ]);
+
+        Http::assertSent(function ($request) {
+            return str_contains($request->url(), '/includes/api.php')
+                && $request['action'] === 'UpdateClient'
+                && (int) $request['clientid'] === 42
+                && $request['firstname'] === 'Amara'
+                && $request['lastname'] === 'Updated';
+        });
+    }
+
+    public function test_admin_can_delete_customer_and_close_whmcs_client(): void
+    {
+        $this->seed(DatabaseSeeder::class);
+
+        config([
+            'site.whmcs.base_url' => 'https://billing.example.test',
+            'site.whmcs.api_identifier' => 'identifier',
+            'site.whmcs.api_secret' => 'secret',
+        ]);
+
+        Http::fake([
+            'https://billing.example.test/includes/api.php' => Http::response([
+                'result' => 'success',
+            ], 200),
+        ]);
+
+        $customer = User::query()->where('email', 'amara@brightmedia.ng')->firstOrFail();
+
+        WhmcsCustomer::query()->create([
+            'user_id' => $customer->id,
+            'whmcs_client_id' => 42,
+            'full_name' => $customer->name,
+            'email' => $customer->email,
+            'status' => 'Active',
+        ]);
+
+        $this->post(route('admin.login.submit'), [
+            'email' => 'admin@example.com',
+            'password' => 'password',
+        ])->assertRedirect(route('admin.dashboard'));
+
+        $this->delete(route('admin.customers.destroy', $customer))
+            ->assertRedirect(route('admin.customers.index', ['source' => 'native']));
+
+        $this->assertDatabaseMissing('users', ['id' => $customer->id]);
+        $this->assertDatabaseMissing('whmcs_customers', ['whmcs_client_id' => 42]);
+
+        Http::assertSent(function ($request) {
+            return str_contains($request->url(), '/includes/api.php')
+                && $request['action'] === 'CloseClient'
+                && (int) $request['clientid'] === 42;
+        });
     }
 }

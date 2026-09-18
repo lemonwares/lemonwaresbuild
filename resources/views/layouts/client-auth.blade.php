@@ -16,126 +16,92 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-{{--
-    Full-viewport split:
-    • Left  — ink/black brand panel (hidden below lg)
-    • Right — white form panel (full-width on mobile)
---}}
 <body class="auth-body">
-
     <div class="auth-shell">
+        <aside class="auth-brand-panel bg-rose" aria-hidden="true" style="background-color:#c51a13;">
+            <div class="domain-landing-hero-glow" aria-hidden="true"></div>
+            <div class="auth-brand-orb auth-brand-orb-a" aria-hidden="true"></div>
+            <div class="auth-brand-orb auth-brand-orb-b" aria-hidden="true"></div>
 
-        {{-- ══════════════════════════════════════
-             LEFT BRAND PANEL — desktop only
-        ══════════════════════════════════════ --}}
-        <aside class="auth-brand-panel" aria-hidden="true">
-
-            {{-- Red top stripe --}}
-            <div class="absolute inset-x-0 top-0 h-[2px]"
-                 style="background:var(--color-red);"></div>
-
-            {{-- Subtle dot grid --}}
-            <div class="pointer-events-none absolute inset-0 opacity-[0.04]"
-                 style="background-image:radial-gradient(circle,#fff 1px,transparent 1px);
-                        background-size:28px 28px;"></div>
-
-            {{-- Soft red glow --}}
-            <div class="pointer-events-none absolute -left-20 -top-20 size-[28rem] rounded-full blur-[100px]"
-                 style="background:rgba(220,38,38,0.18);"></div>
-
-            <div class="relative z-10 flex h-full flex-col justify-between p-10 xl:p-14">
-
-                {{-- Logo --}}
-                <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
-                    <img src="{{ asset('lemonwareslogo.webp') }}"
-                         alt="{{ config('site.name') }}"
-                         class="h-9 w-auto brightness-0 invert"
-                         width="220" height="56">
+            <div class="relative z-10 flex h-full flex-col justify-between p-8 xl:p-12">
+                <a href="{{ route('home') }}" class="inline-flex">
+                    <img
+                        src="{{ asset('lemonwareslogo.webp') }}"
+                        alt="{{ config('site.name') }}"
+                        class="auth-brand-logo brightness-0 invert"
+                        width="420"
+                        height="110"
+                    >
                 </a>
 
-                {{-- Middle: tagline + quote --}}
-                <div>
-                    <p class="mb-6 text-[2.6rem] font-bold leading-[1.1] tracking-tight text-white xl:text-5xl">
-                        Your business,<br>
-                        <span style="color:var(--color-red);">always online.</span>
+                <div class="max-w-md">
+                    <p class="text-xs font-semibold uppercase tracking-widest text-white/70">
+                        {{ __('account.client_area') }}
                     </p>
-                    <p class="max-w-xs text-sm font-light leading-relaxed"
-                       style="color:rgba(255,255,255,0.45);">
-                        {{ __('account.account_lede') }}
+                    <p class="auth-brand-title mt-4 text-[2.1rem] text-white xl:text-[2.65rem]" style="font-family: Syne, ui-sans-serif, system-ui, sans-serif; color: #fff;">
+                        {{ __('account.auth_brand_title') }}
                     </p>
+                    <p class="mt-4 max-w-sm text-sm font-light leading-relaxed text-white/85">
+                        {{ __('account.auth_brand_lede') }}
+                    </p>
+
+                    <ul class="mt-6 space-y-2.5">
+                        @foreach ((array) __('account.auth_brand_points') as $point)
+                            @continue(! is_string($point) || $point === '')
+                            <li class="flex items-start gap-3 text-sm font-medium text-white/90">
+                                <span class="mt-1.5 size-1.5 shrink-0 rounded-full bg-white" aria-hidden="true"></span>
+                                <span>{{ $point }}</span>
+                            </li>
+                        @endforeach
+                    </ul>
                 </div>
 
-                {{-- Bottom: trust strip --}}
-                <div class="flex flex-col gap-4">
-                    <div class="h-px w-full" style="background:rgba(255,255,255,0.08);"></div>
-                    <div class="flex flex-wrap items-center gap-6">
-                        <div class="flex items-center gap-2">
-                            <span class="text-2xl font-bold text-white">99%</span>
-                            <span class="text-xs font-medium" style="color:rgba(255,255,255,0.4);">
-                                Uptime focus
-                            </span>
+                <div>
+                    <div class="h-px w-full bg-white/15"></div>
+                    <div class="mt-4 flex flex-wrap gap-x-8 gap-y-3">
+                        <div>
+                            <p class="text-xl font-bold text-white">99%</p>
+                            <p class="text-xs font-medium text-white/60">{{ __('account.auth_stat_uptime') }}</p>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-2xl font-bold text-white">0</span>
-                            <span class="text-xs font-medium" style="color:rgba(255,255,255,0.4);">
-                                Data-loss incidents
-                            </span>
+                        <div>
+                            <p class="text-xl font-bold text-white">{{ config('site.years_experience') }}+</p>
+                            <p class="text-xs font-medium text-white/60">{{ __('account.auth_stat_years') }}</p>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="text-2xl font-bold text-white">{{ config('site.years_experience') }}+</span>
-                            <span class="text-xs font-medium" style="color:rgba(255,255,255,0.4);">
-                                Years experience
-                            </span>
+                        <div>
+                            <p class="text-xl font-bold text-white">24/7</p>
+                            <p class="text-xs font-medium text-white/60">{{ __('account.auth_stat_support') }}</p>
                         </div>
                     </div>
                 </div>
-
             </div>
         </aside>
 
-        {{-- ══════════════════════════════════════
-             RIGHT FORM PANEL
-        ══════════════════════════════════════ --}}
         <main class="auth-form-panel">
-
-            {{-- Top bar: mobile logo + locale + back link --}}
-            <div class="flex items-center justify-between border-b px-6 py-4
-                        sm:px-8 lg:px-10"
-                 style="border-color:var(--color-border);">
-
-                {{-- Mobile logo (hidden on desktop where brand panel shows) --}}
+            <div class="auth-topbar">
                 <a href="{{ route('home') }}" class="lg:hidden">
-                    <img src="{{ asset('lemonwareslogo.webp') }}"
-                         alt="{{ config('site.name') }}"
-                         class="h-8 w-auto"
-                         width="220" height="56">
+                    <img
+                        src="{{ asset('lemonwareslogo.webp') }}"
+                        alt="{{ config('site.name') }}"
+                        class="h-12 w-auto sm:h-14"
+                        width="280"
+                        height="74"
+                    >
                 </a>
 
-                {{-- Desktop: just a small label --}}
-                <p class="hidden text-xs font-bold uppercase tracking-[0.18em] lg:block"
-                   style="color:var(--color-ink-3);">
-                    {{ __('account.auth_area') }}
-                </p>
-
-                <div class="flex items-center gap-3">
+                <div class="ml-auto flex items-center gap-3 lg:ml-0 lg:w-full lg:justify-between">
                     <x-layout.locale-switcher />
-                    <a href="{{ route('home') }}"
-                       class="hidden text-xs font-semibold transition hover:text-red sm:inline"
-                       style="color:var(--color-ink-3);">
+                    <a href="{{ route('home') }}" class="hidden text-xs font-semibold text-on-blush/55 transition hover:text-rose sm:inline">
                         ← {{ __('account.nav_website') }}
                     </a>
                 </div>
             </div>
 
-            {{-- Form area — vertically centred --}}
             <div class="auth-form-scroll">
-                <div class="auth-form-inner">
+                <div class="auth-form-card">
                     @yield('content')
                 </div>
             </div>
-
         </main>
     </div>
-
 </body>
 </html>

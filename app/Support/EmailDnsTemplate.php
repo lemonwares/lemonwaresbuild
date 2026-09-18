@@ -18,7 +18,7 @@ class EmailDnsTemplate
                 [
                     'type' => 'MX',
                     'name' => '@',
-                    'value' => 'mail.trekmail.net',
+                    'value' => 'mx.trekmail.net',
                     'priority' => 10,
                 ],
                 [
@@ -30,7 +30,7 @@ class EmailDnsTemplate
                 [
                     'type' => 'TXT',
                     'name' => '_dmarc',
-                    'value' => 'v=DMARC1; p=none;',
+                    'value' => 'v=DMARC1; p=none; sp=none; adkim=r; aspf=r;',
                     'priority' => null,
                 ],
             ];

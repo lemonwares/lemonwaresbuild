@@ -9,7 +9,10 @@ export default defineConfig({
             input: ["resources/css/app.css", "resources/js/app.js"],
             refresh: true,
             fonts: [
-                google("Space Grotesk", {
+                google("Syne", {
+                    weights: [500, 600, 700, 800],
+                }),
+                google("Inter", {
                     weights: [300, 400, 500, 600, 700],
                 }),
             ],

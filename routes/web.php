@@ -1,7 +1,13 @@
 <?php
 
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\AccountActivityController;
+use App\Http\Controllers\AccountDomainController;
+use App\Http\Controllers\AccountInvoiceController;
 use App\Http\Controllers\AccountNotificationController;
+use App\Http\Controllers\AccountProductController;
+use App\Http\Controllers\AccountStaffController;
+use App\Http\Controllers\AccountSubscriptionController;
 use App\Http\Controllers\AdminEmailCatalogController;
 use App\Http\Controllers\AdminEmailProviderSettingsController;
 use App\Http\Controllers\AdminAuthController;
@@ -13,9 +19,25 @@ use App\Http\Controllers\AdminHostingPriceController;
 use App\Http\Controllers\AdminFlutterwaveSettingsController;
 use App\Http\Controllers\AdminZeptoMailSettingsController;
 use App\Http\Controllers\AdminCloudflareSettingsController;
+use App\Http\Controllers\AdminSearchController;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\SupportController;
+use App\Http\Controllers\AdminSupportTicketController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\DomainCartController;
+use App\Http\Controllers\DomainOrderController;
 use App\Http\Controllers\AdminWhmcsSettingsController;
 use App\Http\Controllers\AdminSubscriberController;
+use App\Http\Controllers\AdminCareerOpeningController;
 use App\Http\Controllers\AdminTeamMemberController;
+use App\Http\Controllers\AdminStaffController;
+use App\Http\Controllers\AdminBlogPostController;
+use App\Http\Controllers\AdminProjectController;
+use App\Http\Controllers\AdminNewsletterCampaignController;
+use App\Http\Controllers\BlogController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\CareerController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -47,8 +69,176 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
+Route::get('/sitemap.xml', function () {
+    $urls = collect([
+        ['loc' => route('home'), 'changefreq' => 'weekly', 'priority' => '1.0'],
+        ['loc' => route('email.plans'), 'changefreq' => 'weekly', 'priority' => '0.95'],
+        ['loc' => route('cloud-hosting'), 'changefreq' => 'weekly', 'priority' => '0.9'],
+        ['loc' => route('plesk'), 'changefreq' => 'weekly', 'priority' => '0.85'],
+        ['loc' => route('vps'), 'changefreq' => 'weekly', 'priority' => '0.85'],
+        ['loc' => route('domain'), 'changefreq' => 'weekly', 'priority' => '0.9'],
+        ['loc' => route('development'), 'changefreq' => 'monthly', 'priority' => '0.8'],
+        ['loc' => route('google-workspace'), 'changefreq' => 'monthly', 'priority' => '0.75'],
+        ['loc' => route('microsoft-365'), 'changefreq' => 'monthly', 'priority' => '0.75'],
+        ['loc' => route('about'), 'changefreq' => 'monthly', 'priority' => '0.6'],
+        ['loc' => route('team'), 'changefreq' => 'monthly', 'priority' => '0.55'],
+        ['loc' => route('careers'), 'changefreq' => 'weekly', 'priority' => '0.55'],
+        ['loc' => route('contact'), 'changefreq' => 'monthly', 'priority' => '0.7'],
+        ['loc' => route('support'), 'changefreq' => 'monthly', 'priority' => '0.7'],
+        ['loc' => route('faq'), 'changefreq' => 'monthly', 'priority' => '0.65'],
+        ['loc' => route('blog'), 'changefreq' => 'weekly', 'priority' => '0.6'],
+        ['loc' => route('projects'), 'changefreq' => 'monthly', 'priority' => '0.55'],
+        ['loc' => route('case-studies'), 'changefreq' => 'monthly', 'priority' => '0.55'],
+        ['loc' => route('microservices'), 'changefreq' => 'monthly', 'priority' => '0.55'],
+        ['loc' => route('web-development'), 'changefreq' => 'monthly', 'priority' => '0.55'],
+        ['loc' => route('mobile-apps'), 'changefreq' => 'monthly', 'priority' => '0.55'],
+        ['loc' => route('terms'), 'changefreq' => 'yearly', 'priority' => '0.3'],
+        ['loc' => route('privacy-policy'), 'changefreq' => 'yearly', 'priority' => '0.3'],
+    ])->map(function (array $url) {
+        $url['lastmod'] = now()->toAtomString();
+
+        return $url;
+    });
+
+    return response()
+        ->view('sitemap', ['urls' => $urls])
+        ->header('Content-Type', 'application/xml; charset=UTF-8');
+})->name('sitemap');
+
 Route::view('/about', 'pages.about')->name('about');
-Route::view('/contact', 'pages.contact')->name('contact');
+Route::get('/blog', [BlogController::class, 'index'])->name('blog');
+Route::get('/blog/{blogPost}', [BlogController::class, 'show'])->name('blog.show');
+Route::get('/projects', [ProjectController::class, 'index'])->name('projects');
+Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+Route::get('/careers', [CareerController::class, 'index'])->name('careers');
+Route::get('/careers/{careerOpening}', [CareerController::class, 'show'])->name('careers.show');
+Route::view('/domain', 'pages.domain')->name('domain');
+Route::get('/cart', [CartController::class, 'show'])->name('cart');
+Route::post('/cart/domain', [CartController::class, 'addDomain'])->middleware('throttle:30,1')->name('cart.domain.add');
+Route::get('/cart/domain/add', [CartController::class, 'addDomainRedirect'])->middleware('throttle:30,1')->name('cart.domain.add-redirect');
+Route::post('/cart/email', [CartController::class, 'addEmail'])->middleware('throttle:30,1')->name('cart.email.add');
+Route::post('/cart/hosting', [CartController::class, 'addHosting'])->middleware('throttle:30,1')->name('cart.hosting.add');
+Route::patch('/cart/{item}', [CartController::class, 'update'])->middleware('throttle:30,1')->name('cart.update');
+Route::delete('/cart/{item}', [CartController::class, 'destroy'])->middleware('throttle:30,1')->name('cart.destroy');
+Route::get('/cart/count', [CartController::class, 'count'])->middleware('throttle:60,1')->name('cart.count');
+Route::get('/checkout', [CheckoutController::class, 'create'])->name('checkout');
+Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:10,1')->name('checkout.store');
+Route::post('/checkout/account-status', [CheckoutController::class, 'accountStatus'])
+    ->middleware('throttle:30,1')
+    ->name('checkout.account-status');
+Route::get('/checkout/payment/flutterwave/callback', [CheckoutController::class, 'callback'])->name('checkout.flutterwave.callback');
+Route::get('/checkout/received/{checkout}', [CheckoutController::class, 'received'])->name('checkout.received');
+Route::post('/checkout/{checkout}/pay', [CheckoutController::class, 'pay'])->middleware('throttle:10,1')->name('checkout.pay');
+Route::get('/domain/cart', [DomainCartController::class, 'show'])->name('domain.cart');
+Route::post('/domain/cart/add', [DomainCartController::class, 'add'])->middleware('throttle:30,1')->name('domain.cart.add');
+Route::get('/domain/cart/add', [DomainCartController::class, 'addRedirect'])->middleware('throttle:30,1')->name('domain.cart.add-redirect');
+Route::patch('/domain/cart/{item}', [DomainCartController::class, 'update'])->middleware('throttle:30,1')->name('domain.cart.update');
+Route::delete('/domain/cart/{item}', [DomainCartController::class, 'destroy'])->middleware('throttle:30,1')->name('domain.cart.destroy');
+Route::get('/domain/cart/count', [DomainCartController::class, 'count'])->middleware('throttle:60,1')->name('domain.cart.count');
+Route::get('/domain/checkout', [DomainOrderController::class, 'create'])->name('domain.checkout');
+Route::post('/domain/checkout', [DomainOrderController::class, 'store'])->middleware('throttle:10,1')->name('domain.checkout.store');
+Route::post('/domain/checkout/account-status', [DomainOrderController::class, 'accountStatus'])
+    ->middleware('throttle:30,1')
+    ->name('domain.checkout.account-status');
+Route::get('/domain/payment/flutterwave/callback', [DomainOrderController::class, 'callback'])->name('domain.flutterwave.callback');
+Route::get('/domain/order/received/{order}', [DomainOrderController::class, 'received'])->name('domain.order-received');
+Route::get('/domain/checkout/received/{checkout}', [DomainOrderController::class, 'receivedCheckout'])->name('domain.checkout-received');
+Route::post('/domain/order/{order}/pay', [DomainOrderController::class, 'pay'])->middleware('throttle:10,1')->name('domain.pay');
+Route::post('/domain/checkout/{checkout}/pay', [DomainOrderController::class, 'payCheckout'])->middleware('throttle:10,1')->name('domain.checkout.pay');
+Route::view('/microservices', 'pages.microservices')->name('microservices');
+Route::view('/development', 'pages.development')->name('development');
+
+Route::view('/cloud-hosting', 'pages.cloud-hosting')->name('cloud-hosting');
+Route::view('/plesk', 'pages.plesk')->name('plesk');
+Route::view('/vps', 'pages.vps')->name('vps');
+
+Route::view('/google-workspace', 'pages.google-workspace')->name('google-workspace');
+Route::view('/microsoft-365', 'pages.microsoft-365')->name('microsoft-365');
+
+Route::get('/web-development', function () {
+    return view('pages.service', [
+        'metaTitle' => __('pages.web_development.meta_title'),
+        'metaDescription' => __('pages.web_development.meta_description'),
+        'eyebrow' => __('pages.web_development.eyebrow'),
+        'title' => __('pages.web_development.title'),
+        'lede' => __('pages.web_development.lede'),
+        'ctaHref' => route('contact'),
+        'ctaLabel' => __('pages.web_development.cta'),
+        'artSrc' => 'images/heroes/about.webp',
+        'body' => __('pages.web_development.body'),
+        'highlights' => __('pages.web_development.highlights'),
+        'cards' => [
+            [
+                'title' => __('site.home.dev_wp_title'),
+                'body' => __('site.home.dev_wp_body'),
+            ],
+            [
+                'title' => __('site.home.dev_custom_title'),
+                'body' => __('site.home.dev_custom_body'),
+            ],
+        ],
+        'helpTitle' => __('pages.web_development.help_title'),
+        'helpLede' => __('pages.web_development.help_lede'),
+        'helpPrimaryHref' => route('contact'),
+        'helpPrimaryLabel' => __('pages.web_development.cta'),
+        'helpSecondaryHref' => route('case-studies'),
+        'helpSecondaryLabel' => __('site.footer.case_studies'),
+    ]);
+})->name('web-development');
+
+Route::get('/mobile-apps', function () {
+    return view('pages.service', [
+        'metaTitle' => __('pages.mobile_apps.meta_title'),
+        'metaDescription' => __('pages.mobile_apps.meta_description'),
+        'eyebrow' => __('pages.mobile_apps.eyebrow'),
+        'title' => __('pages.mobile_apps.title'),
+        'lede' => __('pages.mobile_apps.lede'),
+        'ctaHref' => route('contact'),
+        'ctaLabel' => __('pages.mobile_apps.cta'),
+        'artSrc' => 'images/heroes/about.webp',
+        'body' => __('pages.mobile_apps.body'),
+        'highlights' => __('pages.mobile_apps.highlights'),
+        'cards' => [],
+        'helpTitle' => __('pages.mobile_apps.help_title'),
+        'helpLede' => __('pages.mobile_apps.help_lede'),
+        'helpPrimaryHref' => route('contact'),
+        'helpPrimaryLabel' => __('pages.mobile_apps.cta'),
+        'helpSecondaryHref' => route('case-studies'),
+        'helpSecondaryLabel' => __('site.footer.case_studies'),
+    ]);
+})->name('mobile-apps');
+
+Route::get('/maintenance', function () {
+    return view('pages.service', [
+        'metaTitle' => __('pages.maintenance.meta_title'),
+        'metaDescription' => __('pages.maintenance.meta_description'),
+        'eyebrow' => __('pages.maintenance.eyebrow'),
+        'title' => __('pages.maintenance.title'),
+        'lede' => __('pages.maintenance.lede'),
+        'ctaHref' => route('contact'),
+        'ctaLabel' => __('pages.maintenance.cta'),
+        'artSrc' => 'images/heroes/about.webp',
+        'body' => __('pages.maintenance.body'),
+        'highlights' => __('pages.maintenance.highlights'),
+        'cards' => [],
+        'helpTitle' => __('pages.maintenance.help_title'),
+        'helpLede' => __('pages.maintenance.help_lede'),
+        'helpPrimaryHref' => route('contact'),
+        'helpPrimaryLabel' => __('pages.maintenance.cta'),
+        'helpSecondaryHref' => route('support'),
+        'helpSecondaryLabel' => __('site.nav.support'),
+    ]);
+})->name('maintenance');
+
+Route::get('/support', [SupportController::class, 'show'])->name('support');
+Route::post('/support/ticket', [SupportController::class, 'store'])
+    ->middleware('throttle:support-ticket')
+    ->name('support.ticket.store');
+
+Route::get('/contact', [ContactController::class, 'show'])->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])
+    ->middleware('throttle:contact-form')
+    ->name('contact.store');
 Route::view('/case-studies', 'pages.case-studies')->name('case-studies');
 Route::view('/faq', 'pages.faq')->name('faq');
 Route::view('/terms', 'pages.terms')->name('terms');
@@ -63,7 +253,7 @@ Route::get('/team', function () {
         ->orderBy('name')
         ->get();
 
-    return view('team', compact('members'));
+    return view('pages.team', compact('members'));
 })->name('team');
 
 Route::get('/locale/{locale}', function (string $locale) {
@@ -104,29 +294,50 @@ Route::post('/email/checkout/account-status', [EmailOrderController::class, 'acc
 Route::get('/email/payment/flutterwave/callback', [EmailOrderController::class, 'callback'])->name('email.flutterwave.callback');
 
 Route::middleware('auth')->group(function (): void {
-    Route::get('/account', [AccountController::class, 'show'])->name('account.show');
-    Route::get('/account/profile', [AccountController::class, 'profile'])->name('account.profile');
-    Route::put('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');
-    Route::put('/account/profile/business', [AccountController::class, 'updateBusinessProfile'])
-        ->middleware('throttle:20,1')
-        ->name('account.profile.business');
-    Route::get('/account/settings', [AccountController::class, 'settings'])->name('account.settings');
-    Route::put('/account/settings/notifications', [AccountController::class, 'updateNotificationPreferences'])->name('account.notifications.update');
-    Route::get('/account/notifications', [AccountNotificationController::class, 'index'])->name('account.notifications.index');
-    Route::post('/account/notifications/read-all', [AccountNotificationController::class, 'markAllRead'])->name('account.notifications.read-all');
-    Route::post('/account/notifications/{notification}/read', [AccountNotificationController::class, 'markRead'])->name('account.notifications.read');
-    Route::post('/account/settings/contacts', [AccountController::class, 'storeContact'])->middleware('throttle:20,1')->name('account.contacts.store');
-    Route::delete('/account/settings/contacts/{contact}', [AccountController::class, 'destroyContact'])->name('account.contacts.destroy');
-    Route::get('/account/email', [AccountController::class, 'email'])->name('account.email.index');
-    Route::get('/account/email/{order}', [EmailOrderController::class, 'show'])->name('account.email.show');
-    Route::post('/account/email/{order}/pay', [EmailOrderController::class, 'pay'])->middleware('throttle:10,1')->name('email.pay');
-    Route::post('/account/email/{order}/renew', [EmailOrderController::class, 'renew'])->middleware('throttle:10,1')->name('email.renew');
-    Route::post('/account/email/{order}/provision', [EmailOrderController::class, 'provision'])->middleware('throttle:5,1')->name('email.provision');
-    Route::get('/account/vps', [AccountController::class, 'vps'])->name('account.vps.index');
-    Route::get('/account/vps/{lead}', [AccountController::class, 'vpsShow'])->name('account.vps.show');
-    Route::get('/account/hosting', [AccountController::class, 'hosting'])->name('account.hosting.index');
-    Route::get('/account/hosting/{lead}', [AccountController::class, 'hostingShow'])->name('account.hosting.show');
+    Route::middleware(\App\Http\Middleware\EnsureAccountPermission::class)->group(function (): void {
+        Route::get('/account', [AccountController::class, 'show'])->name('account.show');
+        Route::get('/account/products', [AccountProductController::class, 'index'])->name('account.products.index');
+        Route::get('/account/domains', [AccountDomainController::class, 'index'])->name('account.domains.index');
+        Route::get('/account/domains/{order}', [AccountDomainController::class, 'show'])->name('account.domains.show');
+        Route::get('/account/subscriptions', [AccountSubscriptionController::class, 'index'])->name('account.subscriptions.index');
+        Route::get('/account/invoices', [AccountInvoiceController::class, 'index'])->name('account.invoices.index');
+        Route::get('/account/invoices/{invoice}', [AccountInvoiceController::class, 'show'])->name('account.invoices.show');
+        Route::get('/account/activity', [AccountActivityController::class, 'index'])->name('account.activity.index');
+        Route::get('/account/profile', [AccountController::class, 'profile'])->name('account.profile');
+        Route::put('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');
+        Route::put('/account/profile/password', [AccountController::class, 'updatePassword'])
+            ->middleware('throttle:10,1')
+            ->name('account.profile.password');
+        Route::put('/account/profile/business', [AccountController::class, 'updateBusinessProfile'])
+            ->middleware('throttle:20,1')
+            ->name('account.profile.business');
+        Route::get('/account/settings', [AccountController::class, 'settings'])->name('account.settings');
+        Route::put('/account/settings/notifications', [AccountController::class, 'updateNotificationPreferences'])->name('account.notifications.update');
+        Route::get('/account/notifications', [AccountNotificationController::class, 'index'])->name('account.notifications.index');
+        Route::post('/account/notifications/read-all', [AccountNotificationController::class, 'markAllRead'])->name('account.notifications.read-all');
+        Route::post('/account/notifications/{notification}/read', [AccountNotificationController::class, 'markRead'])->name('account.notifications.read');
+        Route::post('/account/settings/contacts', [AccountController::class, 'storeContact'])->middleware('throttle:20,1')->name('account.contacts.store');
+        Route::delete('/account/settings/contacts/{contact}', [AccountController::class, 'destroyContact'])->name('account.contacts.destroy');
+        Route::get('/account/staff', [AccountStaffController::class, 'index'])->name('account.staff.index');
+        Route::post('/account/staff', [AccountStaffController::class, 'store'])->middleware('throttle:10,1')->name('account.staff.store');
+        Route::delete('/account/staff/invites/{invite}', [AccountStaffController::class, 'destroyInvite'])->name('account.staff.invites.destroy');
+        Route::delete('/account/staff/{member}', [AccountStaffController::class, 'destroy'])->name('account.staff.destroy');
+        Route::get('/account/email', [AccountController::class, 'email'])->name('account.email.index');
+        Route::get('/account/email/{order}', [EmailOrderController::class, 'show'])->name('account.email.show');
+        Route::post('/account/email/{order}/pay', [EmailOrderController::class, 'pay'])->middleware('throttle:10,1')->name('email.pay');
+        Route::post('/account/email/{order}/renew', [EmailOrderController::class, 'renew'])->middleware('throttle:10,1')->name('email.renew');
+        Route::post('/account/email/{order}/provision', [EmailOrderController::class, 'provision'])->middleware('throttle:5,1')->name('email.provision');
+        Route::get('/account/vps', [AccountController::class, 'vps'])->name('account.vps.index');
+        Route::get('/account/vps/{lead}', [AccountController::class, 'vpsShow'])->name('account.vps.show');
+        Route::get('/account/hosting', [AccountController::class, 'hosting'])->name('account.hosting.index');
+        Route::get('/account/hosting/{lead}', [AccountController::class, 'hostingShow'])->name('account.hosting.show');
+    });
 });
+
+Route::get('/account/invites/{token}', [AccountStaffController::class, 'showInvite'])->name('account.invites.show');
+Route::post('/account/invites/{token}', [AccountStaffController::class, 'acceptInvite'])
+    ->middleware('throttle:10,1')
+    ->name('account.invites.accept');
 
 Route::get('/hosting/request', function (Request $request) {
     $planOptions = config('site.hosting_plans', []);
@@ -152,18 +363,28 @@ Route::get('/hosting/request', function (Request $request) {
         ->keyBy('spec_key');
 
     $specifications = collect($plan['specifications'] ?? [])
-        ->map(function (array $spec) use ($priceMap, $selectedBillingCycle) {
+        ->map(function (array $spec) use ($priceMap, $selectedBillingCycle, $planSlug) {
             $price = $priceMap->get($spec['key'] ?? '');
             $hasPrice = $price && (float) $price->price_amount > 0;
 
             if ($hasPrice) {
                 $payload = HostingPricing::pricePayload($price, $selectedBillingCycle);
                 $spec = array_merge($spec, $payload);
-                $spec['price_amount'] = $payload['monthly_usd'];
+                $spec['price_amount'] = $payload['monthly_ngn'];
             } else {
-                $spec['price_display'] = null;
-                $spec['period_display'] = null;
-                $spec['price_amount'] = null;
+                $defaultNgn = HostingPricing::monthlyNgnForSpec($planSlug, (string) ($spec['key'] ?? ''));
+                if ($defaultNgn > 0) {
+                    $periodNgn = HostingPricing::periodTotalNgn($defaultNgn, $selectedBillingCycle);
+                    $spec['price_amount'] = $defaultNgn;
+                    $spec['monthly_ngn'] = $defaultNgn;
+                    $spec['period_ngn'] = $periodNgn;
+                    $spec['price_display'] = HostingPricing::ngnPriceDisplay($defaultNgn, HostingPricing::monthlySuffix());
+                    $spec['period_display'] = HostingPricing::ngnPriceDisplay($periodNgn);
+                } else {
+                    $spec['price_display'] = null;
+                    $spec['period_display'] = null;
+                    $spec['price_amount'] = null;
+                }
                 $spec['billing_cycle_label'] = HostingPricing::cycleLabel($selectedBillingCycle);
                 $spec['discount_percent'] = (int) (HostingPricing::cycle($selectedBillingCycle)['discount_percent'] ?? 0);
             }
@@ -233,8 +454,16 @@ Route::get('/hosting/request/details', function (Request $request) {
         ->all();
 
     if ($selectedSpecKeys === []) {
+        $redirectParams = ['plan' => $selectedPlan];
+        if (filled($request->query('domain'))) {
+            $redirectParams['domain'] = (string) $request->query('domain');
+        }
+        if (filled($request->query('domain_option'))) {
+            $redirectParams['domain_option'] = (string) $request->query('domain_option');
+        }
+
         return redirect()
-            ->route('hosting.specifications', ['plan' => $selectedPlan])
+            ->route('hosting.specifications', $redirectParams)
             ->with('hosting_feedback', [
                 'type' => 'error',
                 'message' => 'Please select at least one hosting specification to continue.',
@@ -247,7 +476,7 @@ Route::get('/hosting/request/details', function (Request $request) {
         ->keyBy(fn ($item) => strtolower((string) $item->spec_key));
 
     $selectedSpecsData = collect($selectedSpecKeys)
-        ->map(function ($key) use ($specMap, $priceMap, $selectedBillingCycle) {
+        ->map(function ($key) use ($specMap, $priceMap, $selectedBillingCycle, $selectedPlan) {
             $spec = $specMap->get($key);
             if (! $spec) {
                 return null;
@@ -260,8 +489,20 @@ Route::get('/hosting/request/details', function (Request $request) {
                 $payload = HostingPricing::pricePayload($price, $selectedBillingCycle);
                 $spec = array_merge($spec, $payload);
             } else {
-                $spec['price_display'] = null;
-                $spec['period_display'] = null;
+                $defaultNgn = HostingPricing::monthlyNgnForSpec($selectedPlan, $key);
+                if ($defaultNgn > 0) {
+                    $periodNgn = HostingPricing::periodTotalNgn($defaultNgn, $selectedBillingCycle);
+                    $rate = max(1.0, HostingPricing::usdToNgnRate());
+                    $spec['monthly_ngn'] = $defaultNgn;
+                    $spec['period_ngn'] = $periodNgn;
+                    $spec['monthly_usd'] = round($defaultNgn / $rate, 2);
+                    $spec['period_usd'] = round($periodNgn / $rate, 2);
+                    $spec['price_display'] = HostingPricing::ngnPriceDisplay($defaultNgn, HostingPricing::monthlySuffix());
+                    $spec['period_display'] = HostingPricing::ngnPriceDisplay($periodNgn);
+                } else {
+                    $spec['price_display'] = null;
+                    $spec['period_display'] = null;
+                }
                 $spec['billing_cycle_label'] = HostingPricing::cycleLabel($selectedBillingCycle);
             }
 
@@ -273,7 +514,9 @@ Route::get('/hosting/request/details', function (Request $request) {
 
     $selectedSpec = implode(',', $selectedSpecKeys);
     $selectedSpecData = $selectedSpecsData[0] ?? null;
-    $orderTotalUsd = collect($selectedSpecsData)->sum(fn ($spec) => (float) ($spec['period_usd'] ?? 0));
+    $orderTotalNgn = collect($selectedSpecsData)->sum(fn ($spec) => (float) ($spec['period_ngn'] ?? 0));
+    $rate = max(1.0, HostingPricing::usdToNgnRate());
+    $orderTotalUsd = round($orderTotalNgn / $rate, 2);
 
     return view('pages.hosting-intake', [
         'planOptions' => $planOptions,
@@ -283,12 +526,14 @@ Route::get('/hosting/request/details', function (Request $request) {
         'selectedSpecKeys' => $selectedSpecKeys,
         'selectedSpecData' => $selectedSpecData,
         'selectedSpecsData' => $selectedSpecsData,
+        'billingCycles' => $billingCycles,
         'selectedBillingCycle' => $selectedBillingCycle,
         'orderTotalUsd' => $orderTotalUsd,
-        'orderTotalDisplay' => HostingPricing::dualPriceDisplay($orderTotalUsd),
+        'orderTotalNgn' => $orderTotalNgn,
+        'orderTotalDisplay' => HostingPricing::ngnPriceDisplay($orderTotalNgn),
         'hostingAmountUsd' => $orderTotalUsd,
-        'hostingAmountDisplay' => HostingPricing::dualPriceDisplay($orderTotalUsd),
-        'usdToNgn' => HostingPricing::usdToNgnRate(),
+        'hostingAmountDisplay' => HostingPricing::ngnPriceDisplay($orderTotalNgn),
+        'usdToNgn' => $rate,
         'requiresDomain' => $selectedPlan !== 'vps',
     ]);
 })->name('hosting.intake');
@@ -460,6 +705,7 @@ Route::post('/hosting/domain/quote', function (Request $request) {
     $validated = Validator::make($request->all(), [
         'domain' => ['required', 'string', 'max:253'],
         'domain_option' => ['required', 'string', 'in:register,transfer,owndomain'],
+        'reg_period' => ['nullable', 'integer', 'min:1', 'max:10'],
     ])->validate();
 
     $domain = DomainName::normalize((string) $validated['domain']);
@@ -470,7 +716,11 @@ Route::post('/hosting/domain/quote', function (Request $request) {
         ], 422);
     }
 
-    $quote = WhmcsDomainPricing::quote($domain, (string) $validated['domain_option']);
+    $quote = WhmcsDomainPricing::quote(
+        $domain,
+        (string) $validated['domain_option'],
+        (int) ($validated['reg_period'] ?? 1),
+    );
 
     return response()->json($quote, ($quote['ok'] ?? false) ? 200 : 422);
 })->middleware('throttle:30,1')->name('hosting.domain.quote');
@@ -560,15 +810,18 @@ Route::post('/hosting/request/details', function (Request $request) {
         ->get()
         ->keyBy(fn ($item) => strtolower((string) $item->spec_key));
 
-    $amountUsd = collect($selectedSpecKeys)->sum(function ($key) use ($priceMap, $billingCycle) {
+    $amountNgn = collect($selectedSpecKeys)->sum(function ($key) use ($priceMap, $billingCycle) {
         $price = $priceMap->get($key);
         if (! $price || (float) $price->price_amount <= 0) {
             return 0;
         }
 
-        return HostingPricing::periodTotalUsd((float) $price->price_amount, $billingCycle);
+        $monthlyNgn = HostingPricing::amountAsNgn((float) $price->price_amount, (string) $price->currency);
+
+        return HostingPricing::periodTotalNgn($monthlyNgn, $billingCycle);
     });
-    $amountNgn = $amountUsd * HostingPricing::usdToNgnRate();
+    $rate = max(1.0, HostingPricing::usdToNgnRate());
+    $amountUsd = round($amountNgn / $rate, 2);
 
     $specLabel = collect($selectedSpecsData)->pluck('label')->filter()->join(', ');
     $specKeyJoined = implode(',', $selectedSpecKeys);
@@ -948,19 +1201,38 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         ->middleware('throttle:5,1')
         ->name('login.submit');
 
-    Route::middleware([EnsureAdminAuthenticated::class])->group(function (): void {
+    Route::middleware([EnsureAdminAuthenticated::class, \App\Http\Middleware\EnsureAdminPermission::class])->group(function (): void {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
+        Route::get('/search', AdminSearchController::class)->name('search');
 
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
         Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
         Route::post('/customers/sync-whmcs', [AdminCustomerController::class, 'syncWhmcs'])->name('customers.sync-whmcs');
         Route::get('/customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
+        Route::put('/customers/{customer}', [AdminCustomerController::class, 'update'])->name('customers.update');
+        Route::delete('/customers/{customer}', [AdminCustomerController::class, 'destroy'])->name('customers.destroy');
         Route::get('/legacy-customers/{legacyCustomer}', [AdminCustomerController::class, 'showLegacy'])->name('customers.legacy.show');
         Route::get('/hosting-leads', [AdminHostingLeadController::class, 'index'])->name('hosting-leads.index');
         Route::get('/hosting-leads/{hostingLead}', [AdminHostingLeadController::class, 'show'])->name('hosting-leads.show');
         Route::post('/hosting-leads/{hostingLead}/retry-whmcs-sync', [AdminHostingLeadController::class, 'retryWhmcsSync'])->name('hosting-leads.retry-whmcs-sync');
+        Route::get('/support-tickets', [AdminSupportTicketController::class, 'index'])->name('support-tickets.index');
+        Route::get('/support-tickets/{supportTicket}', [AdminSupportTicketController::class, 'show'])->name('support-tickets.show');
+        Route::put('/support-tickets/{supportTicket}', [AdminSupportTicketController::class, 'update'])->name('support-tickets.update');
+        Route::post('/support-tickets/{supportTicket}/reply', [AdminSupportTicketController::class, 'reply'])->name('support-tickets.reply');
         Route::get('/subscribers', [AdminSubscriberController::class, 'index'])->name('subscribers.index');
+        Route::resource('staff', AdminStaffController::class)->except(['show']);
+        Route::resource('blog-posts', AdminBlogPostController::class)->except(['show']);
+        Route::resource('projects', AdminProjectController::class)->except(['show']);
+        Route::get('/newsletter-campaigns', [AdminNewsletterCampaignController::class, 'index'])->name('newsletter-campaigns.index');
+        Route::get('/newsletter-campaigns/create', [AdminNewsletterCampaignController::class, 'create'])->name('newsletter-campaigns.create');
+        Route::post('/newsletter-campaigns', [AdminNewsletterCampaignController::class, 'store'])->name('newsletter-campaigns.store');
+        Route::get('/newsletter-campaigns/{newsletterCampaign}', [AdminNewsletterCampaignController::class, 'show'])->name('newsletter-campaigns.show');
+        Route::get('/newsletter-campaigns/{newsletterCampaign}/edit', [AdminNewsletterCampaignController::class, 'edit'])->name('newsletter-campaigns.edit');
+        Route::put('/newsletter-campaigns/{newsletterCampaign}', [AdminNewsletterCampaignController::class, 'update'])->name('newsletter-campaigns.update');
+        Route::delete('/newsletter-campaigns/{newsletterCampaign}', [AdminNewsletterCampaignController::class, 'destroy'])->name('newsletter-campaigns.destroy');
+        Route::post('/newsletter-campaigns/{newsletterCampaign}/send', [AdminNewsletterCampaignController::class, 'send'])->name('newsletter-campaigns.send');
         Route::resource('team-members', AdminTeamMemberController::class)->except(['show']);
+        Route::resource('career-openings', AdminCareerOpeningController::class)->except(['show']);
         Route::get('/hosting-prices', [AdminHostingPriceController::class, 'index'])->name('hosting-prices.index');
         Route::put('/hosting-prices', [AdminHostingPriceController::class, 'update'])->name('hosting-prices.update');
         Route::get('/whmcs-settings', [AdminWhmcsSettingsController::class, 'index'])->name('whmcs-settings.index');

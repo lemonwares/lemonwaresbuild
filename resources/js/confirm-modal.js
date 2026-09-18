@@ -49,9 +49,12 @@ document.querySelectorAll('[data-confirm-modal]').forEach((root) => {
 
     submit.addEventListener('click', () => {
         submit.disabled = true;
-        submit.classList.add('opacity-80', 'cursor-not-allowed');
+        submit.classList.add('opacity-80', 'cursor-not-allowed', 'is-loading');
         spinner?.classList.remove('hidden');
-        label?.classList.add('opacity-80');
+        if (label) {
+            label.textContent = label.getAttribute('data-loading-text') || 'Deleting…';
+            label.classList.add('opacity-80');
+        }
         form.requestSubmit();
     });
 });

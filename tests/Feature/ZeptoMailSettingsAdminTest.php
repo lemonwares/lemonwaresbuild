@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\IntegrationSetting;
+use App\Support\ContactFormSettings;
 use App\Support\ZeptoMailSettings;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -29,6 +30,7 @@ class ZeptoMailSettingsAdminTest extends TestCase
             'from_address' => 'noreply@lemonwares.com',
             'from_name' => 'Lemonwares',
             'logo_url' => 'https://cdn.example.com/lemonwareslogo.png',
+            'contact_form_inbox' => 'hello@lemonwares.com',
         ])->assertRedirect(route('admin.zeptomail-settings.index'));
 
         $this->assertDatabaseHas('integration_settings', [
@@ -40,11 +42,17 @@ class ZeptoMailSettingsAdminTest extends TestCase
             'value' => 'https://cdn.example.com/lemonwareslogo.png',
         ]);
 
+        $this->assertDatabaseHas('integration_settings', [
+            'key' => 'contact_form.inbox',
+            'value' => 'hello@lemonwares.com',
+        ]);
+
         $this->assertTrue(ZeptoMailSettings::isEnabled());
         $this->assertTrue(ZeptoMailSettings::isConfigured());
         $this->assertSame('zm_admin_token', ZeptoMailSettings::token());
         $this->assertSame('noreply@lemonwares.com', ZeptoMailSettings::fromAddress());
         $this->assertSame('https://cdn.example.com/lemonwareslogo.png', ZeptoMailSettings::logoUrl());
+        $this->assertSame('hello@lemonwares.com', ContactFormSettings::inboxAddress());
         $this->assertSame('zeptomail', config('mail.default'));
     }
 

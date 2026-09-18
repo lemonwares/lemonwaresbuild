@@ -9,22 +9,32 @@ return [
     'cta' => 'Fragen durchsuchen',
     'home_label' => 'FAQ',
     'home_title' => 'Fragen, die Kunden vor dem Start stellen',
-    'home_lede' => 'Ein paar schnelle Antworten — die volle FAQ hat mehr Details.',
+    'home_lede' => 'Schnelle Antworten beim Scrollen — öffnen Sie eine Frage oder lesen Sie die volle FAQ.',
     'view_all' => 'Alle FAQs ansehen',
     'still_title' => 'Noch eine Frage?',
     'still_lede' => 'Sagen Sie uns, was Sie brauchen — wir zeigen Ihnen den nächsten Schritt.',
     'still_cta' => 'Kontakt',
-    'email_cta' => 'Lemon-Mail-Pläne ansehen',
+    'email_cta' => 'Mailemon-Pläne ansehen',
     'items' => [
         [
-            'question' => 'Welche Hosting-Pläne bieten Sie an?',
-            'answer' => 'Wir bieten cPanel- und Plesk-Shared-Cloud-Hosting für typische Websites sowie VPS-Root-Server, wenn Sie mehr Leistung und Kontrolle brauchen.',
+            'question' => 'Was ist Mailemon?',
+            'answer' => 'Mailemon ist die Business-E-Mail von Lemonwares auf Ihrer Domain — online bestellen, sicher bezahlen, und wir richten Marken-Postfächer mit Webmail, Outlook und Handy-Apps ein.',
+            'href' => 'email.plans',
+            'cta' => 'Mailemon-Pläne ansehen',
         ],
         [
             'question' => 'Können Sie Business-E-Mail auf meiner Domain einrichten?',
-            'answer' => 'Ja. Bestellen Sie Lemon Mail für Ihre Domain auf dieser Site — wir legen die Postfächer an und liefern die DNS-Einträge. Microsoft 365, Google Workspace und Titan gibt es auf Anfrage.',
+            'answer' => 'Ja. Bestellen Sie Mailemon für Ihre Domain auf dieser Site — wir legen die Postfächer an und liefern die DNS-Einträge. Microsoft 365 und Google Workspace gibt es auf Anfrage.',
             'href' => 'email.plans',
-            'cta' => 'Lemon Mail bestellen',
+            'cta' => 'Mailemon bestellen',
+        ],
+        [
+            'question' => 'Wie lange dauert die Mailemon-Einrichtung?',
+            'answer' => 'Nach der Zahlung provisionieren wir die Postfächer schnell. Mail fließt, sobald Sie die DNS-Einträge setzen — oft innerhalb von Minuten bis wenigen Stunden, je nach DNS-Anbieter.',
+        ],
+        [
+            'question' => 'Welche Hosting-Pläne bieten Sie an?',
+            'answer' => 'Wir bieten cPanel- und Plesk-Shared-Cloud-Hosting für typische Websites sowie VPS-Root-Server, wenn Sie mehr Leistung und Kontrolle brauchen.',
         ],
         [
             'question' => 'Bauen Sie WordPress-Sites und individuelle Apps?',
@@ -36,7 +46,7 @@ return [
         ],
         [
             'question' => 'Welche Abrechnungszyklen gibt es?',
-            'answer' => 'Monatlich, 2 Monate, vierteljährlich oder jährlich. Längere Zyklen sind oft günstiger. Exakte Beträge sehen Sie vor der Bestätigung.',
+            'answer' => 'Monatlich, 2 Monate, vierteljährlich oder jährlich für Hosting und E-Mail. Längere Zyklen sind oft günstiger. Exakte Beträge sehen Sie vor der Bestätigung.',
         ],
         [
             'question' => 'Wie erhalte ich Support nach dem Go-Live?',

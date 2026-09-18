@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\IntegrationSetting;
+use App\Support\ContactFormSettings;
 use App\Support\ZeptoMailSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ class AdminZeptoMailSettingsController extends Controller
                 'from_address' => ZeptoMailSettings::fromAddress(),
                 'from_name' => ZeptoMailSettings::fromName(),
                 'logo_url' => IntegrationSetting::getValue('zeptomail.logo_url', (string) config('services.zeptomail.logo_url', '')),
+                'contact_form_inbox' => ContactFormSettings::inboxAddress(),
             ],
             'logo_preview_url' => ZeptoMailSettings::logoUrl(),
             'is_configured' => ZeptoMailSettings::isConfigured(),
@@ -35,6 +37,7 @@ class AdminZeptoMailSettingsController extends Controller
             'from_address' => ['nullable', 'email', 'max:190'],
             'from_name' => ['nullable', 'string', 'max:120'],
             'logo_url' => ['nullable', 'url', 'max:500'],
+            'contact_form_inbox' => ['nullable', 'email', 'max:190'],
         ]);
 
         IntegrationSetting::putMany([
@@ -45,6 +48,7 @@ class AdminZeptoMailSettingsController extends Controller
             'zeptomail.from_address' => trim((string) ($validated['from_address'] ?? '')),
             'zeptomail.from_name' => trim((string) ($validated['from_name'] ?? '')),
             'zeptomail.logo_url' => trim((string) ($validated['logo_url'] ?? '')),
+            'contact_form.inbox' => trim((string) ($validated['contact_form_inbox'] ?? '')),
         ]);
 
         ZeptoMailSettings::applyRuntimeConfig();

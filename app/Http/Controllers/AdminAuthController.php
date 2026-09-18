@@ -13,7 +13,11 @@ class AdminAuthController extends Controller
     public function showLogin(): View|RedirectResponse
     {
         if (session('admin_authenticated')) {
-            return redirect()->route('admin.dashboard');
+            $admin = \App\Support\AdminPermissions::currentUser();
+
+            return redirect()->to(
+                $admin ? $this->landingUrlFor($admin) : route('admin.dashboard')
+            );
         }
 
         return view('admin.login');
@@ -40,7 +44,7 @@ class AdminAuthController extends Controller
         $request->session()->put('admin_authenticated', true);
         $request->session()->put('admin_user_id', $admin->id);
 
-        return redirect()->route('admin.dashboard');
+        return redirect()->to($this->landingUrlFor($admin));
     }
 
     public function logout(Request $request): RedirectResponse
@@ -50,5 +54,35 @@ class AdminAuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('admin.login')->with('status', 'Signed out.');
+    }
+
+    private function landingUrlFor(User $admin): string
+    {
+        if ($admin->isSuperAdmin() || $admin->hasAdminPermission('dashboard')) {
+            return route('admin.dashboard');
+        }
+
+        $routeMap = [
+            'customers' => 'admin.customers.index',
+            'support' => 'admin.support-tickets.index',
+            'email_orders' => 'admin.email-orders.index',
+            'hosting_leads' => 'admin.hosting-leads.index',
+            'subscribers' => 'admin.subscribers.index',
+            'campaigns' => 'admin.newsletter-campaigns.index',
+            'blog' => 'admin.blog-posts.index',
+            'projects' => 'admin.projects.index',
+            'team' => 'admin.team-members.index',
+            'careers' => 'admin.career-openings.index',
+            'email_catalog' => 'admin.email-catalog.index',
+            'staff' => 'admin.staff.index',
+        ];
+
+        foreach ($routeMap as $permission => $routeName) {
+            if ($admin->hasAdminPermission($permission)) {
+                return route($routeName);
+            }
+        }
+
+        return route('admin.dashboard');
     }
 }

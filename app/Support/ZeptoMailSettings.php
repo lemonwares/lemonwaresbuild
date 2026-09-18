@@ -94,6 +94,59 @@ class ZeptoMailSettings
         return asset('lemonwareslogo.webp');
     }
 
+    /**
+     * Content-ID used when embedding the logo via ZeptoMail inline_images.
+     */
+    public static function logoCid(): string
+    {
+        return 'lemonwares-logo';
+    }
+
+    /**
+     * Absolute filesystem path to the branded logo file shipped with the app.
+     */
+    public static function logoPath(): ?string
+    {
+        foreach (['lemonwareslogo.png', 'lemonwareslogo.jpg', 'lemonwareslogo.jpeg', 'lemonwareslogo.webp'] as $file) {
+            $path = public_path($file);
+            if (is_file($path)) {
+                return $path;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * ZeptoMail inline_images payload so the logo renders without a remote fetch.
+     *
+     * @return array{content:string,mime_type:string,cid:string}|null
+     */
+    public static function logoInlineImage(): ?array
+    {
+        $path = self::logoPath();
+        if ($path === null) {
+            return null;
+        }
+
+        $binary = @file_get_contents($path);
+        if ($binary === false || $binary === '') {
+            return null;
+        }
+
+        $mime = match (strtolower(pathinfo($path, PATHINFO_EXTENSION))) {
+            'jpg', 'jpeg' => 'image/jpeg',
+            'webp' => 'image/webp',
+            default => 'image/png',
+        };
+
+        return [
+            'content' => base64_encode($binary),
+            'mime_type' => $mime,
+            'cid' => self::logoCid(),
+        ];
+    }
+
     public static function isConfigured(): bool
     {
         return self::isEnabled()

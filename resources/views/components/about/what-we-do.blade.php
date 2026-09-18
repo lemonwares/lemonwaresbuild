@@ -1,4 +1,4 @@
-<section class="section-band border-t border-border">
+<section {{ $attributes->class('section-band border-t border-border') }}>
     <div class="container-page py-14 sm:py-16">
         <div class="mb-10 max-w-2xl">
             <p class="section-label mb-3">{{ __('pages.about.services_label') }}</p>

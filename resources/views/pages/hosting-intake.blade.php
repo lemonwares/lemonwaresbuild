@@ -75,7 +75,7 @@
                                         id="domain"
                                         name="domain"
                                         type="text"
-                                        value="{{ old('domain') }}"
+                                        value="{{ old('domain', request('domain')) }}"
                                         placeholder="example.com"
                                         class="footer-input w-full rounded-xl border border-border bg-white px-4 py-3 transition-[padding]"
                                         required
@@ -111,9 +111,9 @@
                                     data-hosting-input
                                     data-hosting-domain-option
                                 >
-                                    <option value="register" @selected(old('domain_option', 'register') === 'register')>{{ __('hosting.domain_option_register') }}</option>
-                                    <option value="owndomain" @selected(old('domain_option') === 'owndomain')>{{ __('hosting.domain_option_owndomain') }}</option>
-                                    <option value="transfer" @selected(old('domain_option') === 'transfer')>{{ __('hosting.domain_option_transfer') }}</option>
+                                    <option value="register" @selected(old('domain_option', request('domain_option', 'register')) === 'register')>{{ __('hosting.domain_option_register') }}</option>
+                                    <option value="owndomain" @selected(old('domain_option', request('domain_option')) === 'owndomain')>{{ __('hosting.domain_option_owndomain') }}</option>
+                                    <option value="transfer" @selected(old('domain_option', request('domain_option')) === 'transfer')>{{ __('hosting.domain_option_transfer') }}</option>
                                 </select>
                             </div>
                         </div>
@@ -300,9 +300,8 @@
             const summaryDomainDisplay = orderSummary?.querySelector('[data-hosting-summary-domain-display]');
             const summaryTotalDisplay = orderSummary?.querySelector('[data-hosting-summary-total-display]');
             const requiresDomainSummary = orderSummary?.dataset.requiresDomain === '1';
-            const hostingAmountUsd = parseFloat(orderSummary?.dataset.hostingAmountUsd || '0') || 0;
-            const usdToNgn = {{ (float) ($usdToNgn ?? 7800) }};
-            let domainAmountUsd = 0;
+            const hostingAmountNgn = parseFloat(orderSummary?.dataset.hostingAmountNgn || '0') || 0;
+            let domainAmountNgn = 0;
             let domainQuoteOk = !requiresDomainSummary;
             let domainQuoteRequestId = 0;
 
@@ -312,29 +311,18 @@
                 quoteFailed: @json(__('hosting.domain_quote_unavailable')),
             };
 
-            const money = (amount, currency) => {
-                if (currency === 'USD') {
-                    return '$' + Number(amount).toLocaleString(undefined, {
-                        minimumFractionDigits: amount >= 100 ? 0 : 2,
-                        maximumFractionDigits: 2,
-                    });
-                }
-
-                return '₦' + Math.round(amount).toLocaleString();
-            };
-
-            const dual = (usd) => money(usd, 'USD') + ' / ' + money(usd * usdToNgn, 'NGN');
+            const moneyNgn = (amount) => '₦' + Math.round(Number(amount) || 0).toLocaleString();
 
             const refreshOrderSummary = () => {
                 if (!summaryTotalDisplay) {
                     return;
                 }
 
-                summaryTotalDisplay.textContent = dual(hostingAmountUsd + domainAmountUsd);
+                summaryTotalDisplay.textContent = moneyNgn(hostingAmountNgn + domainAmountNgn);
             };
 
             const resetDomainQuote = () => {
-                domainAmountUsd = 0;
+                domainAmountNgn = 0;
                 domainQuoteOk = !requiresDomainSummary;
 
                 if (summaryDomainLabel) {
@@ -353,7 +341,7 @@
             };
 
             const applyDomainQuote = (quote) => {
-                domainAmountUsd = parseFloat(String(quote?.amount_usd ?? 0)) || 0;
+                domainAmountNgn = parseFloat(String(quote?.amount_ngn ?? 0)) || 0;
                 domainQuoteOk = Boolean(quote?.ok);
 
                 if (summaryDomainLabel) {
@@ -365,7 +353,7 @@
                 }
 
                 if (summaryDomainDisplay) {
-                    summaryDomainDisplay.textContent = quote?.display || dual(domainAmountUsd);
+                    summaryDomainDisplay.textContent = quote?.display || moneyNgn(domainAmountNgn);
                 }
 
                 refreshOrderSummary();
@@ -412,7 +400,7 @@
 
                     if (!response.ok || !quote?.ok) {
                         domainQuoteOk = false;
-                        domainAmountUsd = 0;
+                        domainAmountNgn = 0;
                         if (summaryDomainLabel) {
                             summaryDomainLabel.textContent = quote?.label || summaryLabels.pending;
                         }
@@ -431,7 +419,7 @@
                     }
 
                     domainQuoteOk = false;
-                    domainAmountUsd = 0;
+                    domainAmountNgn = 0;
                     if (summaryDomainDisplay) {
                         summaryDomainDisplay.textContent = '—';
                     }
@@ -1059,6 +1047,7 @@
 
                 if (domainInput?.value) {
                     scheduleDomainSuggest();
+                    scheduleDomainCheck(true);
                 }
 
                 updateSubmitState();

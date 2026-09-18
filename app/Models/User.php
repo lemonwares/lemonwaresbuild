@@ -16,6 +16,10 @@ use Illuminate\Notifications\Notifiable;
     'name',
     'email',
     'role',
+    'is_super_admin',
+    'admin_permissions',
+    'account_owner_id',
+    'account_permissions',
     'phone',
     'company',
     'job_title',
@@ -50,6 +54,9 @@ class User extends Authenticatable
             'password' => 'hashed',
             'notify_in_app' => 'boolean',
             'notify_email' => 'boolean',
+            'is_super_admin' => 'boolean',
+            'admin_permissions' => 'array',
+            'account_permissions' => 'array',
         ];
     }
 
@@ -95,19 +102,110 @@ class User extends Authenticatable
         return $this->role === 'admin';
     }
 
+    public function isSuperAdmin(): bool
+    {
+        return $this->isAdmin() && (bool) $this->is_super_admin;
+    }
+
+    public function hasAdminPermission(string $permission): bool
+    {
+        if (! $this->isAdmin()) {
+            return false;
+        }
+
+        if ($this->isSuperAdmin()) {
+            return true;
+        }
+
+        $permissions = $this->admin_permissions;
+
+        if (! is_array($permissions) || $permissions === []) {
+            return false;
+        }
+
+        return in_array($permission, $permissions, true);
+    }
+
     public function isCustomer(): bool
     {
         return $this->role !== 'admin';
     }
 
+    public function isAccountOwner(): bool
+    {
+        return $this->isCustomer() && blank($this->account_owner_id);
+    }
+
+    public function isAccountStaff(): bool
+    {
+        return $this->isCustomer() && filled($this->account_owner_id);
+    }
+
+    public function accountOwner(): self
+    {
+        if ($this->isAccountStaff() && $this->account_owner_id) {
+            $owner = $this->relationLoaded('accountOwnerUser')
+                ? $this->accountOwnerUser
+                : $this->accountOwnerUser()->first();
+
+            return $owner instanceof self ? $owner : $this;
+        }
+
+        return $this;
+    }
+
+    public function accountOwnerUser(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(self::class, 'account_owner_id');
+    }
+
+    public function accountStaffMembers(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(self::class, 'account_owner_id');
+    }
+
+    public function accountInvites(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(AccountInvite::class, 'owner_id')->latest();
+    }
+
+    public function accountActivities(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(AccountActivity::class)->latest();
+    }
+
+    public function hasAccountPermission(string $permission): bool
+    {
+        if (! $this->isCustomer()) {
+            return false;
+        }
+
+        if ($this->isAccountOwner()) {
+            return true;
+        }
+
+        $permissions = $this->account_permissions;
+
+        if (! is_array($permissions) || $permissions === []) {
+            return false;
+        }
+
+        return in_array($permission, $permissions, true);
+    }
+
     public function scopeCustomers(Builder $query): Builder
     {
-        return $query->where('role', 'customer');
+        return $query->where('role', 'customer')->whereNull('account_owner_id');
     }
 
     public function emailOrders(): HasMany
     {
         return $this->hasMany(EmailOrder::class)->latest();
+    }
+
+    public function domainOrders(): HasMany
+    {
+        return $this->hasMany(DomainOrder::class)->latest();
     }
 
     public function hostingLeads(): HasMany
@@ -204,6 +302,46 @@ class User extends Authenticatable
     }
 
     /**
+     * Billing profile required for WHMCS-style site checkout.
+     */
+    public function hasCheckoutBillingProfile(): bool
+    {
+        return filled($this->name)
+            && filled($this->phone)
+            && filled($this->company)
+            && filled($this->billing_country)
+            && filled($this->billing_address_line_1)
+            && filled($this->billing_city)
+            && filled($this->billing_state)
+            && filled($this->billing_postcode);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function missingCheckoutBillingFields(): array
+    {
+        $missing = [];
+
+        foreach ([
+            'name',
+            'phone',
+            'company',
+            'billing_address_line_1',
+            'billing_city',
+            'billing_state',
+            'billing_postcode',
+            'billing_country',
+        ] as $field) {
+            if (! filled($this->{$field})) {
+                $missing[] = $field;
+            }
+        }
+
+        return $missing;
+    }
+
+    /**
      * Fuller customer profile gate for the forced completion modal.
      */
     public function hasCompleteBusinessProfile(): bool
@@ -266,5 +404,67 @@ class User extends Authenticatable
         if ($updates !== []) {
             $this->forceFill($updates)->save();
         }
+    }
+
+    /**
+     * Apply full billing details from site checkout (overwrites with submitted values).
+     *
+     * @param  array<string, mixed>  $payload
+     */
+    public function fillBillingFromCheckout(array $payload): void
+    {
+        $updates = [];
+
+        if (isset($payload['name'])) {
+            $name = trim((string) $payload['name']);
+            if ($name !== '') {
+                $updates['name'] = $name;
+            }
+        }
+
+        foreach ([
+            'company',
+            'phone',
+            'billing_country',
+            'billing_city',
+            'billing_state',
+            'billing_postcode',
+            'billing_address_line_1',
+            'billing_address_line_2',
+        ] as $field) {
+            if (! array_key_exists($field, $payload)) {
+                continue;
+            }
+
+            $value = trim((string) ($payload[$field] ?? ''));
+            $updates[$field] = $value === '' ? null : $value;
+        }
+
+        if (isset($updates['billing_country']) && filled($updates['billing_country'])) {
+            $updates['billing_country'] = strtoupper((string) $updates['billing_country']);
+        }
+
+        if ($updates !== []) {
+            $this->forceFill($updates)->save();
+        }
+    }
+
+    /**
+     * @return array<string, string|null>
+     */
+    public function billingSnapshot(): array
+    {
+        return [
+            'name' => $this->name,
+            'email' => $this->email,
+            'company' => $this->company,
+            'phone' => $this->phone,
+            'billing_address_line_1' => $this->billing_address_line_1,
+            'billing_address_line_2' => $this->billing_address_line_2,
+            'billing_city' => $this->billing_city,
+            'billing_state' => $this->billing_state,
+            'billing_postcode' => $this->billing_postcode,
+            'billing_country' => $this->billing_country,
+        ];
     }
 }

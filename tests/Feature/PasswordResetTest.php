@@ -141,6 +141,42 @@ class PasswordResetTest extends TestCase
         });
     }
 
+    public function test_zeptomail_embeds_branded_logo_as_inline_image(): void
+    {
+        config([
+            'services.zeptomail.token' => 'zm_test_token',
+            'services.zeptomail.endpoint' => 'https://api.zeptomail.test/v1.1/email',
+            'services.zeptomail.logo_url' => 'https://gadgets.lemonwares.com/lemonwareslogo.png',
+        ]);
+
+        Http::fake([
+            'https://api.zeptomail.test/v1.1/email' => Http::response([
+                'message' => 'OK',
+                'request_id' => 'req-logo',
+            ], 200),
+        ]);
+
+        $html = '<html><body><img src="https://gadgets.lemonwares.com/lemonwareslogo.png" alt="Lemonwares"></body></html>';
+
+        Mail::mailer('zeptomail')->html($html, function ($message): void {
+            $message->to('ada@example.com')
+                ->from('mails@lemonwares.com', 'Lemonwares')
+                ->subject('Branded');
+        });
+
+        Http::assertSent(function ($request) {
+            $htmlBody = (string) data_get($request->data(), 'htmlbody');
+            $inline = data_get($request->data(), 'inline_images.0');
+
+            return $request->url() === 'https://api.zeptomail.test/v1.1/email'
+                && str_contains($htmlBody, 'cid:lemonwares-logo')
+                && ! str_contains($htmlBody, 'gadgets.lemonwares.com/lemonwareslogo.png')
+                && data_get($inline, 'cid') === 'lemonwares-logo'
+                && data_get($inline, 'mime_type') === 'image/png'
+                && filled(data_get($inline, 'content'));
+        });
+    }
+
     public function test_zeptomail_strips_authorization_prefix_from_token(): void
     {
         config([

@@ -9,22 +9,37 @@ use App\Support\WhmcsDomainCheck;
 use App\Support\WhmcsSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class AdminWhmcsSettingsController extends Controller
 {
     public function index(): View
     {
-        $plans = config('site.hosting_plans', []);
         $mappings = WhmcsProductMapping::query()
             ->orderBy('plan_slug')
             ->orderBy('spec_key')
-            ->get()
-            ->keyBy(fn (WhmcsProductMapping $item) => strtolower($item->plan_slug . ':' . $item->spec_key));
+            ->get();
+
+        $suggestedPlans = collect(config('site.hosting_plans', []))
+            ->map(fn (array $plan, string $slug) => [
+                'slug' => $slug,
+                'title' => (string) ($plan['title'] ?? $slug),
+                'specs' => collect($plan['specifications'] ?? [])
+                    ->map(fn (array $spec) => [
+                        'key' => strtolower((string) ($spec['key'] ?? '')),
+                        'label' => (string) ($spec['label'] ?? ($spec['key'] ?? '')),
+                    ])
+                    ->filter(fn (array $spec) => $spec['key'] !== '')
+                    ->values()
+                    ->all(),
+            ])
+            ->values()
+            ->all();
 
         return view('admin.whmcs-settings.index', [
-            'plans' => $plans,
             'mappings' => $mappings,
+            'suggestedPlans' => $suggestedPlans,
             'settings' => [
                 'base_url' => WhmcsSettings::baseUrl(),
                 'client_login_url' => WhmcsSettings::clientLoginUrl(),
@@ -50,8 +65,8 @@ class AdminWhmcsSettingsController extends Controller
             'payment_method' => ['required', 'string', 'max:80'],
             'defer_payment_redirect' => ['nullable', 'boolean'],
             'mappings' => ['nullable', 'array'],
-            'mappings.*.plan_slug' => ['required_with:mappings', 'string', 'max:50'],
-            'mappings.*.spec_key' => ['required_with:mappings', 'string', 'max:80'],
+            'mappings.*.plan_slug' => ['nullable', 'string', 'max:50'],
+            'mappings.*.spec_key' => ['nullable', 'string', 'max:80'],
             'mappings.*.whmcs_pid' => ['nullable', 'integer', 'min:1'],
             'mappings.*.is_active' => ['nullable', 'boolean'],
         ]);
@@ -67,30 +82,34 @@ class AdminWhmcsSettingsController extends Controller
             'whmcs.defer_payment_redirect' => ! empty($validated['defer_payment_redirect']) ? '1' : '0',
         ]);
 
-        foreach (($validated['mappings'] ?? []) as $mapping) {
-            $planSlug = strtolower((string) $mapping['plan_slug']);
-            $specKey = strtolower((string) $mapping['spec_key']);
-            $pid = (int) ($mapping['whmcs_pid'] ?? 0);
+        $rows = collect($validated['mappings'] ?? [])
+            ->map(function (array $mapping): ?array {
+                $planSlug = strtolower(trim((string) ($mapping['plan_slug'] ?? '')));
+                $specKey = strtolower(trim((string) ($mapping['spec_key'] ?? '')));
+                $pid = (int) ($mapping['whmcs_pid'] ?? 0);
 
-            if ($pid < 1) {
-                WhmcsProductMapping::query()
-                    ->where('plan_slug', $planSlug)
-                    ->where('spec_key', $specKey)
-                    ->delete();
-                continue;
-            }
+                if ($planSlug === '' || $specKey === '' || $pid < 1) {
+                    return null;
+                }
 
-            WhmcsProductMapping::query()->updateOrCreate(
-                [
+                return [
                     'plan_slug' => $planSlug,
                     'spec_key' => $specKey,
-                ],
-                [
                     'whmcs_pid' => $pid,
                     'is_active' => (bool) ($mapping['is_active'] ?? false),
-                ]
-            );
-        }
+                ];
+            })
+            ->filter()
+            ->unique(fn (array $row) => $row['plan_slug'] . ':' . $row['spec_key'])
+            ->values();
+
+        DB::transaction(function () use ($rows): void {
+            WhmcsProductMapping::query()->delete();
+
+            foreach ($rows as $row) {
+                WhmcsProductMapping::query()->create($row);
+            }
+        });
 
         return redirect()
             ->route('admin.whmcs-settings.index')

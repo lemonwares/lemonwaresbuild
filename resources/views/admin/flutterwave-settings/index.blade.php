@@ -1,121 +1,131 @@
 @extends('layouts.admin')
 
-@section('title', 'Flutterwave Settings — Admin')
+@section('title', 'Flutterwave Settings — ' . config('site.short_name'))
+@section('hide_auto_breadcrumbs', true)
 
 @section('content')
-    <div class="mb-8">
-        <p class="section-label mb-3">Integrations</p>
-        <h1 class="heading">Flutterwave Settings</h1>
-        <p class="mt-3 lede">Manage Flutterwave keys for hosting, VPS, and Lemon Mail checkout. Values here override <code class="rounded bg-blush-soft px-1">.env</code> fallbacks.</p>
-    </div>
+    <x-admin.page-header
+        title="Flutterwave Settings"
+        lede="Manage Flutterwave keys for hosting, VPS, and Lemon Mail checkout. Values here override .env fallbacks."
+        :back-href="route('admin.dashboard')"
+        back-label="Go back"
+        :breadcrumbs="[['label' => 'Flutterwave Settings']]"
+        class="mb-5"
+    />
 
-    @if (session('status'))
-        <p class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            {{ session('status') }}
-        </p>
-    @endif
-
-    <form method="POST" action="{{ route('admin.flutterwave-settings.update') }}" class="space-y-6">
+    <form method="POST" action="{{ route('admin.flutterwave-settings.update') }}" class="admin-page-stack" data-submit-form>
         @csrf
         @method('PUT')
 
-        <section class="rounded-3xl border border-border bg-white p-6">
-            <div class="flex flex-wrap items-start justify-between gap-4">
+        <section class="admin-panel">
+            <div class="admin-panel-toolbar compact">
                 <div>
-                    <h2 class="text-lg font-bold text-black">API Credentials</h2>
-                    <p class="mt-1 text-sm text-on-blush/65">Use Flutterwave test keys locally, then swap to live keys in production.</p>
+                    <h2 class="admin-dash-panel-title">API Credentials</h2>
+                    <p class="admin-dash-panel-lede">Use Flutterwave test keys locally, then swap to live keys in production.</p>
                 </div>
                 @if ($is_configured)
                     <span @class([
-                        'inline-flex rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-widest',
-                        'bg-amber-100 text-amber-800' => $is_test_mode,
-                        'bg-emerald-100 text-emerald-800' => ! $is_test_mode,
+                        'admin-pill',
+                        'is-info' => $is_test_mode,
+                        'is-ok' => ! $is_test_mode,
                     ])>
                         {{ $is_test_mode ? 'Test mode keys' : 'Live keys detected' }}
                     </span>
                 @endif
             </div>
 
-            <div class="mt-5 space-y-4">
-                <label class="inline-flex items-start gap-3 rounded-xl border border-border bg-blush-soft/40 px-4 py-3">
-                    <input
-                        type="checkbox"
-                        name="enabled"
-                        value="1"
-                        class="mt-1 rounded border-border text-rose focus:ring-rose/20"
-                        @checked(old('enabled', $settings['enabled']))
-                    />
-                    <span>
-                        <span class="block text-sm font-semibold text-black">Enable Flutterwave checkout</span>
-                        <span class="mt-1 block text-xs text-on-blush/65">When disabled, orders are saved but customers are not redirected to Flutterwave.</span>
-                    </span>
-                </label>
+            <label class="admin-check" style="margin-top:0">
+                <input
+                    type="checkbox"
+                    name="enabled"
+                    value="1"
+                    @checked(old('enabled', $settings['enabled']))
+                />
+                <span>Enable Flutterwave checkout — when disabled, orders are saved but customers are not redirected to Flutterwave.</span>
+            </label>
 
-                <div>
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Public Key</label>
+            <div class="admin-edit-grid mt-5">
+                <label class="admin-field admin-field-span">
+                    <span>Public Key</span>
                     <input
                         type="text"
                         name="public_key"
                         value="{{ old('public_key', $settings['public_key']) }}"
-                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        class="admin-input"
                         placeholder="FLWPUBK_TEST-..."
                         autocomplete="off"
                     >
-                </div>
+                </label>
 
-                <div>
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Secret Key</label>
+                <label class="admin-field admin-field-span">
+                    <span>Secret Key</span>
                     <input
                         type="text"
                         name="secret_key"
                         value="{{ old('secret_key', $settings['secret_key']) }}"
-                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        class="admin-input"
                         required
                         placeholder="FLWSECK_TEST-..."
                         autocomplete="off"
                     >
-                </div>
+                </label>
 
-                <div>
-                    <label class="mb-1.5 block text-xs font-semibold uppercase tracking-widest text-on-blush/60">Webhook Secret Hash</label>
+                <label class="admin-field admin-field-span">
+                    <span>Webhook Secret Hash</span>
                     <input
                         type="text"
                         name="secret_hash"
                         value="{{ old('secret_hash', $settings['secret_hash']) }}"
-                        class="footer-input w-full rounded-xl border border-border px-3 py-2.5"
+                        class="admin-input"
                         placeholder="Same hash configured in Flutterwave dashboard"
                         autocomplete="off"
                     >
-                    <p class="mt-2 text-xs text-on-blush/60">Required for server-to-server webhook verification. Set the same value in Flutterwave → Settings → Webhooks.</p>
-                </div>
+                    <p class="admin-muted text-xs">Required for server-to-server webhook verification. Set the same value in Flutterwave → Settings → Webhooks.</p>
+                </label>
             </div>
         </section>
 
-        <section class="rounded-3xl border border-border bg-white p-6">
-            <h2 class="text-lg font-bold text-black">Webhook URL</h2>
-            <p class="mt-2 text-sm text-on-blush/65">Register this URL in your Flutterwave dashboard so paid orders sync to WHMCS automatically.</p>
-            <div class="mt-4 rounded-2xl border border-border bg-blush-soft px-4 py-3">
-                <code class="break-all text-sm text-black">{{ $webhook_url }}</code>
+        <section class="admin-panel">
+            <div class="admin-panel-toolbar compact">
+                <div>
+                    <h2 class="admin-dash-panel-title">Webhook URL</h2>
+                    <p class="admin-dash-panel-lede">Register this URL in your Flutterwave dashboard so paid orders sync to WHMCS automatically.</p>
+                </div>
+            </div>
+            <div class="rounded-xl border border-border bg-blush-soft/40 px-4 py-3">
+                <code class="admin-mono break-all text-sm text-black">{{ $webhook_url }}</code>
             </div>
         </section>
 
         <div class="flex flex-wrap justify-end gap-3">
-            <button type="submit" class="btn btn-primary">Save Flutterwave Settings</button>
+            <button type="submit" class="admin-btn-primary inline-flex items-center gap-2" data-submit-button>
+                <span class="admin-btn-spinner hidden" data-submit-spinner></span>
+                <span data-submit-label>Save Flutterwave Settings</span>
+                <span class="hidden" data-submit-loading>Saving…</span>
+            </button>
         </div>
     </form>
 
-    <section class="mt-8 rounded-3xl border border-border bg-white p-6">
-        <h2 class="text-lg font-bold text-black">Test API Connection</h2>
-        <p class="mt-2 text-sm text-on-blush/65">Calls Flutterwave’s banks endpoint with your saved secret key.</p>
+    <section class="admin-panel mt-6">
+        <div class="admin-panel-toolbar compact">
+            <div>
+                <h2 class="admin-dash-panel-title">Test API Connection</h2>
+                <p class="admin-dash-panel-lede">Calls Flutterwave’s banks endpoint with your saved secret key.</p>
+            </div>
+        </div>
 
-        <form method="POST" action="{{ route('admin.flutterwave-settings.test-connection') }}" class="mt-5">
+        <form method="POST" action="{{ route('admin.flutterwave-settings.test-connection') }}" data-submit-form>
             @csrf
-            <button type="submit" class="btn btn-ghost">Run Connection Test</button>
+            <button type="submit" class="admin-btn-ghost inline-flex items-center gap-2" data-submit-button>
+                <span class="admin-btn-spinner hidden" data-submit-spinner></span>
+                <span data-submit-label>Run Connection Test</span>
+                <span class="hidden" data-submit-loading>Testing…</span>
+            </button>
         </form>
 
         @if (session('connection_test_result'))
             @php($test = session('connection_test_result'))
-            <div class="mt-6 rounded-2xl border border-border bg-blush-soft p-4 text-sm">
+            <div class="mt-6 rounded-xl border border-border bg-blush-soft/40 px-4 py-3 text-sm">
                 <p @class([
                     'font-semibold',
                     'text-emerald-700' => $test['ok'] ?? false,
