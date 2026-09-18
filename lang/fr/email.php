@@ -367,12 +367,28 @@ return [
             'summary' => 'Email pro hébergé par Titan avec accompagnement Lemonwares.',
         ],
         'google_workspace_business_starter' => [
-            'name' => 'Google Workspace Starter',
-            'summary' => 'Gmail et apps Google avec assistance migration et configuration.',
+            'name' => 'Business Starter',
+            'summary' => 'Gmail, Drive, Meet et Calendar — idéal pour les petites équipes qui passent à Google.',
+        ],
+        'google_workspace_business_standard' => [
+            'name' => 'Business Standard',
+            'summary' => 'Plus de stockage, enregistrement des réunions et Drive partagés pour les équipes en croissance.',
+        ],
+        'google_workspace_business_plus' => [
+            'name' => 'Business Plus',
+            'summary' => 'Sécurité renforcée, options Vault et réunions plus grandes.',
         ],
         'microsoft_365_business_basic' => [
-            'name' => 'Microsoft 365 Business Basic',
-            'summary' => 'Outlook et suite Microsoft avec onboarding guidé.',
+            'name' => 'Business Basic',
+            'summary' => 'Outlook, Teams, OneDrive et Office web sur votre domaine.',
+        ],
+        'microsoft_365_business_standard' => [
+            'name' => 'Business Standard',
+            'summary' => 'Apps Office bureau plus Teams et OneDrive pour le quotidien.',
+        ],
+        'microsoft_365_business_premium' => [
+            'name' => 'Business Premium',
+            'summary' => 'Productivité Standard plus sécurité appareil et identité renforcée.',
         ],
         'starter' => [
             'name' => 'Solo',

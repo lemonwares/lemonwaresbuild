@@ -62,7 +62,7 @@
                         {{ __('pages.google_workspace.lede') }}
                     </p>
                     <div class="mt-8 flex flex-wrap items-center gap-3">
-                        <a href="{{ $quoteHref }}" class="btn bg-white text-rose hover:bg-blush">
+                        <a href="#suite-pricing" class="btn bg-white text-rose hover:bg-blush">
                             <span>{{ __('pages.google_workspace.cta') }}</span>
                         </a>
                         <a href="#gws-apps" class="inline-flex items-center gap-2 text-sm font-semibold text-white/90 transition hover:text-white">
@@ -96,6 +96,8 @@
             </ol>
         </div>
     </section>
+
+    <x-suite-pricing :suite-plans="$suitePlans ?? []" page-key="google_workspace" />
 
     <section id="gws-apps" class="scroll-mt-28 border-t border-border bg-blush-soft/40" data-reveal>
         <div class="container-page py-16 sm:py-20">
@@ -230,7 +232,7 @@
             <div class="flex flex-wrap items-center gap-3">
                 <a href="{{ $quoteHref }}" class="btn btn-primary">
                     <x-ui.icons.arrow-up-right class="size-4" />
-                    <span>{{ __('pages.google_workspace.cta') }}</span>
+                    <span>{{ __('pages.google_workspace.cta_contact') }}</span>
                 </a>
                 <a href="{{ route('email.plans') }}" class="btn btn-ghost">
                     <span>{{ __('site.nav.email') }}</span>

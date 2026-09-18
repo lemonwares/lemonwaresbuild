@@ -51,6 +51,7 @@
                             <th>Photo</th>
                             <th>Name</th>
                             <th>Role</th>
+                            <th>Department</th>
                             <th>Order</th>
                             <th>Status</th>
                             <th></th>
@@ -70,6 +71,7 @@
                                 </td>
                                 <td><strong>{{ $member->name }}</strong></td>
                                 <td>{{ $member->role }}</td>
+                                <td>{{ \App\Models\TeamMember::departments()[$member->department] ?? ucfirst((string) $member->department) }}</td>
                                 <td>{{ $member->sort_order }}</td>
                                 <td>
                                     <span @class(['admin-pill', 'is-ok' => $member->is_active])>
@@ -98,7 +100,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="admin-table-empty">No team members yet. Click Add Team Member to get started.</td>
+                                <td colspan="7" class="admin-table-empty">No team members yet. Click Add Team Member to get started.</td>
                             </tr>
                         @endforelse
                     </tbody>

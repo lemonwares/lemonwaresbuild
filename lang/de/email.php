@@ -367,12 +367,28 @@ return [
             'summary' => 'Titan-gehostete Business-E-Mail mit Lemonwares-Onboarding.',
         ],
         'google_workspace_business_starter' => [
-            'name' => 'Google Workspace Starter',
-            'summary' => 'Gmail und Google-Apps mit Migrations- und Setup-Hilfe.',
+            'name' => 'Business Starter',
+            'summary' => 'Gmail, Drive, Meet und Calendar — solide für kleine Teams auf Google.',
+        ],
+        'google_workspace_business_standard' => [
+            'name' => 'Business Standard',
+            'summary' => 'Mehr Speicher, Meeting-Aufzeichnung und Shared Drives für wachsende Teams.',
+        ],
+        'google_workspace_business_plus' => [
+            'name' => 'Business Plus',
+            'summary' => 'Mehr Sicherheit, Vault-Optionen und größere Meetings.',
         ],
         'microsoft_365_business_basic' => [
-            'name' => 'Microsoft 365 Business Basic',
-            'summary' => 'Outlook und Microsoft-Suite mit geführtem Onboarding.',
+            'name' => 'Business Basic',
+            'summary' => 'Outlook, Teams, OneDrive und Office im Web auf Ihrer Domain.',
+        ],
+        'microsoft_365_business_standard' => [
+            'name' => 'Business Standard',
+            'summary' => 'Desktop-Office plus Teams und OneDrive für den Alltag.',
+        ],
+        'microsoft_365_business_premium' => [
+            'name' => 'Business Premium',
+            'summary' => 'Standard-Produktivität plus stärkere Geräte- und Identitätssicherheit.',
         ],
         'starter' => [
             'name' => 'Solo',

@@ -14,6 +14,7 @@ class AdminTeamMemberController extends Controller
     public function index(): View
     {
         $members = TeamMember::query()
+            ->orderByRaw("case department when 'managerial' then 0 when 'administrative' then 1 else 2 end")
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
@@ -85,6 +86,7 @@ class AdminTeamMemberController extends Controller
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'role' => ['required', 'string', 'max:160'],
+            'department' => ['required', Rule::in(array_keys(TeamMember::departments()))],
             'quote' => ['nullable', 'string', 'max:255'],
             'bio' => ['nullable', 'string', 'max:1000'],
             'x_url' => ['nullable', 'url', 'max:255'],

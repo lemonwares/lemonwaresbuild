@@ -126,7 +126,7 @@ class AdminBreadcrumbs
                 ['label' => 'Hosting Prices'],
             ],
             'admin.email-catalog.index' => [
-                ['label' => 'Email Catalog'],
+                ['label' => 'Email & Suite Pricing'],
             ],
             'admin.whmcs-settings.index' => [
                 ['label' => 'WHMCS Settings'],

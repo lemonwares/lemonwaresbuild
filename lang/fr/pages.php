@@ -12,7 +12,7 @@ return [
         'cta_careers' => 'Carrières',
         'story_label' => 'Notre histoire',
         'story_title' => 'Infrastructure et produits, avec des humains derrière',
-        'p1' => 'Lemonwares Technology est une entreprise d’infrastructure digitale basée à Lagos qui aide les entreprises à bâtir et maintenir une présence en ligne solide. De l’hébergement cloud partagé et des VPS à l’email Mailemon, au développement web et aux apps mobiles, nous fournissons les outils et le support dont les équipes en croissance ont besoin.',
+        'p1' => 'Lemonwares Technology est une entreprise d’infrastructure digitale basée à Lagos qui aide les entreprises à bâtir et maintenir une présence en ligne solide. De l’hébergement cloud et des VPS à l’email Mailemon, au développement web et aux apps mobiles, nous fournissons les outils et le support dont les équipes en croissance ont besoin.',
         'p2' => 'Notre focus : technologie pratique, communication claire et service fiable. Premier site, boîtes de marque, migration ou montée en charge — nous aidons à choisir la bonne config et à la faire tourner.',
         'p3' => 'Nous travaillons depuis Lekki, Lagos, et servons des clients au Nigeria et au-delà — domaines, hébergement, email et développement avec la même équipe.',
         'values_label' => 'Notre façon de faire',
@@ -204,6 +204,18 @@ return [
         'grid_label' => 'Personnes',
         'grid_title' => 'Les visages derrière le travail',
         'grid_lede' => 'Les profils sont gérés depuis l’admin Lemonwares — photos, rôles et liens à tout moment.',
+        'departments' => [
+            'managerial' => [
+                'label' => 'Direction',
+                'title' => 'Managerial',
+                'lede' => 'Stratégie, leadership delivery, et les personnes qui façonnent la croissance de Lemonwares.',
+            ],
+            'administrative' => [
+                'label' => 'Opérations',
+                'title' => 'Administratif',
+                'lede' => 'Les coordinateurs qui assurent le planning, les RH et le quotidien de l’équipe.',
+            ],
+        ],
         'empty' => 'Les profils d’équipe sont en cours de mise à jour. Écrivez-nous — ou voyez les postes ouverts sur Carrières.',
         'need_help' => 'Besoin d’aide de notre équipe ?',
         'get_in_touch' => 'Contactez-nous',
@@ -308,7 +320,7 @@ return [
             [
                 'client' => 'Bright Media',
                 'service' => 'Hébergement WordPress',
-                'summary' => 'Migration d’une plateforme WordPress à fort trafic depuis un hébergement partagé instable vers un environnement Lemonwares optimisé avec cache, monitoring et sauvegardes.',
+                'summary' => 'Migration d’une plateforme WordPress à fort trafic depuis un hébergement cloud instable vers un environnement Lemonwares optimisé avec cache, monitoring et sauvegardes.',
                 'result' => 'Pages plus rapides, moins d’incidents support, et une disponibilité stable pour publier sans interruptions techniques.',
             ],
             [
@@ -424,7 +436,7 @@ return [
         'card_dns_title' => 'DNS aligné avec votre stack',
         'card_dns_body' => 'Nous vous fournissons des enregistrements clairs pour l’hébergement et Mailemon afin que mail et site soient en ligne sans approximations.',
         'card_hosting_title' => 'Hébergement à côté',
-        'card_hosting_body' => 'Choisissez un hébergement cloud partagé ou un VPS quand vous êtes prêt — la même équipe pour domaine, site et email.',
+        'card_hosting_body' => 'Choisissez un hébergement cloud ou un VPS quand vous êtes prêt — la même équipe pour domaine, site et email.',
         'hero_title' => 'Trouvez le nom de domaine parfait',
         'hero_lede' => 'Vérifiez la disponibilité en quelques secondes, voyez le prix, puis continuez vers l’hébergement avec enregistrement ou transfert prêt.',
         'social_proof' => 'Enregistrez ou transférez — puis hébergement, email et DNS avec une seule équipe Lemonwares.',
@@ -449,7 +461,7 @@ return [
         'feature_transfer_body' => 'En vrai, un transfert demande le domaine déverrouillé, un code auth/EPP et une approbation e-mail — souvent quelques jours. Ici, nous confirmons que le nom est enregistré, affichons le prix en nairas, puis vous payez sur ce site pour lancer le transfert (ou le coupler à l’hébergement). Après validation, renouvellements, DNS et support restent chez Lemonwares.',
         'feature_transfer_cta' => 'Transférer votre domaine',
         'feature_manage_title' => 'Gestion simple avec l’hébergement',
-        'feature_manage_body' => 'Une fois le domaine à vous, pointez-le vers le cloud partagé ou le VPS et posez les enregistrements A pour charger le site. Ajoutez Mailemon pour les boîtes de marque — nous fournissons les MX et DNS associés pour que mail et web restent sur le même nom. Une stack qui grandit sans changer de registrar.',
+        'feature_manage_body' => 'Une fois le domaine à vous, pointez-le vers le cloud ou le VPS et posez les enregistrements A pour charger le site. Ajoutez Mailemon pour les boîtes de marque — nous fournissons les MX et DNS associés pour que mail et web restent sur le même nom. Une stack qui grandit sans changer de registrar.',
         'feature_manage_cta' => 'Voir l’hébergement cloud',
         'faq_title' => 'Questions fréquentes sur les domaines',
         'faq_items' => [
@@ -485,12 +497,21 @@ return [
         'eyebrow' => 'Google Workspace',
         'title' => 'Google Workspace sur votre domaine',
         'lede' => 'Gmail pro, Drive, Meet et Calendar sous votre marque — devis, provisionnement et support par Lemonwares.',
-        'cta' => 'Demander un devis',
+        'cta' => 'Voir les tarifs',
+        'cta_contact' => 'Demander un devis',
         'cta_subject' => 'Devis Google Workspace',
-        'body' => 'Google Workspace est la suite Google complète sur votre domaine. Nous vous aidons à choisir les sièges, migrer mails et fichiers, vérifier le domaine et maintenir le DNS correct pour que votre équipe travaille sans approximation. Les tarifs sont proposés selon la taille de votre équipe — contactez-nous quand vous êtes prêts.',
+        'cta_pricing' => 'Choisir ce plan',
+        'body' => 'Google Workspace est la suite Google complète sur votre domaine. Nous vous aidons à choisir les sièges, migrer mails et fichiers, vérifier le domaine et maintenir le DNS correct pour que votre équipe travaille sans approximation.',
         'intro_eyebrow' => 'Comment ça marche',
         'intro_title' => 'Devis, migration, mise en ligne',
         'intro_lede' => 'Quatre étapes claires de la première conversation à Gmail sur votre domaine.',
+        'pricing_eyebrow' => 'Tarifs',
+        'pricing_title' => 'Offres Google Workspace',
+        'pricing_lede' => 'Tarifs publiés par utilisateur en Naira — choisissez un niveau, puis indiquez le nombre de sièges pour confirmation et provisionnement.',
+        'pricing_from' => 'À partir de',
+        'pricing_per_user' => 'par utilisateur / mois',
+        'pricing_empty' => 'Les tarifs sont en cours de mise à jour. Demandez un devis et nous confirmerons sièges et facturation.',
+        'pricing_note' => 'La facture finale dépend du nombre de sièges, du cycle de facturation et d’une éventuelle migration. Contactez-nous pour confirmer avant de payer.',
         'steps' => [
             [
                 'title' => 'Indiquez la taille de votre équipe',
@@ -667,12 +688,21 @@ return [
         'eyebrow' => 'Microsoft 365',
         'title' => 'Microsoft 365 pour votre activité',
         'lede' => 'Outlook, Teams, OneDrive et les apps Office sur votre domaine — devis et mise en place avec Lemonwares.',
-        'cta' => 'Demander un devis',
+        'cta' => 'Voir les tarifs',
+        'cta_contact' => 'Demander un devis',
         'cta_subject' => 'Devis Microsoft 365',
-        'body' => 'Microsoft 365 est la suite Microsoft que vos clients connaissent déjà. Nous aidons pour les licences, la migration des boîtes, les bases du tenant et les enregistrements DNS qui rendent le mail et Teams fiables. Les tarifs sont proposés selon vos sièges — contactez-nous quand vous êtes prêts.',
+        'cta_pricing' => 'Choisir ce plan',
+        'body' => 'Microsoft 365 est la suite Microsoft que vos clients connaissent déjà. Nous aidons pour les licences, la migration des boîtes, les bases du tenant et les enregistrements DNS qui rendent le mail et Teams fiables.',
         'intro_eyebrow' => 'Comment ça marche',
         'intro_title' => 'Licences, migration, collaboration',
         'intro_lede' => 'Quatre étapes claires de la première conversation à Outlook et Teams sur votre domaine.',
+        'pricing_eyebrow' => 'Tarifs',
+        'pricing_title' => 'Offres Microsoft 365',
+        'pricing_lede' => 'Tarifs publiés par utilisateur en Naira — choisissez une licence, puis indiquez le nombre de sièges pour confirmation et provisionnement.',
+        'pricing_from' => 'À partir de',
+        'pricing_per_user' => 'par utilisateur / mois',
+        'pricing_empty' => 'Les tarifs sont en cours de mise à jour. Demandez un devis et nous confirmerons sièges et facturation.',
+        'pricing_note' => 'La facture finale dépend du nombre de sièges, du cycle de facturation et d’une éventuelle migration. Contactez-nous pour confirmer avant de payer.',
         'steps' => [
             [
                 'title' => 'Partagez sièges et besoins',
@@ -845,19 +875,19 @@ return [
     ],
     'cloud_hosting' => [
         'meta_title' => 'Hébergement cloud',
-        'meta_description' => 'Hébergement cloud partagé cPanel et Plesk chez Lemonwares — offres SSD, SSL, sauvegardes et support pour les sites du quotidien.',
+        'meta_description' => 'hébergement cloud cPanel et Plesk chez Lemonwares — offres SSD, SSL, sauvegardes et support pour les sites du quotidien.',
         'eyebrow' => 'Hébergement cloud',
-        'title' => 'Hébergement cloud partagé qui reste en ligne',
+        'title' => 'hébergement cloud qui reste en ligne',
         'lede' => 'cPanel ou Plesk pour sites vitrine, blogs et petites plateformes — sans la complexité d’un serveur root.',
         'cta' => 'Voir les offres cPanel',
-        'body' => 'L’hébergement cloud partagé convient quand vous avez besoin d’un site fiable, pas d’un serveur à administrer. Choisissez un panneau, une offre avec le stockage et les limites de sites adaptés — nous gérons SSL, sauvegardes et support.',
+        'body' => 'L’hébergement cloud convient quand vous avez besoin d’un site fiable, pas d’un serveur à administrer. Choisissez un panneau, une offre avec le stockage et les limites de sites adaptés — nous gérons SSL, sauvegardes et support.',
         'intro_eyebrow' => 'Comment ça marche',
         'intro_title' => 'Panneau, offre, puis mise en ligne',
         'intro_lede' => 'Trois étapes claires de la découverte au site en ligne — sans accès root.',
         'steps' => [
             [
                 'title' => 'Choisir cPanel ou Plesk',
-                'body' => 'La même stack cloud partagée. Choisissez le panneau que votre équipe connaît pour WordPress, l’email et les sites du quotidien.',
+                'body' => 'La même stack cloude. Choisissez le panneau que votre équipe connaît pour WordPress, l’email et les sites du quotidien.',
             ],
             [
                 'title' => 'Choisir stockage et limites de sites',
@@ -870,16 +900,16 @@ return [
         ],
         'panels_eyebrow' => 'Choisissez votre panneau',
         'panels_title' => 'cPanel ou Plesk',
-        'panels_lede' => 'La même plateforme cloud partagée — choisissez le panneau que votre équipe connaît déjà.',
+        'panels_lede' => 'La même plateforme cloude — choisissez le panneau que votre équipe connaît déjà.',
         'cpanel_badge' => 'Le plus populaire',
         'cpanel_title' => 'cPanel',
         'cpanel_body' => 'Le panneau familier pour WordPress, l’hébergement prêt pour l’email et les sites business du quotidien.',
         'cpanel_cta' => 'Voir les offres cPanel',
         'plesk_title' => 'Plesk',
-        'plesk_body' => 'Une alternative claire sur la même stack cloud partagée — idéal si votre équipe préfère Plesk, Node.js ou Next.js.',
+        'plesk_body' => 'Une alternative claire sur la même stack cloude — idéal si votre équipe préfère Plesk, Node.js ou Next.js.',
         'plesk_cta' => 'Découvrir l’hébergement Plesk',
         'plans_eyebrow' => 'Aperçu des offres',
-        'plans_title' => 'Ce que chaque offre partagée inclut',
+        'plans_title' => 'Ce que chaque offre cloud inclut',
         'plans_lede' => 'Prix mensuels en naira. Ouvrez un panneau ci-dessous pour sélectionner une offre et continuer vers le panier.',
         'plans_from' => 'À partir de',
         'plans_storage' => 'Stockage',
@@ -889,7 +919,7 @@ return [
         'cpanel_plans_title' => 'Offres cPanel',
         'plesk_plans_title' => 'Offres Plesk',
         'features_eyebrow' => 'Inclus sur chaque offre',
-        'features_title' => 'Ce que le cloud partagé couvre toujours',
+        'features_title' => 'Ce que l’hébergement cloud couvre toujours',
         'features_lede' => 'Les bases pour garder un site business en ligne — sans mot de passe root.',
         'features' => [
             [
@@ -902,7 +932,7 @@ return [
             ],
             [
                 'title' => 'SSD et bande passante illimitée',
-                'body' => 'Stockage rapide avec transfert illimité sur les offres partagées — dimensionné par stockage et nombre de sites.',
+                'body' => 'Stockage rapide avec transfert illimité sur les offres cloud — dimensionné par stockage et nombre de sites.',
             ],
             [
                 'title' => 'Domaine et email prêts',
@@ -921,7 +951,7 @@ return [
         'benefits_title' => 'Conçu pour les sites qui doivent rester en ligne',
         'benefits_lede' => 'SSL, sauvegardes et support sur chaque offre — sans mot de passe root dont vous n’avez pas besoin.',
         'highlights' => [
-            'Options cloud partagé cPanel et Plesk',
+            'Options cloud cPanel et Plesk',
             'Stockage SSD avec bande passante illimitée',
             'SSL et sauvegardes automatiques sur chaque offre',
             'Domaines enregistrables ou connectables au checkout',
@@ -929,9 +959,9 @@ return [
             'Support sur WhatsApp, téléphone et email',
         ],
         'fit_eyebrow' => 'Est-ce pour vous ?',
-        'fit_title' => 'Cloud partagé vs VPS',
+        'fit_title' => 'Hébergement cloud vs VPS',
         'fit_lede' => 'Commencez ici pour les sites et landing pages. Passez au VPS quand vous avez besoin de root ou de ressources dédiées.',
-        'fit_shared_title' => 'Choisissez le cloud partagé si vous avez besoin',
+        'fit_shared_title' => 'Choisissez le cloud si vous avez besoin',
         'fit_shared' => [
             'D’un site vitrine, blog ou portfolio',
             'De WordPress ou d’un site business simple',
@@ -942,14 +972,14 @@ return [
         'fit_vps' => [
             'D’un accès root et d’un stack personnalisé',
             'De CPU, RAM ou isolation dédiés',
-            'D’apps qui dépassent l’hébergement partagé',
+            'D’apps qui dépassent l’hébergement cloud',
             'Du contrôle total avec le support Lemonwares à proximité',
         ],
         'fit_vps_cta' => 'Explorer le VPS',
         'faq_title' => 'FAQ hébergement cloud',
         'faq_items' => [
             [
-                'question' => 'Qu’est-ce que l’hébergement cloud partagé ?',
+                'question' => 'Qu’est-ce que l’hébergement cloud ?',
                 'answer' => 'Votre site tourne sur une infrastructure partagée gérée avec un panneau. Vous gérez contenu et apps — nous le serveur, le SSL et les sauvegardes.',
             ],
             [
@@ -966,7 +996,7 @@ return [
             ],
             [
                 'question' => 'Quand passer au VPS ?',
-                'answer' => 'Passez au VPS pour root/SSH, CPU et RAM dédiés, Docker, ou un stack que l’hébergement partagé ne peut pas faire tourner.',
+                'answer' => 'Passez au VPS pour root/SSH, CPU et RAM dédiés, Docker, ou un stack que l’hébergement cloud ne peut pas faire tourner.',
             ],
             [
                 'question' => 'Comment commander ?',
@@ -978,15 +1008,15 @@ return [
     ],
     'plesk' => [
         'meta_title' => 'Hébergement Plesk',
-        'meta_description' => 'Hébergement cloud partagé avec Plesk chez Lemonwares — offres Web Basic, Web Plus et Web Scale avec SSD, SSL et support pour WordPress, Node.js et Next.js.',
+        'meta_description' => 'hébergement cloud avec Plesk chez Lemonwares — offres Web Basic, Web Plus et Web Scale avec SSD, SSL et support pour WordPress, Node.js et Next.js.',
         'eyebrow' => 'Hébergement Plesk',
-        'title' => 'Cloud partagé avec le panneau Plesk',
-        'lede' => 'Plesk sur le cloud partagé Lemonwares — offres claires en naira pour WordPress, Node.js et Next.js sans la complexité d’un serveur root.',
+        'title' => 'cloud avec le panneau Plesk',
+        'lede' => 'Plesk sur le cloud Lemonwares — offres claires en naira pour WordPress, Node.js et Next.js sans la complexité d’un serveur root.',
         'cta' => 'Voir les offres Plesk',
-        'body' => 'L’hébergement Plesk utilise le même stack cloud partagé que nos offres cPanel, avec un panneau que de nombreuses équipes préfèrent pour les apps modernes. Choisissez Web Basic, Web Plus ou Web Scale — stockage SSD, bande passante illimitée, SSL et sauvegardes inclus.',
+        'body' => 'L’hébergement Plesk utilise le même stack cloud que nos offres cPanel, avec un panneau que de nombreuses équipes préfèrent pour les apps modernes. Choisissez Web Basic, Web Plus ou Web Scale — stockage SSD, bande passante illimitée, SSL et sauvegardes inclus.',
         'intro_eyebrow' => 'Comment ça marche',
         'intro_title' => 'Choisissez une offre Plesk, puis passez en ligne',
-        'intro_lede' => 'Trois étapes claires de la consultation à un site live sur le cloud partagé Plesk.',
+        'intro_lede' => 'Trois étapes claires de la consultation à un site live sur le cloud Plesk.',
         'steps' => [
             [
                 'title' => 'Choisissez Web Basic, Plus ou Scale',
@@ -998,7 +1028,7 @@ return [
             ],
             [
                 'title' => 'Nous provisionnons avec SSL et sauvegardes',
-                'body' => 'Après paiement, nous installons Plesk sur le cloud partagé avec SSL gratuit et sauvegardes automatiques — vous gérez les sites dans le panneau.',
+                'body' => 'Après paiement, nous installons Plesk sur le cloud avec SSL gratuit et sauvegardes automatiques — vous gérez les sites dans le panneau.',
             ],
         ],
         'plans_eyebrow' => 'Offres Plesk',
@@ -1010,7 +1040,7 @@ return [
         'plans_websites' => 'Sites web',
         'plans_select' => 'Choisir l’offre',
         'features_eyebrow' => 'Inclus dans chaque offre',
-        'features_title' => 'Ce que le cloud partagé Plesk couvre toujours',
+        'features_title' => 'Ce que l’hébergement cloud Plesk couvre toujours',
         'features_lede' => 'Un panneau familier sur une infrastructure partagée gérée — sans vous remettre un mot de passe root.',
         'features' => [
             [
@@ -1039,7 +1069,7 @@ return [
             ],
         ],
         'highlights' => [
-            'Plesk sur le cloud partagé Lemonwares',
+            'Plesk sur le cloud Lemonwares',
             'Web Basic, Web Plus et Web Scale en naira',
             'Stockage SSD avec bande passante illimitée',
             'SSL et sauvegardes automatiques sur chaque offre',
@@ -1048,31 +1078,31 @@ return [
         ],
         'fit_eyebrow' => 'Est-ce pour vous ?',
         'fit_title' => 'Plesk vs cPanel',
-        'fit_lede' => 'La même plateforme cloud partagée — choisissez le panneau que votre équipe connaît déjà.',
+        'fit_lede' => 'La même plateforme cloude — choisissez le panneau que votre équipe connaît déjà.',
         'fit_plesk_title' => 'Choisissez Plesk si vous avez besoin',
         'fit_plesk' => [
             'D’un panneau que votre équipe utilise déjà',
             'De WordPress plus de confort Node.js ou Next.js',
             'D’offres Web Basic / Plus / Scale claires',
-            'De cloud partagé sans admin serveur root',
+            'De cloud sans admin serveur root',
         ],
         'fit_cpanel_title' => 'Choisissez cPanel si vous avez besoin',
         'fit_cpanel' => [
             'Du panneau d’hébergement WordPress le plus familier',
             'De sites business classiques et d’hébergement prêt pour l’email',
             'Du workflow que la plupart des agences connaissent déjà',
-            'Du même stack cloud partagé sous un autre panneau',
+            'Du même stack cloud sous un autre panneau',
         ],
         'fit_cpanel_cta' => 'Voir l’hébergement cloud',
         'faq_title' => 'FAQ hébergement Plesk',
         'faq_items' => [
             [
                 'question' => 'Qu’est-ce que l’hébergement Plesk ?',
-                'answer' => 'Un hébergement cloud partagé avec le panneau Plesk. Vous gérez sites et apps dans Plesk ; Lemonwares s’occupe du serveur, du SSL et des sauvegardes.',
+                'answer' => 'Un hébergement cloud avec le panneau Plesk. Vous gérez sites et apps dans Plesk ; Lemonwares s’occupe du serveur, du SSL et des sauvegardes.',
             ],
             [
                 'question' => 'En quoi est-ce différent de cPanel ?',
-                'answer' => 'Même infrastructure cloud partagée. Plesk est le panneau — un bon choix si votre équipe le préfère, ou si vous travaillez avec Node.js et Next.js en plus de WordPress.',
+                'answer' => 'Même infrastructure cloude. Plesk est le panneau — un bon choix si votre équipe le préfère, ou si vous travaillez avec Node.js et Next.js en plus de WordPress.',
             ],
             [
                 'question' => 'Quelles offres sont disponibles ?',
@@ -1099,7 +1129,7 @@ return [
         'meta_description' => 'Serveurs VPS root AMD EPYC chez Lemonwares — CPU, RAM et NVMe dédiés, accès root complet et marge de croissance.',
         'eyebrow' => 'VPS',
         'title' => 'Serveurs root quand vous avez besoin du contrôle total',
-        'lede' => 'VPS AMD EPYC avec accès root, durcissement sécurité et marge pour les apps qui dépassent l’hébergement partagé.',
+        'lede' => 'VPS AMD EPYC avec accès root, durcissement sécurité et marge pour les apps qui dépassent l’hébergement cloud.',
         'cta' => 'Voir les offres VPS',
         'body' => 'Quand votre charge nécessite des ressources dédiées ou un stack personnalisé, un VPS vous donne les clés sans perdre le support Lemonwares. Choisissez CPU, RAM et NVMe — puis installez ce dont vous avez besoin.',
         'intro_eyebrow' => 'Comment ça marche',
@@ -1136,7 +1166,7 @@ return [
         'features' => [
             [
                 'title' => 'Root et SSH complets',
-                'body' => 'Installez le stack dont vous avez besoin — Nginx, Docker, bases, agents CI — sans limites d’hébergement partagé.',
+                'body' => 'Installez le stack dont vous avez besoin — Nginx, Docker, bases, agents CI — sans limites d’hébergement cloud.',
             ],
             [
                 'title' => 'AMD EPYC et NVMe',
@@ -1144,7 +1174,7 @@ return [
             ],
             [
                 'title' => 'Ressources dédiées',
-                'body' => 'Votre vCPU et RAM ne sont pas partagés comme un site vitrine en cloud partagé — meilleure isolation pour la production.',
+                'body' => 'Votre vCPU et RAM ne sont pas partagés comme un site vitrine en cloud — meilleure isolation pour la production.',
             ],
             [
                 'title' => 'Options de durcissement',
@@ -1156,7 +1186,7 @@ return [
             ],
             [
                 'title' => 'Le même support Lemonwares',
-                'body' => 'WhatsApp, téléphone et email — alignés avec vos domaines, hébergement partagé et email pro.',
+                'body' => 'WhatsApp, téléphone et email — alignés avec vos domaines, hébergement cloud et email pro.',
             ],
         ],
         'highlights' => [
@@ -1168,16 +1198,16 @@ return [
             'La même équipe support qu’hébergement et email',
         ],
         'fit_eyebrow' => 'Le VPS est-il adapté ?',
-        'fit_title' => 'VPS vs cloud partagé',
-        'fit_lede' => 'Choisissez le VPS quand vous avez besoin des clés. Restez en cloud partagé quand un panneau et un site suffisent.',
+        'fit_title' => 'VPS vs hébergement cloud',
+        'fit_lede' => 'Choisissez le VPS quand vous avez besoin des clés. Restez en cloud quand un panneau et un site suffisent.',
         'fit_vps_title' => 'Choisissez le VPS si vous avez besoin',
         'fit_vps' => [
             'D’un accès root ou SSH',
             'De CPU et mémoire dédiés',
             'De Docker, runtimes custom ou APIs lourdes',
-            'D’une isolation au-delà de l’hébergement partagé',
+            'D’une isolation au-delà de l’hébergement cloud',
         ],
-        'fit_shared_title' => 'Restez en cloud partagé si vous avez besoin',
+        'fit_shared_title' => 'Restez en cloud si vous avez besoin',
         'fit_shared' => [
             'D’un site vitrine ou d’un blog WordPress',
             'De cPanel ou Plesk sans admin serveur',
@@ -1186,7 +1216,7 @@ return [
         ],
         'fit_shared_cta' => 'Voir l’hébergement cloud',
         'contrast_eyebrow' => 'Vous hésitez ?',
-        'contrast_title' => 'Le cloud partagé peut suffire',
+        'contrast_title' => 'Le cloud peut suffire',
         'contrast_lede' => 'Si vous avez surtout besoin d’un panneau pour un site — pas d’un serveur — commencez par cPanel ou Plesk.',
         'contrast_cta' => 'Voir l’hébergement cloud',
         'faq_title' => 'FAQ VPS',
@@ -1196,8 +1226,8 @@ return [
                 'answer' => 'Un serveur privé virtuel avec ressources dédiées et accès root. Vous administrez l’OS et les apps ; nous fournissons la machine virtuelle et le support.',
             ],
             [
-                'question' => 'Différence avec le cloud partagé ?',
-                'answer' => 'Le cloud partagé donne un panneau sur un hébergement géré. Le VPS donne root, CPU/RAM dédiés et liberté pour des stacks custom.',
+                'question' => 'Différence avec l’hébergement cloud ?',
+                'answer' => 'Le cloud donne un panneau sur un hébergement géré. Le VPS donne root, CPU/RAM dédiés et liberté pour des stacks custom.',
             ],
             [
                 'question' => 'Par quel VPS commencer ?',

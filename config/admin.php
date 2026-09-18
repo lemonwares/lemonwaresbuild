@@ -22,7 +22,7 @@ return [
         'subscribers' => 'Subscribers',
         'campaigns' => 'Newsletter campaigns',
         'hosting_prices' => 'Hosting prices',
-        'email_catalog' => 'Lemon Mail catalog',
+        'email_catalog' => 'Email & suite pricing',
         'email_providers' => 'Email provider settings',
         'whmcs' => 'WHMCS settings',
         'flutterwave' => 'Flutterwave settings',

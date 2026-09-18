@@ -34,7 +34,7 @@ return [
         ],
         [
             'question' => 'Welche Hosting-Pläne bieten Sie an?',
-            'answer' => 'Wir bieten cPanel- und Plesk-Shared-Cloud-Hosting für typische Websites sowie VPS-Root-Server, wenn Sie mehr Leistung und Kontrolle brauchen.',
+            'answer' => 'Wir bieten cPanel- und Plesk-Cloud-Hosting für typische Websites sowie VPS-Root-Server, wenn Sie mehr Leistung und Kontrolle brauchen.',
         ],
         [
             'question' => 'Bauen Sie WordPress-Sites und individuelle Apps?',
