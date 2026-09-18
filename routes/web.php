@@ -152,8 +152,17 @@ Route::view('/cloud-hosting', 'pages.cloud-hosting')->name('cloud-hosting');
 Route::view('/plesk', 'pages.plesk')->name('plesk');
 Route::view('/vps', 'pages.vps')->name('vps');
 
-Route::view('/google-workspace', 'pages.google-workspace')->name('google-workspace');
-Route::view('/microsoft-365', 'pages.microsoft-365')->name('microsoft-365');
+Route::get('/google-workspace', function () {
+    $suitePlans = \App\Support\EmailPricing::plansForProvider('google_workspace');
+
+    return view('pages.google-workspace', compact('suitePlans'));
+})->name('google-workspace');
+
+Route::get('/microsoft-365', function () {
+    $suitePlans = \App\Support\EmailPricing::plansForProvider('ms365');
+
+    return view('pages.microsoft-365', compact('suitePlans'));
+})->name('microsoft-365');
 
 Route::get('/web-development', function () {
     return view('pages.service', [
@@ -253,7 +262,12 @@ Route::get('/team', function () {
         ->orderBy('name')
         ->get();
 
-    return view('pages.team', compact('members'));
+    $departments = collect(TeamMember::departments())
+        ->mapWithKeys(fn (string $label, string $key) => [
+            $key => $members->where('department', $key)->values(),
+        ]);
+
+    return view('pages.team', compact('members', 'departments'));
 })->name('team');
 
 Route::get('/locale/{locale}', function (string $locale) {

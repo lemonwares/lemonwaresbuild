@@ -54,74 +54,92 @@
                 <p class="lede mt-3">{{ __('pages.team.grid_lede') }}</p>
             </div>
 
-            <div class="team-member-track" @if ($members->isNotEmpty()) data-team-carousel @endif>
-                @forelse ($members as $member)
-                    @php
-                        $initials = \Illuminate\Support\Str::of($member->name)->explode(' ')->map(fn ($part) => \Illuminate\Support\Str::substr($part, 0, 1))->take(2)->join('');
-                        $social = collect([
-                            'x' => $member->x_url,
-                            'linkedin' => $member->linkedin_url,
-                            'instagram' => $member->instagram_url,
-                            'facebook' => $member->facebook_url,
-                        ])->filter(fn ($url) => filled($url));
-                    @endphp
-                    <article class="team-member-card group">
-                        <div class="team-member-media">
-                            @if ($member->photo_path)
-                                <img
-                                    src="{{ asset('storage/' . $member->photo_path) }}"
-                                    alt="{{ $member->name }}"
-                                    class="team-member-photo"
-                                    loading="lazy"
-                                    decoding="async"
-                                >
-                            @else
-                                <div class="team-member-fallback" aria-hidden="true">
-                                    <span>{{ $initials }}</span>
-                                </div>
-                            @endif
-                        </div>
+            @if ($members->isEmpty())
+                <article class="rounded-3xl border border-border bg-white p-8 text-center">
+                    <p class="text-base font-light text-on-blush/75">{{ __('pages.team.empty') }}</p>
+                    <a href="{{ route('careers') }}" class="btn btn-primary mt-6 inline-flex">
+                        <span>{{ __('pages.team.cta_careers') }}</span>
+                        <x-ui.icons.arrow-up-right class="size-4" />
+                    </a>
+                </article>
+            @else
+                <div class="space-y-14">
+                    @foreach ($departments as $departmentKey => $departmentMembers)
+                        @continue($departmentMembers->isEmpty())
 
-                        <div class="team-member-overlay">
-                            <h3 class="team-member-name" title="{{ $member->name }}">{{ $member->name }}</h3>
-                            <p class="team-member-role" title="{{ $member->role }}">{{ $member->role }}</p>
+                        <div>
+                            <div class="mb-6 max-w-2xl">
+                                <p class="section-label mb-2">{{ __('pages.team.departments.'.$departmentKey.'.label') }}</p>
+                                <h3 class="text-2xl font-bold tracking-tight text-black sm:text-3xl">
+                                    {{ __('pages.team.departments.'.$departmentKey.'.title') }}
+                                </h3>
+                                <p class="lede mt-2">{{ __('pages.team.departments.'.$departmentKey.'.lede') }}</p>
+                            </div>
 
-                            @if ($social->isNotEmpty())
-                                <div class="team-member-social">
-                                    @if ($social->has('x'))
-                                        <a href="{{ $social->get('x') }}" target="_blank" rel="noopener noreferrer" aria-label="{{ $member->name }} on X" class="team-member-social-link">
-                                            <x-ui.icons.x class="size-4" />
-                                        </a>
-                                    @endif
-                                    @if ($social->has('linkedin'))
-                                        <a href="{{ $social->get('linkedin') }}" target="_blank" rel="noopener noreferrer" aria-label="{{ $member->name }} on LinkedIn" class="team-member-social-link">
-                                            <x-ui.icons.linkedin class="size-4" />
-                                        </a>
-                                    @endif
-                                    @if ($social->has('instagram'))
-                                        <a href="{{ $social->get('instagram') }}" target="_blank" rel="noopener noreferrer" aria-label="{{ $member->name }} on Instagram" class="team-member-social-link">
-                                            <x-ui.icons.instagram class="size-4" />
-                                        </a>
-                                    @endif
-                                    @if ($social->has('facebook'))
-                                        <a href="{{ $social->get('facebook') }}" target="_blank" rel="noopener noreferrer" aria-label="{{ $member->name }} on Facebook" class="team-member-social-link">
-                                            <x-ui.icons.facebook class="size-4" />
-                                        </a>
-                                    @endif
-                                </div>
-                            @endif
+                            <div class="team-member-track" data-team-carousel>
+                                @foreach ($departmentMembers as $member)
+                                    @php
+                                        $initials = \Illuminate\Support\Str::of($member->name)->explode(' ')->map(fn ($part) => \Illuminate\Support\Str::substr($part, 0, 1))->take(2)->join('');
+                                        $social = collect([
+                                            'x' => $member->x_url,
+                                            'linkedin' => $member->linkedin_url,
+                                            'instagram' => $member->instagram_url,
+                                            'facebook' => $member->facebook_url,
+                                        ])->filter(fn ($url) => filled($url));
+                                    @endphp
+                                    <article class="team-member-card group">
+                                        <div class="team-member-media">
+                                            @if ($member->photo_path)
+                                                <img
+                                                    src="{{ asset('storage/' . $member->photo_path) }}"
+                                                    alt="{{ $member->name }}"
+                                                    class="team-member-photo"
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                >
+                                            @else
+                                                <div class="team-member-fallback" aria-hidden="true">
+                                                    <span>{{ $initials }}</span>
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        <div class="team-member-overlay">
+                                            <h4 class="team-member-name" title="{{ $member->name }}">{{ $member->name }}</h4>
+                                            <p class="team-member-role" title="{{ $member->role }}">{{ $member->role }}</p>
+
+                                            @if ($social->isNotEmpty())
+                                                <div class="team-member-social">
+                                                    @if ($social->has('x'))
+                                                        <a href="{{ $social->get('x') }}" target="_blank" rel="noopener noreferrer" aria-label="{{ $member->name }} on X" class="team-member-social-link">
+                                                            <x-ui.icons.x class="size-4" />
+                                                        </a>
+                                                    @endif
+                                                    @if ($social->has('linkedin'))
+                                                        <a href="{{ $social->get('linkedin') }}" target="_blank" rel="noopener noreferrer" aria-label="{{ $member->name }} on LinkedIn" class="team-member-social-link">
+                                                            <x-ui.icons.linkedin class="size-4" />
+                                                        </a>
+                                                    @endif
+                                                    @if ($social->has('instagram'))
+                                                        <a href="{{ $social->get('instagram') }}" target="_blank" rel="noopener noreferrer" aria-label="{{ $member->name }} on Instagram" class="team-member-social-link">
+                                                            <x-ui.icons.instagram class="size-4" />
+                                                        </a>
+                                                    @endif
+                                                    @if ($social->has('facebook'))
+                                                        <a href="{{ $social->get('facebook') }}" target="_blank" rel="noopener noreferrer" aria-label="{{ $member->name }} on Facebook" class="team-member-social-link">
+                                                            <x-ui.icons.facebook class="size-4" />
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </article>
+                                @endforeach
+                            </div>
                         </div>
-                    </article>
-                @empty
-                    <article class="rounded-3xl border border-border bg-white p-8 text-center sm:col-span-2 lg:col-span-3">
-                        <p class="text-base font-light text-on-blush/75">{{ __('pages.team.empty') }}</p>
-                        <a href="{{ route('careers') }}" class="btn btn-primary mt-6 inline-flex">
-                            <span>{{ __('pages.team.cta_careers') }}</span>
-                            <x-ui.icons.arrow-up-right class="size-4" />
-                        </a>
-                    </article>
-                @endforelse
-            </div>
+                    @endforeach
+                </div>
+            @endif
         </div>
     </section>
 

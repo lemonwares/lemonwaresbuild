@@ -32,6 +32,7 @@ class AdminEmailCatalogController extends Controller
             'plans.*.mailbox_count' => ['required', 'integer', 'min:1', 'max:500'],
             'plans.*.monthly_ngn' => ['required', 'numeric', 'min:0'],
             'plans.*.is_visible' => ['nullable', 'boolean'],
+            'plans.*.featured_suite' => ['nullable', 'boolean'],
             'featured_plan_id' => ['nullable', 'integer', 'exists:email_plans,id'],
             'cycles' => ['required', 'array'],
             'cycles.*.id' => ['required', 'integer', 'exists:email_billing_cycles,id'],
@@ -45,15 +46,19 @@ class AdminEmailCatalogController extends Controller
         foreach ($validated['plans'] as $row) {
             $monthlyNgn = (float) $row['monthly_ngn'];
             $monthlyUsd = round($monthlyNgn / $rate, 2);
+            $provider = (string) $row['provider'];
+            $isSuite = in_array($provider, ['google_workspace', 'ms365'], true);
 
             EmailPlan::query()
                 ->whereKey($row['id'])
                 ->update([
-                    'provider' => (string) $row['provider'],
+                    'provider' => $provider,
                     'fulfilment_mode' => (string) $row['fulfilment_mode'],
                     'mailbox_count' => (int) $row['mailbox_count'],
                     'monthly_usd' => $monthlyUsd,
-                    'featured' => $featuredId !== null && (int) $row['id'] === (int) $featuredId,
+                    'featured' => $isSuite
+                        ? (bool) ($row['featured_suite'] ?? false)
+                        : ($featuredId !== null && (int) $row['id'] === (int) $featuredId),
                     'is_visible' => (bool) ($row['is_visible'] ?? false),
                 ]);
         }
@@ -69,6 +74,6 @@ class AdminEmailCatalogController extends Controller
 
         return redirect()
             ->route('admin.email-catalog.index')
-            ->with('status', 'Lemon Mail pricing updated.');
+            ->with('status', 'Email and suite pricing updated.');
     }
 }

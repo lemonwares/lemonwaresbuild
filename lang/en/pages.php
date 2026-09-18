@@ -12,7 +12,7 @@ return [
         'cta_careers' => 'Careers',
         'story_label' => 'Our story',
         'story_title' => 'Infrastructure and products with people behind them',
-        'p1' => 'Lemonwares Technology is a Lagos-based digital infrastructure company helping businesses build and maintain a strong online presence. From shared cloud hosting and VPS servers to Mailemon business email, custom web development, and mobile apps, we provide the tools and support growing teams need to stay online.',
+        'p1' => 'Lemonwares Technology is a Lagos-based digital infrastructure company helping businesses build and maintain a strong online presence. From cloud hosting and VPS servers to Mailemon business email, custom web development, and mobile apps, we provide the tools and support growing teams need to stay online.',
         'p2' => 'Our focus is practical technology, clear communication, and dependable service. Whether you are launching your first website, rolling out branded mailboxes, migrating a platform, or scaling for more traffic, we help you choose the right setup and keep it running smoothly.',
         'p3' => 'We work from Lekki, Lagos, and serve customers across Nigeria and beyond — with the same team on domains, hosting, email, and development so you are not bounced between vendors.',
         'values_label' => 'How we work',
@@ -204,6 +204,18 @@ return [
         'grid_label' => 'People',
         'grid_title' => 'Faces behind the work',
         'grid_lede' => 'Profiles are managed from the Lemonwares admin — add photos, roles, and links anytime.',
+        'departments' => [
+            'managerial' => [
+                'label' => 'Leadership',
+                'title' => 'Managerial',
+                'lede' => 'Strategy, delivery leadership, and the people shaping how Lemonwares grows.',
+            ],
+            'administrative' => [
+                'label' => 'Operations',
+                'title' => 'Administrative',
+                'lede' => 'The coordinators who keep scheduling, people ops, and day-to-day work running smoothly.',
+            ],
+        ],
         'empty' => 'Team profiles are being updated. Meanwhile, say hello — or see open roles on Careers.',
         'need_help' => 'Need help from our team?',
         'get_in_touch' => 'Get in touch',
@@ -424,7 +436,7 @@ return [
         'card_dns_title' => 'DNS that matches your stack',
         'card_dns_body' => 'We hand you clear records for hosting and Mailemon so mail and the site go live without guesswork.',
         'card_hosting_title' => 'Hosting next door',
-        'card_hosting_body' => 'Choose shared cloud hosting or a VPS when you are ready — same team for domain, site, and email.',
+        'card_hosting_body' => 'Choose cloud hosting or a VPS when you are ready — same team for domain, site, and email.',
         'hero_title' => 'Find Your Perfect Domain Name',
         'hero_lede' => 'Search availability in seconds, see pricing, then register or transfer on Lemonwares — or continue into hosting.',
         'social_proof' => 'Register or transfer — then host, email, and DNS under one Lemonwares team.',
@@ -449,7 +461,7 @@ return [
         'feature_transfer_body' => 'In real life a transfer needs the domain unlocked, an auth/EPP code, and email approval — often a few days. On this site we confirm the name is registered, quote the transfer price in Naira, then you check out here to start the move (or pair it with hosting). After approval, renewals, DNS, and support sit with one Lemonwares team.',
         'feature_transfer_cta' => 'Transfer your domain',
         'feature_manage_title' => 'Easy domain management with hosting',
-        'feature_manage_body' => 'Once the domain is yours, point it at shared cloud or VPS hosting and set the A records so the site loads. Add Mailemon when you need branded inboxes — we hand you the MX and related DNS so mail and web stay on the same name. One stack that can grow without another registrar hop.',
+        'feature_manage_body' => 'Once the domain is yours, point it at cloud or VPS hosting and set the A records so the site loads. Add Mailemon when you need branded inboxes — we hand you the MX and related DNS so mail and web stay on the same name. One stack that can grow without another registrar hop.',
         'feature_manage_cta' => 'Explore cloud hosting',
         'faq_title' => 'Frequently asked questions about domains',
         'faq_items' => [
@@ -485,12 +497,21 @@ return [
         'eyebrow' => 'Google Workspace',
         'title' => 'Google Workspace on Your Domain',
         'lede' => 'Professional Gmail, Drive, Meet, and Calendar under your brand — quoted, provisioned, and supported by Lemonwares.',
-        'cta' => 'Request a quote',
+        'cta' => 'See pricing',
+        'cta_contact' => 'Request a quote',
         'cta_subject' => 'Google Workspace quote',
-        'body' => 'Google Workspace is the full Google productivity suite on your domain. We help you choose seats, migrate mail and files, verify the domain, and keep DNS correct so your team can work without guesswork. Pricing is quoted for your team size — contact us when you are ready.',
+        'cta_pricing' => 'Get this plan',
+        'body' => 'Google Workspace is the full Google productivity suite on your domain. We help you choose seats, migrate mail and files, verify the domain, and keep DNS correct so your team can work without guesswork.',
         'intro_eyebrow' => 'How it works',
         'intro_title' => 'Quote, migrate, go live',
         'intro_lede' => 'Four clear steps from first conversation to Gmail on your domain.',
+        'pricing_eyebrow' => 'Pricing',
+        'pricing_title' => 'Google Workspace plans',
+        'pricing_lede' => 'Published per-user Naira pricing — pick a tier, then tell us your seat count so we can confirm and provision.',
+        'pricing_from' => 'From',
+        'pricing_per_user' => 'per user / mo',
+        'pricing_empty' => 'Pricing is being updated. Request a quote and we will confirm seats and billing.',
+        'pricing_note' => 'Final invoice depends on seat count, billing cycle, and any migration work. Contact us to confirm before you pay.',
         'steps' => [
             [
                 'title' => 'Tell us your team size',
@@ -667,12 +688,21 @@ return [
         'eyebrow' => 'Microsoft 365',
         'title' => 'Microsoft 365 Built for Your Business',
         'lede' => 'Outlook, Teams, OneDrive, and the Office apps on your domain — quoted and set up with Lemonwares.',
-        'cta' => 'Request a quote',
+        'cta' => 'See pricing',
+        'cta_contact' => 'Request a quote',
         'cta_subject' => 'Microsoft 365 quote',
-        'body' => 'Microsoft 365 is the Microsoft productivity stack your clients already know. We help with licensing, mailbox migration, tenant basics, and the DNS records that make mail and Teams reliable. Pricing is quoted for your seats — contact us when you are ready.',
+        'cta_pricing' => 'Get this plan',
+        'body' => 'Microsoft 365 is the Microsoft productivity stack your clients already know. We help with licensing, mailbox migration, tenant basics, and the DNS records that make mail and Teams reliable.',
         'intro_eyebrow' => 'How it works',
         'intro_title' => 'License, migrate, collaborate',
         'intro_lede' => 'Four clear steps from first conversation to Outlook and Teams on your domain.',
+        'pricing_eyebrow' => 'Pricing',
+        'pricing_title' => 'Microsoft 365 plans',
+        'pricing_lede' => 'Published per-user Naira pricing — pick a license tier, then tell us your seat count so we can confirm and provision.',
+        'pricing_from' => 'From',
+        'pricing_per_user' => 'per user / mo',
+        'pricing_empty' => 'Pricing is being updated. Request a quote and we will confirm seats and billing.',
+        'pricing_note' => 'Final invoice depends on seat count, billing cycle, and any migration work. Contact us to confirm before you pay.',
         'steps' => [
             [
                 'title' => 'Share seats and workload',
@@ -845,19 +875,19 @@ return [
     ],
     'cloud_hosting' => [
         'meta_title' => 'Cloud Hosting',
-        'meta_description' => 'cPanel and Plesk shared cloud hosting from Lemonwares — SSD plans, SSL, backups, and support for everyday websites.',
+        'meta_description' => 'cPanel and Plesk cloud hosting from Lemonwares — SSD plans, SSL, backups, and support for everyday websites.',
         'eyebrow' => 'Cloud Hosting',
-        'title' => 'Shared Cloud Hosting That Stays Online',
+        'title' => 'Cloud Hosting That Stays Online',
         'lede' => 'cPanel or Plesk for marketing sites, blogs, and small business platforms — without root-server complexity.',
         'cta' => 'View cPanel plans',
-        'body' => 'Shared cloud hosting is the practical fit when you need a reliable website, not a server to manage. Pick a panel, choose a plan with the storage and site limits you need, then we handle SSL, backups, and support.',
+        'body' => 'Cloud hosting is the practical fit when you need a reliable website, not a server to manage. Pick a panel, choose a plan with the storage and site limits you need, then we handle SSL, backups, and support.',
         'intro_eyebrow' => 'How it works',
         'intro_title' => 'Panel, plan, then go live',
         'intro_lede' => 'Three clear steps from browsing to a live site — no root access required.',
         'steps' => [
             [
                 'title' => 'Choose cPanel or Plesk',
-                'body' => 'Same shared cloud stack. Pick the control panel your team already knows for WordPress, email, and everyday sites.',
+                'body' => 'Same cloud hosting stack. Pick the control panel your team already knows for WordPress, email, and everyday sites.',
             ],
             [
                 'title' => 'Pick storage and site limits',
@@ -870,13 +900,13 @@ return [
         ],
         'panels_eyebrow' => 'Choose your panel',
         'panels_title' => 'cPanel or Plesk',
-        'panels_lede' => 'Same shared cloud platform — pick the control panel your team already knows.',
+        'panels_lede' => 'Same cloud hosting platform — pick the control panel your team already knows.',
         'cpanel_badge' => 'Most popular',
         'cpanel_title' => 'cPanel',
         'cpanel_body' => 'The familiar panel for WordPress, email-ready hosting, and everyday business sites.',
         'cpanel_cta' => 'View cPanel plans',
         'plesk_title' => 'Plesk',
-        'plesk_body' => 'A clean alternative panel on the same shared cloud stack — ideal if your team prefers Plesk, Node.js, or Next.js.',
+        'plesk_body' => 'A clean alternative panel on the same cloud hosting stack — ideal if your team prefers Plesk, Node.js, or Next.js.',
         'plesk_cta' => 'Explore Plesk hosting',
         'plans_eyebrow' => 'Plan preview',
         'plans_title' => 'What each shared plan includes',
@@ -889,7 +919,7 @@ return [
         'cpanel_plans_title' => 'cPanel plans',
         'plesk_plans_title' => 'Plesk plans',
         'features_eyebrow' => 'Included on every plan',
-        'features_title' => 'What shared cloud always covers',
+        'features_title' => 'What cloud hosting always covers',
         'features_lede' => 'The basics that keep a business site online — without handing you a root password.',
         'features' => [
             [
@@ -921,7 +951,7 @@ return [
         'benefits_title' => 'Built for sites that need to stay up',
         'benefits_lede' => 'SSL, backups, and support on every plan — without handing you a root password you did not ask for.',
         'highlights' => [
-            'cPanel and Plesk shared cloud options',
+            'cPanel and Plesk cloud hosting options',
             'SSD storage with unmetered bandwidth',
             'SSL and automated backups on every plan',
             'Domains registered or connected at checkout',
@@ -929,9 +959,9 @@ return [
             'Support on WhatsApp, phone, and email',
         ],
         'fit_eyebrow' => 'Is this for you?',
-        'fit_title' => 'Shared cloud vs VPS',
+        'fit_title' => 'Cloud hosting vs VPS',
         'fit_lede' => 'Start here for websites and landing pages. Move to VPS when you need root access or dedicated resources.',
-        'fit_shared_title' => 'Choose shared cloud if you need',
+        'fit_shared_title' => 'Choose cloud hosting if you need',
         'fit_shared' => [
             'A marketing site, blog, or portfolio',
             'WordPress or a simple business site',
@@ -949,7 +979,7 @@ return [
         'faq_title' => 'Cloud hosting FAQ',
         'faq_items' => [
             [
-                'question' => 'What is shared cloud hosting?',
+                'question' => 'What is cloud hosting?',
                 'answer' => 'Your site runs on managed shared infrastructure with a control panel. You manage content and apps — we handle the server, SSL, and backups.',
             ],
             [
@@ -978,15 +1008,15 @@ return [
     ],
     'plesk' => [
         'meta_title' => 'Plesk Hosting',
-        'meta_description' => 'Shared cloud hosting with Plesk from Lemonwares — Web Basic, Web Plus, and Web Scale plans with SSD, SSL, and support for WordPress, Node.js, and Next.js.',
+        'meta_description' => 'Cloud hosting with Plesk from Lemonwares — Web Basic, Web Plus, and Web Scale plans with SSD, SSL, and support for WordPress, Node.js, and Next.js.',
         'eyebrow' => 'Plesk Hosting',
-        'title' => 'Shared Cloud with the Plesk Panel',
-        'lede' => 'Plesk on Lemonwares shared cloud — clear Naira plans for WordPress, Node.js, and Next.js without root-server complexity.',
+        'title' => 'Cloud hosting with the Plesk Panel',
+        'lede' => 'Plesk on Lemonwares cloud hosting — clear Naira plans for WordPress, Node.js, and Next.js without root-server complexity.',
         'cta' => 'View Plesk plans',
-        'body' => 'Plesk hosting is the same shared cloud stack as our cPanel plans, with a panel many teams prefer for modern apps. Choose Web Basic, Web Plus, or Web Scale — SSD storage, unmetered bandwidth, SSL, and backups included.',
+        'body' => 'Plesk hosting is the same cloud hosting stack as our cPanel plans, with a panel many teams prefer for modern apps. Choose Web Basic, Web Plus, or Web Scale — SSD storage, unmetered bandwidth, SSL, and backups included.',
         'intro_eyebrow' => 'How it works',
         'intro_title' => 'Pick a Plesk plan, then go live',
-        'intro_lede' => 'Three clear steps from browsing to a live site on Plesk shared cloud.',
+        'intro_lede' => 'Three clear steps from browsing to a live site on Plesk cloud hosting.',
         'steps' => [
             [
                 'title' => 'Choose Web Basic, Plus, or Scale',
@@ -998,7 +1028,7 @@ return [
             ],
             [
                 'title' => 'We provision with SSL and backups',
-                'body' => 'After payment we set up Plesk on shared cloud with free SSL and automated backups — you manage sites in the panel.',
+                'body' => 'After payment we set up Plesk on cloud hosting with free SSL and automated backups — you manage sites in the panel.',
             ],
         ],
         'plans_eyebrow' => 'Plesk plans',
@@ -1010,7 +1040,7 @@ return [
         'plans_websites' => 'Websites',
         'plans_select' => 'Select plan',
         'features_eyebrow' => 'Included on every plan',
-        'features_title' => 'What Plesk shared cloud always covers',
+        'features_title' => 'What Plesk cloud hosting always covers',
         'features_lede' => 'A familiar panel on managed shared infrastructure — without handing you a root password.',
         'features' => [
             [
@@ -1039,7 +1069,7 @@ return [
             ],
         ],
         'highlights' => [
-            'Plesk on Lemonwares shared cloud',
+            'Plesk on Lemonwares cloud hosting',
             'Web Basic, Web Plus, and Web Scale in Naira',
             'SSD storage with unmetered bandwidth',
             'SSL and automated backups on every plan',
@@ -1048,31 +1078,31 @@ return [
         ],
         'fit_eyebrow' => 'Is this for you?',
         'fit_title' => 'Plesk vs cPanel',
-        'fit_lede' => 'Same shared cloud platform — pick the panel your team already knows.',
+        'fit_lede' => 'Same cloud hosting platform — pick the panel your team already knows.',
         'fit_plesk_title' => 'Choose Plesk if you need',
         'fit_plesk' => [
             'A panel your team already uses',
             'WordPress plus Node.js or Next.js comfort',
             'Clear Web Basic / Plus / Scale plans',
-            'Shared cloud without root-server admin',
+            'Cloud hosting without root-server admin',
         ],
         'fit_cpanel_title' => 'Choose cPanel if you need',
         'fit_cpanel' => [
             'The most familiar WordPress hosting panel',
             'Classic business sites and email-ready hosting',
             'The workflow most agencies already know',
-            'The same shared cloud stack under a different panel',
+            'The same cloud hosting stack under a different panel',
         ],
         'fit_cpanel_cta' => 'View cloud hosting',
         'faq_title' => 'Plesk hosting FAQ',
         'faq_items' => [
             [
                 'question' => 'What is Plesk hosting?',
-                'answer' => 'Shared cloud hosting with the Plesk control panel. You manage sites and apps in Plesk; Lemonwares handles the server, SSL, and backups.',
+                'answer' => 'Cloud hosting with the Plesk control panel. You manage sites and apps in Plesk; Lemonwares handles the server, SSL, and backups.',
             ],
             [
                 'question' => 'How is this different from cPanel?',
-                'answer' => 'Same shared cloud infrastructure. Plesk is the panel — a strong choice if your team prefers it, or you work with Node.js and Next.js alongside WordPress.',
+                'answer' => 'Same cloud hosting infrastructure. Plesk is the panel — a strong choice if your team prefers it, or you work with Node.js and Next.js alongside WordPress.',
             ],
             [
                 'question' => 'What plans are available?',
@@ -1144,7 +1174,7 @@ return [
             ],
             [
                 'title' => 'Dedicated resources',
-                'body' => 'Your vCPU and RAM are not shared the way a marketing site is on shared cloud — better isolation for production services.',
+                'body' => 'Your vCPU and RAM are not shared the way a marketing site is on cloud hosting — better isolation for production services.',
             ],
             [
                 'title' => 'Security hardening options',
@@ -1168,8 +1198,8 @@ return [
             'Same support team as hosting and email',
         ],
         'fit_eyebrow' => 'Is VPS right?',
-        'fit_title' => 'VPS vs shared cloud',
-        'fit_lede' => 'Choose VPS when you need the keys. Stay on shared cloud when a panel and a website are enough.',
+        'fit_title' => 'VPS vs cloud hosting',
+        'fit_lede' => 'Choose VPS when you need the keys. Stay on cloud hosting when a panel and a website are enough.',
         'fit_vps_title' => 'Choose VPS if you need',
         'fit_vps' => [
             'Root or SSH access',
@@ -1177,7 +1207,7 @@ return [
             'Docker, custom runtimes, or heavy APIs',
             'Isolation beyond shared hosting',
         ],
-        'fit_shared_title' => 'Stay on shared cloud if you need',
+        'fit_shared_title' => 'Stay on cloud hosting if you need',
         'fit_shared' => [
             'A marketing site or WordPress blog',
             'cPanel or Plesk without server admin',
@@ -1186,8 +1216,8 @@ return [
         ],
         'fit_shared_cta' => 'View cloud hosting',
         'contrast_eyebrow' => 'Not sure yet?',
-        'contrast_title' => 'Maybe shared cloud is enough',
-        'contrast_lede' => 'If you mainly need a website panel — not a server — start with cPanel or Plesk shared cloud.',
+        'contrast_title' => 'Maybe cloud hosting is enough',
+        'contrast_lede' => 'If you mainly need a website panel — not a server — start with cPanel or Plesk cloud hosting.',
         'contrast_cta' => 'View cloud hosting',
         'faq_title' => 'VPS FAQ',
         'faq_items' => [
@@ -1196,8 +1226,8 @@ return [
                 'answer' => 'A virtual private server with dedicated resources and root access. You administer the OS and apps; we provide the virtual machine and support.',
             ],
             [
-                'question' => 'How is this different from shared cloud?',
-                'answer' => 'Shared cloud gives you a control panel on managed hosting. VPS gives you root, dedicated CPU/RAM, and freedom to run custom stacks.',
+                'question' => 'How is this different from cloud hosting?',
+                'answer' => 'Cloud hosting gives you a control panel on managed hosting. VPS gives you root, dedicated CPU/RAM, and freedom to run custom stacks.',
             ],
             [
                 'question' => 'Which VPS should I start with?',

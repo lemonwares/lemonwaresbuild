@@ -34,7 +34,7 @@ return [
         ],
         [
             'question' => 'What hosting plans do you offer?',
-            'answer' => 'We offer cPanel and Plesk shared cloud hosting for everyday websites, plus VPS root servers when you need more power, control, and room to grow.',
+            'answer' => 'We offer cPanel and Plesk cloud hosting for everyday websites, plus VPS root servers when you need more power, control, and room to grow.',
         ],
         [
             'question' => 'Do you build WordPress sites and custom apps?',

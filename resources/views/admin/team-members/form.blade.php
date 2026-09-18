@@ -16,6 +16,18 @@
     </label>
 
     <label class="admin-field admin-field-span">
+        <span>Department</span>
+        <select id="department" name="department" required class="admin-input">
+            @foreach (\App\Models\TeamMember::departments() as $value => $label)
+                <option value="{{ $value }}" @selected(old('department', $member->department ?? \App\Models\TeamMember::DEPARTMENT_MANAGERIAL) === $value)>
+                    {{ $label }}
+                </option>
+            @endforeach
+        </select>
+        @error('department') <em>{{ $message }}</em> @enderror
+    </label>
+
+    <label class="admin-field admin-field-span">
         <span>Short Quote (optional)</span>
         <input id="quote" name="quote" type="text" value="{{ old('quote', $member->quote ?? '') }}" class="admin-input" placeholder="e.g. We build with clarity and speed." />
         @error('quote') <em>{{ $message }}</em> @enderror

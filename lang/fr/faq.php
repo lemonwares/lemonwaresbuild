@@ -34,7 +34,7 @@ return [
         ],
         [
             'question' => 'Quelles offres d’hébergement proposez-vous ?',
-            'answer' => 'Nous proposons de l’hébergement cloud partagé cPanel et Plesk pour les sites du quotidien, plus des VPS root quand vous avez besoin de plus de puissance et de contrôle.',
+            'answer' => 'Nous proposons de l’hébergement cloud cPanel et Plesk pour les sites du quotidien, plus des VPS root quand vous avez besoin de plus de puissance et de contrôle.',
         ],
         [
             'question' => 'Construisez-vous des sites WordPress et des apps sur mesure ?',

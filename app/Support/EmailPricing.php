@@ -176,6 +176,18 @@ class EmailPricing
     }
 
     /**
+     * @return list<array<string, mixed>>
+     */
+    public static function plansForProvider(string $provider, string $cycleKey = 'monthly'): array
+    {
+        return collect(self::plans())
+            ->filter(fn (array $plan) => ($plan['provider'] ?? '') === $provider)
+            ->map(fn (array $plan) => self::presentPlan($plan, $cycleKey))
+            ->values()
+            ->all();
+    }
+
+    /**
      * @return list<array<string, string>>
      */
     public static function enterpriseProducts(): array
