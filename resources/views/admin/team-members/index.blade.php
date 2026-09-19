@@ -62,7 +62,7 @@
                             <tr>
                                 <td>
                                     @if ($member->photo_path)
-                                        <img src="{{ asset('storage/' . $member->photo_path) }}" alt="{{ $member->name }}" class="size-11 rounded-full object-cover" />
+                                        <img src="{{ $member->photoUrl() }}" alt="{{ $member->name }}" class="size-11 rounded-full object-cover" />
                                     @else
                                         <span class="inline-flex size-11 items-center justify-center rounded-full bg-blush text-sm font-bold text-rose">
                                             {{ \Illuminate\Support\Str::of($member->name)->explode(' ')->map(fn ($part) => \Illuminate\Support\Str::substr($part, 0, 1))->take(2)->join('') }}

@@ -84,7 +84,7 @@
 
         @if (! empty($member?->photo_path))
             <div class="mt-4 flex items-center gap-4">
-                <img src="{{ asset('storage/' . $member->photo_path) }}" alt="{{ $member->name }}" class="size-14 rounded-full object-cover" />
+                <img src="{{ $member->photoUrl() }}" alt="{{ $member->name }}" class="size-14 rounded-full object-cover" />
                 <label class="admin-check">
                     <input type="checkbox" name="remove_photo" value="1">
                     <span>Remove current photo</span>

@@ -44,7 +44,7 @@
     <x-layout.page-content>
         @if ($project->cover_path)
             <div class="mx-auto mb-10 max-w-3xl overflow-hidden rounded-md">
-                <img src="{{ asset('storage/' . $project->cover_path) }}" alt="" class="aspect-[16/9] w-full object-cover" />
+                <img src="{{ $project->coverUrl() }}" alt="" class="aspect-[16/9] w-full object-cover" />
             </div>
         @endif
         <article class="mx-auto max-w-3xl space-y-5 body-text">

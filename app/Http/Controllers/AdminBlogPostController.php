@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\BlogPost;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Support\MediaStorage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -34,7 +34,7 @@ class AdminBlogPostController extends Controller
         $data['author_id'] = (int) $request->session()->get('admin_user_id') ?: null;
 
         if ($request->hasFile('cover')) {
-            $data['cover_path'] = $request->file('cover')->store('blog-covers', 'public');
+            $data['cover_path'] = MediaStorage::store($request->file('cover'), 'blog-covers');
         }
 
         BlogPost::query()->create($data);
@@ -60,15 +60,15 @@ class AdminBlogPostController extends Controller
         );
 
         if ($request->boolean('remove_cover') && $blogPost->cover_path) {
-            Storage::disk('public')->delete($blogPost->cover_path);
+            MediaStorage::delete($blogPost->cover_path);
             $data['cover_path'] = null;
         }
 
         if ($request->hasFile('cover')) {
             if ($blogPost->cover_path) {
-                Storage::disk('public')->delete($blogPost->cover_path);
+                MediaStorage::delete($blogPost->cover_path);
             }
-            $data['cover_path'] = $request->file('cover')->store('blog-covers', 'public');
+            $data['cover_path'] = MediaStorage::store($request->file('cover'), 'blog-covers');
         }
 
         $blogPost->update($data);
@@ -81,7 +81,7 @@ class AdminBlogPostController extends Controller
     public function destroy(BlogPost $blogPost): RedirectResponse
     {
         if ($blogPost->cover_path) {
-            Storage::disk('public')->delete($blogPost->cover_path);
+            MediaStorage::delete($blogPost->cover_path);
         }
 
         $blogPost->delete();

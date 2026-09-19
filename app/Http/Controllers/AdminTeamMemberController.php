@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\TeamMember;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Support\MediaStorage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -32,7 +32,7 @@ class AdminTeamMemberController extends Controller
         $data = $this->validatePayload($request);
 
         if ($request->hasFile('photo')) {
-            $data['photo_path'] = $request->file('photo')->store('team-members', 'public');
+            $data['photo_path'] = MediaStorage::store($request->file('photo'), 'team-members');
         }
 
         TeamMember::create($data);
@@ -50,16 +50,16 @@ class AdminTeamMemberController extends Controller
         $data = $this->validatePayload($request);
 
         if ($request->boolean('remove_photo') && $teamMember->photo_path) {
-            Storage::disk('public')->delete($teamMember->photo_path);
+            MediaStorage::delete($teamMember->photo_path);
             $data['photo_path'] = null;
         }
 
         if ($request->hasFile('photo')) {
             if ($teamMember->photo_path) {
-                Storage::disk('public')->delete($teamMember->photo_path);
+                MediaStorage::delete($teamMember->photo_path);
             }
 
-            $data['photo_path'] = $request->file('photo')->store('team-members', 'public');
+            $data['photo_path'] = MediaStorage::store($request->file('photo'), 'team-members');
         }
 
         $teamMember->update($data);
@@ -70,7 +70,7 @@ class AdminTeamMemberController extends Controller
     public function destroy(TeamMember $teamMember): RedirectResponse
     {
         if ($teamMember->photo_path) {
-            Storage::disk('public')->delete($teamMember->photo_path);
+            MediaStorage::delete($teamMember->photo_path);
         }
 
         $teamMember->delete();

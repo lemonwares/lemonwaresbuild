@@ -4,20 +4,21 @@ namespace App\Models;
 
 use App\Support\MediaStorage;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
-class BlogPost extends Model
+class CaseStudy extends Model
 {
     protected $fillable = [
         'title',
         'slug',
-        'excerpt',
-        'body',
+        'client_name',
+        'summary',
+        'outcome',
+        'description',
         'cover_path',
-        'author_id',
+        'cta_url',
+        'cta_label',
         'is_published',
-        'published_at',
         'sort_order',
     ];
 
@@ -25,7 +26,6 @@ class BlogPost extends Model
     {
         return [
             'is_published' => 'boolean',
-            'published_at' => 'datetime',
         ];
     }
 
@@ -34,16 +34,9 @@ class BlogPost extends Model
         return 'slug';
     }
 
-    public function author(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'author_id');
-    }
-
     public function scopePublished($query)
     {
-        return $query->where('is_published', true)
-            ->whereNotNull('published_at')
-            ->where('published_at', '<=', now());
+        return $query->where('is_published', true);
     }
 
     public function coverUrl(): ?string
@@ -53,7 +46,7 @@ class BlogPost extends Model
 
     public static function uniqueSlug(string $title, ?int $ignoreId = null): string
     {
-        $base = Str::slug($title) ?: 'post';
+        $base = Str::slug($title) ?: 'case-study';
         $slug = $base;
         $i = 2;
 

@@ -74,6 +74,7 @@ class AdminStaffPermissionsAndCoversTest extends TestCase
 
         $post = \App\Models\BlogPost::query()->where('title', 'Covered Post')->firstOrFail();
         $this->assertNotNull($post->cover_path);
+        $this->assertNotNull($post->coverUrl());
         Storage::disk('public')->assertExists($post->cover_path);
 
         $projectCover = UploadedFile::fake()->create('project.png', 200, 'image/png');
@@ -88,6 +89,23 @@ class AdminStaffPermissionsAndCoversTest extends TestCase
 
         $project = \App\Models\Project::query()->where('title', 'Covered Project')->firstOrFail();
         $this->assertNotNull($project->cover_path);
+        $this->assertNotNull($project->coverUrl());
         Storage::disk('public')->assertExists($project->cover_path);
+
+        $caseCover = UploadedFile::fake()->create('case.jpg', 200, 'image/jpeg');
+
+        $this->post(route('admin.case-studies.store'), [
+            'title' => 'Shipped Product',
+            'client_name' => 'Acme',
+            'summary' => 'Built and launched',
+            'outcome' => 'Live in production',
+            'is_published' => '1',
+            'cover' => $caseCover,
+        ])->assertRedirect(route('admin.case-studies.index'));
+
+        $caseStudy = \App\Models\CaseStudy::query()->where('title', 'Shipped Product')->firstOrFail();
+        $this->assertNotNull($caseStudy->cover_path);
+        $this->assertNotNull($caseStudy->coverUrl());
+        Storage::disk('public')->assertExists($caseStudy->cover_path);
     }
 }

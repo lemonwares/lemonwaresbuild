@@ -16,6 +16,7 @@ import './domain-search.js';
 import './domain-cart.js';
 import './header-domain-search.js';
 import './theme.js';
+import './case-live-preview.js';
 import './admin-sidebar.js';
 import './account-sidebar.js';
 import './admin-chrome.js';

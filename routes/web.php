@@ -19,6 +19,7 @@ use App\Http\Controllers\AdminHostingPriceController;
 use App\Http\Controllers\AdminFlutterwaveSettingsController;
 use App\Http\Controllers\AdminZeptoMailSettingsController;
 use App\Http\Controllers\AdminCloudflareSettingsController;
+use App\Http\Controllers\AdminCloudinarySettingsController;
 use App\Http\Controllers\AdminSearchController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\SupportController;
@@ -34,9 +35,11 @@ use App\Http\Controllers\AdminTeamMemberController;
 use App\Http\Controllers\AdminStaffController;
 use App\Http\Controllers\AdminBlogPostController;
 use App\Http\Controllers\AdminProjectController;
+use App\Http\Controllers\AdminCaseStudyController;
 use App\Http\Controllers\AdminNewsletterCampaignController;
 use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\CaseStudyController;
 use App\Http\Controllers\CareerController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -110,6 +113,8 @@ Route::get('/blog', [BlogController::class, 'index'])->name('blog');
 Route::get('/blog/{blogPost}', [BlogController::class, 'show'])->name('blog.show');
 Route::get('/projects', [ProjectController::class, 'index'])->name('projects');
 Route::get('/projects/{project}', [ProjectController::class, 'show'])->name('projects.show');
+Route::get('/case-studies', [CaseStudyController::class, 'index'])->name('case-studies');
+Route::get('/case-studies/{caseStudy}', [CaseStudyController::class, 'show'])->name('case-studies.show');
 Route::get('/careers', [CareerController::class, 'index'])->name('careers');
 Route::get('/careers/{careerOpening}', [CareerController::class, 'show'])->name('careers.show');
 Route::view('/domain', 'pages.domain')->name('domain');
@@ -248,7 +253,6 @@ Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])
     ->middleware('throttle:contact-form')
     ->name('contact.store');
-Route::view('/case-studies', 'pages.case-studies')->name('case-studies');
 Route::view('/faq', 'pages.faq')->name('faq');
 Route::view('/terms', 'pages.terms')->name('terms');
 Route::view('/refund-policy', 'pages.refund-policy')->name('refund-policy');
@@ -1237,6 +1241,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::resource('staff', AdminStaffController::class)->except(['show']);
         Route::resource('blog-posts', AdminBlogPostController::class)->except(['show']);
         Route::resource('projects', AdminProjectController::class)->except(['show']);
+        Route::resource('case-studies', AdminCaseStudyController::class)->except(['show']);
         Route::get('/newsletter-campaigns', [AdminNewsletterCampaignController::class, 'index'])->name('newsletter-campaigns.index');
         Route::get('/newsletter-campaigns/create', [AdminNewsletterCampaignController::class, 'create'])->name('newsletter-campaigns.create');
         Route::post('/newsletter-campaigns', [AdminNewsletterCampaignController::class, 'store'])->name('newsletter-campaigns.store');
@@ -1264,6 +1269,10 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/cloudflare-settings', [AdminCloudflareSettingsController::class, 'index'])->name('cloudflare-settings.index');
         Route::put('/cloudflare-settings', [AdminCloudflareSettingsController::class, 'update'])->name('cloudflare-settings.update');
         Route::post('/cloudflare-settings/test-connection', [AdminCloudflareSettingsController::class, 'testConnection'])->name('cloudflare-settings.test-connection');
+
+        Route::get('/cloudinary-settings', [AdminCloudinarySettingsController::class, 'index'])->name('cloudinary-settings.index');
+        Route::put('/cloudinary-settings', [AdminCloudinarySettingsController::class, 'update'])->name('cloudinary-settings.update');
+        Route::post('/cloudinary-settings/test-connection', [AdminCloudinarySettingsController::class, 'testConnection'])->name('cloudinary-settings.test-connection');
 
         Route::get('/email-catalog', [AdminEmailCatalogController::class, 'index'])->name('email-catalog.index');
         Route::put('/email-catalog', [AdminEmailCatalogController::class, 'update'])->name('email-catalog.update');

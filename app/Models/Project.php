@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MediaStorage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
@@ -34,6 +35,11 @@ class Project extends Model
     public function scopePublished($query)
     {
         return $query->where('is_published', true);
+    }
+
+    public function coverUrl(): ?string
+    {
+        return MediaStorage::url($this->cover_path);
     }
 
     public static function uniqueSlug(string $title, ?int $ignoreId = null): string

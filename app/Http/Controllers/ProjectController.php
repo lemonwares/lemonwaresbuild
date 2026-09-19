@@ -3,25 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
-use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
 class ProjectController extends Controller
 {
-    public function index(): View
+    public function index(): RedirectResponse
     {
-        $projects = Project::query()
-            ->published()
-            ->orderBy('sort_order')
-            ->orderBy('title')
-            ->get();
-
-        return view('pages.projects', compact('projects'));
+        return redirect()->route('case-studies', [], 301);
     }
 
-    public function show(Project $project): View
+    public function show(Project $project): RedirectResponse
     {
-        abort_unless($project->is_published, 404);
-
-        return view('pages.project-show', compact('project'));
+        return redirect()->route('case-studies', [], 301);
     }
 }

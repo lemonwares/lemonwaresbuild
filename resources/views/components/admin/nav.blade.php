@@ -25,6 +25,7 @@
                 ['label' => 'Flutterwave Settings', 'route' => 'admin.flutterwave-settings.index', 'match' => 'admin.flutterwave-settings.*', 'icon' => 'zap', 'permission' => 'flutterwave'],
                 ['label' => 'ZeptoMail Settings', 'route' => 'admin.zeptomail-settings.index', 'match' => 'admin.zeptomail-settings.*', 'icon' => 'send', 'permission' => 'zeptomail'],
                 ['label' => 'Cloudflare Settings', 'route' => 'admin.cloudflare-settings.index', 'match' => 'admin.cloudflare-settings.*', 'icon' => 'shield', 'permission' => 'cloudflare'],
+                ['label' => 'Cloudinary Settings', 'route' => 'admin.cloudinary-settings.index', 'match' => 'admin.cloudinary-settings.*', 'icon' => 'cloud-upload', 'permission' => 'cloudinary'],
             ],
         ],
         [
@@ -32,6 +33,7 @@
             'items' => [
                 ['label' => 'Blog', 'route' => 'admin.blog-posts.index', 'match' => 'admin.blog-posts.*', 'icon' => 'clipboard-check', 'permission' => 'blog'],
                 ['label' => 'Projects', 'route' => 'admin.projects.index', 'match' => 'admin.projects.*', 'icon' => 'boxes', 'permission' => 'projects'],
+                ['label' => 'Case Studies', 'route' => 'admin.case-studies.index', 'match' => 'admin.case-studies.*', 'icon' => 'clipboard-check', 'permission' => 'case_studies'],
                 ['label' => 'Team', 'route' => 'admin.team-members.index', 'match' => 'admin.team-members.*', 'icon' => 'user', 'permission' => 'team'],
                 ['label' => 'Careers', 'route' => 'admin.career-openings.index', 'match' => 'admin.career-openings.*', 'icon' => 'rocket', 'permission' => 'careers'],
             ],

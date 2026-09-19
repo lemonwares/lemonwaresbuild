@@ -71,6 +71,7 @@ class AdminAuthController extends Controller
             'campaigns' => 'admin.newsletter-campaigns.index',
             'blog' => 'admin.blog-posts.index',
             'projects' => 'admin.projects.index',
+            'case_studies' => 'admin.case-studies.index',
             'team' => 'admin.team-members.index',
             'careers' => 'admin.career-openings.index',
             'email_catalog' => 'admin.email-catalog.index',

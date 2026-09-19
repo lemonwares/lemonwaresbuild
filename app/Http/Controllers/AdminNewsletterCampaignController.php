@@ -5,11 +5,11 @@ namespace App\Http\Controllers;
 use App\Mail\NewsletterCampaignMail;
 use App\Models\NewsletterCampaign;
 use App\Models\NewsletterSubscriber;
+use App\Support\MediaStorage;
 use App\Support\ZeptoMailSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -219,7 +219,7 @@ class AdminNewsletterCampaignController extends Controller
         if ($remove !== []) {
             foreach ($remove as $path) {
                 if (in_array($path, $keep, true)) {
-                    Storage::disk('public')->delete($path);
+                    MediaStorage::delete($path);
                     $keep = array_values(array_filter($keep, fn (string $p) => $p !== $path));
                 }
             }
@@ -230,7 +230,7 @@ class AdminNewsletterCampaignController extends Controller
                 if (! $file) {
                     continue;
                 }
-                $keep[] = $file->store('newsletter-campaigns', 'public');
+                $keep[] = MediaStorage::store($file, 'newsletter-campaigns');
             }
         }
 
