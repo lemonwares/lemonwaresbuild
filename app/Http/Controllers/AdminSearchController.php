@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CaseStudy;
 use App\Models\EmailOrder;
 use App\Models\HostingLead;
 use App\Models\NewsletterSubscriber;
@@ -37,6 +38,7 @@ class AdminSearchController extends Controller
             ['title' => 'Hosting Prices', 'subtitle' => 'Catalog', 'url' => route('admin.hosting-prices.index'), 'type' => 'Page', 'permission' => 'hosting_prices'],
             ['title' => 'Blog', 'subtitle' => 'Site', 'url' => route('admin.blog-posts.index'), 'type' => 'Page', 'permission' => 'blog'],
             ['title' => 'Projects', 'subtitle' => 'Site', 'url' => route('admin.projects.index'), 'type' => 'Page', 'permission' => 'projects'],
+            ['title' => 'Case Studies', 'subtitle' => 'Site', 'url' => route('admin.case-studies.index'), 'type' => 'Page', 'permission' => 'case_studies'],
             ['title' => 'Team', 'subtitle' => 'Site', 'url' => route('admin.team-members.index'), 'type' => 'Page', 'permission' => 'team'],
             ['title' => 'Careers', 'subtitle' => 'Site', 'url' => route('admin.career-openings.index'), 'type' => 'Page', 'permission' => 'careers'],
         ];
@@ -165,6 +167,25 @@ class AdminSearchController extends Controller
                         'subtitle' => $member->role,
                         'url' => route('admin.team-members.edit', $member),
                         'type' => 'Team',
+                    ]);
+                });
+        }
+
+        if (AdminPermissions::currentCan('case_studies')) {
+            CaseStudy::query()
+                ->where(function ($query) use ($like): void {
+                    $query->where('title', 'like', $like)
+                        ->orWhere('client_name', 'like', $like)
+                        ->orWhere('summary', 'like', $like);
+                })
+                ->limit(4)
+                ->get(['id', 'title', 'client_name', 'slug'])
+                ->each(function (CaseStudy $caseStudy) use ($results): void {
+                    $results->push([
+                        'title' => $caseStudy->title,
+                        'subtitle' => $caseStudy->client_name ?: $caseStudy->slug,
+                        'url' => route('admin.case-studies.edit', $caseStudy),
+                        'type' => 'Case study',
                     ]);
                 });
         }

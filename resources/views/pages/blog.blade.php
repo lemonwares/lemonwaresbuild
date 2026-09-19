@@ -25,7 +25,7 @@
                     <article class="border-b border-border pb-8">
                         @if ($post->cover_path)
                             <a href="{{ route('blog.show', $post) }}" class="mb-4 block overflow-hidden rounded-md">
-                                <img src="{{ asset('storage/' . $post->cover_path) }}" alt="" class="aspect-[16/9] w-full object-cover" loading="lazy" />
+                                <img src="{{ $post->coverUrl() }}" alt="" class="aspect-[16/9] w-full object-cover" loading="lazy" />
                             </a>
                         @endif
                         <p class="text-xs font-semibold uppercase tracking-widest text-on-blush/55">

@@ -57,7 +57,7 @@
 
         @if (! empty($post?->cover_path))
             <div class="mt-4 flex items-center gap-4">
-                <img src="{{ asset('storage/' . $post->cover_path) }}" alt="" class="h-20 w-32 rounded-lg object-cover" />
+                <img src="{{ $post->coverUrl() }}" alt="" class="h-20 w-32 rounded-lg object-cover" />
                 <label class="admin-check">
                     <input type="checkbox" name="remove_cover" value="1">
                     <span>Remove current cover</span>

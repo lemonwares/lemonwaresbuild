@@ -31,7 +31,7 @@
             <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($existingImages as $path)
                     <label class="admin-campaign-image-pick">
-                        <img src="{{ asset('storage/' . $path) }}" alt="" class="admin-campaign-image-thumb" />
+                        <img src="{{ \App\Support\MediaStorage::url($path) }}" alt="" class="admin-campaign-image-thumb" />
                         <span class="admin-check mt-2">
                             <input type="checkbox" name="remove_images[]" value="{{ $path }}">
                             <span>Remove</span>

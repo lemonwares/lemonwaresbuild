@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\MediaStorage;
 use Illuminate\Database\Eloquent\Model;
 
 class TeamMember extends Model
@@ -38,6 +39,11 @@ class TeamMember extends Model
             self::DEPARTMENT_MANAGERIAL => 'Managerial',
             self::DEPARTMENT_ADMINISTRATIVE => 'Administrative',
         ];
+    }
+
+    public function photoUrl(): ?string
+    {
+        return MediaStorage::url($this->photo_path);
     }
 }
 

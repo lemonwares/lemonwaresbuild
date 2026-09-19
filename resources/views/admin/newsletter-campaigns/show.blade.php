@@ -75,7 +75,7 @@
                             <dd>
                                 <div class="mt-2 grid gap-3 sm:grid-cols-2">
                                     @foreach ($campaign->imagePaths() as $path)
-                                        <img src="{{ asset('storage/' . $path) }}" alt="" class="admin-campaign-image-thumb" />
+                                        <img src="{{ \App\Support\MediaStorage::url($path) }}" alt="" class="admin-campaign-image-thumb" />
                                     @endforeach
                                 </div>
                             </dd>

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Support\Facades\Storage;
+use App\Support\MediaStorage;
 
 class NewsletterCampaign extends Model
 {
@@ -70,7 +70,8 @@ class NewsletterCampaign extends Model
     public function imageUrls(): array
     {
         return collect($this->imagePaths())
-            ->map(fn (string $path) => asset('storage/'.$path))
+            ->map(fn (string $path) => MediaStorage::url($path))
+            ->filter()
             ->values()
             ->all();
     }
@@ -78,7 +79,7 @@ class NewsletterCampaign extends Model
     public function deleteStoredImages(): void
     {
         foreach ($this->imagePaths() as $path) {
-            Storage::disk('public')->delete($path);
+            MediaStorage::delete($path);
         }
     }
 }

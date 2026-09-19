@@ -85,6 +85,17 @@ class AdminBreadcrumbs
                 ['label' => 'Projects', 'href' => route('admin.projects.index')],
                 ['label' => 'Edit'],
             ],
+            'admin.case-studies.index' => [
+                ['label' => 'Case Studies'],
+            ],
+            'admin.case-studies.create' => [
+                ['label' => 'Case Studies', 'href' => route('admin.case-studies.index')],
+                ['label' => 'Add'],
+            ],
+            'admin.case-studies.edit' => [
+                ['label' => 'Case Studies', 'href' => route('admin.case-studies.index')],
+                ['label' => 'Edit'],
+            ],
             'admin.newsletter-campaigns.index' => [
                 ['label' => 'Campaigns'],
             ],

@@ -187,5 +187,6 @@ class DatabaseSeeder extends Seeder
 
         $this->call(CareerOpeningSeeder::class);
         $this->call(TeamMemberSeeder::class);
+        $this->call(CaseStudySeeder::class);
     }
 }

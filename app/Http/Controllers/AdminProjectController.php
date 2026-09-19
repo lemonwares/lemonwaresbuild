@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Support\MediaStorage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -32,7 +32,7 @@ class AdminProjectController extends Controller
         $data['slug'] = Project::uniqueSlug($data['title']);
 
         if ($request->hasFile('cover')) {
-            $data['cover_path'] = $request->file('cover')->store('project-covers', 'public');
+            $data['cover_path'] = MediaStorage::store($request->file('cover'), 'project-covers');
         }
 
         Project::query()->create($data);
@@ -58,15 +58,15 @@ class AdminProjectController extends Controller
         );
 
         if ($request->boolean('remove_cover') && $project->cover_path) {
-            Storage::disk('public')->delete($project->cover_path);
+            MediaStorage::delete($project->cover_path);
             $data['cover_path'] = null;
         }
 
         if ($request->hasFile('cover')) {
             if ($project->cover_path) {
-                Storage::disk('public')->delete($project->cover_path);
+                MediaStorage::delete($project->cover_path);
             }
-            $data['cover_path'] = $request->file('cover')->store('project-covers', 'public');
+            $data['cover_path'] = MediaStorage::store($request->file('cover'), 'project-covers');
         }
 
         $project->update($data);
@@ -79,7 +79,7 @@ class AdminProjectController extends Controller
     public function destroy(Project $project): RedirectResponse
     {
         if ($project->cover_path) {
-            Storage::disk('public')->delete($project->cover_path);
+            MediaStorage::delete($project->cover_path);
         }
 
         $project->delete();

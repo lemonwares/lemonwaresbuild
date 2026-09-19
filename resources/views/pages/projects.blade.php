@@ -25,7 +25,7 @@
                     <article class="border-b border-border pb-8">
                         @if ($project->cover_path)
                             <a href="{{ route('projects.show', $project) }}" class="mb-4 block overflow-hidden rounded-md">
-                                <img src="{{ asset('storage/' . $project->cover_path) }}" alt="" class="aspect-[16/9] w-full object-cover" loading="lazy" />
+                                <img src="{{ $project->coverUrl() }}" alt="" class="aspect-[16/9] w-full object-cover" loading="lazy" />
                             </a>
                         @endif
                         @if ($project->client_name)

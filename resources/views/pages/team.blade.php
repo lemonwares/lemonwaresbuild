@@ -91,7 +91,7 @@
                                         <div class="team-member-media">
                                             @if ($member->photo_path)
                                                 <img
-                                                    src="{{ asset('storage/' . $member->photo_path) }}"
+                                                    src="{{ $member->photoUrl() }}"
                                                     alt="{{ $member->name }}"
                                                     class="team-member-photo"
                                                     loading="lazy"
