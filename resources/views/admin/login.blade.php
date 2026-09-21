@@ -15,7 +15,7 @@
                 >
                 <p class="section-label mb-2">Staff CRM</p>
                 <h1 class="heading">Sign In</h1>
-                <p class="lede mt-3">Use your Lemonwares staff account to monitor customers, email, and hosting.</p>
+                <p class="lede mt-3">Use your LemonWares staff account to monitor customers, email, and hosting.</p>
             </div>
 
             @if ($errors->any())

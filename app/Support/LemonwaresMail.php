@@ -5,7 +5,7 @@ namespace App\Support;
 use App\Support\ZeptoMailSettings;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class LemonwaresMail
+class LemonWaresMail
 {
     public static function message(): MailMessage
     {

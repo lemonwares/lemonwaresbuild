@@ -6,7 +6,7 @@
 @section('content')
     <x-admin.page-header
         title="Overview"
-        lede="Everything moving across Lemonwares — customers, orders, leads, and support — at a glance."
+        lede="Everything moving across LemonWares — customers, orders, leads, and support — at a glance."
         :back-href="url('/')"
         back-label="Go back"
         :breadcrumbs="[['label' => 'Overview']]"

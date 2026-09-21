@@ -29,7 +29,7 @@
                         <div class="w-full max-w-md rounded-2xl border border-border bg-white p-6 shadow-2xl">
                             <h3 class="text-lg font-bold text-black">Delete this customer?</h3>
                             <p class="mt-2 text-sm text-on-blush/70">
-                                This removes the Lemonwares account
+                                This removes the LemonWares account
                                 @if ($customer->whmcsCustomer)
                                     and closes WHMCS client #{{ $customer->whmcsCustomer->whmcs_client_id }}
                                 @endif

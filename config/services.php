@@ -39,7 +39,7 @@ return [
         'token' => env('ZEPTOMAIL_TOKEN'),
         'endpoint' => env('ZEPTOMAIL_ENDPOINT', 'https://api.zeptomail.com/v1.1/email'),
         'from_address' => env('ZEPTOMAIL_FROM_ADDRESS', env('MAIL_FROM_ADDRESS')),
-        'from_name' => env('ZEPTOMAIL_FROM_NAME', env('MAIL_FROM_NAME', env('APP_NAME', 'Lemonwares'))),
+        'from_name' => env('ZEPTOMAIL_FROM_NAME', env('MAIL_FROM_NAME', env('APP_NAME', 'LemonWares'))),
         'logo_url' => env('ZEPTOMAIL_LOGO_URL'),
     ],
 

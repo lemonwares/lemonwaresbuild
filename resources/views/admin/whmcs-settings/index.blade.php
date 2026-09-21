@@ -66,7 +66,7 @@
                     @checked(\App\Support\WhmcsSettings::deferPaymentRedirect())
                 />
                 <span>
-                    Test mode: skip WHMCS payment redirect — create the WHMCS client and pending order via API, then stay on Lemonwares instead of sending the customer to WHMCS checkout. Enabled automatically when APP_ENV=local unless overridden here.
+                    Test mode: skip WHMCS payment redirect — create the WHMCS client and pending order via API, then stay on LemonWares instead of sending the customer to WHMCS checkout. Enabled automatically when APP_ENV=local unless overridden here.
                 </span>
             </label>
         </section>

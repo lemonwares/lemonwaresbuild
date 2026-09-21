@@ -44,7 +44,7 @@
             <div class="admin-metric is-static">
                 <span class="admin-metric-label">Linked</span>
                 <span class="admin-metric-value admin-metric-value-sm">{{ $legacyCustomer->user ? 'Yes' : 'No' }}</span>
-                <span class="admin-metric-meta">Native Lemonwares account</span>
+                <span class="admin-metric-meta">Native LemonWares account</span>
             </div>
         </section>
 
@@ -67,7 +67,7 @@
                     <div><dt>Status</dt><dd>{{ $legacyCustomer->status ?: '—' }}</dd></div>
                     <div><dt>WHMCS Client ID</dt><dd>{{ $legacyCustomer->whmcs_client_id }}</dd></div>
                     <div class="admin-dl-span">
-                        <dt>Linked Lemonwares account</dt>
+                        <dt>Linked LemonWares account</dt>
                         <dd>
                             @if ($legacyCustomer->user)
                                 <a href="{{ route('admin.customers.show', $legacyCustomer->user) }}">

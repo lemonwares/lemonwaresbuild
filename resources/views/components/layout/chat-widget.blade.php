@@ -9,7 +9,7 @@
         data-chat-panel
         hidden
         role="dialog"
-        aria-label="Chat with Lemonwares"
+        aria-label="Chat with LemonWares"
         aria-modal="true"
     >
         {{-- Header --}}
@@ -82,7 +82,7 @@
                 </span>
                 <h3 class="mb-2 text-base font-semibold text-on-blush">Talk to Our Team</h3>
                 <p class="mb-5 text-sm leading-relaxed text-on-blush/70">
-                    A Lemonwares representative will reply on WhatsApp — usually within a few minutes during business hours.
+                    A LemonWares representative will reply on WhatsApp — usually within a few minutes during business hours.
                 </p>
                 <a
                     href="{{ config('site.whatsapp') }}"

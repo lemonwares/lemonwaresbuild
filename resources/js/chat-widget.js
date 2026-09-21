@@ -72,7 +72,7 @@ const initChatWidget = () => {
                 greeted = true;
                 appendMessage(
                     'bot',
-                    "Hi! I'm the Lemonwares assistant. Ask me about hosting plans, business email, web development, mobile apps, or how to get started.",
+                    "Hi! I'm the LemonWares assistant. Ask me about hosting plans, business email, web development, mobile apps, or how to get started.",
                 );
             }
 

@@ -115,7 +115,7 @@ class ContactFormTest extends TestCase
     {
         config([
             'services.zeptomail.from_address' => 'noreply@lemonwares.com',
-            'services.zeptomail.from_name' => 'Lemonwares',
+            'services.zeptomail.from_name' => 'LemonWares',
         ]);
 
         $mail = new ContactFormSubmitted(

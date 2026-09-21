@@ -61,6 +61,22 @@
     $deployments = $services['deployments'] ?? [];
     $testing = $services['testing'] ?? [];
     $maintenance = $services['maintenance'] ?? [];
+
+    $stackLogos = collect(config('site.technologies', []))
+        ->filter(fn ($tech) => is_array($tech) && filled($tech['logo'] ?? null))
+        ->values()
+        ->all();
+    $stackColA = [];
+    $stackColB = [];
+    foreach ($stackLogos as $i => $tech) {
+        if ($i % 2 === 0) {
+            $stackColA[] = $tech;
+        } else {
+            $stackColB[] = $tech;
+        }
+    }
+
+    $featuredBuilds = $featuredBuilds ?? collect();
 @endphp
 
 @section('content')
@@ -108,19 +124,66 @@
         </div>
     </section>
 
-    <section class="border-b border-border bg-white" data-reveal>
+    <section class="border-t border-border bg-white" data-reveal>
+        <div class="container-page py-16 sm:py-20">
+            <div class="mb-10 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+                <div class="max-w-2xl">
+                    <p class="section-label mb-3">{{ __('pages.development.built_eyebrow') }}</p>
+                    <h2 class="heading">{{ __('pages.development.built_title') }}</h2>
+                    <p class="lede mt-3">{{ __('pages.development.built_lede') }}</p>
+                </div>
+                <a href="{{ route('case-studies') }}" class="btn btn-primary shrink-0 self-start sm:self-auto">
+                    <span>{{ __('pages.development.built_more') }}</span>
+                    <x-ui.icons.arrow-up-right class="size-4" />
+                </a>
+            </div>
+
+            @if ($featuredBuilds->isEmpty())
+                <p class="text-sm font-light text-on-blush/70">{{ __('pages.development.built_empty') }}</p>
+            @else
+                <div class="dev-built-grid">
+                    @foreach ($featuredBuilds as $build)
+                        <a
+                            href="{{ route('case-studies.show', $build) }}"
+                            class="dev-built-card"
+                        >
+                            <div class="dev-built-media" aria-hidden="true">
+                                @if ($build->cover_path)
+                                    <img
+                                        src="{{ $build->coverUrl() }}"
+                                        alt=""
+                                        class="dev-built-img"
+                                        loading="{{ $loop->first ? 'eager' : 'lazy' }}"
+                                    >
+                                @else
+                                    <div class="dev-built-fallback"></div>
+                                @endif
+                            </div>
+                            <div class="dev-built-copy">
+                                @if ($build->client_name)
+                                    <p class="dev-built-client">{{ $build->client_name }}</p>
+                                @endif
+                                <h3 class="dev-built-title">{{ $build->title }}</h3>
+                                @if ($build->summary)
+                                    <p class="dev-built-summary">{{ $build->summary }}</p>
+                                @endif
+                                <span class="dev-built-action">
+                                    <span>{{ __('pages.development.built_view') }}</span>
+                                    <x-ui.icons.arrow-up-right class="size-4" />
+                                </span>
+                            </div>
+                        </a>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+    </section>
+
+    <section class="border-t border-border bg-white" data-reveal>
         <div class="container-page py-14 sm:py-16">
-            @php
-                $stackLogos = collect(config('site.technologies', []))
-                    ->filter(fn ($tech) => is_array($tech) && filled($tech['logo'] ?? null))
-                    ->values()
-                    ->all();
-                $stackColA = array_values(array_filter($stackLogos, fn ($_, $i) => $i % 2 === 0, ARRAY_FILTER_USE_BOTH));
-                $stackColB = array_values(array_filter($stackLogos, fn ($_, $i) => $i % 2 === 1, ARRAY_FILTER_USE_BOTH));
-            @endphp
             <div class="grid items-center gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] lg:gap-14">
                 <div class="dev-section-copy max-w-xl">
-                    <p class="section-label mb-3">{{ __('pages.development.eyebrow') }}</p>
+                    <p class="dev-stack-eyebrow mb-3">{{ __('pages.development.eyebrow') }}</p>
                     <p class="text-base font-light leading-relaxed text-on-blush/80 sm:text-lg">
                         {{ __('pages.development.body') }}
                     </p>
@@ -229,7 +292,7 @@
                         <p class="section-label mb-0">{{ $web['eyebrow'] ?? '' }}</p>
                     </div>
                     <h2 class="heading">{{ $web['title'] ?? '' }}</h2>
-                    <p class="lede mt-3">{{ $web['lede'] ?? '' }}</p>
+                    <p class="lede mt-3">{{ $web['summary'] ?? '' }}</p>
                     @if (! empty($web['tags']) && is_array($web['tags']))
                         <div class="mt-6 flex flex-wrap gap-2">
                             @foreach ($web['tags'] as $tag)
@@ -250,7 +313,7 @@
                 </div>
             </div>
             <ul class="check-list mt-12 grid gap-3 sm:grid-cols-2">
-                @foreach (($web['points'] ?? []) as $point)
+                @foreach (array_slice(($web['points'] ?? []), 0, 3) as $point)
                     <li>{{ $point }}</li>
                 @endforeach
             </ul>
@@ -275,7 +338,7 @@
                         <p class="section-label mb-0">{{ $mobile['eyebrow'] ?? '' }}</p>
                     </div>
                     <h2 class="heading">{{ $mobile['title'] ?? '' }}</h2>
-                    <p class="lede mt-3">{{ $mobile['lede'] ?? '' }}</p>
+                    <p class="lede mt-3">{{ $mobile['summary'] ?? '' }}</p>
                     @if (! empty($mobile['tags']) && is_array($mobile['tags']))
                         <div class="mt-6 flex flex-wrap gap-2">
                             @foreach ($mobile['tags'] as $tag)
@@ -284,7 +347,7 @@
                         </div>
                     @endif
                     <ul class="check-list mt-8 space-y-3">
-                        @foreach (($mobile['points'] ?? []) as $point)
+                        @foreach (array_slice(($mobile['points'] ?? []), 0, 3) as $point)
                             <li>{{ $point }}</li>
                         @endforeach
                     </ul>
@@ -309,7 +372,7 @@
                         <p class="text-xs font-semibold uppercase tracking-widest text-white/75">{{ $wordpress['eyebrow'] ?? '' }}</p>
                     </div>
                     <h2 class="mt-1 text-3xl font-bold tracking-tight text-white sm:text-4xl">{{ $wordpress['title'] ?? '' }}</h2>
-                    <p class="mt-4 max-w-xl text-base font-light leading-relaxed text-white/90">{{ $wordpress['lede'] ?? '' }}</p>
+                    <p class="mt-4 max-w-xl text-base font-light leading-relaxed text-white/90">{{ $wordpress['summary'] ?? '' }}</p>
                     @if (! empty($wordpress['tags']) && is_array($wordpress['tags']))
                         <div class="mt-6 flex flex-wrap gap-2">
                             @foreach ($wordpress['tags'] as $tag)
@@ -330,7 +393,7 @@
                 </div>
             </div>
             <ul class="check-list mt-10 grid gap-3 sm:grid-cols-2">
-                @foreach (($wordpress['points'] ?? []) as $point)
+                @foreach (array_slice(($wordpress['points'] ?? []), 0, 3) as $point)
                     <li>{{ $point }}</li>
                 @endforeach
             </ul>
@@ -349,9 +412,9 @@
                         <p class="section-label mb-0">{{ $microservices['eyebrow'] ?? '' }}</p>
                     </div>
                     <h2 class="heading">{{ $microservices['title'] ?? '' }}</h2>
-                    <p class="lede mt-3">{{ $microservices['lede'] ?? '' }}</p>
+                    <p class="lede mt-3">{{ $microservices['summary'] ?? '' }}</p>
                     <ul class="check-list mt-8 space-y-3">
-                        @foreach (($microservices['points'] ?? []) as $point)
+                        @foreach (array_slice(($microservices['points'] ?? []), 0, 3) as $point)
                             <li>{{ $point }}</li>
                         @endforeach
                     </ul>
@@ -388,7 +451,7 @@
                         <p class="section-label mb-0">{{ $deployments['eyebrow'] ?? '' }}</p>
                     </div>
                     <h2 class="heading">{{ $deployments['title'] ?? '' }}</h2>
-                    <p class="lede mt-3">{{ $deployments['lede'] ?? '' }}</p>
+                    <p class="lede mt-3">{{ $deployments['summary'] ?? '' }}</p>
                     <ol class="dev-pipeline mt-8">
                         @foreach (($deployments['pipeline'] ?? ['Build', 'Test', 'Stage', 'Ship']) as $index => $label)
                             <li class="dev-pipeline-step">
@@ -398,7 +461,7 @@
                         @endforeach
                     </ol>
                     <ul class="check-list mt-8 space-y-3">
-                        @foreach (($deployments['points'] ?? []) as $point)
+                        @foreach (array_slice(($deployments['points'] ?? []), 0, 3) as $point)
                             <li>{{ $point }}</li>
                         @endforeach
                     </ul>
@@ -423,9 +486,9 @@
                         <p class="section-label mb-0">{{ $testing['eyebrow'] ?? '' }}</p>
                     </div>
                     <h2 class="heading">{{ $testing['title'] ?? '' }}</h2>
-                    <p class="lede mt-3">{{ $testing['lede'] ?? '' }}</p>
+                    <p class="lede mt-3">{{ $testing['summary'] ?? '' }}</p>
                     <div class="dev-qa-board mt-8">
-                        @foreach (($testing['points'] ?? []) as $point)
+                        @foreach (array_slice(($testing['points'] ?? []), 0, 3) as $point)
                             <div class="dev-qa-row">
                                 <span class="dev-qa-pass" aria-hidden="true">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="size-3.5"><path d="M20 6 9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -467,9 +530,9 @@
                         <p class="section-label mb-0">{{ $maintenance['eyebrow'] ?? '' }}</p>
                     </div>
                     <h2 class="heading">{{ $maintenance['title'] ?? '' }}</h2>
-                    <p class="lede mt-3">{{ $maintenance['lede'] ?? '' }}</p>
+                    <p class="lede mt-3">{{ $maintenance['summary'] ?? '' }}</p>
                     <ul class="check-list mt-8 space-y-3">
-                        @foreach (($maintenance['points'] ?? []) as $point)
+                        @foreach (array_slice(($maintenance['points'] ?? []), 0, 3) as $point)
                             <li>{{ $point }}</li>
                         @endforeach
                     </ul>

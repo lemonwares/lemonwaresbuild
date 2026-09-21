@@ -12,11 +12,6 @@
             'label' => 'cPanel',
             'src' => asset('images/brands/cpanel.svg'),
         ],
-        [
-            'key' => 'plesk',
-            'label' => 'Plesk',
-            'src' => asset('images/brands/plesk.svg'),
-        ],
     ];
 @endphp
 

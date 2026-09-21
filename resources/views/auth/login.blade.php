@@ -7,6 +7,9 @@
     <div class="auth-heading">
         <h1 class="font-bold tracking-tight text-black">{{ __('account.login_title') }}</h1>
         <p class="font-light text-on-blush/65">{{ __('account.login_lede') }}</p>
+        @if (! empty($whmcsLoginEnabled))
+            <p class="mt-2 text-sm font-medium text-on-blush/70">{{ __('account.login_whmcs_hint') }}</p>
+        @endif
     </div>
 
     <x-ui.flash show-status />

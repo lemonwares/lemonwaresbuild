@@ -18,7 +18,7 @@
     </div>
 
     <div class="domain-scene-panel is-to domain-scene-float">
-        <p class="domain-scene-panel-label">Lemonwares</p>
+        <p class="domain-scene-panel-label">LemonWares</p>
         <p class="domain-scene-panel-domain">yourbrand.net</p>
         <p class="domain-scene-panel-meta">DNS · billing · support</p>
     </div>

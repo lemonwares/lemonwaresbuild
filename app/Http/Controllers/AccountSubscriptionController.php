@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\WhmcsCheckout;
+use App\Support\WhmcsSyncService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -10,6 +12,13 @@ class AccountSubscriptionController extends Controller
     public function index(Request $request): View
     {
         $owner = $request->user()->accountOwner();
+
+        $whmcsCustomer = $owner->whmcsCustomer;
+        if ($whmcsCustomer?->whmcs_client_id) {
+            // Refresh products when the client opens Subscriptions.
+            WhmcsSyncService::syncServicesForCustomer($whmcsCustomer);
+            $whmcsCustomer->refresh();
+        }
 
         $whmcsServices = $owner->whmcsServices()->limit(50)->get();
         $emailOrders = $owner->emailOrders()
@@ -21,6 +30,11 @@ class AccountSubscriptionController extends Controller
         $subscriptions = collect();
 
         foreach ($whmcsServices as $service) {
+            $manageUrl = null;
+            if ($whmcsCustomer?->whmcs_client_id) {
+                $manageUrl = WhmcsCheckout::clientAreaUrl((int) $whmcsCustomer->whmcs_client_id);
+            }
+
             $subscriptions->push([
                 'source' => 'whmcs',
                 'label' => $service->product_name ?: __('account.subscription_whmcs'),
@@ -28,7 +42,7 @@ class AccountSubscriptionController extends Controller
                 'status' => $service->status,
                 'billing_cycle' => $service->billing_cycle,
                 'next_due' => $service->next_due_date,
-                'url' => null,
+                'url' => $manageUrl,
                 'renew_url' => null,
             ]);
         }

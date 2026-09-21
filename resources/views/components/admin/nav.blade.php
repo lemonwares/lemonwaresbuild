@@ -21,6 +21,7 @@
                 ['label' => 'Hosting Prices', 'route' => 'admin.hosting-prices.index', 'match' => 'admin.hosting-prices.*', 'icon' => 'zap', 'permission' => 'hosting_prices'],
                 ['label' => 'Email & Suite Pricing', 'route' => 'admin.email-catalog.index', 'match' => 'admin.email-catalog.*', 'icon' => 'mail', 'permission' => 'email_catalog'],
                 ['label' => 'Email Providers', 'route' => 'admin.email-provider-settings.index', 'match' => 'admin.email-provider-settings.*', 'icon' => 'bot', 'permission' => 'email_providers'],
+                ['label' => 'WHMCS Console', 'route' => 'admin.whmcs-console.index', 'match' => 'admin.whmcs-console.*', 'icon' => 'boxes', 'permission' => 'whmcs'],
                 ['label' => 'WHMCS Settings', 'route' => 'admin.whmcs-settings.index', 'match' => 'admin.whmcs-settings.*', 'icon' => 'wrench', 'permission' => 'whmcs'],
                 ['label' => 'Flutterwave Settings', 'route' => 'admin.flutterwave-settings.index', 'match' => 'admin.flutterwave-settings.*', 'icon' => 'zap', 'permission' => 'flutterwave'],
                 ['label' => 'ZeptoMail Settings', 'route' => 'admin.zeptomail-settings.index', 'match' => 'admin.zeptomail-settings.*', 'icon' => 'send', 'permission' => 'zeptomail'],

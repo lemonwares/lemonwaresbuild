@@ -29,6 +29,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DomainCartController;
 use App\Http\Controllers\DomainOrderController;
 use App\Http\Controllers\AdminWhmcsSettingsController;
+use App\Http\Controllers\AdminWhmcsConsoleController;
 use App\Http\Controllers\AdminSubscriberController;
 use App\Http\Controllers\AdminCareerOpeningController;
 use App\Http\Controllers\AdminTeamMemberController;
@@ -151,7 +152,16 @@ Route::get('/domain/checkout/received/{checkout}', [DomainOrderController::class
 Route::post('/domain/order/{order}/pay', [DomainOrderController::class, 'pay'])->middleware('throttle:10,1')->name('domain.pay');
 Route::post('/domain/checkout/{checkout}/pay', [DomainOrderController::class, 'payCheckout'])->middleware('throttle:10,1')->name('domain.checkout.pay');
 Route::view('/microservices', 'pages.microservices')->name('microservices');
-Route::view('/development', 'pages.development')->name('development');
+Route::get('/development', function () {
+    $featuredBuilds = \App\Models\CaseStudy::query()
+        ->published()
+        ->orderBy('sort_order')
+        ->orderBy('title')
+        ->limit(3)
+        ->get();
+
+    return view('pages.development', compact('featuredBuilds'));
+})->name('development');
 
 Route::view('/cloud-hosting', 'pages.cloud-hosting')->name('cloud-hosting');
 Route::view('/plesk', 'pages.plesk')->name('plesk');
@@ -1257,6 +1267,30 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/whmcs-settings', [AdminWhmcsSettingsController::class, 'index'])->name('whmcs-settings.index');
         Route::put('/whmcs-settings', [AdminWhmcsSettingsController::class, 'update'])->name('whmcs-settings.update');
         Route::post('/whmcs-settings/test-domain', [AdminWhmcsSettingsController::class, 'testDomain'])->name('whmcs-settings.test-domain');
+
+        Route::get('/whmcs-console', [AdminWhmcsConsoleController::class, 'index'])->name('whmcs-console.index');
+        Route::get('/whmcs-console/clients', [AdminWhmcsConsoleController::class, 'clients'])->name('whmcs-console.clients');
+        Route::get('/whmcs-console/clients/{clientId}', [AdminWhmcsConsoleController::class, 'showClient'])->name('whmcs-console.clients.show')->whereNumber('clientId');
+        Route::put('/whmcs-console/clients/{clientId}', [AdminWhmcsConsoleController::class, 'updateClient'])->name('whmcs-console.clients.update')->whereNumber('clientId');
+        Route::post('/whmcs-console/clients/{clientId}/close', [AdminWhmcsConsoleController::class, 'closeClient'])->name('whmcs-console.clients.close')->whereNumber('clientId');
+        Route::get('/whmcs-console/services', [AdminWhmcsConsoleController::class, 'services'])->name('whmcs-console.services');
+        Route::post('/whmcs-console/services/suspend', [AdminWhmcsConsoleController::class, 'suspendService'])->name('whmcs-console.services.suspend');
+        Route::post('/whmcs-console/services/unsuspend', [AdminWhmcsConsoleController::class, 'unsuspendService'])->name('whmcs-console.services.unsuspend');
+        Route::post('/whmcs-console/services/terminate', [AdminWhmcsConsoleController::class, 'terminateService'])->name('whmcs-console.services.terminate');
+        Route::get('/whmcs-console/invoices', [AdminWhmcsConsoleController::class, 'invoices'])->name('whmcs-console.invoices');
+        Route::get('/whmcs-console/invoices/{invoiceId}', [AdminWhmcsConsoleController::class, 'showInvoice'])->name('whmcs-console.invoices.show')->whereNumber('invoiceId');
+        Route::post('/whmcs-console/invoices/{invoiceId}/mark-paid', [AdminWhmcsConsoleController::class, 'markInvoicePaid'])->name('whmcs-console.invoices.mark-paid')->whereNumber('invoiceId');
+        Route::get('/whmcs-console/orders', [AdminWhmcsConsoleController::class, 'orders'])->name('whmcs-console.orders');
+        Route::post('/whmcs-console/orders/accept', [AdminWhmcsConsoleController::class, 'acceptOrder'])->name('whmcs-console.orders.accept');
+        Route::post('/whmcs-console/orders/cancel', [AdminWhmcsConsoleController::class, 'cancelOrder'])->name('whmcs-console.orders.cancel');
+        Route::post('/whmcs-console/orders/pending', [AdminWhmcsConsoleController::class, 'pendingOrder'])->name('whmcs-console.orders.pending');
+        Route::get('/whmcs-console/tickets', [AdminWhmcsConsoleController::class, 'tickets'])->name('whmcs-console.tickets');
+        Route::get('/whmcs-console/tickets/{ticketId}', [AdminWhmcsConsoleController::class, 'showTicket'])->name('whmcs-console.tickets.show')->whereNumber('ticketId');
+        Route::post('/whmcs-console/tickets/{ticketId}/reply', [AdminWhmcsConsoleController::class, 'replyTicket'])->name('whmcs-console.tickets.reply')->whereNumber('ticketId');
+        Route::post('/whmcs-console/tickets/{ticketId}/close', [AdminWhmcsConsoleController::class, 'closeTicket'])->name('whmcs-console.tickets.close')->whereNumber('ticketId');
+        Route::get('/whmcs-console/domains', [AdminWhmcsConsoleController::class, 'domains'])->name('whmcs-console.domains');
+        Route::post('/whmcs-console/domains/lock', [AdminWhmcsConsoleController::class, 'lockDomain'])->name('whmcs-console.domains.lock');
+        Route::post('/whmcs-console/domains/renew', [AdminWhmcsConsoleController::class, 'renewDomain'])->name('whmcs-console.domains.renew');
         Route::get('/flutterwave-settings', [AdminFlutterwaveSettingsController::class, 'index'])->name('flutterwave-settings.index');
         Route::put('/flutterwave-settings', [AdminFlutterwaveSettingsController::class, 'update'])->name('flutterwave-settings.update');
         Route::post('/flutterwave-settings/test-connection', [AdminFlutterwaveSettingsController::class, 'testConnection'])->name('flutterwave-settings.test-connection');

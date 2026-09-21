@@ -48,7 +48,7 @@ class PasswordResetTest extends TestCase
     {
         config([
             'services.zeptomail.from_address' => 'noreply@lemonwares.com',
-            'services.zeptomail.from_name' => 'Lemonwares',
+            'services.zeptomail.from_name' => 'LemonWares',
             'app.url' => 'https://gadgets.lemonwares.com',
         ]);
 
@@ -56,7 +56,7 @@ class PasswordResetTest extends TestCase
         $notification = new ResetPasswordNotification('demo-token');
         $mail = $notification->toMail($user);
 
-        $this->assertSame(['noreply@lemonwares.com', 'Lemonwares'], $mail->from);
+        $this->assertSame(['noreply@lemonwares.com', 'LemonWares'], $mail->from);
         $this->assertStringContainsString('lemonwareslogo', $mail->render());
     }
 
@@ -126,9 +126,9 @@ class PasswordResetTest extends TestCase
             ], 200),
         ]);
 
-        Mail::mailer('zeptomail')->raw('Hello from Lemonwares', function ($message): void {
+        Mail::mailer('zeptomail')->raw('Hello from LemonWares', function ($message): void {
             $message->to('ada@example.com')
-                ->from('mails@lemonwares.com', 'Lemonwares')
+                ->from('mails@lemonwares.com', 'LemonWares')
                 ->subject('Test');
         });
 
@@ -156,11 +156,11 @@ class PasswordResetTest extends TestCase
             ], 200),
         ]);
 
-        $html = '<html><body><img src="https://gadgets.lemonwares.com/lemonwareslogo.png" alt="Lemonwares"></body></html>';
+        $html = '<html><body><img src="https://gadgets.lemonwares.com/lemonwareslogo.png" alt="LemonWares"></body></html>';
 
         Mail::mailer('zeptomail')->html($html, function ($message): void {
             $message->to('ada@example.com')
-                ->from('mails@lemonwares.com', 'Lemonwares')
+                ->from('mails@lemonwares.com', 'LemonWares')
                 ->subject('Branded');
         });
 
@@ -190,7 +190,7 @@ class PasswordResetTest extends TestCase
 
         Mail::mailer('zeptomail')->raw('Hello', function ($message): void {
             $message->to('ada@example.com')
-                ->from('mails@lemonwares.com', 'Lemonwares')
+                ->from('mails@lemonwares.com', 'LemonWares')
                 ->subject('Test');
         });
 

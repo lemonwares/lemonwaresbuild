@@ -6,7 +6,7 @@
 @section('content')
     <section class="case-cinema-intro">
         <div class="container-page case-cinema-intro-inner">
-            <p class="case-cinema-brand">{{ config('site.short_name') }}</p>
+            <p class="case-cinema-brand">{{ config('site.name') }}</p>
             <h1 class="case-cinema-intro-title">{{ __('pages.case_studies.title') }}</h1>
             <p class="case-cinema-intro-lede">{{ __('pages.case_studies.lede') }}</p>
             <a href="#reel" class="btn btn-primary case-cinema-intro-cta">

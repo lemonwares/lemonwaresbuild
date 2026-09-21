@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\WhmcsAuthBridge;
+use App\Support\WhmcsClient;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +25,9 @@ class LoginController extends Controller
             $request->session()->put('url.intended', url($redirect));
         }
 
-        return view('auth.login');
+        return view('auth.login', [
+            'whmcsLoginEnabled' => WhmcsClient::isConfigured(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -42,8 +46,8 @@ class LoginController extends Controller
 
         $email = strtolower((string) $credentials['email']);
         $ip = (string) $request->ip();
-        $emailIpKey = 'auth-login|' . $email . '|' . $ip;
-        $ipKey = 'auth-login-ip|' . $ip;
+        $emailIpKey = 'auth-login|'.$email.'|'.$ip;
+        $ipKey = 'auth-login-ip|'.$ip;
 
         if (RateLimiter::tooManyAttempts($emailIpKey, 6) || RateLimiter::tooManyAttempts($ipKey, 30)) {
             $availableIn = max(
@@ -56,12 +60,31 @@ class LoginController extends Controller
                 ->onlyInput('email');
         }
 
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+        $remember = $request->boolean('remember');
+        $authenticated = Auth::attempt([
+            'email' => $email,
+            'password' => $credentials['password'],
+        ], $remember);
+
+        if (! $authenticated) {
+            $bridged = WhmcsAuthBridge::attempt($email, $credentials['password']);
+
+            if ($bridged) {
+                Auth::login($bridged, $remember);
+                $authenticated = true;
+            }
+        }
+
+        if (! $authenticated) {
             RateLimiter::hit($emailIpKey, 600);
             RateLimiter::hit($ipKey, 600);
 
+            $error = WhmcsClient::isConfigured()
+                ? WhmcsAuthBridge::failureMessage()
+                : __('account.invalid_credentials');
+
             return back()
-                ->withErrors(['email' => __('account.invalid_credentials')])
+                ->withErrors(['email' => $error])
                 ->onlyInput('email');
         }
 

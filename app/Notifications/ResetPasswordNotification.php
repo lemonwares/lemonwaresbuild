@@ -2,7 +2,7 @@
 
 namespace App\Notifications;
 
-use App\Support\LemonwaresMail;
+use App\Support\LemonWaresMail;
 use Illuminate\Auth\Notifications\ResetPassword as BaseResetPassword;
 use Illuminate\Notifications\Messages\MailMessage;
 
@@ -12,7 +12,7 @@ class ResetPasswordNotification extends BaseResetPassword
     {
         $url = $this->resetUrl($notifiable);
 
-        return LemonwaresMail::message()
+        return LemonWaresMail::message()
             ->subject(__('account.reset_mail_subject'))
             ->markdown('mail.password-reset', [
                 'url' => $url,

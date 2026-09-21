@@ -102,7 +102,7 @@
                         name="from_name"
                         value="{{ old('from_name', $settings['from_name']) }}"
                         class="admin-input"
-                        placeholder="Lemonwares"
+                        placeholder="LemonWares"
                         autocomplete="off"
                     >
                 </label>
@@ -119,7 +119,7 @@
                     >
                     <p class="admin-muted text-xs">
                         Public HTTPS image shown in password-reset and account emails.
-                        Leave blank to use the default Lemonwares logo on this site.
+                        Leave blank to use the default LemonWares logo on this site.
                     </p>
                     @if ($logo_preview_url)
                         <div class="mt-3 flex items-center gap-4 rounded-xl border border-border bg-blush-soft/40 px-4 py-3">

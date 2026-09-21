@@ -69,12 +69,12 @@ class ZeptoMailSettings
     {
         return (string) IntegrationSetting::getValue(
             'zeptomail.from_name',
-            (string) config('services.zeptomail.from_name', config('mail.from.name', config('site.short_name', 'Lemonwares'))),
+            (string) config('services.zeptomail.from_name', config('mail.from.name', config('site.short_name', 'LemonWares'))),
         );
     }
 
     /**
-     * Public absolute URL for the Lemonwares logo used in transactional emails.
+     * Public absolute URL for the LemonWares logo used in transactional emails.
      */
     public static function logoUrl(): string
     {
@@ -232,7 +232,7 @@ class ZeptoMailSettings
 
         try {
             Mail::mailer('zeptomail')->raw(
-                'This is a Lemonwares ZeptoMail test. Password resets and account notices will use this connection.',
+                'This is a LemonWares ZeptoMail test. Password resets and account notices will use this connection.',
                 function ($message) use ($to): void {
                     $message->to($to)
                         ->from(self::fromAddress(), self::fromName())

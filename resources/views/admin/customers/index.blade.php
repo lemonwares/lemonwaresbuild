@@ -6,7 +6,7 @@
 @section('content')
     <x-admin.page-header
         title="Customers"
-        lede="Native Lemonwares accounts and legacy WHMCS customers in one CRM view."
+        lede="Native LemonWares accounts and legacy WHMCS customers in one CRM view."
         :back-href="route('admin.dashboard')"
         back-label="Go back"
         :breadcrumbs="[['label' => 'Customers']]"
@@ -54,7 +54,7 @@
             >
                 <span class="admin-metric-label">Native</span>
                 <span class="admin-metric-value">{{ $nativeCount }}</span>
-                <span class="admin-metric-meta">Lemonwares accounts</span>
+                <span class="admin-metric-meta">LemonWares accounts</span>
             </a>
             <a
                 href="{{ route('admin.customers.index', ['source' => 'legacy']) }}"
@@ -94,7 +94,7 @@
                         @if ($search !== '')
                             Results for “{{ $search }}”
                         @else
-                            {{ $source === 'legacy' ? 'Clients synced from WHMCS.' : 'Accounts created on Lemonwares.' }}
+                            {{ $source === 'legacy' ? 'Clients synced from WHMCS.' : 'Accounts created on LemonWares.' }}
                         @endif
                     </p>
                 </div>

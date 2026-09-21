@@ -3,7 +3,7 @@
     <head>
         @php
             $seoTitle = trim($__env->yieldContent('title', 'Admin — ' . config('site.short_name')));
-            $seoDescription = trim($__env->yieldContent('meta_description', 'Lemonwares admin portal.'));
+            $seoDescription = trim($__env->yieldContent('meta_description', 'LemonWares admin portal.'));
             $seoImage = asset('lemonwareslogo.webp');
             $seoUrl = url()->current();
             $adminAuthed = session('admin_authenticated');

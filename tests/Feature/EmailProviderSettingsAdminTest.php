@@ -29,7 +29,7 @@ class EmailProviderSettingsAdminTest extends TestCase
             'trekmail_base_url' => 'https://trekmail.example.test/api/v1',
             'trekmail_webmail_url' => 'https://webmail.example.test',
             'trekmail_branding_enabled' => '1',
-            'trekmail_brand_name' => 'Lemonwares Mail',
+            'trekmail_brand_name' => 'LemonWares Mail',
             'trekmail_brand_primary_color' => '#e04545',
             'trekmail_brand_accent_color' => '#ffeded',
             'trekmail_brand_support_email' => 'support@lemonwares.com',
@@ -68,7 +68,7 @@ class EmailProviderSettingsAdminTest extends TestCase
         $this->assertTrue(TrekMailClient::isConfigured());
         $this->assertSame('https://webmail.example.test', TrekMailClient::webmailUrl());
         $this->assertTrue(TrekMailSettings::brandingEnabled());
-        $this->assertSame('Lemonwares Mail', TrekMailSettings::brandName());
+        $this->assertSame('LemonWares Mail', TrekMailSettings::brandName());
         $this->assertSame('#e04545', TrekMailSettings::brandPrimaryColor());
         $this->assertSame('support@lemonwares.com', TrekMailSettings::brandSupportEmail());
 

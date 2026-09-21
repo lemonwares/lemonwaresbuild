@@ -8,7 +8,7 @@
             </p>
         </div>
 
-        <div class="grid gap-6 lg:grid-cols-3">
+        <div class="grid gap-6 lg:grid-cols-2">
             <article class="flex flex-col rounded-3xl border border-white/20 bg-rose p-8 text-white">
                 <div class="hosting-plan-logo-row mb-5">
                     <img
@@ -32,32 +32,6 @@
                 </ul>
                 <x-ui.button href="{{ route('hosting.specifications', ['plan' => 'cpanel']) }}" class="mt-auto w-fit bg-white text-rose hover:bg-blush!">
                     <span>{{ __('site.home.cpanel_cta') }}</span>
-                </x-ui.button>
-            </article>
-
-            <article class="card-tech flex flex-col p-8">
-                <div class="hosting-plan-logo-row mb-5">
-                    <img
-                        src="{{ asset('images/brands/plesk.svg') }}"
-                        alt="Plesk"
-                        width="200"
-                        height="48"
-                        class="hosting-plan-logo hosting-plan-logo-wide"
-                        loading="lazy"
-                        decoding="async"
-                    >
-                </div>
-                <h3 class="mb-3 text-2xl font-bold text-on-blush">{{ __('site.home.plesk_title') }}</h3>
-                <p class="mb-6 body-text">
-                    {{ __('site.home.plesk_summary') }}
-                </p>
-                <ul class="check-list mb-8 flex flex-col gap-3">
-                    @foreach (config('site.hosting_plans.plesk.highlights', []) as $item)
-                        <li>{{ $item }}</li>
-                    @endforeach
-                </ul>
-                <x-ui.button href="{{ route('hosting.specifications', ['plan' => 'plesk']) }}" variant="ghost" class="mt-auto w-fit border-rose/30 text-rose hover:bg-blush-soft">
-                    <span>{{ __('site.home.plesk_cta') }}</span>
                 </x-ui.button>
             </article>
 

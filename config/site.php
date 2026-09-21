@@ -2,8 +2,8 @@
 
 return [
 
-    'name' => 'Lemonwares Technology',
-    'short_name' => 'Lemonwares',
+    'name' => 'LemonWares Technology',
+    'short_name' => 'LemonWares',
     'domain' => 'lemonwares.com',
     'url' => env('APP_URL', 'https://lemonwares.com'),
     'tagline' => 'Hosting · Email · Web & Mobile',

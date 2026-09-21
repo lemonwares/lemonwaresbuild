@@ -96,7 +96,7 @@ class AdminContentModulesTest extends TestCase
 
         $this->post(route('admin.newsletter-campaigns.store'), [
             'subject' => 'March update',
-            'body' => 'Hello from Lemonwares',
+            'body' => 'Hello from LemonWares',
         ])->assertRedirect();
 
         $campaign = NewsletterCampaign::query()->firstOrFail();

@@ -587,7 +587,7 @@ class EmailAccountTest extends TestCase
                     'data' => [
                         'mode' => 'custom',
                         'brand' => [
-                            'name' => 'Lemonwares',
+                            'name' => 'LemonWares',
                             'primary_color' => '#e04545',
                         ],
                     ],

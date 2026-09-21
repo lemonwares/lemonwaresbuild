@@ -2,8 +2,8 @@
 
 return [
     'about' => [
-        'meta_title' => 'About Lemonwares',
-        'meta_description' => 'Lemonwares Technology is a Lagos-based team for dependable hosting, Mailemon business email, and web & mobile development for growing businesses.',
+        'meta_title' => 'About LemonWares',
+        'meta_description' => 'LemonWares Technology is a Lagos-based team for dependable hosting, Mailemon business email, and web & mobile development for growing businesses.',
         'eyebrow' => 'About us',
         'title' => 'Built for businesses that stay online',
         'lede' => 'Hosting, Mailemon email, and product development from a team that cares about uptime, clarity, and long-term support.',
@@ -12,7 +12,7 @@ return [
         'cta_careers' => 'Careers',
         'story_label' => 'Our story',
         'story_title' => 'Infrastructure and products with people behind them',
-        'p1' => 'Lemonwares Technology is a Lagos-based digital infrastructure company helping businesses build and maintain a strong online presence. From cloud hosting and VPS servers to Mailemon business email, custom web development, and mobile apps, we provide the tools and support growing teams need to stay online.',
+        'p1' => 'LemonWares Technology is a Lagos-based digital infrastructure company helping businesses build and maintain a strong online presence. From cloud hosting and VPS servers to Mailemon business email, custom web development, and mobile apps, we provide the tools and support growing teams need to stay online.',
         'p2' => 'Our focus is practical technology, clear communication, and dependable service. Whether you are launching your first website, rolling out branded mailboxes, migrating a platform, or scaling for more traffic, we help you choose the right setup and keep it running smoothly.',
         'p3' => 'We work from Lekki, Lagos, and serve customers across Nigeria and beyond — with the same team on domains, hosting, email, and development so you are not bounced between vendors.',
         'values_label' => 'How we work',
@@ -45,7 +45,7 @@ return [
         'stat_support' => 'Support coverage when you need us',
         'stat_rating' => 'Average Google review rating',
         'milestones_label' => 'Timeline',
-        'milestones_title' => 'How Lemonwares grew',
+        'milestones_title' => 'How LemonWares grew',
         'milestones_lede' => 'From infrastructure roots to Mailemon and full-stack delivery.',
         'milestones' => [
             [
@@ -71,11 +71,11 @@ return [
         'services_label' => 'Services',
         'services_title' => 'What we do',
         'services_lede' => 'Hosting, email, web, and mobile — end-to-end services with the detail and support growing businesses need to launch, scale, and stay online.',
-        'help_title' => 'Ready to work with Lemonwares?',
+        'help_title' => 'Ready to work with LemonWares?',
         'help_lede' => 'Start with Mailemon, hosting, or a build — or talk to us about the right next step.',
     ],
     'blog' => [
-        'meta_description' => 'Guides and updates from Lemonwares on hosting, business email, and building online.',
+        'meta_description' => 'Guides and updates from LemonWares on hosting, business email, and building online.',
         'eyebrow' => 'Blog',
         'title' => 'Ideas for Staying Online',
         'lede' => 'Hosting tips, Mailemon setup notes, and practical advice for growing teams.',
@@ -86,7 +86,7 @@ return [
     ],
     'projects' => [
         'meta_title' => 'Projects',
-        'meta_description' => 'Selected Lemonwares client projects across hosting, email, web, and mobile.',
+        'meta_description' => 'Selected LemonWares client projects across hosting, email, web, and mobile.',
         'eyebrow' => 'Projects',
         'title' => 'Selected Work',
         'lede' => 'A look at client work we have shipped — from hosting migrations to product builds.',
@@ -99,7 +99,7 @@ return [
     ],
     'contact' => [
         'meta_title' => 'Contact',
-        'meta_description' => 'Contact Lemonwares for cloud hosting, business email, web development, and mobile app projects. Reach our team by phone, email, or WhatsApp.',
+        'meta_description' => 'Contact LemonWares for cloud hosting, business email, web development, and mobile app projects. Reach our team by phone, email, or WhatsApp.',
         'eyebrow' => 'Contact',
         'title' => "Let's Talk About Your Project",
         'lede' => 'Hosting, business email, web development, or a mobile app — tell us what you need and we will point you in the right direction.',
@@ -189,26 +189,26 @@ return [
         'help_cta' => 'Go to support',
         'ack_subject' => ':site · We received your message',
         'ack_title' => 'We received your message',
-        'ack_body' => 'Hi :name, thanks for reaching out to Lemonwares. A member of our team will review your note and get back to you soon.',
+        'ack_body' => 'Hi :name, thanks for reaching out to LemonWares. A member of our team will review your note and get back to you soon.',
         'ack_footer' => 'If your request is urgent, reply to this email or WhatsApp us during business hours.',
     ],
     'team' => [
         'meta_title' => 'Team',
-        'meta_description' => 'Meet the Lemonwares team behind hosting, Mailemon business email, web development, and mobile apps for growing businesses.',
+        'meta_description' => 'Meet the LemonWares team behind hosting, Mailemon business email, web development, and mobile apps for growing businesses.',
         'eyebrow' => 'Our people',
-        'title' => 'Meet the team behind Lemonwares',
+        'title' => 'Meet the team behind LemonWares',
         'lede' => 'The people building reliable hosting, Mailemon, web, and mobile solutions — and answering when something needs fixing.',
         'cta' => 'See the team',
         'cta_careers' => 'Join us',
         'body' => 'We are operators and builders: infrastructure, support, product, and delivery working as one team from Lagos.',
         'grid_label' => 'People',
         'grid_title' => 'Faces behind the work',
-        'grid_lede' => 'Profiles are managed from the Lemonwares admin — add photos, roles, and links anytime.',
+        'grid_lede' => 'Profiles are managed from the LemonWares admin — add photos, roles, and links anytime.',
         'departments' => [
             'managerial' => [
                 'label' => 'Leadership',
                 'title' => 'Managerial',
-                'lede' => 'Strategy, delivery leadership, and the people shaping how Lemonwares grows.',
+                'lede' => 'Strategy, delivery leadership, and the people shaping how LemonWares grows.',
             ],
             'administrative' => [
                 'label' => 'Operations',
@@ -225,14 +225,14 @@ return [
     ],
     'careers' => [
         'meta_title' => 'Careers',
-        'meta_description' => 'Join Lemonwares — careers in hosting, Mailemon email, support, and product development with a Lagos-based team.',
+        'meta_description' => 'Join LemonWares — careers in hosting, Mailemon email, support, and product development with a Lagos-based team.',
         'eyebrow' => 'Careers',
         'title' => 'Build infrastructure people rely on',
         'lede' => 'Help customers stay online with hosting, Mailemon, and product work that ships and stays supported.',
         'cta' => 'View open roles',
         'cta_team' => 'Meet the team',
         'body' => 'We hire people who care about clear communication, reliable systems, and finishing the job after launch — not just demos.',
-        'perks_label' => 'Why Lemonwares',
+        'perks_label' => 'Why LemonWares',
         'perks_title' => 'What you can expect',
         'perks_lede' => 'A small, focused team with real product surface area and customers who depend on us daily.',
         'perks' => [
@@ -297,7 +297,7 @@ return [
     ],
     'case_studies' => [
         'meta_title' => 'Case Studies',
-        'meta_description' => 'Products and platforms Lemonwares has built and shipped — websites, hosting migrations, Mailemon rollouts, mobile apps, and VPS deployments.',
+        'meta_description' => 'Products and platforms LemonWares has built and shipped — websites, hosting migrations, Mailemon rollouts, mobile apps, and VPS deployments.',
         'eyebrow' => 'Portfolio',
         'title' => 'Products we have built and shipped',
         'lede' => 'A reel of real client work — websites, cloud hosting, Mailemon, mobile apps, and VPS — from kickoff to launch.',
@@ -315,7 +315,7 @@ return [
         'view_live' => 'View live',
         'open_new_tab' => 'Open in new tab',
         'close_preview' => 'Close preview',
-        'live_preview_hint' => 'Preview stays on Lemonwares — close anytime to return here.',
+        'live_preview_hint' => 'Preview stays on LemonWares — close anytime to return here.',
         'live_preview_loading' => 'Loading live preview…',
         'live_preview_blocked_title' => 'This site blocks in-page preview',
         'live_preview_blocked_lede' => 'Some products set security headers that prevent embedding. Open it in a new tab instead — your case study page will still be here when you come back.',
@@ -386,10 +386,10 @@ return [
     ],
     'domain' => [
         'meta_title' => 'Domains',
-        'meta_description' => 'Search, register, or transfer a domain with Lemonwares — see Naira pricing, then check out on-site or continue into hosting.',
+        'meta_description' => 'Search, register, or transfer a domain with LemonWares — see Naira pricing, then check out on-site or continue into hosting.',
         'eyebrow' => 'Domains',
         'title' => 'Find Your Domain',
-        'lede' => 'Search availability, see pricing, then register or transfer on Lemonwares — or continue into hosting.',
+        'lede' => 'Search availability, see pricing, then register or transfer on LemonWares — or continue into hosting.',
         'cta' => 'Search domains',
         'tab_register' => 'Register',
         'tab_transfer' => 'Transfer',
@@ -422,8 +422,8 @@ return [
         'card_hosting_title' => 'Hosting next door',
         'card_hosting_body' => 'Choose cloud hosting or a VPS when you are ready — same team for domain, site, and email.',
         'hero_title' => 'Find Your Perfect Domain Name',
-        'hero_lede' => 'Search availability in seconds, see pricing, then register or transfer on Lemonwares — or continue into hosting.',
-        'social_proof' => 'Register or transfer — then host, email, and DNS under one Lemonwares team.',
+        'hero_lede' => 'Search availability in seconds, see pricing, then register or transfer on LemonWares — or continue into hosting.',
+        'social_proof' => 'Register or transfer — then host, email, and DNS under one LemonWares team.',
         'benefit_trusted_title' => 'Trusted for growing brands',
         'benefit_trusted_body' => 'Secure a name that matches your business, then keep DNS, hosting, and mail in one place.',
         'benefit_trusted_cta' => 'Search domains',
@@ -434,15 +434,15 @@ return [
         'benefit_support_body' => 'Stuck on transfer codes or DNS? WhatsApp, phone, and email support from the same team that runs your stack.',
         'benefit_support_cta' => 'Talk to us',
         'why_title' => 'Why you need the perfect domain name',
-        'why_body' => 'Your domain is the address customers type, share, and remember. A clear name builds trust before anyone hits your site — and pairing it with Lemonwares hosting and Mailemon keeps website and email under one brand, whether you register new or transfer what you already own.',
-        'choose_title' => 'Why choose Lemonwares for domains?',
+        'why_body' => 'Your domain is the address customers type, share, and remember. A clear name builds trust before anyone hits your site — and pairing it with LemonWares hosting and Mailemon keeps website and email under one brand, whether you register new or transfer what you already own.',
+        'choose_title' => 'Why choose LemonWares for domains?',
         'choose_lede' => 'Search or transfer in one flow, check out on-site or carry the name into hosting, and get the same team for DNS, Mailemon, and the site.',
         'choose_cta' => 'Register a domain',
         'feature_search_title' => 'Find your new domain instantly',
         'feature_search_body' => 'Type a keyword or the full name you want. We check live availability and show estimated registration prices in Naira right away. When a popular ending is taken, we surface alternatives you can tap without starting over. Pick the name that fits, then buy the domain on its own or continue into hosting with it already filled in.',
         'feature_search_cta' => 'Search domain name',
-        'feature_transfer_title' => 'Transfer your domain to Lemonwares',
-        'feature_transfer_body' => 'In real life a transfer needs the domain unlocked, an auth/EPP code, and email approval — often a few days. On this site we confirm the name is registered, quote the transfer price in Naira, then you check out here to start the move (or pair it with hosting). After approval, renewals, DNS, and support sit with one Lemonwares team.',
+        'feature_transfer_title' => 'Transfer your domain to LemonWares',
+        'feature_transfer_body' => 'In real life a transfer needs the domain unlocked, an auth/EPP code, and email approval — often a few days. On this site we confirm the name is registered, quote the transfer price in Naira, then you check out here to start the move (or pair it with hosting). After approval, renewals, DNS, and support sit with one LemonWares team.',
         'feature_transfer_cta' => 'Transfer your domain',
         'feature_manage_title' => 'Easy domain management with hosting',
         'feature_manage_body' => 'Once the domain is yours, point it at cloud or VPS hosting and set the A records so the site loads. Add Mailemon when you need branded inboxes — we hand you the MX and related DNS so mail and web stay on the same name. One stack that can grow without another registrar hop.',
@@ -463,7 +463,7 @@ return [
             ],
             [
                 'question' => 'What happens after I find an available domain?',
-                'answer' => 'Buy the domain only in Lemonwares checkout, or continue into cPanel cloud hosting with that domain carried over for registration.',
+                'answer' => 'Buy the domain only in LemonWares checkout, or continue into cPanel cloud hosting with that domain carried over for registration.',
             ],
             [
                 'question' => 'Can I use this domain with Mailemon?',
@@ -477,10 +477,10 @@ return [
     ],
     'google_workspace' => [
         'meta_title' => 'Google Workspace',
-        'meta_description' => 'Google Workspace for business from Lemonwares — Gmail on your domain, Drive, Meet, Calendar, Docs, and Sheets. Quoted, migrated, and supported.',
+        'meta_description' => 'Google Workspace for business from LemonWares — Gmail on your domain, Drive, Meet, Calendar, Docs, and Sheets. Quoted, migrated, and supported.',
         'eyebrow' => 'Google Workspace',
         'title' => 'Google Workspace on Your Domain',
-        'lede' => 'Professional Gmail, Drive, Meet, and Calendar under your brand — quoted, provisioned, and supported by Lemonwares.',
+        'lede' => 'Professional Gmail, Drive, Meet, and Calendar under your brand — quoted, provisioned, and supported by LemonWares.',
         'cta' => 'See pricing',
         'cta_contact' => 'Request a quote',
         'cta_subject' => 'Google Workspace quote',
@@ -511,7 +511,7 @@ return [
             ],
             [
                 'title' => 'Go live with support',
-                'body' => 'Seats are provisioned, admins get day-one guidance, and Lemonwares stays available on WhatsApp, phone, and email.',
+                'body' => 'Seats are provisioned, admins get day-one guidance, and LemonWares stays available on WhatsApp, phone, and email.',
             ],
         ],
         'apps_eyebrow' => 'Included apps',
@@ -545,7 +545,7 @@ return [
         ],
         'setup_eyebrow' => 'What we handle',
         'setup_title' => 'DNS, migration, and day-one admin',
-        'setup_lede' => 'You should not have to become a Google admin overnight. Lemonwares covers the technical path.',
+        'setup_lede' => 'You should not have to become a Google admin overnight. LemonWares covers the technical path.',
         'setup_items' => [
             [
                 'title' => 'Domain verification',
@@ -575,7 +575,7 @@ return [
         ],
         'features_eyebrow' => 'What you get',
         'features_title' => 'The Google suite your team already knows',
-        'features_lede' => 'Mail, storage, meetings, and calendar on your domain — with Lemonwares handling the admin and DNS details.',
+        'features_lede' => 'Mail, storage, meetings, and calendar on your domain — with LemonWares handling the admin and DNS details.',
         'features' => [
             [
                 'title' => 'Gmail on your domain',
@@ -598,7 +598,7 @@ return [
                 'body' => 'We help move mail and contacts from consumer Gmail, legacy hosts, or other suites with less downtime.',
             ],
             [
-                'title' => 'Lemonwares setup support',
+                'title' => 'LemonWares setup support',
                 'body' => 'DNS, verification, and day-one admin help on WhatsApp, phone, and email — the same team behind your hosting.',
             ],
         ],
@@ -618,7 +618,7 @@ return [
             'Gmail plus Drive, Meet, Calendar, and Docs',
             'Google admin tools for a growing team',
             'Migration from consumer or legacy Google mail',
-            'A quoted enterprise suite with Lemonwares setup',
+            'A quoted enterprise suite with LemonWares setup',
         ],
         'fit_mailemon_title' => 'Choose Mailemon if you need',
         'fit_mailemon' => [
@@ -636,7 +636,7 @@ return [
             ],
             [
                 'question' => 'How is pricing handled?',
-                'answer' => 'Google Workspace is quoted for your seat count and plan tier. Contact Lemonwares for a tailored offer; it is not self-serve checkout like Mailemon.',
+                'answer' => 'Google Workspace is quoted for your seat count and plan tier. Contact LemonWares for a tailored offer; it is not self-serve checkout like Mailemon.',
             ],
             [
                 'question' => 'Can I keep my existing domain?',
@@ -664,14 +664,14 @@ return [
             ],
         ],
         'help_title' => 'Ready for Google Workspace?',
-        'help_lede' => 'Tell us your seat count and current mail setup — we will quote and provision with Lemonwares support.',
+        'help_lede' => 'Tell us your seat count and current mail setup — we will quote and provision with LemonWares support.',
     ],
     'microsoft_365' => [
         'meta_title' => 'Microsoft 365',
-        'meta_description' => 'Microsoft 365 for business from Lemonwares — Outlook on your domain, Teams, OneDrive, Word, Excel, and PowerPoint. Quoted, migrated, and supported.',
+        'meta_description' => 'Microsoft 365 for business from LemonWares — Outlook on your domain, Teams, OneDrive, Word, Excel, and PowerPoint. Quoted, migrated, and supported.',
         'eyebrow' => 'Microsoft 365',
         'title' => 'Microsoft 365 Built for Your Business',
-        'lede' => 'Outlook, Teams, OneDrive, and the Office apps on your domain — quoted and set up with Lemonwares.',
+        'lede' => 'Outlook, Teams, OneDrive, and the Office apps on your domain — quoted and set up with LemonWares.',
         'cta' => 'See pricing',
         'cta_contact' => 'Request a quote',
         'cta_subject' => 'Microsoft 365 quote',
@@ -698,11 +698,11 @@ return [
             ],
             [
                 'title' => 'Configure tenant and DNS',
-                'body' => 'Lemonwares helps with tenant setup, MX and related DNS, and a migration plan that protects delivery during cutover.',
+                'body' => 'LemonWares helps with tenant setup, MX and related DNS, and a migration plan that protects delivery during cutover.',
             ],
             [
                 'title' => 'Migrate and hand over',
-                'body' => 'Mailboxes move, users get day-one guidance, and your team can work in Outlook and Teams with Lemonwares on call.',
+                'body' => 'Mailboxes move, users get day-one guidance, and your team can work in Outlook and Teams with LemonWares on call.',
             ],
         ],
         'apps_eyebrow' => 'Included apps',
@@ -766,7 +766,7 @@ return [
         ],
         'features_eyebrow' => 'What you get',
         'features_title' => 'The Microsoft stack businesses already use',
-        'features_lede' => 'Mail, meetings, files, and Office apps on your domain — with Lemonwares guiding licenses and DNS.',
+        'features_lede' => 'Mail, meetings, files, and Office apps on your domain — with LemonWares guiding licenses and DNS.',
         'features' => [
             [
                 'title' => 'Outlook and Exchange Online',
@@ -790,14 +790,14 @@ return [
             ],
             [
                 'title' => 'Migration and DNS support',
-                'body' => 'Mailbox moves, MX and related records, and Lemonwares support on WhatsApp, phone, and email after go-live.',
+                'body' => 'Mailbox moves, MX and related records, and LemonWares support on WhatsApp, phone, and email after go-live.',
             ],
         ],
         'highlights' => [
             'Outlook and Exchange Online on your domain',
             'Teams, OneDrive, SharePoint, and Office desktop apps',
             'Licensing guidance for the seats you need',
-            'Migration and DNS setup with Lemonwares support',
+            'Migration and DNS setup with LemonWares support',
             'Quoted pricing — contact us for a tailored offer',
             'Same support team as hosting and Mailemon',
         ],
@@ -809,7 +809,7 @@ return [
             'Outlook plus Teams, OneDrive, and Office apps',
             'Licensing that matches how your team already works',
             'Migration from another Exchange or hosted mail',
-            'A quoted Microsoft suite with Lemonwares setup',
+            'A quoted Microsoft suite with LemonWares setup',
         ],
         'fit_mailemon_title' => 'Choose Mailemon if you need',
         'fit_mailemon' => [
@@ -827,7 +827,7 @@ return [
             ],
             [
                 'question' => 'How is pricing handled?',
-                'answer' => 'Microsoft 365 is quoted for your seat count and plan. Contact Lemonwares for a tailored offer; it is not self-serve checkout like Mailemon.',
+                'answer' => 'Microsoft 365 is quoted for your seat count and plan. Contact LemonWares for a tailored offer; it is not self-serve checkout like Mailemon.',
             ],
             [
                 'question' => 'Do we get Teams and Office apps?',
@@ -855,14 +855,14 @@ return [
             ],
         ],
         'help_title' => 'Ready for Microsoft 365?',
-        'help_lede' => 'Tell us your seat count and how your team works — we will quote and set up with Lemonwares support.',
+        'help_lede' => 'Tell us your seat count and how your team works — we will quote and set up with LemonWares support.',
     ],
     'cloud_hosting' => [
         'meta_title' => 'Cloud Hosting',
-        'meta_description' => 'cPanel and Plesk cloud hosting from Lemonwares — SSD plans, SSL, backups, and support for everyday websites.',
+        'meta_description' => 'cPanel cloud hosting from LemonWares — SSD plans, SSL, backups, and support for everyday websites.',
         'eyebrow' => 'Cloud Hosting',
         'title' => 'Cloud Hosting That Stays Online',
-        'lede' => 'cPanel or Plesk for marketing sites, blogs, and small business platforms — without root-server complexity.',
+        'lede' => 'cPanel hosting for marketing sites, blogs, and small business platforms — without root-server complexity.',
         'cta' => 'View cPanel plans',
         'body' => 'Cloud hosting is the practical fit when you need a reliable website, not a server to manage. Pick a panel, choose a plan with the storage and site limits you need, then we handle SSL, backups, and support.',
         'intro_eyebrow' => 'How it works',
@@ -928,7 +928,7 @@ return [
             ],
             [
                 'title' => 'Real support nearby',
-                'body' => 'WhatsApp, phone, and email — the same Lemonwares team that handles your domains and business email.',
+                'body' => 'WhatsApp, phone, and email — the same LemonWares team that handles your domains and business email.',
             ],
         ],
         'benefits_eyebrow' => 'What you get',
@@ -957,7 +957,7 @@ return [
             'Root access and a custom stack',
             'Dedicated CPU, RAM, or isolation',
             'Apps that outgrow shared hosting',
-            'Full control with Lemonwares support still nearby',
+            'Full control with LemonWares support still nearby',
         ],
         'fit_vps_cta' => 'Explore VPS',
         'faq_title' => 'Cloud hosting FAQ',
@@ -992,10 +992,10 @@ return [
     ],
     'plesk' => [
         'meta_title' => 'Plesk Hosting',
-        'meta_description' => 'Cloud hosting with Plesk from Lemonwares — Web Basic, Web Plus, and Web Scale plans with SSD, SSL, and support for WordPress, Node.js, and Next.js.',
+        'meta_description' => 'Cloud hosting with Plesk from LemonWares — Web Basic, Web Plus, and Web Scale plans with SSD, SSL, and support for WordPress, Node.js, and Next.js.',
         'eyebrow' => 'Plesk Hosting',
         'title' => 'Cloud hosting with the Plesk Panel',
-        'lede' => 'Plesk on Lemonwares cloud hosting — clear Naira plans for WordPress, Node.js, and Next.js without root-server complexity.',
+        'lede' => 'Plesk on LemonWares cloud hosting — clear Naira plans for WordPress, Node.js, and Next.js without root-server complexity.',
         'cta' => 'View Plesk plans',
         'body' => 'Plesk hosting is the same cloud hosting stack as our cPanel plans, with a panel many teams prefer for modern apps. Choose Web Basic, Web Plus, or Web Scale — SSD storage, unmetered bandwidth, SSL, and backups included.',
         'intro_eyebrow' => 'How it works',
@@ -1049,11 +1049,11 @@ return [
             ],
             [
                 'title' => 'Real support nearby',
-                'body' => 'WhatsApp, phone, and email — the same Lemonwares team that handles your domains, cPanel hosting, and business email.',
+                'body' => 'WhatsApp, phone, and email — the same LemonWares team that handles your domains, cPanel hosting, and business email.',
             ],
         ],
         'highlights' => [
-            'Plesk on Lemonwares cloud hosting',
+            'Plesk on LemonWares cloud hosting',
             'Web Basic, Web Plus, and Web Scale in Naira',
             'SSD storage with unmetered bandwidth',
             'SSL and automated backups on every plan',
@@ -1082,7 +1082,7 @@ return [
         'faq_items' => [
             [
                 'question' => 'What is Plesk hosting?',
-                'answer' => 'Cloud hosting with the Plesk control panel. You manage sites and apps in Plesk; Lemonwares handles the server, SSL, and backups.',
+                'answer' => 'Cloud hosting with the Plesk control panel. You manage sites and apps in Plesk; LemonWares handles the server, SSL, and backups.',
             ],
             [
                 'question' => 'How is this different from cPanel?',
@@ -1094,7 +1094,7 @@ return [
             ],
             [
                 'question' => 'What is included in every plan?',
-                'answer' => 'SSD storage, unmetered bandwidth, free SSL, automated backups, and Lemonwares support. Higher tiers add more storage and more websites.',
+                'answer' => 'SSD storage, unmetered bandwidth, free SSL, automated backups, and LemonWares support. Higher tiers add more storage and more websites.',
             ],
             [
                 'question' => 'Can I connect my own domain?',
@@ -1106,16 +1106,16 @@ return [
             ],
         ],
         'help_title' => 'Ready for Plesk hosting?',
-        'help_lede' => 'Pick Web Basic, Plus, or Scale, add it to cart, and we will provision with Lemonwares support.',
+        'help_lede' => 'Pick Web Basic, Plus, or Scale, add it to cart, and we will provision with LemonWares support.',
     ],
     'vps' => [
         'meta_title' => 'VPS Root Servers',
-        'meta_description' => 'AMD EPYC VPS root servers from Lemonwares — dedicated CPU, RAM, NVMe, full root access, and room to grow.',
+        'meta_description' => 'AMD EPYC VPS root servers from LemonWares — dedicated CPU, RAM, NVMe, full root access, and room to grow.',
         'eyebrow' => 'VPS',
         'title' => 'Root Servers When You Need Full Control',
         'lede' => 'AMD EPYC VPS with root access, security hardening, and headroom for apps that outgrow shared hosting.',
         'cta' => 'View VPS plans',
-        'body' => 'When your workload needs dedicated resources or custom stack choices, a VPS gives you the keys without leaving Lemonwares support behind. Choose CPU, RAM, and NVMe — then install what you need.',
+        'body' => 'When your workload needs dedicated resources or custom stack choices, a VPS gives you the keys without leaving LemonWares support behind. Choose CPU, RAM, and NVMe — then install what you need.',
         'intro_eyebrow' => 'How it works',
         'intro_title' => 'Sized resources, full root',
         'intro_lede' => 'Pick a VPS tier, check out, and we provision a root server on AMD EPYC with the resources you selected.',
@@ -1145,7 +1145,7 @@ return [
         'benefits_title' => 'Power and control without going it alone',
         'benefits_lede' => 'Root access on solid infrastructure — with the same support team behind your hosting and email.',
         'features_eyebrow' => 'Built for serious workloads',
-        'features_title' => 'What a Lemonwares VPS gives you',
+        'features_title' => 'What a LemonWares VPS gives you',
         'features_lede' => 'Dedicated capacity and full control — without disappearing into a faceless cloud console.',
         'features' => [
             [
@@ -1169,7 +1169,7 @@ return [
                 'body' => 'Move from VPS 2 to VPS 4 or VPS 8 as traffic, containers, or databases need more headroom.',
             ],
             [
-                'title' => 'Same Lemonwares support',
+                'title' => 'Same LemonWares support',
                 'body' => 'WhatsApp, phone, and email — aligned with your domains, shared hosting, and business email.',
             ],
         ],
@@ -1222,7 +1222,7 @@ return [
                 'answer' => 'Yes. Every VPS plan includes root and SSH so you can install and configure what you need.',
             ],
             [
-                'question' => 'Can Lemonwares still help?',
+                'question' => 'Can LemonWares still help?',
                 'answer' => 'Yes. You run the stack; we help with provisioning, networking questions, and hardening — plus the same support channels as hosting and email.',
             ],
             [
@@ -1231,16 +1231,22 @@ return [
             ],
         ],
         'help_title' => 'Ready for a VPS?',
-        'help_lede' => 'Pick a spec, add it to cart, and we will provision with Lemonwares support.',
+        'help_lede' => 'Pick a spec, add it to cart, and we will provision with LemonWares support.',
     ],
     'development' => [
         'meta_title' => 'Development',
-        'meta_description' => 'Custom web platforms, mobile apps, WordPress, APIs, deployments, testing, and maintenance from Lemonwares — build, ship, and keep it running.',
+        'meta_description' => 'Custom web platforms, mobile apps, WordPress, APIs, deployments, testing, and maintenance from LemonWares — build, ship, and keep it running.',
         'eyebrow' => 'Development',
         'title' => 'Build Software That Fits How You Work',
         'lede' => 'Websites, platforms, mobile apps, and the services around them — scoped clearly, shipped carefully, and cared for after launch.',
         'cta' => 'Start a project',
-        'body' => 'Lemonwares development covers the full path from first conversation to live product: discovery, build, deploy, test, and ongoing care — so you are not stitching five vendors together.',
+        'body' => 'LemonWares development covers the full path from first conversation to live product: discovery, build, deploy, test, and ongoing care — so you are not stitching five vendors together.',
+        'built_eyebrow' => 'Shipped work',
+        'built_title' => 'Products we have built',
+        'built_lede' => 'Hover a project to focus it — then open the full case or browse the reel.',
+        'built_view' => 'View case',
+        'built_more' => 'View more case studies',
+        'built_empty' => 'Case studies are on the way. Talk to us about your next build.',
         'intro_eyebrow' => 'How we work',
         'intro_title' => 'Discover, ship, and stay supported',
         'intro_lede' => 'Three stages from idea to a product your team can run with confidence.',
@@ -1327,13 +1333,13 @@ return [
                 'eyebrow' => 'Go-live',
                 'title' => 'Deployments, CI/CD, and hosting',
                 'summary' => 'Pipelines, environments, and go-live support so releases are repeatable — not weekend fire drills.',
-                'lede' => 'Shipping is part of the product. We set up staging, production, and deployment workflows that match your hosting — Lemonwares cloud, VPS, or an existing stack.',
+                'lede' => 'Shipping is part of the product. We set up staging, production, and deployment workflows that match your hosting — LemonWares cloud, VPS, or an existing stack.',
                 'cta' => 'Plan a go-live',
                 'pipeline' => ['Build', 'Test', 'Stage', 'Ship'],
                 'points' => [
                     'CI/CD pipelines for safer, repeatable releases',
                     'Staging and production environment setup',
-                    'Hosting aligned with Lemonwares cloud or VPS',
+                    'Hosting aligned with LemonWares cloud or VPS',
                     'DNS, SSL, and cutover checklists',
                     'Rollback plans before you flip the switch',
                 ],
@@ -1379,7 +1385,7 @@ return [
             ],
             [
                 'question' => 'Can you work with our existing hosting or tools?',
-                'answer' => 'Yes. We often deploy on Lemonwares cloud or VPS, and we can also integrate with stacks you already run — as long as access and requirements are clear up front.',
+                'answer' => 'Yes. We often deploy on LemonWares cloud or VPS, and we can also integrate with stacks you already run — as long as access and requirements are clear up front.',
             ],
             [
                 'question' => 'Do you only build, or do you maintain after launch?',
@@ -1391,7 +1397,7 @@ return [
             ],
             [
                 'question' => 'Where are you based, and who do you support?',
-                'answer' => 'Lemonwares serves growing businesses in Nigeria and beyond. Communication is in English (and our site locales) over WhatsApp, phone, and email.',
+                'answer' => 'LemonWares serves growing businesses in Nigeria and beyond. Communication is in English (and our site locales) over WhatsApp, phone, and email.',
             ],
         ],
         'help_title' => 'Ready to start a project?',
@@ -1399,7 +1405,7 @@ return [
     ],
     'web_development' => [
         'meta_title' => 'Web Development',
-        'meta_description' => 'WordPress websites and custom web platforms from Lemonwares — designed, built, and maintained for growing businesses.',
+        'meta_description' => 'WordPress websites and custom web platforms from LemonWares — designed, built, and maintained for growing businesses.',
         'eyebrow' => 'Web Development',
         'title' => 'Websites and Platforms That Match Your Business',
         'lede' => 'From a polished WordPress site to a custom Laravel platform, we design, build, and ship work your team can actually run.',
@@ -1416,7 +1422,7 @@ return [
     ],
     'mobile_apps' => [
         'meta_title' => 'Mobile Apps',
-        'meta_description' => 'iOS and Android app development from Lemonwares — native or cross-platform builds with backend support.',
+        'meta_description' => 'iOS and Android app development from LemonWares — native or cross-platform builds with backend support.',
         'eyebrow' => 'Mobile Apps',
         'title' => 'Mobile Apps Your Customers Will Open',
         'lede' => 'Native or cross-platform apps for iOS and Android, tied to the same backends and hosting we already run for you.',
@@ -1433,7 +1439,7 @@ return [
     ],
     'maintenance' => [
         'meta_title' => 'Maintenance',
-        'meta_description' => 'Website and app maintenance from Lemonwares — updates, security, backups, and care plans.',
+        'meta_description' => 'Website and app maintenance from LemonWares — updates, security, backups, and care plans.',
         'eyebrow' => 'Maintenance',
         'title' => 'Keep Sites and Apps Healthy After Launch',
         'lede' => 'Updates, security patches, backups, and small fixes — so your product does not quietly rot after go-live.',
@@ -1450,7 +1456,7 @@ return [
     ],
     'support_page' => [
         'meta_title' => 'Support',
-        'meta_description' => 'Lemonwares support on WhatsApp, phone, email, and tickets — hosting, Mailemon, domains, billing, and development under one roof.',
+        'meta_description' => 'LemonWares support on WhatsApp, phone, email, and tickets — hosting, Mailemon, domains, billing, and development under one roof.',
         'eyebrow' => 'Support',
         'title' => 'Real People When Something Needs Attention',
         'lede' => 'WhatsApp, phone, email, or open a ticket — same team that already knows your hosting, email, and apps.',
@@ -1568,7 +1574,7 @@ return [
     ],
     'microservices' => [
         'meta_title' => 'Microservices',
-        'meta_description' => 'Web development, mobile apps, maintenance, and support from Lemonwares — built for growing businesses.',
+        'meta_description' => 'Web development, mobile apps, maintenance, and support from LemonWares — built for growing businesses.',
         'eyebrow' => 'Web · Mobile · Care',
         'title' => 'Build, Ship, and Keep It Running',
         'lede' => 'Web development leads the offer — with mobile, maintenance, and support when you need the rest of the stack.',

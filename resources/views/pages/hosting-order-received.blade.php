@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', __('hosting.order_received_title') . ' — ' . config('site.short_name'))
-@section('meta_description', $lead->isShared() ? __('hosting.whmcs_notice') : 'Your Lemonwares VPS order request was received.')
+@section('meta_description', $lead->isShared() ? __('hosting.whmcs_notice') : 'Your LemonWares VPS order request was received.')
 @section('focus_flow', '1')
 
 @section('content')

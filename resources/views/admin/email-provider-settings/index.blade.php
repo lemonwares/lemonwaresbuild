@@ -122,7 +122,7 @@
                         name="trekmail_brand_name"
                         value="{{ old('trekmail_brand_name', $branding['name']) }}"
                         class="admin-input"
-                        placeholder="Lemonwares"
+                        placeholder="LemonWares"
                     >
                 </label>
                 <label class="admin-field">

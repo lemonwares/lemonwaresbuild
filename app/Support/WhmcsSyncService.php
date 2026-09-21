@@ -10,6 +10,41 @@ use Illuminate\Support\Facades\Log;
 class WhmcsSyncService
 {
     /**
+     * Pull products for one linked WHMCS customer and attach them to the local user.
+     */
+    public static function syncServicesForCustomer(WhmcsCustomer $customer): int
+    {
+        $clientId = (int) $customer->whmcs_client_id;
+        if ($clientId < 1) {
+            return 0;
+        }
+
+        $synced = 0;
+        $products = WhmcsClient::getClientProducts($clientId);
+
+        foreach ($products as $product) {
+            self::upsertService($customer, $product);
+            $synced++;
+        }
+
+        // Backfill any older rows that were synced before the user existed.
+        if ($customer->user_id) {
+            WhmcsService::query()
+                ->where('whmcs_client_id', $clientId)
+                ->where(function ($query) use ($customer): void {
+                    $query->whereNull('user_id')
+                        ->orWhere('user_id', '!=', $customer->user_id);
+                })
+                ->update([
+                    'user_id' => $customer->user_id,
+                    'whmcs_customer_id' => $customer->id,
+                ]);
+        }
+
+        return $synced;
+    }
+
+    /**
      * @return array{customers_synced:int,services_synced:int}
      */
     public static function syncCustomersAndServices(): array
@@ -32,12 +67,7 @@ class WhmcsSyncService
             foreach ($clients as $clientPayload) {
                 $customer = self::upsertCustomer($clientPayload);
                 $customersSynced++;
-
-                $products = WhmcsClient::getClientProducts((int) $customer->whmcs_client_id);
-                foreach ($products as $product) {
-                    self::upsertService($customer, $product);
-                    $servicesSynced++;
-                }
+                $servicesSynced += self::syncServicesForCustomer($customer);
             }
 
             $start += $limit;

@@ -13,6 +13,7 @@
     if (! is_array($apps)) {
         $apps = [];
     }
+    $appIcons = ['layout', 'mail', 'smartphone', 'bot', 'user', 'shield'];
     $setupItems = __('email.setup_items');
     if (! is_array($setupItems)) {
         $setupItems = [];
@@ -21,6 +22,8 @@
     if (! is_array($platformItems)) {
         $platformItems = [];
     }
+    $platformIcons = ['cloud-upload', 'send', 'mail', 'shield-check', 'boxes', 'clipboard-check'];
+
     $validationPoints = __('email.validation_points');
     if (! is_array($validationPoints)) {
         $validationPoints = [];
@@ -122,10 +125,11 @@
                 <p class="lede mx-auto mt-3">{{ __('email.apps_lede') }}</p>
             </div>
             <div class="hosting-feature-grid" data-reveal-stagger>
-                @foreach ($apps as $app)
+                @foreach ($apps as $index => $app)
+                    @php($icon = $appIcons[$index] ?? 'mail')
                     <article class="hosting-feature-card">
                         <span class="dev-icon-badge mb-4" aria-hidden="true">
-                            <x-ui.icons.mail class="size-5 text-rose" />
+                            <x-dynamic-component :component="'ui.icons.'.$icon" class="size-5 text-rose" />
                         </span>
                         <h3 class="text-base font-bold text-black">{{ $app['title'] ?? '' }}</h3>
                         <p class="mt-2 text-sm font-light leading-relaxed text-on-blush/75">{{ $app['body'] ?? '' }}</p>
@@ -314,10 +318,11 @@
                 <p class="lede mt-3">{{ __('email.platform_lede') }}</p>
             </div>
             <div class="hosting-feature-grid" data-reveal-stagger>
-                @foreach ($platformItems as $item)
+                @foreach ($platformItems as $index => $item)
+                    @php($icon = $platformIcons[$index] ?? 'mail')
                     <article class="hosting-feature-card">
                         <span class="dev-icon-badge mb-4" aria-hidden="true">
-                            <x-ui.icons.mail class="size-5 text-rose" />
+                            <x-dynamic-component :component="'ui.icons.'.$icon" class="size-5 text-rose" />
                         </span>
                         <h3 class="text-base font-bold text-black">{{ $item['title'] ?? '' }}</h3>
                         <p class="mt-2 text-sm font-light leading-relaxed text-on-blush/75">{{ $item['body'] ?? '' }}</p>

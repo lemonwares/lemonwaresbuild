@@ -2,7 +2,7 @@
 
 return [
     'meta_title' => 'FAQ',
-    'meta_description' => 'Answers to common questions about Lemonwares hosting, business email, web development, mobile apps, billing, and support.',
+    'meta_description' => 'Answers to common questions about LemonWares hosting, business email, web development, mobile apps, billing, and support.',
     'eyebrow' => 'Help Center',
     'title' => 'Frequently Asked Questions',
     'lede' => 'Quick answers about hosting, email, development, billing, and how we support growing businesses.',
@@ -18,7 +18,7 @@ return [
     'items' => [
         [
             'question' => 'What is Mailemon?',
-            'answer' => 'Mailemon is Lemonwares business email on your domain — order online, pay securely, and we provision branded mailboxes with webmail, Outlook, and phone apps.',
+            'answer' => 'Mailemon is LemonWares business email on your domain — order online, pay securely, and we provision branded mailboxes with webmail, Outlook, and phone apps.',
             'href' => 'email.plans',
             'cta' => 'View Mailemon plans',
         ],
@@ -34,7 +34,7 @@ return [
         ],
         [
             'question' => 'What hosting plans do you offer?',
-            'answer' => 'We offer cPanel and Plesk cloud hosting for everyday websites, plus VPS root servers when you need more power, control, and room to grow.',
+            'answer' => 'We offer cPanel cloud hosting for everyday websites, plus VPS root servers when you need more power, control, and room to grow.',
         ],
         [
             'question' => 'Do you build WordPress sites and custom apps?',
