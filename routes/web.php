@@ -15,7 +15,6 @@ use App\Http\Controllers\AdminCustomerController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminEmailOrderController;
 use App\Http\Controllers\AdminHostingLeadController;
-use App\Http\Controllers\AdminHostingPriceController;
 use App\Http\Controllers\AdminFlutterwaveSettingsController;
 use App\Http\Controllers\AdminZeptoMailSettingsController;
 use App\Http\Controllers\AdminCloudflareSettingsController;
@@ -29,6 +28,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DomainCartController;
 use App\Http\Controllers\DomainOrderController;
 use App\Http\Controllers\AdminWhmcsSettingsController;
+use App\Http\Controllers\AdminWhmcsConsoleController;
 use App\Http\Controllers\AdminSubscriberController;
 use App\Http\Controllers\AdminCareerOpeningController;
 use App\Http\Controllers\AdminTeamMemberController;
@@ -41,19 +41,20 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\CaseStudyController;
 use App\Http\Controllers\CareerController;
+use App\Http\Controllers\Auth\EmailVerificationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\EmailOrderController;
 use App\Http\Controllers\FlutterwaveWebhookController;
 use App\Http\Middleware\EnsureAdminAuthenticated;
+use App\Http\Middleware\EnsureOrderAccess;
+use App\Support\OrderLinks;
 use App\Models\HostingLead;
-use App\Models\HostingPlanPrice;
 use App\Models\NewsletterSubscriber;
 use App\Models\TeamMember;
 use App\Support\DomainName;
 use App\Support\FlutterwavePayment;
-use App\Support\HostingPlanPriceSync;
 use App\Support\HostingPricing;
 use App\Support\WhmcsDomainCheck;
 use App\Support\WhmcsDomainPricing;
@@ -77,7 +78,6 @@ Route::get('/sitemap.xml', function () {
         ['loc' => route('home'), 'changefreq' => 'weekly', 'priority' => '1.0'],
         ['loc' => route('email.plans'), 'changefreq' => 'weekly', 'priority' => '0.95'],
         ['loc' => route('cloud-hosting'), 'changefreq' => 'weekly', 'priority' => '0.9'],
-        ['loc' => route('plesk'), 'changefreq' => 'weekly', 'priority' => '0.85'],
         ['loc' => route('vps'), 'changefreq' => 'weekly', 'priority' => '0.85'],
         ['loc' => route('domain'), 'changefreq' => 'weekly', 'priority' => '0.9'],
         ['loc' => route('development'), 'changefreq' => 'monthly', 'priority' => '0.8'],
@@ -132,8 +132,8 @@ Route::post('/checkout/account-status', [CheckoutController::class, 'accountStat
     ->middleware('throttle:30,1')
     ->name('checkout.account-status');
 Route::get('/checkout/payment/flutterwave/callback', [CheckoutController::class, 'callback'])->name('checkout.flutterwave.callback');
-Route::get('/checkout/received/{checkout}', [CheckoutController::class, 'received'])->name('checkout.received');
-Route::post('/checkout/{checkout}/pay', [CheckoutController::class, 'pay'])->middleware('throttle:10,1')->name('checkout.pay');
+Route::get('/checkout/received/{checkout}', [CheckoutController::class, 'received'])->middleware(EnsureOrderAccess::class)->name('checkout.received');
+Route::post('/checkout/{checkout}/pay', [CheckoutController::class, 'pay'])->middleware(['throttle:10,1', EnsureOrderAccess::class])->name('checkout.pay');
 Route::get('/domain/cart', [DomainCartController::class, 'show'])->name('domain.cart');
 Route::post('/domain/cart/add', [DomainCartController::class, 'add'])->middleware('throttle:30,1')->name('domain.cart.add');
 Route::get('/domain/cart/add', [DomainCartController::class, 'addRedirect'])->middleware('throttle:30,1')->name('domain.cart.add-redirect');
@@ -141,20 +141,25 @@ Route::patch('/domain/cart/{item}', [DomainCartController::class, 'update'])->mi
 Route::delete('/domain/cart/{item}', [DomainCartController::class, 'destroy'])->middleware('throttle:30,1')->name('domain.cart.destroy');
 Route::get('/domain/cart/count', [DomainCartController::class, 'count'])->middleware('throttle:60,1')->name('domain.cart.count');
 Route::get('/domain/checkout', [DomainOrderController::class, 'create'])->name('domain.checkout');
-Route::post('/domain/checkout', [DomainOrderController::class, 'store'])->middleware('throttle:10,1')->name('domain.checkout.store');
-Route::post('/domain/checkout/account-status', [DomainOrderController::class, 'accountStatus'])
-    ->middleware('throttle:30,1')
-    ->name('domain.checkout.account-status');
 Route::get('/domain/payment/flutterwave/callback', [DomainOrderController::class, 'callback'])->name('domain.flutterwave.callback');
-Route::get('/domain/order/received/{order}', [DomainOrderController::class, 'received'])->name('domain.order-received');
-Route::get('/domain/checkout/received/{checkout}', [DomainOrderController::class, 'receivedCheckout'])->name('domain.checkout-received');
-Route::post('/domain/order/{order}/pay', [DomainOrderController::class, 'pay'])->middleware('throttle:10,1')->name('domain.pay');
-Route::post('/domain/checkout/{checkout}/pay', [DomainOrderController::class, 'payCheckout'])->middleware('throttle:10,1')->name('domain.checkout.pay');
+Route::get('/domain/order/received/{order}', [DomainOrderController::class, 'received'])->middleware(EnsureOrderAccess::class)->name('domain.order-received');
+Route::get('/domain/checkout/received/{checkout}', [DomainOrderController::class, 'receivedCheckout'])->middleware(EnsureOrderAccess::class)->name('domain.checkout-received');
+Route::post('/domain/order/{order}/pay', [DomainOrderController::class, 'pay'])->middleware(['throttle:10,1', EnsureOrderAccess::class])->name('domain.pay');
+Route::post('/domain/checkout/{checkout}/pay', [DomainOrderController::class, 'payCheckout'])->middleware(['throttle:10,1', EnsureOrderAccess::class])->name('domain.checkout.pay');
 Route::view('/microservices', 'pages.microservices')->name('microservices');
-Route::view('/development', 'pages.development')->name('development');
+Route::get('/development', function () {
+    $featuredBuilds = \App\Models\CaseStudy::query()
+        ->published()
+        ->orderBy('sort_order')
+        ->orderBy('title')
+        ->limit(3)
+        ->get();
+
+    return view('pages.development', compact('featuredBuilds'));
+})->name('development');
 
 Route::view('/cloud-hosting', 'pages.cloud-hosting')->name('cloud-hosting');
-Route::view('/plesk', 'pages.plesk')->name('plesk');
+Route::redirect('/plesk', '/cloud-hosting', 301);
 Route::view('/vps', 'pages.vps')->name('vps');
 
 Route::get('/google-workspace', function () {
@@ -303,6 +308,16 @@ Route::middleware('guest')->group(function (): void {
 
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
 
+Route::middleware('auth')->group(function (): void {
+    Route::get('/account/verify-email', [EmailVerificationController::class, 'notice'])->name('verification.notice');
+    Route::get('/account/verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+        ->middleware(['signed', 'throttle:6,1'])
+        ->name('verification.verify');
+    Route::post('/account/verify-email/send', [EmailVerificationController::class, 'send'])
+        ->middleware('throttle:3,1')
+        ->name('verification.send');
+});
+
 Route::get('/email', [EmailOrderController::class, 'plans'])->name('email.plans');
 Route::get('/email/checkout', [EmailOrderController::class, 'create'])->name('email.checkout');
 Route::post('/email/checkout', [EmailOrderController::class, 'store'])->middleware('throttle:10,1')->name('email.checkout.store');
@@ -316,8 +331,18 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/account', [AccountController::class, 'show'])->name('account.show');
         Route::get('/account/products', [AccountProductController::class, 'index'])->name('account.products.index');
         Route::get('/account/domains', [AccountDomainController::class, 'index'])->name('account.domains.index');
+        Route::get('/account/domains/whmcs/{domainId}', [AccountDomainController::class, 'whmcs'])
+            ->whereNumber('domainId')
+            ->name('account.domains.whmcs');
         Route::get('/account/domains/{order}', [AccountDomainController::class, 'show'])->name('account.domains.show');
         Route::get('/account/subscriptions', [AccountSubscriptionController::class, 'index'])->name('account.subscriptions.index');
+        Route::get('/account/subscriptions/{service}', [AccountSubscriptionController::class, 'show'])
+            ->name('account.subscriptions.show');
+        // Legacy /manage URL (older links) → in-app subscription detail.
+        Route::get('/account/subscriptions/{service}/manage', [AccountSubscriptionController::class, 'manage'])
+            ->name('account.subscriptions.manage');
+        Route::get('/account/subscriptions/{service}/cpanel', [AccountSubscriptionController::class, 'cpanel'])
+            ->name('account.subscriptions.cpanel');
         Route::get('/account/invoices', [AccountInvoiceController::class, 'index'])->name('account.invoices.index');
         Route::get('/account/invoices/{invoice}', [AccountInvoiceController::class, 'show'])->name('account.invoices.show');
         Route::get('/account/activity', [AccountActivityController::class, 'index'])->name('account.activity.index');
@@ -366,7 +391,6 @@ Route::get('/hosting/request', function (Request $request) {
         ? $requestedPlan
         : array_key_first($planOptions);
     $plan = $planOptions[$planSlug];
-    HostingPlanPriceSync::sync();
 
     $billingCycles = HostingPricing::billingCycles();
     $selectedBillingCycle = strtolower((string) $request->query('billing_cycle', 'monthly'));
@@ -374,25 +398,12 @@ Route::get('/hosting/request', function (Request $request) {
         $selectedBillingCycle = 'monthly';
     }
 
-    $priceMap = HostingPlanPrice::query()
-        ->where('plan_slug', $planSlug)
-        ->where('is_visible', true)
-        ->get()
-        ->keyBy('spec_key');
-
     $specifications = collect($plan['specifications'] ?? [])
-        ->map(function (array $spec) use ($priceMap, $selectedBillingCycle, $planSlug) {
-            $price = $priceMap->get($spec['key'] ?? '');
-            $hasPrice = $price && (float) $price->price_amount > 0;
-
-            if ($hasPrice) {
-                $payload = HostingPricing::pricePayload($price, $selectedBillingCycle);
-                $spec = array_merge($spec, $payload);
-                $spec['price_amount'] = $payload['monthly_ngn'];
-            } else {
+        ->map(function (array $spec) use ($selectedBillingCycle, $planSlug) {
+            {
                 $defaultNgn = HostingPricing::monthlyNgnForSpec($planSlug, (string) ($spec['key'] ?? ''));
                 if ($defaultNgn > 0) {
-                    $periodNgn = HostingPricing::periodTotalNgn($defaultNgn, $selectedBillingCycle);
+                    $periodNgn = HostingPricing::periodNgnForSpec($planSlug, (string) ($spec['key'] ?? ''), $selectedBillingCycle);
                     $spec['price_amount'] = $defaultNgn;
                     $spec['monthly_ngn'] = $defaultNgn;
                     $spec['period_ngn'] = $periodNgn;
@@ -404,7 +415,7 @@ Route::get('/hosting/request', function (Request $request) {
                     $spec['price_amount'] = null;
                 }
                 $spec['billing_cycle_label'] = HostingPricing::cycleLabel($selectedBillingCycle);
-                $spec['discount_percent'] = (int) (HostingPricing::cycle($selectedBillingCycle)['discount_percent'] ?? 0);
+                $spec['discount_percent'] = (int) \App\Support\Catalog::discountFor($selectedBillingCycle, \App\Support\Catalog::plan($planSlug, (string) ($spec['key'] ?? '')));
             }
 
             return $spec;
@@ -488,28 +499,17 @@ Route::get('/hosting/request/details', function (Request $request) {
             ]);
     }
 
-    $priceMap = HostingPlanPrice::query()
-        ->where('plan_slug', $selectedPlan)
-        ->get()
-        ->keyBy(fn ($item) => strtolower((string) $item->spec_key));
-
     $selectedSpecsData = collect($selectedSpecKeys)
-        ->map(function ($key) use ($specMap, $priceMap, $selectedBillingCycle, $selectedPlan) {
+        ->map(function ($key) use ($specMap, $selectedBillingCycle, $selectedPlan) {
             $spec = $specMap->get($key);
             if (! $spec) {
                 return null;
             }
 
-            $price = $priceMap->get($key);
-            $hasPrice = $price && (float) $price->price_amount > 0;
-
-            if ($hasPrice) {
-                $payload = HostingPricing::pricePayload($price, $selectedBillingCycle);
-                $spec = array_merge($spec, $payload);
-            } else {
+            {
                 $defaultNgn = HostingPricing::monthlyNgnForSpec($selectedPlan, $key);
                 if ($defaultNgn > 0) {
-                    $periodNgn = HostingPricing::periodTotalNgn($defaultNgn, $selectedBillingCycle);
+                    $periodNgn = HostingPricing::periodNgnForSpec($selectedPlan, $key, $selectedBillingCycle);
                     $rate = max(1.0, HostingPricing::usdToNgnRate());
                     $spec['monthly_ngn'] = $defaultNgn;
                     $spec['period_ngn'] = $periodNgn;
@@ -561,20 +561,19 @@ Route::get('/hosting/request/received/{lead}', function (HostingLead $lead) {
         ->where('email', strtolower((string) $lead->email))
         ->exists();
 
-    $whmcsClientAreaUrl = null;
-    if ($lead->isPaid() && $lead->isShared() && $lead->whmcs_client_id) {
-        $whmcsClientAreaUrl = WhmcsCheckout::clientAreaUrl((int) $lead->whmcs_client_id);
-    }
-
-    return view('pages.hosting-order-received', compact('lead', 'accountExists', 'whmcsClientAreaUrl'));
-})->name('hosting.order-received');
+    return view('pages.hosting-order-received', [
+        'lead' => $lead,
+        'accountExists' => $accountExists,
+        'whmcsClientAreaUrl' => null,
+    ]);
+})->middleware(EnsureOrderAccess::class)->name('hosting.order-received');
 
 Route::get('/hosting/payment/flutterwave/callback', function (Request $request) {
     $status = strtolower((string) $request->query('status', ''));
     $txRef = (string) $request->query('tx_ref', '');
     $transactionId = (string) $request->query('transaction_id', '');
 
-    $lead = HostingLead::query()
+    $lead = $txRef === '' ? null : HostingLead::query()
         ->where('payment_reference', $txRef)
         ->first();
 
@@ -587,28 +586,24 @@ Route::get('/hosting/payment/flutterwave/callback', function (Request $request) 
             ]);
     }
 
-    if ($transactionId === '') {
+    $receivedUrl = OrderLinks::url('hosting.order-received', $lead);
+
+    $markFailed = function (string $paymentStatus) use ($lead): void {
+        if ($lead->fresh()?->isPaid()) {
+            return;
+        }
+
         $lead->update([
-            'payment_status' => $status ?: 'failed',
+            'payment_status' => $paymentStatus,
             'status' => 'payment_failed',
         ]);
+    };
+
+    if ($transactionId === '' || in_array($status, ['failed', 'cancelled', 'abandoned'], true)) {
+        $markFailed($status ?: 'failed');
 
         return redirect()
-            ->route('hosting.order-received', $lead)
-            ->with('hosting_feedback', [
-                'type' => 'error',
-                'message' => __('hosting.payment_not_completed'),
-            ]);
-    }
-
-    if (in_array($status, ['failed', 'cancelled', 'abandoned'], true)) {
-        $lead->update([
-            'payment_status' => $status,
-            'status' => 'payment_failed',
-        ]);
-
-        return redirect()
-            ->route('hosting.order-received', $lead)
+            ->to($receivedUrl)
             ->with('hosting_feedback', [
                 'type' => 'error',
                 'message' => __('hosting.payment_not_completed'),
@@ -618,13 +613,10 @@ Route::get('/hosting/payment/flutterwave/callback', function (Request $request) 
     $verified = FlutterwavePayment::verifyTransaction($transactionId);
 
     if (! $verified) {
-        $lead->update([
-            'payment_status' => 'unverified',
-            'status' => 'payment_failed',
-        ]);
+        $markFailed('unverified');
 
         return redirect()
-            ->route('hosting.order-received', $lead)
+            ->to($receivedUrl)
             ->with('hosting_feedback', [
                 'type' => 'error',
                 'message' => __('hosting.payment_unverified'),
@@ -634,7 +626,7 @@ Route::get('/hosting/payment/flutterwave/callback', function (Request $request) 
     $result = FlutterwavePayment::confirmHostingLeadPayment($lead->fresh(), $verified);
 
     return redirect()
-        ->route('hosting.order-received', $lead)
+        ->to($receivedUrl)
         ->with('hosting_feedback', [
             'type' => ($result['ok'] ?? false) ? 'success' : 'error',
             'message' => (string) ($result['message'] ?? __('hosting.payment_not_completed')),
@@ -646,11 +638,22 @@ Route::post('/webhooks/flutterwave', FlutterwaveWebhookController::class)->name(
 Route::post('/hosting/request/received/{lead}/pay', function (HostingLead $lead) {
     abort_unless(($lead->checkout_provider === 'internal' || $lead->payment_provider === 'flutterwave'), 404);
 
+    $receivedUrl = OrderLinks::url('hosting.order-received', $lead);
+
+    if ($lead->isPaid()) {
+        return redirect()
+            ->to($receivedUrl)
+            ->with('hosting_feedback', [
+                'type' => 'success',
+                'message' => __('hosting.payment_already_confirmed'),
+            ]);
+    }
+
     $link = FlutterwavePayment::createPaymentLink($lead);
 
     if (! $link) {
         return redirect()
-            ->route('hosting.order-received', $lead)
+            ->to($receivedUrl)
             ->with('hosting_feedback', [
                 'type' => 'error',
                 'message' => 'Unable to start Flutterwave checkout right now. Please try again shortly.',
@@ -658,7 +661,7 @@ Route::post('/hosting/request/received/{lead}/pay', function (HostingLead $lead)
     }
 
     return redirect()->away($link);
-})->middleware('throttle:10,1')->name('hosting.flutterwave.pay');
+})->middleware(['throttle:10,1', EnsureOrderAccess::class])->name('hosting.flutterwave.pay');
 
 Route::post('/hosting/domain/check', function (Request $request) {
     $validator = Validator::make($request->all(), [
@@ -753,7 +756,7 @@ Route::post('/hosting/request/details', function (Request $request) {
     $request->merge(['phone' => $normalizedPhone]);
 
     $planSlugInput = strtolower(trim((string) $request->input('plan', '')));
-    $requiresDomain = in_array($planSlugInput, ['cpanel', 'plesk'], true);
+    $requiresDomain = $planSlugInput === 'cpanel';
 
     $validator = Validator::make($request->all(), [
         'full_name' => ['required', 'string', 'max:120'],
@@ -823,21 +826,7 @@ Route::post('/hosting/request/details', function (Request $request) {
             ]);
     }
 
-    $priceMap = HostingPlanPrice::query()
-        ->where('plan_slug', $planSlug)
-        ->get()
-        ->keyBy(fn ($item) => strtolower((string) $item->spec_key));
-
-    $amountNgn = collect($selectedSpecKeys)->sum(function ($key) use ($priceMap, $billingCycle) {
-        $price = $priceMap->get($key);
-        if (! $price || (float) $price->price_amount <= 0) {
-            return 0;
-        }
-
-        $monthlyNgn = HostingPricing::amountAsNgn((float) $price->price_amount, (string) $price->currency);
-
-        return HostingPricing::periodTotalNgn($monthlyNgn, $billingCycle);
-    });
+    $amountNgn = collect($selectedSpecKeys)->sum(fn ($key) => HostingPricing::periodNgnForSpec($planSlug, (string) $key, $billingCycle));
     $rate = max(1.0, HostingPricing::usdToNgnRate());
     $amountUsd = round($amountNgn / $rate, 2);
 
@@ -938,6 +927,7 @@ Route::post('/hosting/request/details', function (Request $request) {
         'spec_label' => $specLabel ?: null,
         'spec_summary' => $specSummary ?: null,
         'hostname' => $normalizedDomain,
+        'domain_option' => $checkoutProvider === 'whmcs' ? ($domainOption ?: 'owndomain') : null,
         'billing_cycle' => $billingCycle,
         'amount_usd' => $amountUsd,
         'amount_ngn' => $amountNgn,
@@ -964,7 +954,7 @@ Route::post('/hosting/request/details', function (Request $request) {
         }
 
         return redirect()
-            ->route('hosting.order-received', $lead)
+            ->to(OrderLinks::url('hosting.order-received', $lead))
             ->with('hosting_feedback', [
                 'type' => 'info',
                 'message' => 'Order saved. Payment checkout is temporarily unavailable — use Pay Now when ready.',
@@ -1028,7 +1018,7 @@ Route::post('/hosting/request/details', function (Request $request) {
             $lead->update(['status' => 'awaiting_payment']);
 
             return redirect()
-                ->route('hosting.order-received', $lead)
+                ->to(OrderLinks::url('hosting.order-received', $lead))
                 ->with('hosting_feedback', [
                     'type' => 'success',
                     'message' => __('hosting.whmcs_test_order_created'),
@@ -1042,7 +1032,7 @@ Route::post('/hosting/request/details', function (Request $request) {
         }
 
         return redirect()
-            ->route('hosting.order-received', $lead)
+            ->to(OrderLinks::url('hosting.order-received', $lead))
             ->with('hosting_feedback', [
                 'type' => 'error',
                 'message' => __('hosting.flutterwave_unavailable'),
@@ -1219,26 +1209,109 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         ->middleware('throttle:5,1')
         ->name('login.submit');
 
-    Route::middleware([EnsureAdminAuthenticated::class, \App\Http\Middleware\EnsureAdminPermission::class])->group(function (): void {
+    Route::middleware([EnsureAdminAuthenticated::class, \App\Http\Middleware\EnsureAdminPermission::class, \App\Http\Middleware\RecordAdminAudit::class])->group(function (): void {
         Route::get('/', AdminDashboardController::class)->name('dashboard');
         Route::get('/search', AdminSearchController::class)->name('search');
 
         Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
         Route::get('/customers', [AdminCustomerController::class, 'index'])->name('customers.index');
+        Route::get('/customers/create', [\App\Http\Controllers\AdminCustomerAccessController::class, 'create'])->name('customers.create');
+        Route::post('/customers', [\App\Http\Controllers\AdminCustomerAccessController::class, 'store'])->name('customers.store');
+        Route::get('/customers/export', [\App\Http\Controllers\AdminCustomerAccessController::class, 'export'])->name('customers.export');
+        Route::post('/impersonation/stop', [\App\Http\Controllers\AdminCustomerAccessController::class, 'stopImpersonating'])->name('impersonation.stop');
+        Route::post('/customers/{customer}/password-reset', [\App\Http\Controllers\AdminCustomerAccessController::class, 'sendPasswordReset'])->name('customers.password-reset');
+        Route::put('/customers/{customer}/password', [\App\Http\Controllers\AdminCustomerAccessController::class, 'setPassword'])->name('customers.password');
+        Route::post('/customers/{customer}/suspend', [\App\Http\Controllers\AdminCustomerAccessController::class, 'suspend'])->name('customers.suspend');
+        Route::post('/customers/{customer}/unsuspend', [\App\Http\Controllers\AdminCustomerAccessController::class, 'unsuspend'])->name('customers.unsuspend');
+        Route::post('/customers/{customer}/verify-email', [\App\Http\Controllers\AdminCustomerAccessController::class, 'verifyEmail'])->name('customers.verify-email');
+        Route::put('/customers/{customer}/notes', [\App\Http\Controllers\AdminCustomerAccessController::class, 'updateNotes'])->name('customers.notes');
+        Route::post('/customers/{customer}/impersonate', [\App\Http\Controllers\AdminCustomerAccessController::class, 'impersonate'])->name('customers.impersonate');
+        Route::delete('/customers/{customer}/staff/{member}', [\App\Http\Controllers\AdminCustomerAccessController::class, 'removeStaffMember'])->name('customers.staff.destroy');
+        Route::delete('/customers/{customer}/invites/{invite}', [\App\Http\Controllers\AdminCustomerAccessController::class, 'revokeInvite'])->name('customers.invites.destroy');
         Route::post('/customers/sync-whmcs', [AdminCustomerController::class, 'syncWhmcs'])->name('customers.sync-whmcs');
         Route::get('/customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
         Route::put('/customers/{customer}', [AdminCustomerController::class, 'update'])->name('customers.update');
         Route::delete('/customers/{customer}', [AdminCustomerController::class, 'destroy'])->name('customers.destroy');
         Route::get('/legacy-customers/{legacyCustomer}', [AdminCustomerController::class, 'showLegacy'])->name('customers.legacy.show');
+        Route::get('/reports', [\App\Http\Controllers\AdminReportController::class, 'index'])->name('reports.index');
+        Route::get('/reports/export', [\App\Http\Controllers\AdminReportController::class, 'export'])->name('reports.export');
+        Route::get('/orders', [\App\Http\Controllers\AdminOrderController::class, 'index'])->name('orders.index');
+        Route::get('/domain-orders', [\App\Http\Controllers\AdminDomainOrderController::class, 'index'])->name('domain-orders.index');
+        Route::get('/domain-orders/{domainOrder}', [\App\Http\Controllers\AdminDomainOrderController::class, 'show'])->name('domain-orders.show');
+        Route::post('/domain-orders/{domainOrder}/mark-paid', [\App\Http\Controllers\AdminDomainOrderController::class, 'markPaid'])->name('domain-orders.mark-paid');
+        Route::post('/domain-orders/{domainOrder}/verify-payment', [\App\Http\Controllers\AdminDomainOrderController::class, 'verifyPayment'])->name('domain-orders.verify-payment');
+        Route::post('/domain-orders/{domainOrder}/cancel', [\App\Http\Controllers\AdminDomainOrderController::class, 'cancel'])->name('domain-orders.cancel');
+        Route::post('/domain-orders/{domainOrder}/reopen', [\App\Http\Controllers\AdminDomainOrderController::class, 'reopen'])->name('domain-orders.reopen');
+        Route::post('/domain-orders/{domainOrder}/refund', [\App\Http\Controllers\AdminDomainOrderController::class, 'refund'])->name('domain-orders.refund');
+        Route::post('/domain-orders/{domainOrder}/retry-whmcs', [\App\Http\Controllers\AdminDomainOrderController::class, 'retryWhmcs'])->name('domain-orders.retry-whmcs');
+        Route::put('/domain-orders/{domainOrder}/notes', [\App\Http\Controllers\AdminDomainOrderController::class, 'updateNotes'])->name('domain-orders.notes');
+        Route::put('/domain-orders/{domainOrder}/epp', [\App\Http\Controllers\AdminDomainOrderController::class, 'updateEpp'])->name('domain-orders.epp');
+        Route::get('/cart-orders', [\App\Http\Controllers\AdminCartOrderController::class, 'index'])->name('cart-orders.index');
+        Route::get('/cart-orders/{cartOrder}', [\App\Http\Controllers\AdminCartOrderController::class, 'show'])->name('cart-orders.show');
+        Route::post('/cart-orders/{cartOrder}/mark-paid', [\App\Http\Controllers\AdminCartOrderController::class, 'markPaid'])->name('cart-orders.mark-paid');
+        Route::post('/cart-orders/{cartOrder}/verify-payment', [\App\Http\Controllers\AdminCartOrderController::class, 'verifyPayment'])->name('cart-orders.verify-payment');
+        Route::post('/cart-orders/{cartOrder}/cancel', [\App\Http\Controllers\AdminCartOrderController::class, 'cancel'])->name('cart-orders.cancel');
+        Route::post('/cart-orders/{cartOrder}/reopen', [\App\Http\Controllers\AdminCartOrderController::class, 'reopen'])->name('cart-orders.reopen');
+        Route::post('/cart-orders/{cartOrder}/refund', [\App\Http\Controllers\AdminCartOrderController::class, 'refund'])->name('cart-orders.refund');
+        Route::put('/cart-orders/{cartOrder}/notes', [\App\Http\Controllers\AdminCartOrderController::class, 'updateNotes'])->name('cart-orders.notes');
         Route::get('/hosting-leads', [AdminHostingLeadController::class, 'index'])->name('hosting-leads.index');
         Route::get('/hosting-leads/{hostingLead}', [AdminHostingLeadController::class, 'show'])->name('hosting-leads.show');
+        Route::get('/hosting-leads/{hostingLead}/edit', [AdminHostingLeadController::class, 'edit'])->name('hosting-leads.edit');
+        Route::put('/hosting-leads/{hostingLead}', [AdminHostingLeadController::class, 'update'])->name('hosting-leads.update');
+        Route::delete('/hosting-leads/{hostingLead}', [AdminHostingLeadController::class, 'destroy'])->name('hosting-leads.destroy');
+        Route::put('/hosting-leads/{hostingLead}/notes', [AdminHostingLeadController::class, 'updateNotes'])->name('hosting-leads.notes');
+        Route::put('/hosting-leads/{hostingLead}/server', [AdminHostingLeadController::class, 'linkServer'])->name('hosting-leads.server');
+        Route::post('/hosting-leads/{hostingLead}/server/action', [AdminHostingLeadController::class, 'serverAction'])->name('hosting-leads.server-action');
+        Route::resource('coupons', \App\Http\Controllers\AdminCouponController::class)->except(['show']);
+        Route::controller(\App\Http\Controllers\AdminCatalogController::class)->prefix('catalog')->name('catalog.')->group(function (): void {
+            Route::get('/', 'index')->name('index');
+            Route::put('/cycles', 'updateCycles')->name('cycles');
+            Route::get('/groups/{group}/edit', 'editGroup')->name('groups.edit');
+            Route::put('/groups/{group}', 'updateGroup')->name('groups.update');
+            Route::get('/plans/create', 'create')->name('create');
+            Route::post('/plans', 'store')->name('store');
+            Route::get('/plans/{plan}/edit', 'edit')->name('edit');
+            Route::put('/plans/{plan}', 'update')->name('update');
+            Route::post('/plans/{plan}/duplicate', 'duplicate')->name('duplicate');
+            Route::post('/plans/{plan}/toggle', 'toggle')->name('toggle');
+            Route::post('/plans/{plan}/move', 'move')->name('move');
+            Route::delete('/plans/{plan}', 'destroy')->name('destroy');
+        });
+        Route::get('/content', [\App\Http\Controllers\AdminContentController::class, 'index'])->name('content.index');
+        Route::put('/content/text', [\App\Http\Controllers\AdminContentController::class, 'saveText'])->name('content.text.save');
+        Route::put('/content/texts', [\App\Http\Controllers\AdminContentController::class, 'saveTexts'])->name('content.texts.save');
+        Route::delete('/content/text', [\App\Http\Controllers\AdminContentController::class, 'resetText'])->name('content.text.reset');
+        Route::get('/content/list', [\App\Http\Controllers\AdminContentController::class, 'editList'])->name('content.list');
+        Route::put('/content/list', [\App\Http\Controllers\AdminContentController::class, 'saveList'])->name('content.list.save');
+        Route::get('/system', [\App\Http\Controllers\AdminSystemController::class, 'index'])->name('system.index');
+        Route::post('/system/run-task', [\App\Http\Controllers\AdminSystemController::class, 'runTask'])->name('system.run-task');
+        Route::post('/system/retry-job', [\App\Http\Controllers\AdminSystemController::class, 'retryJob'])->name('system.retry-job');
+        Route::post('/system/forget-job', [\App\Http\Controllers\AdminSystemController::class, 'forgetJob'])->name('system.forget-job');
+        Route::post('/system/clear-cache', [\App\Http\Controllers\AdminSystemController::class, 'clearCache'])->name('system.clear-cache');
+        Route::post('/system/backup', [\App\Http\Controllers\AdminSystemController::class, 'backup'])->name('system.backup');
+        Route::get('/site-settings', [\App\Http\Controllers\AdminSiteSettingsController::class, 'index'])->name('site-settings.index');
+        Route::put('/site-settings', [\App\Http\Controllers\AdminSiteSettingsController::class, 'update'])->name('site-settings.update');
+        Route::post('/site-settings/refresh-rate', [\App\Http\Controllers\AdminSiteSettingsController::class, 'refreshRate'])->name('site-settings.refresh-rate');
+        Route::get('/hetzner-settings', [\App\Http\Controllers\AdminHetznerSettingsController::class, 'index'])->name('hetzner-settings.index');
+        Route::put('/hetzner-settings', [\App\Http\Controllers\AdminHetznerSettingsController::class, 'update'])->name('hetzner-settings.update');
+        Route::post('/hetzner-settings/test-connection', [\App\Http\Controllers\AdminHetznerSettingsController::class, 'testConnection'])->name('hetzner-settings.test-connection');
         Route::post('/hosting-leads/{hostingLead}/retry-whmcs-sync', [AdminHostingLeadController::class, 'retryWhmcsSync'])->name('hosting-leads.retry-whmcs-sync');
         Route::get('/support-tickets', [AdminSupportTicketController::class, 'index'])->name('support-tickets.index');
         Route::get('/support-tickets/{supportTicket}', [AdminSupportTicketController::class, 'show'])->name('support-tickets.show');
         Route::put('/support-tickets/{supportTicket}', [AdminSupportTicketController::class, 'update'])->name('support-tickets.update');
         Route::post('/support-tickets/{supportTicket}/reply', [AdminSupportTicketController::class, 'reply'])->name('support-tickets.reply');
         Route::get('/subscribers', [AdminSubscriberController::class, 'index'])->name('subscribers.index');
+        Route::post('/subscribers', [AdminSubscriberController::class, 'store'])->name('subscribers.store');
+        Route::get('/subscribers/export', [AdminSubscriberController::class, 'export'])->name('subscribers.export');
+        Route::post('/subscribers/import', [AdminSubscriberController::class, 'import'])->name('subscribers.import');
+        Route::delete('/subscribers/{subscriber}', [AdminSubscriberController::class, 'destroy'])->name('subscribers.destroy');
+        Route::get('/saved-replies', [\App\Http\Controllers\AdminSavedReplyController::class, 'index'])->name('saved-replies.index');
+        Route::post('/saved-replies', [\App\Http\Controllers\AdminSavedReplyController::class, 'store'])->name('saved-replies.store');
+        Route::put('/saved-replies/{savedReply}', [\App\Http\Controllers\AdminSavedReplyController::class, 'update'])->name('saved-replies.update');
+        Route::delete('/saved-replies/{savedReply}', [\App\Http\Controllers\AdminSavedReplyController::class, 'destroy'])->name('saved-replies.destroy');
         Route::resource('staff', AdminStaffController::class)->except(['show']);
+        Route::resource('roles', \App\Http\Controllers\AdminRoleController::class)->except(['show']);
+        Route::get('/audit-log', [\App\Http\Controllers\AdminAuditLogController::class, 'index'])->name('audit-log.index');
         Route::resource('blog-posts', AdminBlogPostController::class)->except(['show']);
         Route::resource('projects', AdminProjectController::class)->except(['show']);
         Route::resource('case-studies', AdminCaseStudyController::class)->except(['show']);
@@ -1252,11 +1325,33 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::post('/newsletter-campaigns/{newsletterCampaign}/send', [AdminNewsletterCampaignController::class, 'send'])->name('newsletter-campaigns.send');
         Route::resource('team-members', AdminTeamMemberController::class)->except(['show']);
         Route::resource('career-openings', AdminCareerOpeningController::class)->except(['show']);
-        Route::get('/hosting-prices', [AdminHostingPriceController::class, 'index'])->name('hosting-prices.index');
-        Route::put('/hosting-prices', [AdminHostingPriceController::class, 'update'])->name('hosting-prices.update');
         Route::get('/whmcs-settings', [AdminWhmcsSettingsController::class, 'index'])->name('whmcs-settings.index');
         Route::put('/whmcs-settings', [AdminWhmcsSettingsController::class, 'update'])->name('whmcs-settings.update');
         Route::post('/whmcs-settings/test-domain', [AdminWhmcsSettingsController::class, 'testDomain'])->name('whmcs-settings.test-domain');
+
+        Route::get('/whmcs-console', [AdminWhmcsConsoleController::class, 'index'])->name('whmcs-console.index');
+        Route::get('/whmcs-console/clients', [AdminWhmcsConsoleController::class, 'clients'])->name('whmcs-console.clients');
+        Route::get('/whmcs-console/clients/{clientId}', [AdminWhmcsConsoleController::class, 'showClient'])->name('whmcs-console.clients.show')->whereNumber('clientId');
+        Route::put('/whmcs-console/clients/{clientId}', [AdminWhmcsConsoleController::class, 'updateClient'])->name('whmcs-console.clients.update')->whereNumber('clientId');
+        Route::post('/whmcs-console/clients/{clientId}/close', [AdminWhmcsConsoleController::class, 'closeClient'])->name('whmcs-console.clients.close')->whereNumber('clientId');
+        Route::get('/whmcs-console/services', [AdminWhmcsConsoleController::class, 'services'])->name('whmcs-console.services');
+        Route::post('/whmcs-console/services/suspend', [AdminWhmcsConsoleController::class, 'suspendService'])->name('whmcs-console.services.suspend');
+        Route::post('/whmcs-console/services/unsuspend', [AdminWhmcsConsoleController::class, 'unsuspendService'])->name('whmcs-console.services.unsuspend');
+        Route::post('/whmcs-console/services/terminate', [AdminWhmcsConsoleController::class, 'terminateService'])->name('whmcs-console.services.terminate');
+        Route::get('/whmcs-console/invoices', [AdminWhmcsConsoleController::class, 'invoices'])->name('whmcs-console.invoices');
+        Route::get('/whmcs-console/invoices/{invoiceId}', [AdminWhmcsConsoleController::class, 'showInvoice'])->name('whmcs-console.invoices.show')->whereNumber('invoiceId');
+        Route::post('/whmcs-console/invoices/{invoiceId}/mark-paid', [AdminWhmcsConsoleController::class, 'markInvoicePaid'])->name('whmcs-console.invoices.mark-paid')->whereNumber('invoiceId');
+        Route::get('/whmcs-console/orders', [AdminWhmcsConsoleController::class, 'orders'])->name('whmcs-console.orders');
+        Route::post('/whmcs-console/orders/accept', [AdminWhmcsConsoleController::class, 'acceptOrder'])->name('whmcs-console.orders.accept');
+        Route::post('/whmcs-console/orders/cancel', [AdminWhmcsConsoleController::class, 'cancelOrder'])->name('whmcs-console.orders.cancel');
+        Route::post('/whmcs-console/orders/pending', [AdminWhmcsConsoleController::class, 'pendingOrder'])->name('whmcs-console.orders.pending');
+        Route::get('/whmcs-console/tickets', [AdminWhmcsConsoleController::class, 'tickets'])->name('whmcs-console.tickets');
+        Route::get('/whmcs-console/tickets/{ticketId}', [AdminWhmcsConsoleController::class, 'showTicket'])->name('whmcs-console.tickets.show')->whereNumber('ticketId');
+        Route::post('/whmcs-console/tickets/{ticketId}/reply', [AdminWhmcsConsoleController::class, 'replyTicket'])->name('whmcs-console.tickets.reply')->whereNumber('ticketId');
+        Route::post('/whmcs-console/tickets/{ticketId}/close', [AdminWhmcsConsoleController::class, 'closeTicket'])->name('whmcs-console.tickets.close')->whereNumber('ticketId');
+        Route::get('/whmcs-console/domains', [AdminWhmcsConsoleController::class, 'domains'])->name('whmcs-console.domains');
+        Route::post('/whmcs-console/domains/lock', [AdminWhmcsConsoleController::class, 'lockDomain'])->name('whmcs-console.domains.lock');
+        Route::post('/whmcs-console/domains/renew', [AdminWhmcsConsoleController::class, 'renewDomain'])->name('whmcs-console.domains.renew');
         Route::get('/flutterwave-settings', [AdminFlutterwaveSettingsController::class, 'index'])->name('flutterwave-settings.index');
         Route::put('/flutterwave-settings', [AdminFlutterwaveSettingsController::class, 'update'])->name('flutterwave-settings.update');
         Route::post('/flutterwave-settings/test-connection', [AdminFlutterwaveSettingsController::class, 'testConnection'])->name('flutterwave-settings.test-connection');
@@ -1276,6 +1371,7 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
 
         Route::get('/email-catalog', [AdminEmailCatalogController::class, 'index'])->name('email-catalog.index');
         Route::put('/email-catalog', [AdminEmailCatalogController::class, 'update'])->name('email-catalog.update');
+        Route::post('/email-catalog/plans', [AdminEmailCatalogController::class, 'store'])->name('email-catalog.store');
         Route::get('/email-provider-settings', [AdminEmailProviderSettingsController::class, 'index'])->name('email-provider-settings.index');
         Route::put('/email-provider-settings', [AdminEmailProviderSettingsController::class, 'update'])->name('email-provider-settings.update');
         Route::post('/email-provider-settings/test-connection', [AdminEmailProviderSettingsController::class, 'testConnection'])->name('email-provider-settings.test-connection');

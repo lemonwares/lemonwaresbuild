@@ -79,10 +79,17 @@ class WhmcsSettingsAdminTest extends TestCase
         ])->assertRedirect(route('admin.whmcs-settings.index'));
 
         Http::fake([
-            'https://billing.example.com/includes/api.php' => Http::response([
-                'result' => 'success',
-                'status' => 'available',
-            ], 200),
+            'https://billing.example.com/includes/api.php' => fn ($request) => Http::response(match ($request['action'] ?? '') {
+                'DomainWhois' => ['result' => 'success', 'status' => 'available'],
+                'GetTLDPricing' => [
+                    'result' => 'success',
+                    'currency' => ['id' => 1, 'code' => 'NGN'],
+                    'pricing' => ['com' => ['register' => ['1' => '15000.00']]],
+                ],
+                'AddClient' => ['result' => 'success', 'clientid' => '99'],
+                'AddOrder' => ['result' => 'success', 'orderid' => '321', 'invoiceid' => '654'],
+                default => ['result' => 'error', 'message' => 'Client not found'],
+            }, 200),
             'open.er-api.com/*' => Http::response(['rates' => ['NGN' => 1600]], 200),
         ]);
 
@@ -106,11 +113,12 @@ class WhmcsSettingsAdminTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        $location = (string) $response->headers->get('Location');
-        $this->assertStringContainsString('/cart.php', $location);
-        $this->assertStringContainsString('pid=16', $location);
-        $this->assertStringContainsString('sld=example', $location);
-        $this->assertStringContainsString('tld=.com', $location);
-        $this->assertStringContainsString('domainoption=register', $location);
+        $lead = \App\Models\HostingLead::query()->latest('id')->firstOrFail();
+        $this->assertStringContainsString('/cart.php', (string) $lead->checkout_url);
+        $this->assertStringContainsString('pid=16', (string) $lead->checkout_url);
+        $this->assertStringContainsString('sld=example', (string) $lead->checkout_url);
+        $this->assertStringContainsString('domainoption=register', (string) $lead->checkout_url);
+        Http::assertSent(fn ($request) => ($request['action'] ?? '') === 'AddOrder'
+            && in_array('16', array_map('strval', (array) ($request['pid'] ?? [])), true));
     }
 }

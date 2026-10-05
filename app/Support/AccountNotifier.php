@@ -17,6 +17,15 @@ class AccountNotifier
             return;
         }
 
-        $user->notify($notification);
+        try {
+            // Queued notifications render later, outside this request's locale.
+            $notification->locale ??= app()->getLocale();
+            if (method_exists($notification, 'afterCommit')) {
+                $notification->afterCommit();
+            }
+            $user->notify($notification);
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
     }
 }

@@ -9,17 +9,17 @@ return [
 
     'terms' => [
         'meta_title' => 'AGB',
-        'meta_description' => 'Lesen Sie die Lemonwares AGB zu Hosting, Business-E-Mail, Web- und Mobile-Entwicklung, Abrechnung und Verantwortlichkeiten.',
+        'meta_description' => 'Lesen Sie die LemonWares AGB zu Hosting, Business-E-Mail, Web- und Mobile-Entwicklung, Abrechnung und Verantwortlichkeiten.',
         'title' => 'Allgemeine Geschäftsbedingungen',
-        'lede' => 'Die Bedingungen für die Nutzung der Lemonwares Hosting-, E-Mail-, Web- und Mobile-Entwicklungsdienste.',
+        'lede' => 'Die Bedingungen für die Nutzung der LemonWares Hosting-, E-Mail-, Web- und Mobile-Entwicklungsdienste.',
         'sections' => [
             [
                 'heading' => '1. Vereinbarung',
-                'body' => 'Durch die Nutzung der Lemonwares Hosting-, E-Mail-, Web- oder Mobile-Entwicklungsdienste stimmen Sie diesen AGB zu. Wenn Sie nicht einverstanden sind, nutzen Sie unsere Dienste bitte nicht.',
+                'body' => 'Durch die Nutzung der LemonWares Hosting-, E-Mail-, Web- oder Mobile-Entwicklungsdienste stimmen Sie diesen AGB zu. Wenn Sie nicht einverstanden sind, nutzen Sie unsere Dienste bitte nicht.',
             ],
             [
                 'heading' => '2. Leistungen',
-                'body' => 'Lemonwares Technology bietet Cloud Hosting, Business-E-Mail, domainbezogene Dienste, Webentwicklung und Mobile-App-Entwicklung. Konkrete Features und Limits hängen vom gewählten Plan oder Vertrag ab.',
+                'body' => 'LemonWares Technology bietet Cloud Hosting, Business-E-Mail, domainbezogene Dienste, Webentwicklung und Mobile-App-Entwicklung. Konkrete Features und Limits hängen vom gewählten Plan oder Vertrag ab.',
             ],
             [
                 'heading' => '3. Kontenverantwortung',
@@ -35,7 +35,7 @@ return [
             ],
             [
                 'heading' => '6. Haftungsbeschränkung',
-                'body' => 'Lemonwares haftet nicht für indirekte oder Folgeschäden aus der Nutzung. Unsere Haftung ist auf den für den betroffenen Leistungszeitraum gezahlten Betrag begrenzt, soweit gesetzlich zulässig.',
+                'body' => 'LemonWares haftet nicht für indirekte oder Folgeschäden aus der Nutzung. Unsere Haftung ist auf den für den betroffenen Leistungszeitraum gezahlten Betrag begrenzt, soweit gesetzlich zulässig.',
             ],
             [
                 'heading' => '7. Kontakt',
@@ -46,9 +46,9 @@ return [
 
     'privacy' => [
         'meta_title' => 'Datenschutz',
-        'meta_description' => 'Lesen Sie die Lemonwares Datenschutzerklärung, um zu verstehen, wie wir Kunden- und Besucherdaten erheben, nutzen und schützen.',
+        'meta_description' => 'Lesen Sie die LemonWares Datenschutzerklärung, um zu verstehen, wie wir Kunden- und Besucherdaten erheben, nutzen und schützen.',
         'title' => 'Datenschutzerklärung',
-        'lede' => 'Wie Lemonwares Ihre Informationen erhebt, nutzt und schützt.',
+        'lede' => 'Wie LemonWares Ihre Informationen erhebt, nutzt und schützt.',
         'sections' => [
             [
                 'heading' => '1. Welche Daten wir erheben',
@@ -83,9 +83,9 @@ return [
 
     'refund' => [
         'meta_title' => 'Rückerstattungsrichtlinie',
-        'meta_description' => 'Lesen Sie die Lemonwares Rückerstattungsrichtlinie für Hosting-Pläne und Service-Engagements inkl. Fristen und Bedingungen.',
+        'meta_description' => 'Lesen Sie die LemonWares Rückerstattungsrichtlinie für Hosting-Pläne und Service-Engagements inkl. Fristen und Bedingungen.',
         'title' => 'Rückerstattungsrichtlinie',
-        'lede' => 'So funktionieren Rückerstattungen für Lemonwares Hosting- und Service-Pläne.',
+        'lede' => 'So funktionieren Rückerstattungen für LemonWares Hosting- und Service-Pläne.',
         'sections' => [
             [
                 'heading' => '1. Hosting-Pläne',
@@ -112,13 +112,13 @@ return [
 
     'usage' => [
         'meta_title' => 'Nutzungsbedingungen',
-        'meta_description' => 'Lesen Sie die Lemonwares Nutzungsbedingungen und Acceptable-Use-Richtlinien für Hosting, E-Mail und digitale Infrastruktur.',
+        'meta_description' => 'Lesen Sie die LemonWares Nutzungsbedingungen und Acceptable-Use-Richtlinien für Hosting, E-Mail und digitale Infrastruktur.',
         'title' => 'Nutzungsbedingungen',
-        'lede' => 'Richtlinien für die zulässige Nutzung der Lemonwares Plattformen und Dienste.',
+        'lede' => 'Richtlinien für die zulässige Nutzung der LemonWares Plattformen und Dienste.',
         'sections' => [
             [
                 'heading' => '1. Zweck',
-                'body' => 'Diese Nutzungsbedingungen definieren zulässiges Verhalten bei der Nutzung von Lemonwares Hosting, E-Mail und zugehöriger Infrastruktur. Sie ergänzen unsere AGB.',
+                'body' => 'Diese Nutzungsbedingungen definieren zulässiges Verhalten bei der Nutzung von LemonWares Hosting, E-Mail und zugehöriger Infrastruktur. Sie ergänzen unsere AGB.',
             ],
             [
                 'heading' => '2. Verbotene Aktivitäten',

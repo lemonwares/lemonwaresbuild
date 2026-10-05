@@ -4,6 +4,7 @@ namespace App\Support;
 
 use App\Models\HostingLead;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class WhmcsLeadSync
 {
@@ -45,17 +46,15 @@ class WhmcsLeadSync
             'country' => strtoupper((string) ($lead->billing_country ?? '')),
         ];
 
+        // Existing clients are never updated from order details: the order form is public, so an
+        // email match alone must not let anyone rewrite another customer's WHMCS record.
         if ($clientId < 1) {
             $created = WhmcsClient::createClient(array_merge($clientPayload, [
-                'password2' => 'LW-' . $lead->id . '-Temp#' . random_int(1000, 9999),
+                'password2' => Str::password(32),
                 'skipvalidation' => true,
             ]));
 
             $clientId = (int) data_get($created, 'clientid', 0);
-        } else {
-            WhmcsClient::updateClient(array_merge($clientPayload, [
-                'clientid' => $clientId,
-            ]));
         }
 
         if ($clientId < 1) {
@@ -75,18 +74,22 @@ class WhmcsLeadSync
         $orderPayload = [
             'clientid' => $clientId,
             'pid' => [$pid],
-            'billingcycle' => [$lead->billing_cycle ?: 'monthly'],
+            'billingcycle' => [self::whmcsCycle((string) $lead->billing_cycle)],
             'paymentmethod' => $paymentMethod,
             'noinvoice' => false,
             'noemail' => true,
         ];
 
         $domain = filled($lead->hostname) ? (string) $lead->hostname : null;
-        $domainOption = 'register';
+        $domainOption = (string) ($lead->domain_option ?? '');
 
-        if ($lead->checkout_url) {
+        if ($domainOption === '' && $lead->checkout_url) {
             parse_str((string) parse_url((string) $lead->checkout_url, PHP_URL_QUERY), $checkoutQuery);
-            $domainOption = (string) ($checkoutQuery['domainoption'] ?? $domainOption);
+            $domainOption = (string) ($checkoutQuery['domainoption'] ?? '');
+        }
+
+        if ($domainOption === '') {
+            $domainOption = 'owndomain';
         }
 
         if ($domain) {
@@ -142,18 +145,17 @@ class WhmcsLeadSync
         $transactionId = trim((string) ($lead->flutterwave_transaction_id ?: $lead->payment_reference ?: ''));
 
         if ($invoiceId > 0 && $transactionId !== '') {
-            $invoicePaid = WhmcsClient::addInvoicePayment(
-                $invoiceId,
-                (float) ($lead->amount_ngn ?? 0),
-                $transactionId,
-            );
+            $outstanding = WhmcsClient::invoiceOutstanding($invoiceId);
+            if ($outstanding === null) {
+                return self::mark($lead, 'failed', WhmcsClient::lastError() ?: 'Could not read the WHMCS invoice balance.');
+            }
 
-            if (! $invoicePaid) {
+            if ($outstanding > 0 && ! WhmcsClient::addInvoicePayment($invoiceId, $outstanding, $transactionId)) {
                 return self::mark($lead, 'failed', WhmcsClient::lastError() ?: 'WHMCS invoice payment recording failed.');
             }
         }
 
-        $accepted = WhmcsClient::acceptOrder($orderId);
+        $accepted = WhmcsClient::acceptOrder($orderId, autoSetup: true);
 
         if (! $accepted) {
             return self::mark($lead, 'failed', 'WHMCS order acceptance failed after payment.');
@@ -177,6 +179,18 @@ class WhmcsLeadSync
         }
 
         return $lead;
+    }
+
+    /**
+     * Maps a storefront billing cycle key to the WHMCS cycle name.
+     */
+    public static function whmcsCycle(string $cycle): string
+    {
+        $mapped = (string) (HostingPricing::cycle($cycle)['whmcs'] ?? '');
+
+        return in_array($mapped, ['monthly', 'quarterly', 'semiannually', 'annually', 'biennially', 'triennially'], true)
+            ? $mapped
+            : 'monthly';
     }
 
     protected static function mark(HostingLead $lead, string $status, string $error): HostingLead

@@ -91,6 +91,14 @@ return [
             'featured' => false,
         ],
         [
+            'key' => 'titan_business',
+            'provider' => 'titan',
+            'fulfilment_mode' => 'manual',
+            'mailboxes' => 1,
+            'monthly_usd' => 3.00,
+            'featured' => false,
+        ],
+        [
             'key' => 'google_workspace_business_starter',
             'provider' => 'google_workspace',
             'fulfilment_mode' => 'manual',

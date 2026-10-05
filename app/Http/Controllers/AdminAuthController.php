@@ -36,19 +36,24 @@ class AdminAuthController extends Controller
             ->first();
 
         if (! $admin || ! Hash::check($credentials['password'], $admin->password)) {
+            \App\Support\AdminAudit::record('login_failed', $admin, $request, ['email' => strtolower($credentials['email'])]);
+
             return back()
                 ->withErrors(['email' => 'Invalid admin credentials.'])
                 ->onlyInput('email');
         }
 
+        $request->session()->regenerate();
         $request->session()->put('admin_authenticated', true);
         $request->session()->put('admin_user_id', $admin->id);
+        \App\Support\AdminAudit::record('login', $admin, $request);
 
         return redirect()->to($this->landingUrlFor($admin));
     }
 
     public function logout(Request $request): RedirectResponse
     {
+        \App\Support\AdminAudit::record('logout', \App\Support\AdminPermissions::currentUser(), $request);
         $request->session()->forget(['admin_authenticated', 'admin_user_id']);
         $request->session()->invalidate();
         $request->session()->regenerateToken();

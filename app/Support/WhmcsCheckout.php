@@ -58,8 +58,31 @@ class WhmcsCheckout
         return $redirectUrl !== '' ? $redirectUrl : WhmcsSettings::clientLoginUrl();
     }
 
+    public static function serviceManageUrl(int $clientId, int $serviceId): ?string
+    {
+        return WhmcsClient::createServiceSsoUrl($clientId, $serviceId)
+            ?: self::clientAreaUrl($clientId);
+    }
+
     public static function passwordResetUrl(): string
     {
         return rtrim(WhmcsSettings::baseUrl(), '/') . '/index.php?rp=/password/reset/begin';
+    }
+
+    public static function websiteUrl(?string $domain): ?string
+    {
+        $domain = strtolower(trim((string) $domain));
+        if ($domain === '') {
+            return null;
+        }
+
+        $domain = preg_replace('#^https?://#i', '', $domain) ?: $domain;
+        $domain = rtrim($domain, '/');
+
+        if ($domain === '' || ! str_contains($domain, '.')) {
+            return null;
+        }
+
+        return 'https://'.$domain;
     }
 }

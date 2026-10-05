@@ -92,6 +92,11 @@ class Cart
             return ['ok' => false, 'message' => __('cart.full', ['max' => self::MAX_ITEMS])];
         }
 
+        $check = WhmcsDomainCheck::validate($normalized, $option);
+        if (! ($check['ok'] ?? false) && in_array($check['status'] ?? '', ['available', 'unavailable'], true)) {
+            return ['ok' => false, 'message' => __($option === 'register' ? 'cart.domain_taken' : 'cart.domain_not_registered', ['domain' => $normalized])];
+        }
+
         $quote = WhmcsDomainPricing::quote($normalized, $option, $regPeriod);
         if (! ($quote['ok'] ?? false) || (float) ($quote['amount_ngn'] ?? 0) <= 0) {
             return [
@@ -230,7 +235,7 @@ class Cart
             );
         }
 
-        $amountNgn = HostingPricing::periodTotalNgn($monthlyNgn, $billingCycle);
+        $amountNgn = HostingPricing::periodNgnForSpec($planSlug, $specKey, $billingCycle);
         $rate = max(1.0, HostingPricing::usdToNgnRate());
         $amountUsd = round($amountNgn / $rate, 2);
         $checkoutProvider = (string) ($plan['checkout_provider'] ?? 'whmcs');
@@ -514,7 +519,7 @@ class Cart
                 }
 
                 $cycle = (string) ($item['billing_cycle'] ?? 'monthly');
-                $amountNgn = HostingPricing::periodTotalNgn($monthlyNgn, $cycle);
+                $amountNgn = HostingPricing::periodNgnForSpec((string) $item['plan_slug'], (string) $item['spec_key'], $cycle);
                 $rate = max(1.0, HostingPricing::usdToNgnRate());
                 $amountUsd = round($amountNgn / $rate, 2);
 

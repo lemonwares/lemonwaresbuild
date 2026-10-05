@@ -10,6 +10,8 @@ use App\Support\WhmcsSyncService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -18,6 +20,7 @@ class AdminCustomerController extends Controller
     public function index(Request $request): View
     {
         $search = trim((string) $request->query('q', ''));
+        $tag = strtolower(trim((string) $request->query('tag', '')));
         $source = strtolower((string) $request->query('source', 'native'));
         if (! in_array($source, ['native', 'legacy'], true)) {
             $source = 'native';
@@ -47,6 +50,7 @@ class AdminCustomerController extends Controller
                             ->orWhere('company', 'like', '%' . $search . '%');
                     });
                 })
+                ->when($tag !== '', fn ($query) => $query->where('admin_tags', 'like', '%"'.$tag.'"%'))
                 ->latest()
                 ->paginate(20)
                 ->withQueryString();
@@ -61,6 +65,7 @@ class AdminCustomerController extends Controller
         return view('admin.customers.index', compact(
             'customers',
             'search',
+            'tag',
             'source',
             'nativeCount',
             'legacyCount',
@@ -79,7 +84,8 @@ class AdminCustomerController extends Controller
             $serviceStatus = 'all';
         }
 
-        $customer->load(['emailOrders.mailboxes', 'contacts', 'whmcsCustomer']);
+        $customer->load(['emailOrders.mailboxes', 'contacts', 'whmcsCustomer', 'accountStaffMembers', 'accountInvites']);
+        $activities = \App\Models\AccountActivity::query()->where('user_id', $customer->id)->latest()->limit(15)->get();
         $hostingLeads = $customer->hostingLeads;
         $whmcsServiceSummary = $customer->whmcsServices()
             ->reorder()
@@ -98,6 +104,7 @@ class AdminCustomerController extends Controller
 
         return view('admin.customers.show', compact(
             'customer',
+            'activities',
             'hostingLeads',
             'whmcsServices',
             'serviceStatus',
@@ -172,7 +179,7 @@ class AdminCustomerController extends Controller
                     return redirect()
                         ->route('admin.customers.show', $customer)
                         ->withErrors([
-                            'delete' => 'WHMCS would not close this client ('.(WhmcsClient::lastError() ?: 'unknown error').'). Local account was not deleted.',
+                            'delete' => 'WHMCS would not close this client ('.(WhmcsClient::lastError() ?: 'unknown error').'). Local account was not closed.',
                         ]);
                 }
                 $whmcsNote = ' WHMCS client #'.$clientId.' closed.';
@@ -181,6 +188,7 @@ class AdminCustomerController extends Controller
             }
         }
 
+        // Orders, invoices and payments stay for the financial record; only personal data is scrubbed.
         DB::transaction(function () use ($customer): void {
             if ($customer->whmcsCustomer) {
                 WhmcsService::query()
@@ -191,12 +199,29 @@ class AdminCustomerController extends Controller
             }
 
             $customer->contacts()->delete();
-            $customer->delete();
+            DB::table('sessions')->where('user_id', $customer->id)->delete();
+
+            $blank = array_fill_keys([
+                'phone', 'company', 'job_title', 'trading_name', 'website', 'industry', 'tax_id',
+                'registration_number', 'billing_address_line_1', 'billing_address_line_2',
+                'billing_city', 'billing_state', 'billing_postcode', 'billing_country',
+            ], null);
+
+            $customer->forceFill($blank + [
+                'name' => 'Closed customer #'.$customer->id,
+                'email' => 'closed-'.$customer->id.'-'.Str::lower(Str::random(8)).'@closed.invalid',
+                'password' => Hash::make(Str::random(64)),
+                'remember_token' => null,
+                'notify_in_app' => false,
+                'notify_email' => false,
+                'suspended_at' => $customer->suspended_at ?? now(),
+                'suspended_reason' => 'Account closed and anonymised by admin.',
+            ])->save();
         });
 
         return redirect()
             ->route('admin.customers.index', ['source' => 'native'])
-            ->with('status', 'Customer deleted.'.$whmcsNote);
+            ->with('status', 'Customer closed and anonymised. Their orders and invoices are kept for the records.'.$whmcsNote);
     }
 
     public function showLegacy(Request $request, WhmcsCustomer $legacyCustomer): View
@@ -280,7 +305,7 @@ class AdminCustomerController extends Controller
             }
         } else {
             $created = WhmcsClient::createClient(array_merge($payload, [
-                'password2' => 'LW-'.strtoupper(substr(md5((string) $customer->id.microtime()), 0, 10)).'#'.random_int(100, 999),
+                'password2' => Str::password(32),
                 'skipvalidation' => true,
             ]));
             $clientId = (int) data_get($created, 'clientid', 0);

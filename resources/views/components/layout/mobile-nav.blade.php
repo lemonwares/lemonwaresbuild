@@ -1,7 +1,8 @@
 @php
     $businessActive = request()->routeIs('email.*', 'google-workspace', 'microsoft-365');
-    $cloudActive = request()->routeIs('domain', 'cloud-hosting', 'plesk', 'vps', 'hosting.*');
+    $cloudActive = request()->routeIs('domain', 'cloud-hosting', 'vps', 'hosting.*');
     $developmentActive = request()->routeIs('development', 'web-development', 'mobile-apps', 'maintenance', 'microservices');
+    $projectsActive = request()->routeIs('case-studies', 'case-studies.*');
     $supportActive = request()->routeIs('support');
 
     $businessPartners = [
@@ -20,12 +21,6 @@
     ];
 
     $cloudPartners = [
-        [
-            'label' => __('site.nav.plesk'),
-            'desc' => __('site.nav.plesk_desc'),
-            'href' => route('plesk'),
-            'logo' => 'images/brands/cloud-hosting.svg',
-        ],
         [
             'label' => __('site.nav.vps'),
             'desc' => __('site.nav.vps_desc'),
@@ -61,7 +56,7 @@
             'featuredDesc' => __('site.nav.cloud_hosting_desc'),
             'featuredCta' => __('site.nav.cloud_cta'),
             'featuredHref' => route('cloud-hosting'),
-            'featuredLogo' => 'images/brands/cloud-hosting.svg',
+            'featuredLogo' => null,
             'partnersLabel' => __('site.nav.cloud_partners_label'),
             'partners' => $cloudPartners,
             'active' => $cloudActive,
@@ -79,6 +74,11 @@
             'label' => __('site.nav.development'),
             'href' => route('development'),
             'active' => $developmentActive,
+        ],
+        [
+            'label' => __('site.nav.projects'),
+            'href' => route('case-studies'),
+            'active' => $projectsActive,
         ],
         [
             'label' => __('site.nav.blog'),
@@ -116,11 +116,6 @@
             'label' => __('site.nav.faq'),
             'href' => route('faq'),
             'active' => request()->routeIs('faq'),
-        ],
-        [
-            'label' => __('site.nav.work'),
-            'href' => route('case-studies'),
-            'active' => request()->routeIs('case-studies'),
         ],
         [
             'label' => __('site.nav.team'),
@@ -194,13 +189,15 @@
                 <div id="mobile-nav-{{ $section['key'] }}-menu" class="mobile-nav-mega-menu" data-nav-mega-menu hidden>
                     <div class="mobile-nav-mega-featured">
                         @if (! empty($section['featuredLogo']))
-                            <img
-                                src="{{ asset($section['featuredLogo']) }}"
-                                alt=""
-                                width="140"
-                                height="32"
-                                class="mb-2 h-7 w-auto max-w-[9rem] object-contain object-left"
-                            >
+                            <span class="nav-mega-left-logo mb-1" aria-hidden="true">
+                                <img
+                                    src="{{ asset($section['featuredLogo']) }}"
+                                    alt=""
+                                    width="140"
+                                    height="32"
+                                    class="nav-mega-left-logo-img"
+                                >
+                            </span>
                         @endif
                         @if (($section['featuredLogo'] ?? '') !== 'images/brands/mailemon-logo.png')
                             <span class="mobile-nav-mega-featured-title">{{ $section['featuredTitle'] }}</span>

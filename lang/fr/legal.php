@@ -9,17 +9,17 @@ return [
 
     'terms' => [
         'meta_title' => 'Conditions générales',
-        'meta_description' => 'Lisez les conditions générales Lemonwares concernant l’hébergement, l’email pro, le développement web et mobile, la facturation et les responsabilités.',
+        'meta_description' => 'Lisez les conditions générales LemonWares concernant l’hébergement, l’email pro, le développement web et mobile, la facturation et les responsabilités.',
         'title' => 'Conditions générales',
-        'lede' => 'Les conditions qui régissent l’utilisation des services Lemonwares d’hébergement, d’email, de web et de développement mobile.',
+        'lede' => 'Les conditions qui régissent l’utilisation des services LemonWares d’hébergement, d’email, de web et de développement mobile.',
         'sections' => [
             [
                 'heading' => '1. Accord',
-                'body' => 'En utilisant les services Lemonwares d’hébergement, d’email, de web ou de développement mobile, vous acceptez ces conditions générales. Si vous n’êtes pas d’accord, veuillez ne pas utiliser nos services.',
+                'body' => 'En utilisant les services LemonWares d’hébergement, d’email, de web ou de développement mobile, vous acceptez ces conditions générales. Si vous n’êtes pas d’accord, veuillez ne pas utiliser nos services.',
             ],
             [
                 'heading' => '2. Services',
-                'body' => 'Lemonwares Technology fournit de l’hébergement cloud, de l’email professionnel, des services liés aux domaines, du développement web et d’applications mobiles. Les fonctionnalités et limites dépendent du plan ou de l’accord choisi.',
+                'body' => 'LemonWares Technology fournit de l’hébergement cloud, de l’email professionnel, des services liés aux domaines, du développement web et d’applications mobiles. Les fonctionnalités et limites dépendent du plan ou de l’accord choisi.',
             ],
             [
                 'heading' => '3. Responsabilités du compte',
@@ -35,7 +35,7 @@ return [
             ],
             [
                 'heading' => '6. Limitation de responsabilité',
-                'body' => 'Lemonwares n’est pas responsable des dommages indirects ou consécutifs liés à l’usage du service. Notre responsabilité est limitée au montant payé pour la période de service concernée, sauf interdiction légale.',
+                'body' => 'LemonWares n’est pas responsable des dommages indirects ou consécutifs liés à l’usage du service. Notre responsabilité est limitée au montant payé pour la période de service concernée, sauf interdiction légale.',
             ],
             [
                 'heading' => '7. Contact',
@@ -46,9 +46,9 @@ return [
 
     'privacy' => [
         'meta_title' => 'Politique de confidentialité',
-        'meta_description' => 'Lisez la politique de confidentialité Lemonwares pour comprendre comment nous collectons, utilisons, protégeons et gérons les informations clients et visiteurs.',
+        'meta_description' => 'Lisez la politique de confidentialité LemonWares pour comprendre comment nous collectons, utilisons, protégeons et gérons les informations clients et visiteurs.',
         'title' => 'Politique de confidentialité',
-        'lede' => 'Comment Lemonwares collecte, utilise et protège vos informations.',
+        'lede' => 'Comment LemonWares collecte, utilise et protège vos informations.',
         'sections' => [
             [
                 'heading' => '1. Informations collectées',
@@ -83,9 +83,9 @@ return [
 
     'refund' => [
         'meta_title' => 'Politique de remboursement',
-        'meta_description' => 'Consultez la politique de remboursement Lemonwares pour les plans d’hébergement et engagements de service, y compris les fenêtres d’éligibilité.',
+        'meta_description' => 'Consultez la politique de remboursement LemonWares pour les plans d’hébergement et engagements de service, y compris les fenêtres d’éligibilité.',
         'title' => 'Politique de remboursement',
-        'lede' => 'Comment fonctionnent les remboursements pour les plans d’hébergement et de services Lemonwares.',
+        'lede' => 'Comment fonctionnent les remboursements pour les plans d’hébergement et de services LemonWares.',
         'sections' => [
             [
                 'heading' => '1. Plans d’hébergement',
@@ -112,13 +112,13 @@ return [
 
     'usage' => [
         'meta_title' => 'Conditions d’utilisation',
-        'meta_description' => 'Lisez les conditions d’utilisation Lemonwares et les règles d’usage acceptable pour l’hébergement, l’email et l’infrastructure digitale.',
+        'meta_description' => 'Lisez les conditions d’utilisation LemonWares et les règles d’usage acceptable pour l’hébergement, l’email et l’infrastructure digitale.',
         'title' => 'Conditions d’utilisation',
-        'lede' => 'Règles d’usage acceptable des plateformes et services Lemonwares.',
+        'lede' => 'Règles d’usage acceptable des plateformes et services LemonWares.',
         'sections' => [
             [
                 'heading' => '1. Objectif',
-                'body' => 'Ces conditions d’utilisation définissent le comportement acceptable lors de l’usage de l’hébergement, de l’email et de l’infrastructure Lemonwares. Elles complètent nos conditions générales.',
+                'body' => 'Ces conditions d’utilisation définissent le comportement acceptable lors de l’usage de l’hébergement, de l’email et de l’infrastructure LemonWares. Elles complètent nos conditions générales.',
             ],
             [
                 'heading' => '2. Activités interdites',

@@ -1,6 +1,6 @@
 /**
  * In-page live product preview for case studies (iframe overlay).
- * Close returns the visitor to the same scroll position on the Lemonwares page.
+ * Close returns the visitor to the same scroll position on the LemonWares page.
  */
 document.querySelectorAll('[data-case-live-preview]').forEach((root) => {
     const openBtns = root.querySelectorAll('[data-case-live-open]');

@@ -17,9 +17,18 @@
     >
         <x-slot:actions>
             <div class="admin-customers-toolbar">
+                @if ($lead->user && $lead->user->isCustomer())
+                    <a href="{{ route('admin.customers.show', $lead->user) }}" class="admin-btn-ghost">Customer profile</a>
+                @endif
+                <a href="{{ route('admin.hosting-leads.edit', $lead) }}" class="admin-btn-primary">Edit</a>
+                <form method="POST" action="{{ route('admin.hosting-leads.destroy', $lead) }}" onsubmit="return confirm('Delete this hosting request permanently? WHMCS and Hetzner are not touched.');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="admin-btn-danger">Delete</button>
+                </form>
                 <form method="POST" action="{{ route('admin.hosting-leads.retry-whmcs-sync', $lead) }}" data-submit-form>
                     @csrf
-                    <button type="submit" class="admin-btn-primary inline-flex items-center gap-2" data-submit-button>
+                    <button type="submit" class="admin-btn-ghost inline-flex items-center gap-2" data-submit-button>
                         <span class="admin-btn-spinner hidden" data-submit-spinner></span>
                         <span data-submit-label>Retry WHMCS Sync</span>
                         <span class="hidden" data-submit-loading>Syncing…</span>
@@ -29,10 +38,8 @@
         </x-slot:actions>
     </x-admin.page-header>
 
-    @if (session('status'))
-        <p class="mb-5 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-            {{ session('status') }}
-        </p>
+    @if ($errors->has('vps'))
+        <p class="mb-5 rounded-xl border border-rose/20 bg-rose/5 px-4 py-3 text-sm text-rose">{{ $errors->first('vps') }}</p>
     @endif
 
     <div class="admin-page-stack">
@@ -44,7 +51,7 @@
             </div>
             <div class="admin-metric is-static">
                 <span class="admin-metric-label">Amount</span>
-                <span class="admin-metric-value admin-metric-value-sm">{{ \App\Support\HostingPricing::dualPriceDisplay((float) ($lead->amount_usd ?? 0)) }}</span>
+                <span class="admin-metric-value admin-metric-value-sm">{{ \App\Support\HostingPricing::formatMoney((float) ($lead->amount_ngn ?? 0)) }} · {{ \App\Support\HostingPricing::formatMoney((float) ($lead->amount_usd ?? 0), 'USD') }}</span>
                 <span class="admin-metric-meta">{{ $lead->billing_cycle ?: 'No cycle' }}</span>
             </div>
             <div class="admin-metric is-static">
@@ -93,7 +100,7 @@
                 <dl class="admin-dl">
                     <div><dt>Plan</dt><dd>{{ $lead->plan_name }}{{ $lead->spec_label ? ' · '.$lead->spec_label : '' }}</dd></div>
                     <div><dt>Billing cycle</dt><dd>{{ $lead->billing_cycle ?: '—' }}</dd></div>
-                    <div><dt>Amount</dt><dd>{{ \App\Support\HostingPricing::dualPriceDisplay((float) ($lead->amount_usd ?? 0)) }}</dd></div>
+                    <div><dt>Amount</dt><dd>{{ \App\Support\HostingPricing::formatMoney((float) ($lead->amount_ngn ?? 0)) }} · {{ \App\Support\HostingPricing::formatMoney((float) ($lead->amount_usd ?? 0), 'USD') }}</dd></div>
                     <div><dt>Status</dt><dd>{{ str_replace('_', ' ', $lead->status ?: 'pending') }} / {{ $lead->payment_status ?: '—' }}</dd></div>
                     <div><dt>WHMCS client ID</dt><dd>{{ $lead->whmcs_client_id ?: '—' }}</dd></div>
                     <div><dt>WHMCS order ID</dt><dd>{{ $lead->whmcs_order_id ?: '—' }}</dd></div>
@@ -103,6 +110,45 @@
                 </dl>
                 @if ($lead->whmcs_sync_error)
                     <p class="mt-4 rounded-xl border border-rose/20 bg-rose/5 px-4 py-3 text-sm text-rose">{{ $lead->whmcs_sync_error }}</p>
+                @endif
+            </section>
+        </div>
+
+        @include('admin.hosting-leads.partials.vps-panel')
+
+        <div class="admin-customer-grid">
+            <section class="admin-panel">
+                <div class="admin-panel-toolbar compact"><h2 class="admin-dash-panel-title">Assignment &amp; internal notes</h2></div>
+                <form method="POST" action="{{ route('admin.hosting-leads.notes', $lead) }}" class="space-y-3" data-submit-form>
+                    @csrf
+                    @method('PUT')
+                    <label class="admin-field">
+                        <span>Assigned to</span>
+                        <select name="assigned_admin_id" class="admin-input">
+                            <option value="">Nobody</option>
+                            @foreach ($admins as $adminOption)
+                                <option value="{{ $adminOption->id }}" @selected((int) $lead->assigned_admin_id === (int) $adminOption->id)>{{ $adminOption->name }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <textarea name="admin_notes" rows="4" class="admin-input w-full" placeholder="Only admins can see this.">{{ old('admin_notes', $lead->admin_notes) }}</textarea>
+                    <button type="submit" class="admin-btn-ghost">Save</button>
+                </form>
+            </section>
+
+            <section class="admin-panel">
+                <div class="admin-panel-toolbar compact"><h2 class="admin-dash-panel-title">Admin history</h2></div>
+                @if ($events->isEmpty())
+                    <p class="admin-table-empty">No admin actions yet.</p>
+                @else
+                    <ul class="space-y-3 text-sm">
+                        @foreach ($events as $event)
+                            <li>
+                                <p><strong>{{ $event->summary }}</strong></p>
+                                <p class="text-on-blush/60">{{ $event->created_at?->format('d M Y H:i') }} · {{ $event->admin?->name ?: 'System' }}</p>
+                            </li>
+                        @endforeach
+                    </ul>
                 @endif
             </section>
         </div>

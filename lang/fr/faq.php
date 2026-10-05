@@ -2,7 +2,7 @@
 
 return [
     'meta_title' => 'FAQ',
-    'meta_description' => 'Réponses aux questions fréquentes sur l’hébergement Lemonwares, l’email pro, le développement web et mobile, la facturation et le support.',
+    'meta_description' => 'Réponses aux questions fréquentes sur l’hébergement LemonWares, l’email pro, le développement web et mobile, la facturation et le support.',
     'eyebrow' => 'Centre d’aide',
     'title' => 'Questions fréquentes',
     'lede' => 'Des réponses rapides sur l’hébergement, l’email, le développement, la facturation et notre support.',
@@ -18,7 +18,7 @@ return [
     'items' => [
         [
             'question' => 'Qu’est-ce que Mailemon ?',
-            'answer' => 'Mailemon est l’email professionnel Lemonwares sur votre domaine — commandez en ligne, payez en sécurité, et nous créons des boîtes de marque avec webmail, Outlook et apps mobiles.',
+            'answer' => 'Mailemon est l’email professionnel LemonWares sur votre domaine — commandez en ligne, payez en sécurité, et nous créons des boîtes de marque avec webmail, Outlook et apps mobiles.',
             'href' => 'email.plans',
             'cta' => 'Voir les offres Mailemon',
         ],
@@ -34,7 +34,7 @@ return [
         ],
         [
             'question' => 'Quelles offres d’hébergement proposez-vous ?',
-            'answer' => 'Nous proposons de l’hébergement cloud cPanel et Plesk pour les sites du quotidien, plus des VPS root quand vous avez besoin de plus de puissance et de contrôle.',
+            'answer' => 'Nous proposons de l’hébergement cloud cPanel pour les sites du quotidien, plus des VPS root quand vous avez besoin de plus de puissance et de contrôle.',
         ],
         [
             'question' => 'Construisez-vous des sites WordPress et des apps sur mesure ?',

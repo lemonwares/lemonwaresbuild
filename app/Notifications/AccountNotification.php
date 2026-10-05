@@ -3,11 +3,15 @@
 namespace App\Notifications;
 
 use App\Models\User;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-abstract class AccountNotification extends Notification
+abstract class AccountNotification extends Notification implements ShouldQueue
 {
+    use Queueable;
+
     /**
      * @return list<string>
      */
@@ -34,7 +38,7 @@ abstract class AccountNotification extends Notification
     {
         $payload = $this->payload();
 
-        return \App\Support\LemonwaresMail::message()
+        return \App\Support\LemonWaresMail::message()
             ->subject($payload['title'])
             ->markdown('mail.account-notification', [
                 'title' => $payload['title'],

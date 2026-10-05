@@ -30,14 +30,14 @@ class AdminFlutterwaveSettingsController extends Controller
         $validated = $request->validate([
             'enabled' => ['nullable', 'boolean'],
             'public_key' => ['nullable', 'string', 'max:255'],
-            'secret_key' => ['required', 'string', 'max:255'],
+            'secret_key' => ['nullable', 'string', 'max:255'],
             'secret_hash' => ['nullable', 'string', 'max:255'],
         ]);
 
         IntegrationSetting::putMany([
             'flutterwave.enabled' => ! empty($validated['enabled']) ? '1' : '0',
             'flutterwave.public_key' => trim((string) ($validated['public_key'] ?? '')),
-            'flutterwave.secret_key' => trim((string) $validated['secret_key']),
+            'flutterwave.secret_key' => trim((string) ($validated['secret_key'] ?? '')),
             'flutterwave.secret_hash' => trim((string) ($validated['secret_hash'] ?? '')),
         ]);
 

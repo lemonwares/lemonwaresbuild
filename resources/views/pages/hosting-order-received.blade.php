@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', __('hosting.order_received_title') . ' — ' . config('site.short_name'))
-@section('meta_description', $lead->isShared() ? __('hosting.whmcs_notice') : 'Your Lemonwares VPS order request was received.')
+@section('meta_description', $lead->isShared() ? __('hosting.whmcs_notice') : 'Your LemonWares VPS order request was received.')
 @section('focus_flow', '1')
 
 @section('content')
@@ -177,7 +177,7 @@
                         </a>
                     @endif
                 @elseif ($lead->isAwaitingPayment())
-                    <form method="POST" action="{{ route('hosting.flutterwave.pay', $lead) }}">
+                    <form method="POST" action="{{ \App\Support\OrderLinks::url('hosting.flutterwave.pay', $lead) }}">
                         @csrf
                         <button type="submit" class="inline-flex rounded-2xl bg-rose px-5 py-3 text-sm font-bold text-white">
                             {{ __('email.pay_with_flutterwave') }}

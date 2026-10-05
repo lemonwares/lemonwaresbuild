@@ -9,17 +9,17 @@ return [
 
     'terms' => [
         'meta_title' => 'Terms & Conditions',
-        'meta_description' => 'Read Lemonwares Terms & Conditions covering hosting, business email, web development, mobile development, billing, and service responsibilities.',
+        'meta_description' => 'Read LemonWares Terms & Conditions covering hosting, business email, web development, mobile development, billing, and service responsibilities.',
         'title' => 'Terms & Conditions',
-        'lede' => 'The terms that govern your use of Lemonwares hosting, email, web, and mobile development services.',
+        'lede' => 'The terms that govern your use of LemonWares hosting, email, web, and mobile development services.',
         'sections' => [
             [
                 'heading' => '1. Agreement',
-                'body' => 'By using Lemonwares hosting, email, web, or mobile development services, you agree to these Terms & Conditions. If you do not agree, please do not use our services.',
+                'body' => 'By using LemonWares hosting, email, web, or mobile development services, you agree to these Terms & Conditions. If you do not agree, please do not use our services.',
             ],
             [
                 'heading' => '2. Services',
-                'body' => 'Lemonwares Technology provides cloud hosting, business email, domain-related services, web development, and mobile app development. Specific features and limits depend on the plan or agreement you select.',
+                'body' => 'LemonWares Technology provides cloud hosting, business email, domain-related services, web development, and mobile app development. Specific features and limits depend on the plan or agreement you select.',
             ],
             [
                 'heading' => '3. Account Responsibilities',
@@ -35,7 +35,7 @@ return [
             ],
             [
                 'heading' => '6. Limitation of Liability',
-                'body' => 'Lemonwares is not liable for indirect or consequential damages arising from service use. Our liability is limited to the amount paid for the affected service period, except where prohibited by law.',
+                'body' => 'LemonWares is not liable for indirect or consequential damages arising from service use. Our liability is limited to the amount paid for the affected service period, except where prohibited by law.',
             ],
             [
                 'heading' => '7. Contact',
@@ -46,9 +46,9 @@ return [
 
     'privacy' => [
         'meta_title' => 'Privacy Policy',
-        'meta_description' => 'Read Lemonwares Privacy Policy to understand how we collect, use, protect, and manage customer and visitor information.',
+        'meta_description' => 'Read LemonWares Privacy Policy to understand how we collect, use, protect, and manage customer and visitor information.',
         'title' => 'Privacy Policy',
-        'lede' => 'How Lemonwares collects, uses, and protects your information.',
+        'lede' => 'How LemonWares collects, uses, and protects your information.',
         'sections' => [
             [
                 'heading' => '1. Information We Collect',
@@ -83,9 +83,9 @@ return [
 
     'refund' => [
         'meta_title' => 'Refund Policy',
-        'meta_description' => 'Review Lemonwares Refund Policy for hosting plans and service engagements, including eligibility windows and refund conditions.',
+        'meta_description' => 'Review LemonWares Refund Policy for hosting plans and service engagements, including eligibility windows and refund conditions.',
         'title' => 'Refund Policy',
-        'lede' => 'How refunds work for Lemonwares hosting and service plans.',
+        'lede' => 'How refunds work for LemonWares hosting and service plans.',
         'sections' => [
             [
                 'heading' => '1. Hosting Plans',
@@ -112,13 +112,13 @@ return [
 
     'usage' => [
         'meta_title' => 'Usage Terms',
-        'meta_description' => 'Read Lemonwares Usage Terms and acceptable use guidelines for hosting, email, and digital infrastructure services.',
+        'meta_description' => 'Read LemonWares Usage Terms and acceptable use guidelines for hosting, email, and digital infrastructure services.',
         'title' => 'Usage Terms',
-        'lede' => 'Guidelines for acceptable use of Lemonwares platforms and services.',
+        'lede' => 'Guidelines for acceptable use of LemonWares platforms and services.',
         'sections' => [
             [
                 'heading' => '1. Purpose',
-                'body' => 'These Usage Terms define acceptable behaviour when using Lemonwares hosting, email, and related infrastructure. They supplement our Terms & Conditions.',
+                'body' => 'These Usage Terms define acceptable behaviour when using LemonWares hosting, email, and related infrastructure. They supplement our Terms & Conditions.',
             ],
             [
                 'heading' => '2. Prohibited Activities',

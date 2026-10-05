@@ -46,10 +46,10 @@ class TrekMailSettings
     {
         $name = trim((string) IntegrationSetting::getValue(
             'trekmail.brand_name',
-            (string) config('site.short_name', 'Lemonwares'),
+            (string) config('site.short_name', 'LemonWares'),
         ));
 
-        return $name !== '' ? $name : (string) config('site.short_name', 'Lemonwares');
+        return $name !== '' ? $name : (string) config('site.short_name', 'LemonWares');
     }
 
     public static function brandPrimaryColor(): string

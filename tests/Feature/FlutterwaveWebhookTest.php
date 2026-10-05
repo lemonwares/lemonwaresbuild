@@ -61,12 +61,14 @@ class FlutterwaveWebhookTest extends TestCase
                 'status' => 'success',
                 'data' => [
                     'id' => '5555',
+                    'tx_ref' => 'LW-HOST-99',
                     'status' => 'successful',
                     'amount' => 7500,
                     'currency' => 'NGN',
                 ],
             ], 200),
             'https://billing.example.test/includes/api.php' => Http::sequence()
+                ->push(['result' => 'success', 'status' => 'Unpaid', 'balance' => '75.00'], 200)
                 ->push(['result' => 'success'], 200)
                 ->push(['result' => 'success'], 200),
         ]);
@@ -159,6 +161,7 @@ class FlutterwaveWebhookTest extends TestCase
                 'status' => 'success',
                 'data' => [
                     'id' => 'tx-email-1',
+                    'tx_ref' => 'LW-MAIL-100',
                     'status' => 'successful',
                     'amount' => 15000,
                     'currency' => 'NGN',
@@ -178,7 +181,7 @@ class FlutterwaveWebhookTest extends TestCase
 
         $fresh = $order->fresh();
         $this->assertSame('successful', $fresh->payment_status);
-        $this->assertSame('paid', $fresh->status);
+        $this->assertSame('awaiting_manual_fulfilment', $fresh->status);
     }
 
     public function test_email_webhook_is_idempotent_when_order_already_paid(): void

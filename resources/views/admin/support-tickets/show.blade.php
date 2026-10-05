@@ -79,8 +79,19 @@
 
                 <form method="POST" action="{{ route('admin.support-tickets.reply', $ticket) }}" class="mt-5 space-y-4" data-submit-form>
                     @csrf
+                    @if ($savedReplies->isNotEmpty())
+                        <label class="admin-field">
+                            <span>Saved reply</span>
+                            <select class="admin-input" onchange="if (this.value) { const box = document.getElementById('body'); box.value = (box.value ? box.value + '\n\n' : '') + this.options[this.selectedIndex].dataset.body; this.value = ''; }">
+                                <option value="">Insert a saved reply…</option>
+                                @foreach ($savedReplies as $savedReply)
+                                    <option value="{{ $savedReply->id }}" data-body="{{ $savedReply->body }}">{{ $savedReply->title }}</option>
+                                @endforeach
+                            </select>
+                        </label>
+                    @endif
                     <label class="admin-field">
-                        <span>Reply</span>
+                        <span>Reply <a href="{{ route('admin.saved-replies.index') }}" class="font-normal">(manage saved replies)</a></span>
                         <textarea id="body" name="body" rows="5" required class="admin-input" placeholder="Write a reply to the customer…">{{ old('body') }}</textarea>
                         @error('body') <em>{{ $message }}</em> @enderror
                     </label>
@@ -124,6 +135,23 @@
                         <select id="status" name="status" class="admin-input">
                             @foreach (\App\Models\SupportTicket::STATUSES as $status)
                                 <option value="{{ $status }}" @selected(old('status', $ticket->status) === $status)>{{ str_replace('_', ' ', $status) }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label class="admin-field">
+                        <span>Priority</span>
+                        <select name="priority" class="admin-input">
+                            @foreach (\App\Models\SupportTicket::PRIORITIES as $priorityOption)
+                                <option value="{{ $priorityOption }}" @selected(old('priority', $ticket->priority) === $priorityOption)>{{ $priorityOption }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label class="admin-field">
+                        <span>Assigned to</span>
+                        <select name="assigned_admin_id" class="admin-input">
+                            <option value="">Nobody</option>
+                            @foreach ($admins as $adminOption)
+                                <option value="{{ $adminOption->id }}" @selected((int) old('assigned_admin_id', $ticket->assigned_admin_id) === (int) $adminOption->id)>{{ $adminOption->name }}</option>
                             @endforeach
                         </select>
                     </label>

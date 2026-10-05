@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAdminOrderControls;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SiteCheckout extends Model
 {
+    use HasAdminOrderControls;
+
     protected $fillable = [
         'user_id',
         'item_count',
@@ -26,6 +29,10 @@ class SiteCheckout extends Model
         'shipping_same_as_billing',
         'shipping_address',
         'billing_snapshot',
+        'coupon_id',
+        'coupon_code',
+        'discount_ngn',
+        'discount_usd',
     ];
 
     /**
@@ -41,6 +48,8 @@ class SiteCheckout extends Model
             'shipping_same_as_billing' => 'boolean',
             'shipping_address' => 'array',
             'billing_snapshot' => 'array',
+            'discount_ngn' => 'decimal:2',
+            'discount_usd' => 'decimal:2',
         ];
     }
 

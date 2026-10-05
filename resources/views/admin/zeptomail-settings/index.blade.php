@@ -61,9 +61,9 @@
                         name="token"
                         rows="3"
                         class="admin-input admin-mono text-sm"
-                        placeholder="Paste Send Mail Token only (or full Zoho-enczapikey … value)"
+                        placeholder="{{ filled($settings['token']) ? '•••••••• saved, leave blank to keep' : 'Paste Send Mail Token only (or full Zoho-enczapikey … value)' }}"
                         autocomplete="off"
-                    >{{ old('token', $settings['token']) }}</textarea>
+                    ></textarea>
                     <p class="admin-muted text-xs">
                         Paste the token from ZeptoMail → Agent → SMTP/API. If you copy the full
                         <code class="rounded bg-blush-soft px-1">Zoho-enczapikey …</code> line, we strip the prefix automatically.
@@ -102,7 +102,7 @@
                         name="from_name"
                         value="{{ old('from_name', $settings['from_name']) }}"
                         class="admin-input"
-                        placeholder="Lemonwares"
+                        placeholder="LemonWares"
                         autocomplete="off"
                     >
                 </label>
@@ -119,7 +119,7 @@
                     >
                     <p class="admin-muted text-xs">
                         Public HTTPS image shown in password-reset and account emails.
-                        Leave blank to use the default Lemonwares logo on this site.
+                        Leave blank to use the default LemonWares logo on this site.
                     </p>
                     @if ($logo_preview_url)
                         <div class="mt-3 flex items-center gap-4 rounded-xl border border-border bg-blush-soft/40 px-4 py-3">

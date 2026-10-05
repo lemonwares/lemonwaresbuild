@@ -15,7 +15,7 @@ class TeamMemberSeeder extends Seeder
                 'role' => 'Managing Director',
                 'department' => TeamMember::DEPARTMENT_MANAGERIAL,
                 'quote' => 'Clear decisions, dependable delivery.',
-                'bio' => 'Leads Lemonwares strategy across hosting, Mailemon, and product delivery.',
+                'bio' => 'Leads LemonWares strategy across hosting, Mailemon, and product delivery.',
                 'sort_order' => 10,
             ],
             [

@@ -69,11 +69,10 @@
                 <label class="admin-field">
                     <span>API key</span>
                     <input
-                        type="text"
+                        type="password"
                         name="api_key"
-                        value="{{ old('api_key', $settings['api_key']) }}"
+                        value="" placeholder="{{ filled($settings['api_key']) ? '•••••••• saved, leave blank to keep' : '123456789012345' }}"
                         class="admin-input admin-mono text-sm"
-                        placeholder="123456789012345"
                         autocomplete="off"
                     >
                 </label>
@@ -81,11 +80,10 @@
                 <label class="admin-field admin-field-span">
                     <span>API secret</span>
                     <input
-                        type="text"
+                        type="password"
                         name="api_secret"
-                        value="{{ old('api_secret', $settings['api_secret']) }}"
+                        value="" placeholder="{{ filled($settings['api_secret']) ? '•••••••• saved, leave blank to keep' : 'your_api_secret' }}"
                         class="admin-input admin-mono text-sm"
-                        placeholder="your_api_secret"
                         autocomplete="off"
                     >
                 </label>

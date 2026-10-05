@@ -65,11 +65,10 @@
                 <label class="admin-field admin-field-span">
                     <span>API Token</span>
                     <input
-                        type="text"
+                        type="password"
                         name="trekmail_token"
-                        value="{{ old('trekmail_token', $trekmail['token']) }}"
+                        value="" placeholder="{{ filled($trekmail['token']) ? '•••••••• saved, leave blank to keep' : 'TrekMail API token' }}"
                         class="admin-input"
-                        placeholder="TrekMail API token"
                         autocomplete="off"
                     >
                 </label>
@@ -122,7 +121,7 @@
                         name="trekmail_brand_name"
                         value="{{ old('trekmail_brand_name', $branding['name']) }}"
                         class="admin-input"
-                        placeholder="Lemonwares"
+                        placeholder="LemonWares"
                     >
                 </label>
                 <label class="admin-field">
@@ -234,9 +233,9 @@
                     <label class="admin-field">
                         <span>API key (optional)</span>
                         <input
-                            type="text"
+                            type="password"
                             name="providers[{{ $provider }}][api_key]"
-                            value="{{ old("providers.{$provider}.api_key", $settings['api_key']) }}"
+                            value="" placeholder="{{ filled($settings['api_key']) ? '•••••••• saved, leave blank to keep' : '' }}"
                             class="admin-input"
                             autocomplete="off"
                         >
@@ -244,9 +243,9 @@
                     <label class="admin-field">
                         <span>API secret (optional)</span>
                         <input
-                            type="text"
+                            type="password"
                             name="providers[{{ $provider }}][api_secret]"
-                            value="{{ old("providers.{$provider}.api_secret", $settings['api_secret']) }}"
+                            value="" placeholder="{{ filled($settings['api_secret']) ? '•••••••• saved, leave blank to keep' : '' }}"
                             class="admin-input"
                             autocomplete="off"
                         >

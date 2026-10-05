@@ -72,7 +72,7 @@ const initChatWidget = () => {
                 greeted = true;
                 appendMessage(
                     'bot',
-                    "Hi! I'm the Lemonwares assistant. Ask me about hosting plans, business email, web development, mobile apps, or how to get started.",
+                    "Hi! I'm the LemonWares assistant. Ask me about hosting plans, business email, web development, mobile apps, or how to get started.",
                 );
             }
 
@@ -101,8 +101,8 @@ const initChatWidget = () => {
             return 'Hello! How can I help you today — hosting, business email, or a custom web project?';
         }
 
-        if (/host|cpanel|plesk|vps|server|cloud/.test(text)) {
-            return 'We offer cPanel and Plesk cloud hosting plus AMD EPYC VPS servers. Shared hosting starts with SSL, business email, and 24/7 support. Want a recommendation? Chat with a representative on WhatsApp.';
+        if (/host|cpanel|vps|server|cloud/.test(text)) {
+            return 'We offer cPanel cloud hosting plus AMD EPYC VPS servers. Shared hosting starts with SSL, business email, and 24/7 support. Want a recommendation? Chat with a representative on WhatsApp.';
         }
 
         if (/email|mail|domain/.test(text)) {

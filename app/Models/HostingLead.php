@@ -26,6 +26,7 @@ class HostingLead extends Model
         'spec_label',
         'spec_summary',
         'hostname',
+        'domain_option',
         'ipv4',
         'panel_url',
         'billing_cycle',
@@ -52,6 +53,11 @@ class HostingLead extends Model
         'checkout_url',
         'source_url',
         'ip_address',
+        'hetzner_server_id',
+        'assigned_admin_id',
+        'admin_notes',
+        'cancelled_at',
+        'cancelled_reason',
     ];
 
     /**
@@ -67,6 +73,8 @@ class HostingLead extends Model
             'domain_amount_usd' => 'decimal:2',
             'domain_amount_ngn' => 'decimal:2',
             'whmcs_synced_at' => 'datetime',
+            'cancelled_at' => 'datetime',
+            'hetzner_server_id' => 'integer',
         ];
     }
 
@@ -75,8 +83,20 @@ class HostingLead extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function assignedAdmin(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_admin_id');
+    }
+
+    /**
+     * Attaches guest orders placed with this email, but only once the user has proven they own it.
+     */
     public static function claimFor(User $user): void
     {
+        if (! $user->hasVerifiedEmail()) {
+            return;
+        }
+
         static::query()
             ->whereNull('user_id')
             ->where('email', strtolower($user->email))
@@ -87,11 +107,12 @@ class HostingLead extends Model
     {
         $owner = $user->accountOwner();
 
-        if ($this->user_id && (int) $this->user_id === (int) $owner->id) {
-            return true;
+        if ($this->user_id) {
+            return (int) $this->user_id === (int) $owner->id;
         }
 
-        return strtolower((string) $this->email) === strtolower($owner->email);
+        return $owner->hasVerifiedEmail()
+            && strtolower((string) $this->email) === strtolower($owner->email);
     }
 
     public function isVps(): bool
@@ -101,7 +122,8 @@ class HostingLead extends Model
 
     public function isShared(): bool
     {
-        return in_array($this->plan_slug, ['cpanel', 'plesk'], true);
+        return $this->plan_slug !== 'vps' && $this->checkout_provider === 'whmcs'
+            || $this->plan_slug === 'cpanel';
     }
 
     public function isPaid(): bool

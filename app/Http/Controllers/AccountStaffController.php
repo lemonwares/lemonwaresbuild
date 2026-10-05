@@ -142,6 +142,7 @@ class AccountStaffController extends Controller
             'account_owner_id' => $invite->owner_id,
             'account_permissions' => $invite->permissions ?? [],
         ]);
+        $user->forceFill(['email_verified_at' => now()])->save();
 
         $invite->update(['accepted_at' => now()]);
 

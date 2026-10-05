@@ -4,7 +4,8 @@
 @section('hide_auto_breadcrumbs', true)
 
 @php
-    $mailemonPlans = $plans->filter(fn ($plan) => in_array($plan->provider, ['lemonmail', 'titan'], true))->values();
+    $mailemonPlans = $plans->where('provider', 'lemonmail')->values();
+    $titanPlans = $plans->where('provider', 'titan')->values();
     $googlePlans = $plans->where('provider', 'google_workspace')->values();
     $microsoftPlans = $plans->where('provider', 'ms365')->values();
 @endphp
@@ -37,6 +38,12 @@
                 'rows' => $mailemonPlans,
             ],
             [
+                'title' => 'Titan',
+                'meta' => 'Public /email · manual setup',
+                'lede' => 'Paid at checkout, then set up by your team from the email orders queue.',
+                'rows' => $titanPlans,
+            ],
+            [
                 'title' => 'Google Workspace',
                 'meta' => 'Public /google-workspace',
                 'lede' => 'Per-user monthly ₦ prices shown on the Google Workspace page.',
@@ -63,10 +70,11 @@
                         <input type="hidden" name="plans[{{ $plan->id }}][id]" value="{{ $plan->id }}">
 
                         <div class="admin-edit-grid">
-                            <div class="admin-field">
-                                <span>{{ __('email.plans.' . $plan->plan_key . '.name') }}</span>
+                            <label class="admin-field">
+                                <span>Name (English)</span>
+                                <input type="text" maxlength="120" name="plans[{{ $plan->id }}][content][en][name]" value="{{ old("plans.{$plan->id}.content.en.name", $plan->displayName('en')) }}" class="admin-input">
                                 <p class="admin-muted text-xs">{{ $plan->plan_key }}</p>
-                            </div>
+                            </label>
 
                             <label class="admin-field">
                                 <span>Provider</span>
@@ -113,6 +121,27 @@
                                 <p class="admin-muted text-xs">Public site shows Naira only. Stored against the live USD→NGN rate.</p>
                             </label>
                         </div>
+
+                        <label class="admin-field mt-3">
+                            <span>Summary (English)</span>
+                            <textarea rows="2" maxlength="500" name="plans[{{ $plan->id }}][content][en][summary]" class="admin-input">{{ old("plans.{$plan->id}.content.en.summary", $plan->displaySummary('en')) }}</textarea>
+                        </label>
+
+                        <details class="mt-3">
+                            <summary class="admin-muted cursor-pointer text-xs font-semibold">French &amp; German text (empty uses English)</summary>
+                            <div class="admin-edit-grid mt-3">
+                                @foreach (['fr' => 'French', 'de' => 'German'] as $locale => $language)
+                                    <label class="admin-field">
+                                        <span>Name ({{ $language }})</span>
+                                        <input type="text" maxlength="120" name="plans[{{ $plan->id }}][content][{{ $locale }}][name]" value="{{ old("plans.{$plan->id}.content.{$locale}.name", $plan->content[$locale]['name'] ?? '') }}" class="admin-input">
+                                    </label>
+                                    <label class="admin-field">
+                                        <span>Summary ({{ $language }})</span>
+                                        <textarea rows="2" maxlength="500" name="plans[{{ $plan->id }}][content][{{ $locale }}][summary]" class="admin-input">{{ old("plans.{$plan->id}.content.{$locale}.summary", $plan->content[$locale]['summary'] ?? '') }}</textarea>
+                                    </label>
+                                @endforeach
+                            </div>
+                        </details>
 
                         <div class="mt-3 flex flex-wrap gap-6">
                             @if (in_array($plan->provider, ['lemonmail', 'titan'], true))
@@ -206,6 +235,42 @@
                 <span data-submit-label>Save pricing</span>
                 <span class="hidden" data-submit-loading>Saving…</span>
             </button>
+        </div>
+    </form>
+
+    <form method="POST" action="{{ route('admin.email-catalog.store') }}" class="admin-panel admin-panel-pad mt-5" data-submit-form>
+        @csrf
+        <h2 class="admin-dash-panel-title">+ Add plan</h2>
+        <p class="admin-dash-panel-lede">Creates a new card. It stays hidden until you tick "Show on site" above and save.</p>
+        <div class="admin-edit-grid mt-3">
+            <label class="admin-field">
+                <span>Provider</span>
+                <select name="provider" class="admin-input" required>
+                    <option value="lemonmail">Mailemon</option>
+                    <option value="titan">Titan</option>
+                    <option value="google_workspace">Google Workspace</option>
+                    <option value="ms365">Microsoft 365</option>
+                </select>
+            </label>
+            <label class="admin-field">
+                <span>Name</span>
+                <input type="text" name="name" maxlength="120" class="admin-input" required value="{{ old('name') }}">
+            </label>
+            <label class="admin-field">
+                <span>Mailboxes / seats</span>
+                <input type="number" name="mailbox_count" min="1" max="500" class="admin-input" required value="{{ old('mailbox_count', 1) }}">
+            </label>
+            <label class="admin-field">
+                <span>Monthly ₦</span>
+                <input type="number" name="monthly_ngn" min="0" step="1" class="admin-input" required value="{{ old('monthly_ngn') }}">
+            </label>
+        </div>
+        <label class="admin-field mt-3">
+            <span>Summary</span>
+            <textarea name="summary" rows="2" maxlength="500" class="admin-input">{{ old('summary') }}</textarea>
+        </label>
+        <div class="mt-3 flex justify-end">
+            <button type="submit" class="admin-btn-primary" data-submit-button><span data-submit-label>Add plan</span></button>
         </div>
     </form>
 @endsection

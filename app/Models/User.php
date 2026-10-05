@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Database\Factories\UserFactory;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Builder;
@@ -18,6 +19,7 @@ use Illuminate\Notifications\Notifiable;
     'role',
     'is_super_admin',
     'admin_permissions',
+    'admin_role_id',
     'account_owner_id',
     'account_permissions',
     'phone',
@@ -37,9 +39,13 @@ use Illuminate\Notifications\Notifiable;
     'notify_in_app',
     'notify_email',
     'password',
+    'suspended_at',
+    'suspended_reason',
+    'admin_notes',
+    'admin_tags',
 ])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -57,6 +63,8 @@ class User extends Authenticatable
             'is_super_admin' => 'boolean',
             'admin_permissions' => 'array',
             'account_permissions' => 'array',
+            'suspended_at' => 'datetime',
+            'admin_tags' => 'array',
         ];
     }
 
@@ -97,6 +105,11 @@ class User extends Authenticatable
         $this->notify(new \App\Notifications\ResetPasswordNotification($token));
     }
 
+    public function sendEmailVerificationNotification(): void
+    {
+        $this->notify(new \App\Notifications\VerifyEmailNotification);
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
@@ -107,7 +120,11 @@ class User extends Authenticatable
         return $this->isAdmin() && (bool) $this->is_super_admin;
     }
 
-    public function hasAdminPermission(string $permission): bool
+    /**
+     * Permission entries are "key" (full access), "key:edit" (view + change) or "key:view" (read only).
+     * Entries from the staff member's role and their own list are combined; the highest level wins.
+     */
+    public function hasAdminPermission(string $permission, string $level = 'view'): bool
     {
         if (! $this->isAdmin()) {
             return false;
@@ -117,13 +134,50 @@ class User extends Authenticatable
             return true;
         }
 
-        $permissions = $this->admin_permissions;
+        return $this->adminPermissionLevel($permission) >= (\App\Support\AdminPermissions::LEVELS[$level] ?? 1);
+    }
 
-        if (! is_array($permissions) || $permissions === []) {
-            return false;
+    public function adminPermissionLevel(string $permission): int
+    {
+        if ($this->isSuperAdmin()) {
+            return \App\Support\AdminPermissions::LEVELS['full'];
         }
 
-        return in_array($permission, $permissions, true);
+        $entries = array_merge(
+            is_array($this->admin_permissions) ? $this->admin_permissions : [],
+            is_array($this->adminRole?->permissions) ? $this->adminRole->permissions : [],
+        );
+
+        $best = 0;
+        foreach ($entries as $entry) {
+            [$key, $level] = array_pad(explode(':', (string) $entry, 2), 2, 'full');
+            if ($key === $permission) {
+                $best = max($best, \App\Support\AdminPermissions::LEVELS[$level] ?? 0);
+            }
+        }
+
+        return $best;
+    }
+
+    public function adminRole(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(AdminRole::class, 'admin_role_id');
+    }
+
+    /**
+     * Suspended by an admin. Account staff are blocked when their owner is suspended.
+     */
+    public function isSuspended(): bool
+    {
+        if ($this->suspended_at !== null) {
+            return true;
+        }
+
+        if ($this->isCustomer() && filled($this->account_owner_id)) {
+            return $this->accountOwner()->suspended_at !== null;
+        }
+
+        return false;
     }
 
     public function isCustomer(): bool

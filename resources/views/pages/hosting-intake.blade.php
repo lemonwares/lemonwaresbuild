@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('title', 'Start Hosting Order — ' . config('site.short_name'))
-@section('meta_description', 'Tell Lemonwares what hosting plan you need, then continue to secure WHMCS checkout.')
+@section('meta_description', 'Tell LemonWares what hosting plan you need, then continue to secure WHMCS checkout.')
 @section('focus_flow', '1')
 
 @section('content')

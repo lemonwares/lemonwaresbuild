@@ -10,6 +10,41 @@ use Illuminate\Support\Facades\Log;
 class WhmcsSyncService
 {
     /**
+     * Pull products for one linked WHMCS customer and attach them to the local user.
+     */
+    public static function syncServicesForCustomer(WhmcsCustomer $customer): int
+    {
+        $clientId = (int) $customer->whmcs_client_id;
+        if ($clientId < 1) {
+            return 0;
+        }
+
+        $synced = 0;
+        $products = WhmcsClient::getClientProducts($clientId);
+
+        foreach ($products as $product) {
+            self::upsertService($customer, $product);
+            $synced++;
+        }
+
+        // Backfill any older rows that were synced before the user existed.
+        if ($customer->user_id) {
+            WhmcsService::query()
+                ->where('whmcs_client_id', $clientId)
+                ->where(function ($query) use ($customer): void {
+                    $query->whereNull('user_id')
+                        ->orWhere('user_id', '!=', $customer->user_id);
+                })
+                ->update([
+                    'user_id' => $customer->user_id,
+                    'whmcs_customer_id' => $customer->id,
+                ]);
+        }
+
+        return $synced;
+    }
+
+    /**
      * @return array{customers_synced:int,services_synced:int}
      */
     public static function syncCustomersAndServices(): array
@@ -32,12 +67,7 @@ class WhmcsSyncService
             foreach ($clients as $clientPayload) {
                 $customer = self::upsertCustomer($clientPayload);
                 $customersSynced++;
-
-                $products = WhmcsClient::getClientProducts((int) $customer->whmcs_client_id);
-                foreach ($products as $product) {
-                    self::upsertService($customer, $product);
-                    $servicesSynced++;
-                }
+                $servicesSynced += self::syncServicesForCustomer($customer);
             }
 
             $start += $limit;
@@ -60,9 +90,17 @@ class WhmcsSyncService
     protected static function upsertCustomer(array $payload): WhmcsCustomer
     {
         $email = strtolower(trim((string) data_get($payload, 'email', '')));
-        $linkedUser = $email !== ''
-            ? User::query()->customers()->where('email', $email)->first()
-            : null;
+        $existing = WhmcsCustomer::query()->where('whmcs_client_id', (int) data_get($payload, 'id'))->first();
+
+        // Keep an established link; otherwise only link by email to a user who verified that address.
+        $linkedUserId = $existing?->user_id;
+        if (! $linkedUserId && $email !== '') {
+            $linkedUserId = User::query()
+                ->customers()
+                ->where('email', $email)
+                ->whereNotNull('email_verified_at')
+                ->value('id');
+        }
 
         $firstName = (string) data_get($payload, 'firstname', '');
         $lastName = (string) data_get($payload, 'lastname', '');
@@ -72,7 +110,7 @@ class WhmcsSyncService
         $customer = WhmcsCustomer::query()->updateOrCreate(
             ['whmcs_client_id' => (int) data_get($payload, 'id')],
             [
-                'user_id' => $linkedUser?->id,
+                'user_id' => $linkedUserId,
                 'first_name' => $firstName ?: null,
                 'last_name' => $lastName ?: null,
                 'full_name' => $fullName !== '' ? $fullName : ((string) data_get($payload, 'fullname', '') ?: null),

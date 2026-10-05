@@ -35,6 +35,7 @@ class SupportTicket extends Model
         'status',
         'admin_notes',
         'resolved_at',
+        'assigned_admin_id',
     ];
 
     protected function casts(): array
@@ -83,5 +84,10 @@ class SupportTicket extends Model
         } while (self::query()->where('reference', $reference)->exists());
 
         return $reference;
+    }
+
+    public function assignedAdmin(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_admin_id');
     }
 }

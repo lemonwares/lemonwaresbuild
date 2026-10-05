@@ -393,6 +393,12 @@
                             @endforeach
                         </ul>
 
+                        <label class="mt-4 block">
+                            <span class="site-checkout-summary-total-label">{{ __('cart.coupon_label') }}</span>
+                            <input type="text" name="coupon_code" value="{{ old('coupon_code') }}" maxlength="40" autocomplete="off" class="mt-1 w-full rounded-lg border border-border px-3 py-2 text-sm uppercase">
+                            @error('coupon_code') <span class="mt-1 block text-sm text-rose">{{ $message }}</span> @enderror
+                        </label>
+
                         <div class="mt-4 flex items-end justify-between gap-3">
                             <div>
                                 <p class="site-checkout-summary-total-label">{{ __('domain.amount_label') }}</p>

@@ -28,15 +28,12 @@ class ZeptoMailSettingsAdminTest extends TestCase
             'token' => 'zm_admin_token',
             'endpoint' => 'https://api.zeptomail.test/v1.1/email',
             'from_address' => 'noreply@lemonwares.com',
-            'from_name' => 'Lemonwares',
+            'from_name' => 'LemonWares',
             'logo_url' => 'https://cdn.example.com/lemonwareslogo.png',
             'contact_form_inbox' => 'hello@lemonwares.com',
         ])->assertRedirect(route('admin.zeptomail-settings.index'));
 
-        $this->assertDatabaseHas('integration_settings', [
-            'key' => 'zeptomail.token',
-            'value' => 'zm_admin_token',
-        ]);
+        $this->assertSame('zm_admin_token', \App\Models\IntegrationSetting::getValue('zeptomail.token'));
         $this->assertDatabaseHas('integration_settings', [
             'key' => 'zeptomail.logo_url',
             'value' => 'https://cdn.example.com/lemonwareslogo.png',
@@ -92,7 +89,7 @@ class ZeptoMailSettingsAdminTest extends TestCase
             'zeptomail.token' => 'zm_send',
             'zeptomail.endpoint' => 'https://api.zeptomail.test/v1.1/email',
             'zeptomail.from_address' => 'mails@lemonwares.com',
-            'zeptomail.from_name' => 'Lemonwares',
+            'zeptomail.from_name' => 'LemonWares',
         ]);
 
         Http::fake([

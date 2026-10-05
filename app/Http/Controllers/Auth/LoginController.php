@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Support\WhmcsAuthBridge;
+use App\Support\WhmcsClient;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +25,9 @@ class LoginController extends Controller
             $request->session()->put('url.intended', url($redirect));
         }
 
-        return view('auth.login');
+        return view('auth.login', [
+            'whmcsLoginEnabled' => WhmcsClient::isConfigured(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -42,8 +46,8 @@ class LoginController extends Controller
 
         $email = strtolower((string) $credentials['email']);
         $ip = (string) $request->ip();
-        $emailIpKey = 'auth-login|' . $email . '|' . $ip;
-        $ipKey = 'auth-login-ip|' . $ip;
+        $emailIpKey = 'auth-login|'.$email.'|'.$ip;
+        $ipKey = 'auth-login-ip|'.$ip;
 
         if (RateLimiter::tooManyAttempts($emailIpKey, 6) || RateLimiter::tooManyAttempts($ipKey, 30)) {
             $availableIn = max(
@@ -56,12 +60,32 @@ class LoginController extends Controller
                 ->onlyInput('email');
         }
 
-        if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+        $remember = $request->boolean('remember');
+        $authenticated = Auth::attempt([
+            'email' => $email,
+            'password' => $credentials['password'],
+        ], $remember);
+
+        if (! $authenticated) {
+            $bridged = WhmcsAuthBridge::attempt($email, $credentials['password']);
+
+            if ($bridged) {
+                Auth::login($bridged, $remember);
+                $authenticated = true;
+            }
+        }
+
+        if (! $authenticated) {
             RateLimiter::hit($emailIpKey, 600);
             RateLimiter::hit($ipKey, 600);
 
+            // Always surface the bridge reason when WHMCS was attempted (including "not configured").
+            $error = WhmcsAuthBridge::lastFailure()
+                ? WhmcsAuthBridge::failureMessage()
+                : __('account.invalid_credentials');
+
             return back()
-                ->withErrors(['email' => __('account.invalid_credentials')])
+                ->withErrors(['email' => $error])
                 ->onlyInput('email');
         }
 
@@ -78,6 +102,14 @@ class LoginController extends Controller
                 ->with('status', 'Staff accounts sign in at the admin dashboard.');
         }
 
+        if ($user->isSuspended()) {
+            Auth::logout();
+
+            return back()
+                ->withErrors(['email' => __('account.account_suspended')])
+                ->onlyInput('email');
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('account.show'));
@@ -85,6 +117,10 @@ class LoginController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
+        if ($request->session()->has('impersonator_admin_id')) {
+            return app(\App\Http\Controllers\AdminCustomerAccessController::class)->stopImpersonating($request);
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

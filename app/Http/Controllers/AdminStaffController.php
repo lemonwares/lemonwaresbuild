@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AdminRole;
 use App\Models\User;
 use App\Support\AdminPermissions;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +17,7 @@ class AdminStaffController extends Controller
     {
         $staff = User::query()
             ->where('role', 'admin')
+            ->with('adminRole')
             ->orderByDesc('is_super_admin')
             ->orderBy('name')
             ->get();
@@ -27,6 +29,7 @@ class AdminStaffController extends Controller
     {
         return view('admin.staff.create', [
             'permissionOptions' => AdminPermissions::all(),
+            'roles' => AdminRole::query()->orderBy('name')->get(),
         ]);
     }
 
@@ -41,6 +44,7 @@ class AdminStaffController extends Controller
             'role' => 'admin',
             'is_super_admin' => $data['is_super_admin'],
             'admin_permissions' => $data['admin_permissions'],
+            'admin_role_id' => $data['admin_role_id'],
         ]);
 
         return redirect()
@@ -51,16 +55,19 @@ class AdminStaffController extends Controller
     public function edit(User $staff): View
     {
         abort_unless($staff->isAdmin(), 404);
+        $this->abortUnlessCanManage($staff);
 
         return view('admin.staff.edit', [
             'member' => $staff,
             'permissionOptions' => AdminPermissions::all(),
+            'roles' => AdminRole::query()->orderBy('name')->get(),
         ]);
     }
 
     public function update(Request $request, User $staff): RedirectResponse
     {
         abort_unless($staff->isAdmin(), 404);
+        $this->abortUnlessCanManage($staff);
 
         $data = $this->validatePayload($request, $staff);
 
@@ -76,10 +83,12 @@ class AdminStaffController extends Controller
         if ($current?->isSuperAdmin() && ! $editingSelf) {
             $staff->is_super_admin = $data['is_super_admin'];
             $staff->admin_permissions = $data['admin_permissions'];
+            $staff->admin_role_id = $data['admin_role_id'];
         } elseif ($current?->isSuperAdmin() && $editingSelf) {
             // Keep own super status; allow refreshing permission list only when not super.
             if (! $staff->is_super_admin) {
                 $staff->admin_permissions = $data['admin_permissions'];
+                $staff->admin_role_id = $data['admin_role_id'];
             }
         }
 
@@ -93,6 +102,7 @@ class AdminStaffController extends Controller
     public function destroy(Request $request, User $staff): RedirectResponse
     {
         abort_unless($staff->isAdmin(), 404);
+        abort_unless(AdminPermissions::currentUser()?->isSuperAdmin(), 403, 'Only a super admin can remove staff accounts.');
 
         $currentId = (int) $request->session()->get('admin_user_id');
         if ($staff->id === $currentId) {
@@ -118,6 +128,21 @@ class AdminStaffController extends Controller
         return redirect()
             ->route('admin.staff.index')
             ->with('status', 'Staff member removed.');
+    }
+
+    /**
+     * Staff who are not super admins may only change their own name, email and password;
+     * otherwise they could reset a more privileged colleague's password and sign in as them.
+     */
+    private function abortUnlessCanManage(User $staff): void
+    {
+        $current = AdminPermissions::currentUser();
+
+        abort_unless(
+            $current && ($current->isSuperAdmin() || $current->id === $staff->id),
+            403,
+            'Only a super admin can change other staff accounts.'
+        );
     }
 
     /**
@@ -148,6 +173,9 @@ class AdminStaffController extends Controller
             $rules['is_super_admin'] = ['nullable', Rule::in(['0', '1', 0, 1])];
             $rules['permissions'] = ['nullable', 'array'];
             $rules['permissions.*'] = ['string', Rule::in($allowed)];
+            $rules['permission_levels'] = ['nullable', 'array'];
+            $rules['permission_levels.*'] = ['string', Rule::in(['none', 'view', 'edit', 'full'])];
+            $rules['admin_role_id'] = ['nullable', 'integer', Rule::exists('admin_roles', 'id')];
         }
 
         $data = $request->validate($rules);
@@ -155,21 +183,29 @@ class AdminStaffController extends Controller
         $isSuper = $canAssign && $request->boolean('is_super_admin');
         $permissions = [];
 
-        if ($canAssign && ! $isSuper) {
-            $permissions = array_values(array_unique(array_intersect(
-                $allowed,
-                array_map('strval', $request->input('permissions', [])),
-            )));
+        $roleId = $canAssign && ! $isSuper && filled($request->input('admin_role_id')) ? (int) $request->input('admin_role_id') : null;
 
-            if ($permissions === []) {
+        if ($canAssign && ! $isSuper) {
+            if ($request->has('permission_levels')) {
+                $permissions = AdminPermissions::entriesFromLevels((array) $request->input('permission_levels', []));
+            } else {
+                // Plain checkbox list (older form): ticked areas get full access.
+                $permissions = array_values(array_unique(array_intersect(
+                    $allowed,
+                    array_map('strval', $request->input('permissions', [])),
+                )));
+            }
+
+            if ($permissions === [] && $roleId === null) {
                 throw \Illuminate\Validation\ValidationException::withMessages([
-                    'permissions' => 'Select at least one permission, or mark the account as super admin.',
+                    'permissions' => 'Pick a role or at least one permission, or mark the account as super admin.',
                 ]);
             }
         }
 
         $data['is_super_admin'] = $isSuper;
         $data['admin_permissions'] = $isSuper ? null : $permissions;
+        $data['admin_role_id'] = $isSuper ? null : $roleId;
 
         return $data;
     }

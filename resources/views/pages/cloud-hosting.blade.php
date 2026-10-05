@@ -61,7 +61,6 @@
     };
 
     $cpanelSpecs = $mapSpecs('cpanel');
-    $pleskSpecs = $mapSpecs('plesk');
 @endphp
 
 @section('content')
@@ -141,7 +140,7 @@
                 <p class="lede mx-auto mt-3">{{ __('pages.cloud_hosting.panels_lede') }}</p>
             </div>
 
-            <div class="mx-auto grid max-w-5xl gap-6 lg:grid-cols-2">
+            <div class="mx-auto grid max-w-3xl gap-6">
                 <article class="hosting-panel-card hosting-panel-card-featured">
                     <p class="hosting-panel-badge">{{ __('pages.cloud_hosting.cpanel_badge') }}</p>
                     <h3 class="mt-4 text-2xl font-bold text-white">{{ __('pages.cloud_hosting.cpanel_title') }}</h3>
@@ -154,22 +153,6 @@
                     >
                         <span class="hidden size-4 animate-spin rounded-full border-2 border-rose/30 border-t-rose" data-action-spinner aria-hidden="true"></span>
                         <span data-action-label>{{ __('pages.cloud_hosting.cpanel_cta') }}</span>
-                        <span class="hidden" data-action-loading-label>{{ __('account.processing') }}</span>
-                    </a>
-                </article>
-
-                <article class="hosting-panel-card">
-                    <p class="text-sm font-bold uppercase tracking-wide text-on-blush/55">Plesk</p>
-                    <h3 class="mt-4 text-2xl font-bold text-on-blush">{{ __('pages.cloud_hosting.plesk_title') }}</h3>
-                    <p class="mt-3 flex-1 body-text">{{ __('pages.cloud_hosting.plesk_body') }}</p>
-                    <a
-                        href="{{ route('plesk') }}"
-                        class="btn btn-ghost mt-8 w-fit border-rose/30 text-rose hover:bg-blush-soft"
-                        data-action-loading
-                        data-loading-label="{{ __('account.processing') }}"
-                    >
-                        <span class="hidden size-4 animate-spin rounded-full border-2 border-rose/30 border-t-rose" data-action-spinner aria-hidden="true"></span>
-                        <span data-action-label>{{ __('pages.cloud_hosting.plesk_cta') }}</span>
                         <span class="hidden" data-action-loading-label>{{ __('account.processing') }}</span>
                     </a>
                 </article>
@@ -228,58 +211,6 @@
                                     data-loading-label="{{ __('account.processing') }}"
                                 >
                                     <span class="hidden size-4 animate-spin rounded-full border-2 border-white/35 border-t-white" data-action-spinner aria-hidden="true"></span>
-                                    <span data-action-label>{{ __('pages.cloud_hosting.plans_select') }}</span>
-                                    <span class="hidden" data-action-loading-label>{{ __('account.processing') }}</span>
-                                </a>
-                            </article>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
-
-            @if (count($pleskSpecs) > 0)
-                <div>
-                    <h3 class="mb-6 text-xl font-bold text-black">{{ __('pages.cloud_hosting.plesk_plans_title') }}</h3>
-                    <div class="hosting-plan-grid">
-                        @foreach ($pleskSpecs as $spec)
-                            <article class="hosting-plan-card">
-                                <h4 class="text-lg font-bold text-black">{{ $spec['label'] }}</h4>
-                                <p class="mt-1 text-sm text-on-blush/70">{{ $spec['description'] }}</p>
-                                <p class="mt-4 text-sm font-semibold text-rose">
-                                    <span class="text-xs font-medium uppercase tracking-wide text-on-blush/50">{{ __('pages.cloud_hosting.plans_from') }}</span>
-                                    <span class="mt-0.5 block text-base text-black">{{ $spec['price_display'] }}</span>
-                                </p>
-                                <dl class="hosting-plan-specs">
-                                    <div>
-                                        <dt>{{ __('pages.cloud_hosting.plans_storage') }}</dt>
-                                        <dd>{{ $spec['storage'] }}</dd>
-                                    </div>
-                                    <div>
-                                        <dt>{{ __('pages.cloud_hosting.plans_bandwidth') }}</dt>
-                                        <dd>{{ $spec['bandwidth'] }}</dd>
-                                    </div>
-                                    <div>
-                                        <dt>{{ __('pages.cloud_hosting.plans_websites') }}</dt>
-                                        <dd>{{ $spec['websites'] }}</dd>
-                                    </div>
-                                </dl>
-                                @if (count($spec['highlights']) > 0)
-                                    <ul class="mt-4 space-y-1.5 text-sm text-on-blush/75">
-                                        @foreach ($spec['highlights'] as $item)
-                                            <li class="flex gap-2">
-                                                <span class="mt-1.5 size-1.5 shrink-0 rounded-full bg-rose" aria-hidden="true"></span>
-                                                <span>{{ $item }}</span>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @endif
-                                <a
-                                    href="{{ route('hosting.specifications', ['plan' => 'plesk', 'spec' => $spec['key']]) }}"
-                                    class="btn btn-ghost mt-6 w-full justify-center border-rose/30 text-rose hover:bg-blush-soft"
-                                    data-action-loading
-                                    data-loading-label="{{ __('account.processing') }}"
-                                >
-                                    <span class="hidden size-4 animate-spin rounded-full border-2 border-rose/30 border-t-rose" data-action-spinner aria-hidden="true"></span>
                                     <span data-action-label>{{ __('pages.cloud_hosting.plans_select') }}</span>
                                     <span class="hidden" data-action-loading-label>{{ __('account.processing') }}</span>
                                 </a>

@@ -6,6 +6,7 @@ use App\Models\EmailMailbox;
 use App\Models\EmailOrder;
 use App\Notifications\EmailOrderDeactivated;
 use App\Notifications\EmailOrderExpired;
+use App\Notifications\EmailRenewalReminder;
 use App\Support\AccountActivityLogger;
 use Illuminate\Support\Facades\Log;
 
@@ -47,10 +48,14 @@ class EmailLifecycle
                 $order->user,
                 $reason === 'expired' ? 'email_expired' : 'email_deactivated',
                 $reason === 'expired' ? 'Email service expired' : 'Email service deactivated',
-                'Mailemon for '.$order->domain.' was '.($reason === 'expired' ? 'expired' : 'deactivated').'.',
+                __('email.providers.'.($order->provider ?: 'lemonmail')).' for '.$order->domain.' was '.($reason === 'expired' ? 'expired' : 'deactivated').'.',
                 $reason === 'expired' ? 'system' : 'admin',
                 $order,
             );
+        }
+
+        if ($reason === 'expired' && $order->isManualFulfilment()) {
+            EmailFulfilment::expired($order);
         }
 
         return $order;
@@ -96,6 +101,42 @@ class EmailLifecycle
             ->chunkById(50, function ($orders) use (&$count): void {
                 foreach ($orders as $order) {
                     self::deactivate($order, 'expired');
+                    $count++;
+                }
+            });
+
+        return $count;
+    }
+
+    public const REMINDER_DAYS = [14, 7, 1];
+
+    public static function sendRenewalReminders(): int
+    {
+        $count = 0;
+
+        EmailOrder::query()
+            ->whereNull('deactivated_at')
+            ->whereNotNull('period_ends_at')
+            ->whereBetween('period_ends_at', [now(), now()->addDays(max(self::REMINDER_DAYS))->endOfDay()])
+            ->whereIn('status', ['paid', 'provisioned', 'paid_pending_setup', 'awaiting_manual_fulfilment'])
+            ->with('user')
+            ->orderBy('id')
+            ->chunkById(50, function ($orders) use (&$count): void {
+                foreach ($orders as $order) {
+                    $daysLeft = (int) ceil(now()->floatDiffInDays($order->period_ends_at));
+                    $due = collect(self::REMINDER_DAYS)->sort()->first(fn (int $days) => $daysLeft <= $days);
+                    if ($due === null) {
+                        continue;
+                    }
+
+                    $sent = (array) ($order->renewal_reminders ?? []);
+                    $marker = $order->period_ends_at->toDateString().':'.$due;
+                    if (in_array($marker, $sent, true)) {
+                        continue;
+                    }
+
+                    $order->forceFill(['renewal_reminders' => [...$sent, $marker]])->save();
+                    AccountNotifier::send($order->user, new EmailRenewalReminder($order, $due));
                     $count++;
                 }
             });

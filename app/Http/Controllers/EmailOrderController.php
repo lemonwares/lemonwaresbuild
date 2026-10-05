@@ -249,17 +249,14 @@ class EmailOrderController extends Controller
         $order = DB::transaction(function () use ($request, $user, $plan, $domain, $localParts, $cycle, $amountUsd, $amountNgn) {
             $provider = (string) ($plan['provider'] ?? 'lemonmail');
             $fulfilmentMode = (string) ($plan['fulfilment_mode'] ?? 'auto');
-            $isManual = $fulfilmentMode === 'manual';
-            $requiresPayment = $provider === 'lemonmail' || ! $isManual;
+            $requiresPayment = true;
 
             $order = EmailOrder::create([
                 'user_id' => $user->id,
                 'plan_key' => $plan['key'],
-                'plan_name' => __('email.plans.' . $plan['key'] . '.name'),
+                'plan_name' => (string) ($plan['name'] ?? __('email.plans.' . $plan['key'] . '.name')),
                 'provider' => $provider,
                 'fulfilment_mode' => $fulfilmentMode,
-                'fulfilment_status' => $isManual ? 'queued' : null,
-                'fulfilment_updated_at' => $isManual ? now() : null,
                 'domain' => $domain,
                 'mailbox_count' => $localParts->count(),
                 'billing_cycle' => $cycle,
@@ -362,7 +359,11 @@ class EmailOrderController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
-        HostingLead::claimFor($user);
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
 
         return $user;
     }
@@ -439,7 +440,7 @@ class EmailOrderController extends Controller
         $isRenewal = str_starts_with($txRef, 'LW-MAIL-R-');
 
         if ($transactionId === '') {
-            if (! $isRenewal) {
+            if (! $isRenewal && ! $order->fresh()?->isPaid()) {
                 $order->update([
                     'payment_status' => $status ?: 'failed',
                     'status' => 'payment_failed',
@@ -453,7 +454,7 @@ class EmailOrderController extends Controller
         }
 
         if (in_array($status, ['failed', 'cancelled', 'abandoned'], true)) {
-            if (! $isRenewal) {
+            if (! $isRenewal && ! $order->fresh()?->isPaid()) {
                 $order->update([
                     'payment_status' => $status,
                     'status' => 'payment_failed',
@@ -469,7 +470,7 @@ class EmailOrderController extends Controller
         $verified = FlutterwavePayment::verifyTransaction($transactionId);
 
         if (! $verified) {
-            if (! $isRenewal) {
+            if (! $isRenewal && ! $order->fresh()?->isPaid()) {
                 $order->update([
                     'payment_status' => 'unverified',
                     'status' => 'payment_failed',

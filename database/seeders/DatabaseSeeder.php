@@ -23,12 +23,12 @@ class DatabaseSeeder extends Seeder
         User::query()->updateOrCreate(
             ['email' => $adminEmail],
             [
-                'name' => 'Lemonwares Admin',
+                'name' => 'LemonWares Admin',
                 'role' => 'admin',
                 'is_super_admin' => true,
                 'admin_permissions' => null,
                 'phone' => '+234 906 732 2844',
-                'company' => 'Lemonwares Technology',
+                'company' => 'LemonWares Technology',
                 'password' => $adminPassword,
                 'email_verified_at' => now(),
             ],

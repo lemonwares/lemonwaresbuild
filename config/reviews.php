@@ -17,14 +17,14 @@ return [
             'name' => 'Restination Apt',
             'date' => '1 year ago',
             'rating' => 5,
-            'text' => 'Lemonwares Tech are very efficient at what they do. They delivered our website on time and just the way we imagined it.',
+            'text' => 'LemonWares Tech are very efficient at what they do. They delivered our website on time and just the way we imagined it.',
         ],
         [
             'initials' => 'AO',
             'name' => 'Adewale O.',
             'date' => '8 months ago',
             'rating' => 5,
-            'text' => 'Moved our business email and hosting to Lemonwares. Setup was smooth, support responded quickly, and everything has been stable since.',
+            'text' => 'Moved our business email and hosting to LemonWares. Setup was smooth, support responded quickly, and everything has been stable since.',
         ],
         [
             'initials' => 'CN',

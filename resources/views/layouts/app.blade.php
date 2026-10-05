@@ -3,7 +3,7 @@
     <head>
         @php
             $seoTitle = trim($__env->yieldContent('title', config('site.short_name')));
-            $seoDescription = trim($__env->yieldContent('meta_description', 'Lemonwares delivers reliable hosting, business email, and web & mobile development for growing businesses.'));
+            $seoDescription = trim($__env->yieldContent('meta_description', 'LemonWares delivers reliable hosting, business email, and web & mobile development for growing businesses.'));
             $seoImage = trim($__env->yieldContent('meta_image', asset('lemonwareslogo.webp')));
             $seoUrl = url()->current();
             $seoJsonLd = [

@@ -38,22 +38,23 @@
 
         <div>
             <label for="password" class="auth-label">{{ __('account.password') }}</label>
-            <input
-                id="password" name="password" type="password"
-                required autocomplete="new-password"
-                class="auth-input @error('password') border-rose/50 @enderror"
+            <x-ui.password-input
+                id="password"
+                name="password"
+                autocomplete="new-password"
                 placeholder="New password"
-            >
+                class="@error('password') border-rose/50 @enderror"
+            />
         </div>
 
         <div>
             <label for="password_confirmation" class="auth-label">{{ __('account.password_confirm') }}</label>
-            <input
-                id="password_confirmation" name="password_confirmation" type="password"
-                required autocomplete="new-password"
-                class="auth-input"
+            <x-ui.password-input
+                id="password_confirmation"
+                name="password_confirmation"
+                autocomplete="new-password"
                 placeholder="Confirm new password"
-            >
+            />
         </div>
 
         <x-ui.submit-button

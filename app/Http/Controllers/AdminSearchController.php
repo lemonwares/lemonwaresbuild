@@ -35,7 +35,7 @@ class AdminSearchController extends Controller
             ['title' => 'Subscribers', 'subtitle' => 'Marketing', 'url' => route('admin.subscribers.index'), 'type' => 'Page', 'permission' => 'subscribers'],
             ['title' => 'Campaigns', 'subtitle' => 'Marketing', 'url' => route('admin.newsletter-campaigns.index'), 'type' => 'Page', 'permission' => 'campaigns'],
             ['title' => 'Staff', 'subtitle' => 'CRM', 'url' => route('admin.staff.index'), 'type' => 'Page', 'permission' => 'staff'],
-            ['title' => 'Hosting Prices', 'subtitle' => 'Catalog', 'url' => route('admin.hosting-prices.index'), 'type' => 'Page', 'permission' => 'hosting_prices'],
+            ['title' => 'Plans & Pricing', 'subtitle' => 'Catalog', 'url' => route('admin.catalog.index'), 'type' => 'Page', 'permission' => 'hosting_prices'],
             ['title' => 'Blog', 'subtitle' => 'Site', 'url' => route('admin.blog-posts.index'), 'type' => 'Page', 'permission' => 'blog'],
             ['title' => 'Projects', 'subtitle' => 'Site', 'url' => route('admin.projects.index'), 'type' => 'Page', 'permission' => 'projects'],
             ['title' => 'Case Studies', 'subtitle' => 'Site', 'url' => route('admin.case-studies.index'), 'type' => 'Page', 'permission' => 'case_studies'],

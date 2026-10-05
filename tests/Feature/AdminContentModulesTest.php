@@ -80,13 +80,8 @@ class AdminContentModulesTest extends TestCase
 
         $project = Project::query()->where('slug', 'bright-media-rebuild')->firstOrFail();
 
-        $this->get(route('projects'))
-            ->assertOk()
-            ->assertSee('Bright Media Rebuild', false);
-
-        $this->get(route('projects.show', $project))
-            ->assertOk()
-            ->assertSee('We rebuilt their stack.', false);
+        $this->get(route('projects'))->assertRedirect(route('case-studies'));
+        $this->get(route('projects.show', $project))->assertRedirect(route('case-studies'));
 
         NewsletterSubscriber::query()->delete();
         NewsletterSubscriber::query()->create([
@@ -96,7 +91,7 @@ class AdminContentModulesTest extends TestCase
 
         $this->post(route('admin.newsletter-campaigns.store'), [
             'subject' => 'March update',
-            'body' => 'Hello from Lemonwares',
+            'body' => 'Hello from LemonWares',
         ])->assertRedirect();
 
         $campaign = NewsletterCampaign::query()->firstOrFail();

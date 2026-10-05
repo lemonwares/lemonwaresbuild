@@ -6,7 +6,7 @@
 @section('content')
     <x-admin.page-header
         title="Customers"
-        lede="Native Lemonwares accounts and legacy WHMCS customers in one CRM view."
+        lede="Native LemonWares accounts and legacy WHMCS customers in one CRM view."
         :back-href="route('admin.dashboard')"
         back-label="Go back"
         :breadcrumbs="[['label' => 'Customers']]"
@@ -21,6 +21,9 @@
                     data-admin-clearable-search
                 >
                     <input type="hidden" name="source" value="{{ $source }}">
+                    @if ($tag !== '')
+                        <input type="hidden" name="tag" value="{{ $tag }}">
+                    @endif
                     <input
                         type="text"
                         name="q"
@@ -34,6 +37,8 @@
                     </button>
                     <button type="submit" class="admin-btn-ghost">Search</button>
                 </form>
+                <a href="{{ route('admin.customers.export', array_filter(['q' => $search, 'tag' => $tag])) }}" class="admin-btn-ghost">Export CSV</a>
+                <a href="{{ route('admin.customers.create') }}" class="admin-btn-ghost">New customer</a>
                 <form method="POST" action="{{ route('admin.customers.sync-whmcs') }}" data-submit-form>
                     @csrf
                     <button type="submit" class="admin-btn-primary inline-flex items-center gap-2" data-submit-button>
@@ -54,7 +59,7 @@
             >
                 <span class="admin-metric-label">Native</span>
                 <span class="admin-metric-value">{{ $nativeCount }}</span>
-                <span class="admin-metric-meta">Lemonwares accounts</span>
+                <span class="admin-metric-meta">LemonWares accounts</span>
             </a>
             <a
                 href="{{ route('admin.customers.index', ['source' => 'legacy']) }}"
@@ -91,10 +96,12 @@
                 <div>
                     <h2 class="admin-dash-panel-title">{{ $source === 'legacy' ? 'Legacy WHMCS customers' : 'Native customers' }}</h2>
                     <p class="admin-dash-panel-lede">
-                        @if ($search !== '')
+                        @if ($tag !== '')
+                            Tagged “{{ $tag }}” · <a href="{{ route('admin.customers.index', array_filter(['q' => $search])) }}">clear tag</a>
+                        @elseif ($search !== '')
                             Results for “{{ $search }}”
                         @else
-                            {{ $source === 'legacy' ? 'Clients synced from WHMCS.' : 'Accounts created on Lemonwares.' }}
+                            {{ $source === 'legacy' ? 'Clients synced from WHMCS.' : 'Accounts created on LemonWares.' }}
                         @endif
                     </p>
                 </div>
@@ -126,6 +133,14 @@
                             <tr>
                                 <td>
                                     <strong>{{ $source === 'legacy' ? ($customer->full_name ?: '—') : $customer->name }}</strong>
+                                    @if ($source !== 'legacy')
+                                        @if ($customer->suspended_at)
+                                            <span class="admin-mini-status" style="color:#b91c1c;">suspended</span>
+                                        @endif
+                                        @foreach ((array) ($customer->admin_tags ?? []) as $customerTag)
+                                            <a href="{{ route('admin.customers.index', ['tag' => $customerTag]) }}" class="admin-mini-status">{{ $customerTag }}</a>
+                                        @endforeach
+                                    @endif
                                 </td>
                                 <td>{{ $customer->email }}</td>
                                 <td>{{ $customer->company ?: '—' }}</td>

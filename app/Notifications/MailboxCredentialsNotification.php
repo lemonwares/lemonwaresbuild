@@ -3,7 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\EmailOrder;
-use App\Support\LemonwaresMail;
+use App\Support\LemonWaresMail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
@@ -40,7 +40,7 @@ class MailboxCredentialsNotification extends Notification
 
     public function toMail(object $notifiable): MailMessage
     {
-        return LemonwaresMail::message()
+        return LemonWaresMail::message()
             ->subject(__('email.credentials_mail_subject', ['domain' => $this->order->domain]))
             ->markdown('mail.mailbox-credentials', [
                 'domain' => $this->order->domain,

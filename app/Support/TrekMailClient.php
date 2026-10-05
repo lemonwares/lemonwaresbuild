@@ -132,7 +132,7 @@ class TrekMailClient
     }
 
     /**
-     * Apply Lemonwares (or admin-configured) branding so TrekMail invites use your name/colors/logo.
+     * Apply LemonWares (or admin-configured) branding so TrekMail invites use your name/colors/logo.
      *
      * @return array<string, mixed>|null
      */

@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->extend('translation.loader', fn ($loader) => new \App\Support\OverridableTranslationLoader($loader));
     }
 
     /**
@@ -30,6 +30,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \App\Support\Catalog::apply();
+        \Illuminate\Support\Facades\Event::listen(
+            \Illuminate\Foundation\Events\LocaleUpdated::class,
+            fn () => \App\Support\Catalog::apply(),
+        );
+
         Mail::extend('zeptomail', function () {
             ZeptoMailSettings::applyRuntimeConfig();
 
@@ -46,6 +52,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         ZeptoMailSettings::applyRuntimeConfig();
+        \App\Support\SiteSettings::applyRuntimeConfig();
 
         RateLimiter::for('auth-login', function (Request $request): array {
             $email = strtolower((string) $request->input('email', 'guest'));

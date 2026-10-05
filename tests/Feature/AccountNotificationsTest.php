@@ -59,11 +59,13 @@ class AccountNotificationsTest extends TestCase
             'amount_ngn' => 15000,
             'status' => 'awaiting_payment',
             'payment_status' => 'pending',
+            'payment_reference' => 'LW-HOST-NOTIFY-1',
             'email' => $user->email,
         ]);
 
         $result = FlutterwavePayment::confirmHostingLeadPayment($lead, [
             'id' => 'tx-host-1',
+            'tx_ref' => 'LW-HOST-NOTIFY-1',
             'status' => 'successful',
             'amount' => 15000,
             'currency' => 'NGN',
@@ -102,6 +104,7 @@ class AccountNotificationsTest extends TestCase
 
         $result = FlutterwavePayment::confirmEmailOrderPayment($order, [
             'id' => 'tx-mail-1',
+            'tx_ref' => 'LW-MAIL-1-TEST',
             'status' => 'successful',
             'amount' => 7500,
             'currency' => 'NGN',

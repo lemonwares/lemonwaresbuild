@@ -133,8 +133,20 @@ class AdminBreadcrumbs
                 ['label' => 'Careers', 'href' => route('admin.career-openings.index')],
                 ['label' => 'Edit opening'],
             ],
-            'admin.hosting-prices.index' => [
-                ['label' => 'Hosting Prices'],
+            'admin.catalog.index' => [
+                ['label' => 'Plans & Pricing'],
+            ],
+            'admin.catalog.edit' => [
+                ['label' => 'Plans & Pricing', 'href' => route('admin.catalog.index')],
+                ['label' => 'Edit plan'],
+            ],
+            'admin.catalog.create' => [
+                ['label' => 'Plans & Pricing', 'href' => route('admin.catalog.index')],
+                ['label' => 'New plan'],
+            ],
+            'admin.catalog.groups.edit' => [
+                ['label' => 'Plans & Pricing', 'href' => route('admin.catalog.index')],
+                ['label' => 'Edit product group'],
             ],
             'admin.email-catalog.index' => [
                 ['label' => 'Email & Suite Pricing'],

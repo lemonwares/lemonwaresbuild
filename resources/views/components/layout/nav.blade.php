@@ -2,14 +2,9 @@
 
 @php
     $businessActive = request()->routeIs('email.*', 'google-workspace', 'microsoft-365');
-    $cloudActive = request()->routeIs('domain', 'cloud-hosting', 'plesk', 'vps', 'hosting.*');
+    $cloudActive = request()->routeIs('domain', 'cloud-hosting', 'vps', 'hosting.*');
     $developmentActive = request()->routeIs('development', 'web-development', 'mobile-apps', 'maintenance', 'microservices');
-
-    $businessLinks = [
-        ['label' => __('site.nav.email_plans'), 'href' => route('email.plans')],
-        ['label' => __('site.nav.email_get_started'), 'href' => route('email.plans').'#email-plans'],
-        ['label' => __('site.nav.email_contact'), 'href' => route('contact')],
-    ];
+    $projectsActive = request()->routeIs('case-studies', 'case-studies.*');
 
     $businessPartners = [
         [
@@ -26,18 +21,7 @@
         ],
     ];
 
-    $cloudLinks = [
-        ['label' => __('site.nav.cloud_plans'), 'href' => route('cloud-hosting')],
-        ['label' => __('site.nav.cloud_get_started'), 'href' => route('hosting.specifications', ['plan' => 'cpanel'])],
-    ];
-
     $cloudPartners = [
-        [
-            'label' => __('site.nav.plesk'),
-            'desc' => __('site.nav.plesk_desc'),
-            'href' => route('plesk'),
-            'logo' => 'images/brands/cloud-hosting.svg',
-        ],
         [
             'label' => __('site.nav.vps'),
             'desc' => __('site.nav.vps_desc'),
@@ -65,7 +49,6 @@
         :logo="'images/brands/mailemon-logo.png'"
         :cta-href="route('email.plans')"
         :cta-label="__('site.nav.email_mail_lemon_cta')"
-        :links="$businessLinks"
         :partners-label="__('site.nav.email_partners_label')"
         :partners="$businessPartners"
         :footer-note="__('site.nav.email_footer_note')"
@@ -79,10 +62,8 @@
         :trigger-label="__('site.nav.cloud_hosting')"
         :title="__('site.nav.cloud_hosting')"
         :description="__('site.nav.cloud_hosting_desc')"
-        :logo="'images/brands/cloud-hosting.svg'"
         :cta-href="route('cloud-hosting')"
         :cta-label="__('site.nav.cloud_cta')"
-        :links="$cloudLinks"
         :partners-label="__('site.nav.cloud_partners_label')"
         :partners="$cloudPartners"
         :footer-note="__('site.nav.cloud_footer_note')"
@@ -99,6 +80,14 @@
         @if ($developmentActive) aria-current="page" @endif
     >
         {{ __('site.nav.development') }}
+    </a>
+
+    <a
+        href="{{ route('case-studies') }}"
+        @class(['nav-link', 'nav-link-active' => $projectsActive])
+        @if ($projectsActive) aria-current="page" @endif
+    >
+        {{ __('site.nav.projects') }}
     </a>
 
     <a

@@ -111,6 +111,9 @@ class PasswordResetController extends Controller
                 ])->save();
 
                 event(new PasswordReset($user));
+
+                // Completing a reset proves control of the inbox.
+                EmailVerificationController::markVerified($user);
             },
         );
 

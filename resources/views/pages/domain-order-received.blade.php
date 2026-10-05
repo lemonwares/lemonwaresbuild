@@ -12,8 +12,8 @@
         $totalNgn = $checkout?->amount_ngn ?? $order?->amount_ngn ?? 0;
         $status = $checkout?->status ?? $order?->status;
         $payRoute = $checkout
-            ? route('domain.checkout.pay', $checkout)
-            : ($order ? route('domain.pay', $order) : null);
+            ? \App\Support\OrderLinks::url('domain.checkout.pay', $checkout)
+            : ($order ? \App\Support\OrderLinks::url('domain.pay', $order) : null);
     @endphp
 
     <x-layout.page-hero

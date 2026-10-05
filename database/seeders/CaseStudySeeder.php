@@ -25,9 +25,9 @@ class CaseStudySeeder extends Seeder
             [
                 'title' => 'Bright Media platform',
                 'client_name' => 'Bright Media',
-                'summary' => 'High-traffic WordPress platform migrated onto Lemonwares cloud hosting with caching, monitoring, and backup policies.',
+                'summary' => 'High-traffic WordPress platform migrated onto LemonWares cloud hosting with caching, monitoring, and backup policies.',
                 'outcome' => 'Faster loads, fewer incidents, and stable uptime for continuous publishing.',
-                'description' => "Bright Media’s WordPress platform was outgrowing unstable hosting. Peak traffic meant slow pages and recurring support noise.\n\nWe migrated the live site onto Lemonwares cloud hosting with caching, monitoring, and backups so publishing could stay continuous.",
+                'description' => "Bright Media’s WordPress platform was outgrowing unstable hosting. Peak traffic meant slow pages and recurring support noise.\n\nWe migrated the live site onto LemonWares cloud hosting with caching, monitoring, and backups so publishing could stay continuous.",
                 'cta_url' => 'https://wordpress.org',
                 'cta_label' => 'View live',
                 'cover_path' => 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1800&q=80',

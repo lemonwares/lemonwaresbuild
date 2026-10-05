@@ -12,6 +12,8 @@
     if (! is_array($apps)) {
         $apps = [];
     }
+    $appIcons = ['mail', 'cloud', 'video', 'calendar', 'file-text', 'message-circle'];
+
     $setupItems = __('pages.google_workspace.setup_items');
     if (! is_array($setupItems)) {
         $setupItems = [];
@@ -19,10 +21,6 @@
     $audienceItems = __('pages.google_workspace.audience_items');
     if (! is_array($audienceItems)) {
         $audienceItems = [];
-    }
-    $features = __('pages.google_workspace.features');
-    if (! is_array($features)) {
-        $features = [];
     }
     $highlights = __('pages.google_workspace.highlights');
     if (! is_array($highlights)) {
@@ -107,16 +105,24 @@
                 <p class="lede mx-auto mt-3">{{ __('pages.google_workspace.apps_lede') }}</p>
             </div>
             <div class="hosting-feature-grid" data-reveal-stagger>
-                @foreach ($apps as $app)
+                @foreach ($apps as $index => $app)
+                    @php($icon = $appIcons[$index] ?? 'layout')
                     <article class="hosting-feature-card">
                         <span class="dev-icon-badge mb-4" aria-hidden="true">
-                            <x-ui.icons.layout class="size-5 text-rose" />
+                            <x-dynamic-component :component="'ui.icons.'.$icon" class="size-5 text-rose" />
                         </span>
                         <h3 class="text-base font-bold text-black">{{ $app['title'] ?? '' }}</h3>
                         <p class="mt-2 text-sm font-light leading-relaxed text-on-blush/75">{{ $app['body'] ?? '' }}</p>
                     </article>
                 @endforeach
             </div>
+            @if (count($highlights) > 0)
+                <ul class="check-list mt-10 grid gap-3 md:grid-cols-2">
+                    @foreach (array_slice($highlights, 0, 4) as $item)
+                        <li>{{ $item }}</li>
+                    @endforeach
+                </ul>
+            @endif
         </div>
     </section>
 
@@ -135,29 +141,6 @@
                     </article>
                 @endforeach
             </div>
-        </div>
-    </section>
-
-    <section id="gws-features" class="scroll-mt-28 border-t border-border bg-blush-soft/40" data-reveal>
-        <div class="container-page py-16 sm:py-20">
-            <div class="mb-10 max-w-2xl">
-                <p class="section-label mb-3">{{ __('pages.google_workspace.features_eyebrow') }}</p>
-                <h2 class="heading">{{ __('pages.google_workspace.features_title') }}</h2>
-                <p class="lede mt-3">{{ __('pages.google_workspace.features_lede') }}</p>
-            </div>
-            <div class="hosting-feature-grid">
-                @foreach ($features as $feature)
-                    <article class="hosting-feature-card">
-                        <h3 class="text-base font-bold text-black">{{ $feature['title'] ?? '' }}</h3>
-                        <p class="mt-2 text-sm font-light leading-relaxed text-on-blush/75">{{ $feature['body'] ?? '' }}</p>
-                    </article>
-                @endforeach
-            </div>
-            <ul class="check-list mt-10 grid gap-3 md:grid-cols-2">
-                @foreach ($highlights as $item)
-                    <li>{{ $item }}</li>
-                @endforeach
-            </ul>
         </div>
     </section>
 
