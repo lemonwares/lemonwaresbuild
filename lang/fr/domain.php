@@ -29,6 +29,7 @@ return array (
   'invalid_domain' => 'Saisissez un nom de domaine valide.',
   'quote_unavailable' => 'Impossible de tarifer ce domaine pour le moment. Réessayez ou contactez le support.',
   'sync_failed' => 'Impossible de démarrer cette commande de domaine. Contactez le support — ne passez pas par un panier externe.',
+  'order_cancelled' => 'Cette commande a été annulée et ne peut plus être payée. Contactez le support en cas d’erreur.',
   'payment_unavailable' => 'Le paiement n’a pas pu démarrer. Rouvrez la commande ou contactez le support.',
   'payment_not_found' => 'Impossible d’associer ce paiement à une commande de domaine.',
   'payment_incomplete' => 'Le paiement n’est pas terminé. Vous pouvez réessayer depuis la page de commande.',

@@ -79,7 +79,8 @@ class LoginController extends Controller
             RateLimiter::hit($emailIpKey, 600);
             RateLimiter::hit($ipKey, 600);
 
-            $error = WhmcsClient::isConfigured()
+            // Always surface the bridge reason when WHMCS was attempted (including "not configured").
+            $error = WhmcsAuthBridge::lastFailure()
                 ? WhmcsAuthBridge::failureMessage()
                 : __('account.invalid_credentials');
 
@@ -101,6 +102,14 @@ class LoginController extends Controller
                 ->with('status', 'Staff accounts sign in at the admin dashboard.');
         }
 
+        if ($user->isSuspended()) {
+            Auth::logout();
+
+            return back()
+                ->withErrors(['email' => __('account.account_suspended')])
+                ->onlyInput('email');
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('account.show'));
@@ -108,6 +117,10 @@ class LoginController extends Controller
 
     public function destroy(Request $request): RedirectResponse
     {
+        if ($request->session()->has('impersonator_admin_id')) {
+            return app(\App\Http\Controllers\AdminCustomerAccessController::class)->stopImpersonating($request);
+        }
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();

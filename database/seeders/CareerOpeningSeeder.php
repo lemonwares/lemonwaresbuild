@@ -40,7 +40,7 @@ class CareerOpeningSeeder extends Seeder
                 'summary' => 'Own shared hosting, VPS, and platform operations: provisioning, monitoring, hardening, and incident response.',
                 'description' => "You will keep LemonWares hosting and related platforms healthy — provisioning, monitoring, and incidents.\n\nReliability and clear runbooks matter as much as clever automation.",
                 'responsibilities' => "- Operate and harden shared hosting and VPS environments\n- Improve monitoring, backups, and incident response\n- Automate repetitive provisioning where it pays off\n- Partner with support on customer-impacting issues",
-                'requirements' => "- Hands-on Linux administration experience\n- Familiarity with cPanel/Plesk or similar stacks\n- Comfort with networking, DNS, and SSL basics\n- Scripting (Bash/Python) and monitoring tools are a plus",
+                'requirements' => "- Hands-on Linux administration experience\n- Familiarity with cPanel or similar stacks\n- Comfort with networking, DNS, and SSL basics\n- Scripting (Bash/Python) and monitoring tools are a plus",
                 'apply_subject' => 'Careers · Cloud Infrastructure Engineer',
                 'sort_order' => 30,
             ],

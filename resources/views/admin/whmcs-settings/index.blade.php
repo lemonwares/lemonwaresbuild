@@ -49,11 +49,11 @@
                 </label>
                 <label class="admin-field admin-field-span">
                     <span>API Secret</span>
-                    <input type="text" name="api_secret" value="{{ old('api_secret', $settings['api_secret']) }}" class="admin-input" required>
+                    <input type="password" name="api_secret" value="" placeholder="{{ filled($settings['api_secret']) ? '•••••••• saved, leave blank to keep' : '' }}" class="admin-input" autocomplete="off">
                 </label>
                 <label class="admin-field admin-field-span">
                     <span>API Access Key (optional)</span>
-                    <input type="text" name="api_access_key" value="{{ old('api_access_key', $settings['api_access_key']) }}" class="admin-input" placeholder="Only if enabled in WHMCS General Settings > Security">
+                    <input type="password" name="api_access_key" value="" placeholder="{{ filled($settings['api_access_key']) ? '•••••••• saved, leave blank to keep' : 'Only if enabled in WHMCS General Settings > Security' }}" class="admin-input" autocomplete="off">
                     <p class="admin-muted text-xs">Required only when WHMCS has a global API Access Key configured.</p>
                 </label>
             </div>

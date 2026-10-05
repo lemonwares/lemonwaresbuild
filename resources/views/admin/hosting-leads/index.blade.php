@@ -50,6 +50,25 @@
                 </div>
             </div>
 
+            <form method="GET" action="{{ route('admin.hosting-leads.index') }}" class="admin-filter-bar">
+                <input type="search" name="q" value="{{ $search }}" class="admin-input" placeholder="Name, email, hostname or reference">
+                <select name="status" class="admin-input">
+                    <option value="">All statuses</option>
+                    @foreach ($statuses as $statusOption)
+                        <option value="{{ $statusOption }}" @selected($status === $statusOption)>{{ __('account.status.'.$statusOption) }}</option>
+                    @endforeach
+                </select>
+                <select name="assigned" class="admin-input">
+                    <option value="">Anyone</option>
+                    <option value="me" @selected($assigned === 'me')>Assigned to me</option>
+                    <option value="none" @selected($assigned === 'none')>Unassigned</option>
+                </select>
+                <button class="admin-btn-primary" type="submit">Apply</button>
+                @if ($search || $status || $assigned)
+                    <a href="{{ route('admin.hosting-leads.index') }}" class="admin-btn-ghost">Clear</a>
+                @endif
+            </form>
+
             <div class="admin-table-wrap is-full">
                 <table class="admin-table is-full">
                     <thead>
@@ -58,6 +77,7 @@
                             <th>Email</th>
                             <th>Plan</th>
                             <th>Status</th>
+                            <th>Assigned</th>
                             <th></th>
                         </tr>
                     </thead>
@@ -67,14 +87,15 @@
                                 <td><strong>{{ $lead->full_name }}</strong></td>
                                 <td>{{ $lead->email }}</td>
                                 <td>{{ $lead->plan_name }}{{ $lead->spec_label ? ' · '.$lead->spec_label : '' }}</td>
-                                <td><span class="admin-mini-status">{{ str_replace('_', ' ', $lead->status ?: 'pending') }}</span></td>
+                                <td><x-admin.status :value="$lead->status ?: 'pending'" /></td>
+                                <td>{{ $lead->assignedAdmin?->name ?: '—' }}</td>
                                 <td class="admin-table-actions">
                                     <a href="{{ route('admin.hosting-leads.show', $lead) }}">View</a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="admin-table-empty">No hosting leads yet.</td>
+                                <td colspan="6" class="admin-table-empty">No hosting leads match.</td>
                             </tr>
                         @endforelse
                     </tbody>

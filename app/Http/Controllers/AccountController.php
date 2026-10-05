@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\AccountContact;
 use App\Models\HostingLead;
 use App\Support\TrekMailClient;
+use App\Support\WhmcsClient;
+use App\Support\WhmcsSyncService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -287,6 +289,30 @@ class AccountController extends Controller
         $sharedHosting = $hostingLeads->filter->isShared()->values();
         $pendingVpsPayment = $vpsServers->first(fn ($lead) => $lead->isAwaitingPayment());
 
+        $whmcsCustomer = $user->whmcsCustomer;
+        $whmcsServiceCount = 0;
+        $whmcsActiveCount = 0;
+        $whmcsDomainCount = 0;
+        $whmcsUnpaidInvoices = 0;
+        $whmcsLinked = false;
+
+        if ($whmcsCustomer?->whmcs_client_id) {
+            $whmcsLinked = true;
+            WhmcsSyncService::syncServicesForCustomer($whmcsCustomer);
+
+            $whmcsServices = $user->whmcsServices()->get();
+            $whmcsServiceCount = $whmcsServices->count();
+            $whmcsActiveCount = $whmcsServices->filter(function ($service): bool {
+                return in_array(strtolower(trim((string) $service->status)), ['active', 'pending'], true);
+            })->count();
+
+            $clientId = (int) $whmcsCustomer->whmcs_client_id;
+            $whmcsDomainCount = count(WhmcsClient::getClientDomains($clientId));
+            $whmcsUnpaidInvoices = collect(WhmcsClient::getInvoices($clientId))
+                ->filter(fn ($row) => in_array(strtolower((string) ($row['status'] ?? '')), ['unpaid', 'overdue'], true))
+                ->count();
+        }
+
         $nextStep = 'browse';
         if ($pendingEmailPayment) {
             $nextStep = 'pay_email';
@@ -296,7 +322,12 @@ class AccountController extends Controller
             $nextStep = 'dns';
         } elseif ($latestOrder && $latestOrder->nextStepKey() === 'webmail') {
             $nextStep = 'webmail';
-        } elseif ($vpsServers->contains(fn ($lead) => $lead->isProvisioned()) || $sharedHosting->isNotEmpty() || $mailboxes->isNotEmpty()) {
+        } elseif (
+            $whmcsActiveCount > 0
+            || $vpsServers->contains(fn ($lead) => $lead->isProvisioned())
+            || $sharedHosting->isNotEmpty()
+            || $mailboxes->isNotEmpty()
+        ) {
             $nextStep = 'all_set';
         }
 
@@ -311,6 +342,11 @@ class AccountController extends Controller
             'pendingVpsPayment' => $pendingVpsPayment,
             'nextStep' => $nextStep,
             'webmailUrl' => TrekMailClient::webmailUrl(),
+            'whmcsLinked' => $whmcsLinked,
+            'whmcsServiceCount' => $whmcsServiceCount,
+            'whmcsActiveCount' => $whmcsActiveCount,
+            'whmcsDomainCount' => $whmcsDomainCount,
+            'whmcsUnpaidInvoices' => $whmcsUnpaidInvoices,
         ];
     }
 }

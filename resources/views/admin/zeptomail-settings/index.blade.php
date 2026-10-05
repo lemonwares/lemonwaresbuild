@@ -61,9 +61,9 @@
                         name="token"
                         rows="3"
                         class="admin-input admin-mono text-sm"
-                        placeholder="Paste Send Mail Token only (or full Zoho-enczapikey … value)"
+                        placeholder="{{ filled($settings['token']) ? '•••••••• saved, leave blank to keep' : 'Paste Send Mail Token only (or full Zoho-enczapikey … value)' }}"
                         autocomplete="off"
-                    >{{ old('token', $settings['token']) }}</textarea>
+                    ></textarea>
                     <p class="admin-muted text-xs">
                         Paste the token from ZeptoMail → Agent → SMTP/API. If you copy the full
                         <code class="rounded bg-blush-soft px-1">Zoho-enczapikey …</code> line, we strip the prefix automatically.

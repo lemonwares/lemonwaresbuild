@@ -20,7 +20,7 @@ return [
     'continue_billing' => 'Weiter zu den Rechnungsdaten',
     'select_prompt' => 'Wählen Sie oben mindestens ein Paket und fahren Sie dann mit den Rechnungsdaten fort.',
     'billed_monthly_vps' => 'VPS wird von LemonWares verarbeitet. Wählen Sie unten Paket und Zeitraum.',
-    'billed_monthly_shared' => 'cPanel- und Plesk-Checkout läuft nach den Rechnungsdaten über WHMCS weiter.',
+    'billed_monthly_shared' => 'cPanel-Checkout läuft nach den Rechnungsdaten über WHMCS weiter.',
     'save_percent' => ':percent% sparen',
     'period_total' => 'Zeitraumgesamt',
     'cycles' => [

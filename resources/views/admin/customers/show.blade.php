@@ -27,13 +27,13 @@
                     <button type="button" class="admin-btn-danger" data-confirm-open>Delete</button>
                     <div data-confirm-dialog class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/45 px-4">
                         <div class="w-full max-w-md rounded-2xl border border-border bg-white p-6 shadow-2xl">
-                            <h3 class="text-lg font-bold text-black">Delete this customer?</h3>
+                            <h3 class="text-lg font-bold text-black">Close and anonymise this customer?</h3>
                             <p class="mt-2 text-sm text-on-blush/70">
-                                This removes the LemonWares account
+                                Their name, email, phone and billing details are erased and they can no longer sign in
                                 @if ($customer->whmcsCustomer)
-                                    and closes WHMCS client #{{ $customer->whmcsCustomer->whmcs_client_id }}
+                                    , and WHMCS client #{{ $customer->whmcsCustomer->whmcs_client_id }} is closed
                                 @endif
-                                . Related email orders and contacts will also be removed.
+                                . Orders, invoices and payments are kept for your records. This cannot be undone.
                             </p>
                             <form method="POST" action="{{ route('admin.customers.destroy', $customer) }}" data-confirm-form class="mt-6 flex justify-end gap-2">
                                 @csrf
@@ -41,7 +41,7 @@
                                 <button type="button" data-confirm-cancel class="admin-btn-ghost">Cancel</button>
                                 <button type="button" data-confirm-submit class="admin-btn-danger inline-flex items-center gap-2">
                                     <span class="admin-btn-spinner hidden" data-confirm-spinner></span>
-                                    <span data-confirm-label data-loading-text="Deleting…">Yes, delete</span>
+                                    <span data-confirm-label data-loading-text="Closing…">Yes, close account</span>
                                 </button>
                             </form>
                         </div>
@@ -201,6 +201,8 @@
                 <span class="admin-metric-meta">Notification people</span>
             </div>
         </section>
+
+        @include('admin.customers.partials.access-panel', ['customer' => $customer, 'activities' => $activities])
 
         <div class="admin-customer-grid">
             <section class="admin-panel">

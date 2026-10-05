@@ -29,10 +29,7 @@ class FlutterwaveSettingsAdminTest extends TestCase
             'secret_hash' => 'hash-from-dashboard',
         ])->assertRedirect(route('admin.flutterwave-settings.index'));
 
-        $this->assertDatabaseHas('integration_settings', [
-            'key' => 'flutterwave.secret_key',
-            'value' => 'FLWSECK_TEST-secret',
-        ]);
+        $this->assertSame('FLWSECK_TEST-secret', \App\Models\IntegrationSetting::getValue('flutterwave.secret_key'));
 
         $this->assertSame('FLWSECK_TEST-secret', FlutterwaveSettings::secretKey());
         $this->assertTrue(FlutterwaveSettings::isConfigured());
@@ -47,6 +44,7 @@ class FlutterwaveSettingsAdminTest extends TestCase
         ]);
 
         Http::fake([
+            '*lemonwareslogo.webp' => Http::response('error', 500),
             'https://api.flutterwave.com/v3/payments' => function ($request) {
                 $this->assertStringContainsString(
                     'FLWSECK_TEST-from-db',
@@ -93,7 +91,7 @@ class FlutterwaveSettingsAdminTest extends TestCase
         config(['app.url' => 'https://gadgets.lemonwares.com']);
 
         Http::fake([
-            'https://gadgets.lemonwares.com/lemonwareslogo.webp' => Http::response('error', 500),
+            '*lemonwareslogo.webp' => Http::response('error', 500),
             'https://api.flutterwave.com/v3/payments' => function ($request) {
                 $payload = $request->data();
                 $this->assertArrayNotHasKey('logo', $payload['customizations'] ?? []);

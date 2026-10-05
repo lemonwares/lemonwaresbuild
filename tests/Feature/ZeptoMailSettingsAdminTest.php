@@ -33,10 +33,7 @@ class ZeptoMailSettingsAdminTest extends TestCase
             'contact_form_inbox' => 'hello@lemonwares.com',
         ])->assertRedirect(route('admin.zeptomail-settings.index'));
 
-        $this->assertDatabaseHas('integration_settings', [
-            'key' => 'zeptomail.token',
-            'value' => 'zm_admin_token',
-        ]);
+        $this->assertSame('zm_admin_token', \App\Models\IntegrationSetting::getValue('zeptomail.token'));
         $this->assertDatabaseHas('integration_settings', [
             'key' => 'zeptomail.logo_url',
             'value' => 'https://cdn.example.com/lemonwareslogo.png',

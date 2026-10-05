@@ -7,9 +7,15 @@ use App\Models\DomainOrder;
 use App\Models\User;
 use App\Models\WhmcsCustomer;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class WhmcsDomainOrderSync
 {
+    /**
+     * @var array<int, true>
+     */
+    protected static array $createdClientIds = [];
+
     public static function syncCheckoutBundle(DomainCheckout $checkout): DomainCheckout
     {
         if (! WhmcsClient::isConfigured()) {
@@ -152,15 +158,12 @@ class WhmcsDomainOrderSync
         }
 
         if ($invoiceId > 0 && $transactionId !== '') {
-            $amount = self::invoicePaymentAmount($invoiceId, (float) ($checkout->amount_ngn ?? 0));
+            $outstanding = WhmcsClient::invoiceOutstanding($invoiceId);
+            if ($outstanding === null) {
+                return self::markCheckout($checkout, 'failed', WhmcsClient::lastError() ?: 'Could not read the WHMCS invoice balance.');
+            }
 
-            $invoicePaid = WhmcsClient::addInvoicePayment(
-                $invoiceId,
-                $amount,
-                $transactionId,
-            );
-
-            if (! $invoicePaid) {
+            if ($outstanding > 0 && ! WhmcsClient::addInvoicePayment($invoiceId, $outstanding, $transactionId)) {
                 return self::markCheckout($checkout, 'failed', WhmcsClient::lastError() ?: 'WHMCS invoice payment recording failed.');
             }
         }
@@ -251,6 +254,7 @@ class WhmcsDomainOrderSync
         }
 
         $clientId = (int) ($user->whmcsCustomer?->whmcs_client_id ?? 0);
+        $linkedClient = $clientId > 0;
 
         if ($clientId < 1) {
             $client = WhmcsClient::findClientByEmail((string) $user->email);
@@ -273,12 +277,15 @@ class WhmcsDomainOrderSync
 
         if ($clientId < 1) {
             $created = WhmcsClient::createClient(array_merge($clientPayload, [
-                'password2' => 'LW-DCART-'.$checkout->id.'-Temp#'.random_int(1000, 9999),
+                'password2' => Str::password(32),
                 'skipvalidation' => true,
             ]));
 
             $clientId = (int) data_get($created, 'clientid', 0);
-        } else {
+            self::$createdClientIds[$clientId] = true;
+        } elseif ($linkedClient) {
+            // Only refresh WHMCS details for a client already proven to belong to this user;
+            // an email match alone must never let someone rewrite another client's record.
             WhmcsClient::updateClient(array_merge($clientPayload, [
                 'clientid' => $clientId,
             ]));
@@ -290,6 +297,16 @@ class WhmcsDomainOrderSync
     protected static function linkWhmcsCustomer(User $user, int $clientId): void
     {
         if ($clientId < 1) {
+            return;
+        }
+
+        // An existing WHMCS client found only by email is linked once the user has proven
+        // they own that address; otherwise an unverified sign-up could inherit someone's account.
+        $ownsClient = isset(self::$createdClientIds[$clientId])
+            || (int) ($user->whmcsCustomer?->whmcs_client_id ?? 0) === $clientId
+            || $user->hasVerifiedEmail();
+
+        if (! $ownsClient) {
             return;
         }
 
@@ -320,29 +337,6 @@ class WhmcsDomainOrderSync
         $id = (int) data_get($catalog, 'currency.id', 0);
 
         return $id > 0 ? $id : 0;
-    }
-
-    /**
-     * Prefer WHMCS invoice balance so AddInvoicePayment clears the invoice in WHMCS currency.
-     */
-    protected static function invoicePaymentAmount(int $invoiceId, float $fallbackNgn): float
-    {
-        $invoice = WhmcsClient::getInvoice($invoiceId);
-        if (! $invoice) {
-            return round(max(0.01, $fallbackNgn), 2);
-        }
-
-        $balance = (float) data_get($invoice, 'balance', 0);
-        if ($balance > 0) {
-            return round($balance, 2);
-        }
-
-        $total = (float) data_get($invoice, 'total', 0);
-        if ($total > 0) {
-            return round($total, 2);
-        }
-
-        return round(max(0.01, $fallbackNgn), 2);
     }
 
     protected static function markCheckout(DomainCheckout $checkout, string $status, string $error): DomainCheckout

@@ -2,8 +2,6 @@
 
 namespace App\Support;
 
-use App\Models\HostingPlanPrice;
-
 class HostingPricing
 {
     public static function usdToNgnRate(): float
@@ -13,7 +11,7 @@ class HostingPricing
 
     public static function billingCycles(): array
     {
-        return config('site.billing_cycles', []);
+        return Catalog::cycles();
     }
 
     public static function cycle(string $key): ?array
@@ -22,32 +20,21 @@ class HostingPricing
     }
 
     /**
-     * Monthly hosting price in NGN (admin amount, or config default).
+     * Monthly hosting price in NGN, as set in the admin catalog.
      */
     public static function monthlyNgnForSpec(string $planSlug, string $specKey): float
     {
-        $price = HostingPlanPrice::query()
-            ->where('plan_slug', strtolower($planSlug))
-            ->where('spec_key', strtolower($specKey))
-            ->first();
+        return (float) (Catalog::plan(strtolower($planSlug), $specKey)?->price_ngn ?? 0);
+    }
 
-        if ($price && (float) $price->price_amount > 0) {
-            return self::amountAsNgn((float) $price->price_amount, (string) $price->currency);
-        }
+    /**
+     * Total for one billing period of a plan, honouring the plan's own cycle prices and discounts.
+     */
+    public static function periodNgnForSpec(string $planSlug, string $specKey, string $cycleKey): float
+    {
+        $plan = Catalog::plan(strtolower($planSlug), $specKey);
 
-        $plans = config('site.hosting_plans', []);
-        $plan = is_array($plans[$planSlug] ?? null) ? $plans[$planSlug] : null;
-        $specs = collect($plan['specifications'] ?? $plan['specs'] ?? []);
-        $spec = $specs->first(fn ($row) => strtolower((string) ($row['key'] ?? '')) === strtolower($specKey));
-
-        if (! is_array($spec)) {
-            return 0.0;
-        }
-
-        return self::amountAsNgn(
-            (float) ($spec['default_price'] ?? 0),
-            (string) ($spec['default_currency'] ?? 'NGN'),
-        );
+        return $plan ? Catalog::periodNgn((float) $plan->price_ngn, $cycleKey, $plan) : 0.0;
     }
 
     /**
@@ -83,12 +70,7 @@ class HostingPricing
 
     public static function periodTotalNgn(float $monthlyNgn, string $cycleKey): float
     {
-        $cycle = self::cycle($cycleKey) ?? self::cycle('monthly');
-        $months = (int) ($cycle['months'] ?? 1);
-        $discount = (float) ($cycle['discount_percent'] ?? 0);
-        $subtotal = $monthlyNgn * $months;
-
-        return round($subtotal * (1 - ($discount / 100)), 2);
+        return Catalog::periodNgn($monthlyNgn, $cycleKey);
     }
 
     /**
@@ -132,28 +114,5 @@ class HostingPricing
     public static function monthlySuffix(): string
     {
         return '/mo';
-    }
-
-    public static function pricePayload(HostingPlanPrice $price, string $cycleKey = 'monthly'): array
-    {
-        $monthlyNgn = self::amountAsNgn((float) $price->price_amount, (string) $price->currency);
-        $cycle = self::cycle($cycleKey) ?? self::cycle('monthly');
-        $totalNgn = self::periodTotalNgn($monthlyNgn, $cycleKey);
-        $months = (int) ($cycle['months'] ?? 1);
-        $discount = (int) ($cycle['discount_percent'] ?? 0);
-        $rate = max(1.0, self::usdToNgnRate());
-
-        return [
-            'monthly_ngn' => $monthlyNgn,
-            'monthly_usd' => round($monthlyNgn / $rate, 2),
-            'period_ngn' => $totalNgn,
-            'period_usd' => round($totalNgn / $rate, 2),
-            'months' => $months,
-            'discount_percent' => $discount,
-            'cycle' => $cycleKey,
-            'price_display' => self::ngnPriceDisplay($monthlyNgn, self::monthlySuffix()),
-            'period_display' => self::ngnPriceDisplay($totalNgn),
-            'billing_cycle_label' => self::cycleLabel($cycleKey),
-        ];
     }
 }

@@ -341,7 +341,10 @@ class AdminCrmTest extends TestCase
         $this->delete(route('admin.customers.destroy', $customer))
             ->assertRedirect(route('admin.customers.index', ['source' => 'native']));
 
-        $this->assertDatabaseMissing('users', ['id' => $customer->id]);
+        $closed = $customer->fresh();
+        $this->assertSame('Closed customer #'.$customer->id, $closed->name);
+        $this->assertStringEndsWith('@closed.invalid', $closed->email);
+        $this->assertNotNull($closed->suspended_at);
         $this->assertDatabaseMissing('whmcs_customers', ['whmcs_client_id' => 42]);
 
         Http::assertSent(function ($request) {

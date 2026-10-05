@@ -68,6 +68,7 @@ class EmailOrder extends Model
             'fulfilment_updated_at' => 'datetime',
             'period_starts_at' => 'datetime',
             'period_ends_at' => 'datetime',
+            'renewal_reminders' => 'array',
             'deactivated_at' => 'datetime',
             'dns_applied_at' => 'datetime',
         ];
@@ -96,12 +97,12 @@ class EmailOrder extends Model
     }
 
     /**
-     * Lemon Mail is ops-manual but still paid at checkout.
-     * Partner suites (Titan/GWS/MS365) stay unpaid queue tickets.
+     * Every plan is paid at checkout. Legacy partner-suite tickets created before
+     * that rule kept status awaiting_manual_fulfilment without a payment.
      */
     public function requiresCheckoutPayment(): bool
     {
-        return $this->provider === 'lemonmail' || $this->fulfilment_mode !== 'manual';
+        return ! ($this->status === 'awaiting_manual_fulfilment' && ! $this->isPaid() && $this->payment_status === null);
     }
 
     public function isAwaitingPayment(): bool

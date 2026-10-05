@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAdminOrderControls;
 use App\Support\WhmcsDomainPricing;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DomainOrder extends Model
 {
+    use HasAdminOrderControls;
+
     protected $fillable = [
         'user_id',
         'domain_checkout_id',

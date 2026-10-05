@@ -162,7 +162,10 @@
                     </header>
 
                     <div class="admin-mobile-nav">
-                        <x-admin.nav />
+                        <details class="admin-mobile-menu">
+                            <summary>Menu</summary>
+                            <x-admin.nav />
+                        </details>
                     </div>
 
                     <main class="admin-content">

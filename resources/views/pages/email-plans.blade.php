@@ -49,7 +49,7 @@
         $faqItems = [];
     }
     $mailemonPlans = collect($plans ?? [])
-        ->filter(fn ($plan) => ($plan['provider'] ?? 'lemonmail') === 'lemonmail')
+        ->filter(fn ($plan) => in_array($plan['provider'] ?? 'lemonmail', ['lemonmail', 'titan'], true))
         ->values()
         ->all();
 @endphp

@@ -58,10 +58,7 @@ class EmailProviderSettingsAdminTest extends TestCase
             ],
         ])->assertRedirect(route('admin.email-provider-settings.index'));
 
-        $this->assertDatabaseHas('integration_settings', [
-            'key' => 'trekmail.token',
-            'value' => 'tm_live_from_admin',
-        ]);
+        $this->assertSame('tm_live_from_admin', \App\Models\IntegrationSetting::getValue('trekmail.token'));
 
         $this->assertSame('tm_live_from_admin', TrekMailSettings::token());
         $this->assertTrue(TrekMailSettings::isConfigured());

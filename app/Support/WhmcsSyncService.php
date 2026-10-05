@@ -90,9 +90,17 @@ class WhmcsSyncService
     protected static function upsertCustomer(array $payload): WhmcsCustomer
     {
         $email = strtolower(trim((string) data_get($payload, 'email', '')));
-        $linkedUser = $email !== ''
-            ? User::query()->customers()->where('email', $email)->first()
-            : null;
+        $existing = WhmcsCustomer::query()->where('whmcs_client_id', (int) data_get($payload, 'id'))->first();
+
+        // Keep an established link; otherwise only link by email to a user who verified that address.
+        $linkedUserId = $existing?->user_id;
+        if (! $linkedUserId && $email !== '') {
+            $linkedUserId = User::query()
+                ->customers()
+                ->where('email', $email)
+                ->whereNotNull('email_verified_at')
+                ->value('id');
+        }
 
         $firstName = (string) data_get($payload, 'firstname', '');
         $lastName = (string) data_get($payload, 'lastname', '');
@@ -102,7 +110,7 @@ class WhmcsSyncService
         $customer = WhmcsCustomer::query()->updateOrCreate(
             ['whmcs_client_id' => (int) data_get($payload, 'id')],
             [
-                'user_id' => $linkedUser?->id,
+                'user_id' => $linkedUserId,
                 'first_name' => $firstName ?: null,
                 'last_name' => $lastName ?: null,
                 'full_name' => $fullName !== '' ? $fullName : ((string) data_get($payload, 'fullname', '') ?: null),

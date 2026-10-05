@@ -60,12 +60,10 @@
                 <label class="admin-field admin-field-span">
                     <span>Secret Key</span>
                     <input
-                        type="text"
+                        type="password"
                         name="secret_key"
-                        value="{{ old('secret_key', $settings['secret_key']) }}"
+                        value="" placeholder="{{ filled($settings['secret_key']) ? '•••••••• saved, leave blank to keep' : 'FLWSECK_TEST-...' }}"
                         class="admin-input"
-                        required
-                        placeholder="FLWSECK_TEST-..."
                         autocomplete="off"
                     >
                 </label>
@@ -73,11 +71,10 @@
                 <label class="admin-field admin-field-span">
                     <span>Webhook Secret Hash</span>
                     <input
-                        type="text"
+                        type="password"
                         name="secret_hash"
-                        value="{{ old('secret_hash', $settings['secret_hash']) }}"
+                        value="" placeholder="{{ filled($settings['secret_hash']) ? '•••••••• saved, leave blank to keep' : 'Same hash configured in Flutterwave dashboard' }}"
                         class="admin-input"
-                        placeholder="Same hash configured in Flutterwave dashboard"
                         autocomplete="off"
                     >
                     <p class="admin-muted text-xs">Required for server-to-server webhook verification. Set the same value in Flutterwave → Settings → Webhooks.</p>

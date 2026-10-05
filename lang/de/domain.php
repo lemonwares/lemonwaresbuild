@@ -29,6 +29,7 @@ return array (
   'invalid_domain' => 'Geben Sie einen gültigen Domainnamen ein.',
   'quote_unavailable' => 'Diese Domain konnte gerade nicht bepreist werden. Bitte erneut versuchen oder Support kontaktieren.',
   'sync_failed' => 'Die Domainbestellung konnte nicht gestartet werden. Bitte Support kontaktieren — nicht über einen externen Warenkorb.',
+  'order_cancelled' => 'Diese Bestellung wurde storniert und kann nicht mehr bezahlt werden. Bitte Support kontaktieren, falls dies ein Fehler ist.',
   'payment_unavailable' => 'Zahlung konnte nicht gestartet werden. Bestellung erneut öffnen oder Support kontaktieren.',
   'payment_not_found' => 'Diese Zahlung konnte keiner Domainbestellung zugeordnet werden.',
   'payment_incomplete' => 'Zahlung nicht abgeschlossen. Sie können es auf der Bestellseite erneut versuchen.',

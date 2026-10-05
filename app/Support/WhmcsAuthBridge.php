@@ -34,26 +34,21 @@ class WhmcsAuthBridge
     }
 
     /**
-     * Human-readable login error for the form (includes WHMCS API detail when available).
+     * Login error for the form. Kept generic so the form never reveals whether a password was right,
+     * an email belongs to staff, or how WHMCS is configured; the real reason goes to the log.
      */
     public static function failureMessage(): string
     {
-        $detail = trim((string) self::$lastFailureDetail);
-        $base = match (self::$lastFailure) {
-            self::FAIL_NOT_CONFIGURED => __('account.login_whmcs_not_configured'),
-            self::FAIL_ADMIN => __('account.login_whmcs_admin_blocked'),
-            self::FAIL_TWO_FACTOR => __('account.login_whmcs_two_factor'),
-            self::FAIL_CLIENT => __('account.login_whmcs_client_missing'),
-            self::FAIL_API => __('account.login_whmcs_api_error'),
-            self::FAIL_CREDENTIALS => __('account.login_whmcs_credentials'),
-            default => __('account.invalid_credentials'),
-        };
-
-        if ($detail === '' || str_contains(mb_strtolower($base), mb_strtolower($detail))) {
-            return $base;
+        if (self::$lastFailure && self::$lastFailure !== self::FAIL_CREDENTIALS) {
+            logger()->info('WHMCS login bridge failed', [
+                'reason' => self::$lastFailure,
+                'detail' => self::$lastFailureDetail,
+            ]);
         }
 
-        return $base.' ('.$detail.')';
+        return self::$lastFailure === self::FAIL_API
+            ? __('account.login_whmcs_api_error')
+            : __('account.invalid_credentials');
     }
 
     /**

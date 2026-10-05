@@ -173,6 +173,7 @@ class EmailLifecycleTest extends TestCase
 
         $result = \App\Support\FlutterwavePayment::confirmEmailOrderPayment($order, [
             'id' => 'tx-renew-1',
+            'tx_ref' => 'LW-MAIL-R-99-ABC',
             'status' => 'successful',
             'amount' => 7500,
             'currency' => 'NGN',
@@ -208,6 +209,7 @@ class EmailLifecycleTest extends TestCase
 
         $result = \App\Support\FlutterwavePayment::confirmEmailOrderPayment($order, [
             'id' => 'tx-renew-2',
+            'tx_ref' => 'LW-MAIL-R-1-ZZZ',
             'status' => 'successful',
             'amount' => 7500,
             'currency' => 'NGN',

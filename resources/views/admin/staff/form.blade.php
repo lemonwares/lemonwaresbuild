@@ -1,9 +1,9 @@
 @php
     $member = $member ?? null;
     $permissionOptions = $permissionOptions ?? \App\Support\AdminPermissions::all();
-    $selectedPermissions = old('permissions', $member?->admin_permissions ?? []);
-    if (! is_array($selectedPermissions)) {
-        $selectedPermissions = [];
+    $selectedLevels = old('permission_levels', \App\Support\AdminPermissions::levelsFromEntries($member?->admin_permissions ?? []));
+    if (! is_array($selectedLevels)) {
+        $selectedLevels = [];
     }
     $currentAdmin = \App\Support\AdminPermissions::currentUser();
     $canAssign = $currentAdmin?->isSuperAdmin() ?? false;
@@ -53,22 +53,22 @@
             @endif
         </div>
 
-        <div class="admin-field admin-field-span">
-            <span>Permissions</span>
-            <p class="admin-muted mb-3">Used when the account is not a super admin. Tick only the areas this person should open.</p>
-            <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach ($permissionOptions as $key => $label)
-                    <label class="admin-check mt-0">
-                        <input
-                            type="checkbox"
-                            name="permissions[]"
-                            value="{{ $key }}"
-                            @checked(in_array($key, $selectedPermissions, true))
-                        >
-                        <span>{{ $label }}</span>
-                    </label>
+        <label class="admin-field admin-field-span">
+            <span>Role</span>
+            <select name="admin_role_id" class="admin-input">
+                <option value="">No role (use the levels below only)</option>
+                @foreach ($roles ?? [] as $role)
+                    <option value="{{ $role->id }}" @selected((string) old('admin_role_id', $member->admin_role_id ?? '') === (string) $role->id)>{{ $role->name }}</option>
                 @endforeach
-            </div>
+            </select>
+            <p class="admin-muted mt-1">The role's access and the levels below are combined; the higher level wins. <a href="{{ route('admin.roles.index') }}" class="font-semibold text-rose hover:underline">Manage roles</a></p>
+            @error('admin_role_id') <em>{{ $message }}</em> @enderror
+        </label>
+
+        <div class="admin-field admin-field-span">
+            <span>Access per area</span>
+            <p class="admin-muted mb-3">Used when the account is not a super admin. View only = can open pages; View + edit = can change things; Full = can also delete.</p>
+            @include('admin.staff.permission-levels', ['permissionOptions' => $permissionOptions, 'selectedLevels' => $selectedLevels])
             @error('permissions') <em>{{ $message }}</em> @enderror
         </div>
     @endif

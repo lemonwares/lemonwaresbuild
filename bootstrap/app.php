@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\BlockSuspendedUsers::class,
+            \App\Http\Middleware\SiteMaintenanceMode::class,
         ]);
         $middleware->validateCsrfTokens(except: [
             'webhooks/flutterwave',

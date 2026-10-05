@@ -60,15 +60,13 @@
                         <span>{{ __('hosting.view_plans') }}</span>
                     </a>
                     <a
-                        href="{{ $isVps ? route('vps') : (($planSlug ?? '') === 'plesk' ? route('plesk') : route('cloud-hosting')) }}"
+                        href="{{ $isVps ? route('vps') : route('cloud-hosting') }}"
                         class="inline-flex items-center gap-2 text-sm font-semibold text-white/90 transition hover:text-white"
                     >
                         <x-ui.icons.arrow-left class="size-4" />
                         <span>
                             @if ($isVps)
                                 {{ __('pages.vps.meta_title') }}
-                            @elseif (($planSlug ?? '') === 'plesk')
-                                {{ __('pages.plesk.meta_title') }}
                             @else
                                 {{ __('pages.cloud_hosting.meta_title') }}
                             @endif

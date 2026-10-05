@@ -31,6 +31,7 @@ return [
     'invalid_domain' => 'Enter a valid domain name.',
     'quote_unavailable' => 'We could not price this domain right now. Try again or contact support.',
     'sync_failed' => 'We could not start this domain order. Please contact support — do not retry via an external cart.',
+    'order_cancelled' => 'This order was cancelled and can no longer be paid. Contact support if you think this is a mistake.',
     'payment_unavailable' => 'Payment could not be started right now. Open your order and try again, or contact support.',
     'payment_not_found' => 'We could not match that payment to a domain order.',
     'payment_incomplete' => 'Payment was not completed. You can try again from the order page.',

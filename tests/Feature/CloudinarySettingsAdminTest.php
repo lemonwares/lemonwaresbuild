@@ -39,14 +39,8 @@ class CloudinarySettingsAdminTest extends TestCase
             'key' => 'cloudinary.cloud_name',
             'value' => 'lemonwares',
         ]);
-        $this->assertDatabaseHas('integration_settings', [
-            'key' => 'cloudinary.api_key',
-            'value' => 'key_123',
-        ]);
-        $this->assertDatabaseHas('integration_settings', [
-            'key' => 'cloudinary.api_secret',
-            'value' => 'secret_456',
-        ]);
+        $this->assertSame('key_123', \App\Models\IntegrationSetting::getValue('cloudinary.api_key'));
+        $this->assertSame('secret_456', \App\Models\IntegrationSetting::getValue('cloudinary.api_secret'));
 
         $this->assertTrue(CloudinarySettings::isConfigured());
         $this->assertTrue(MediaStorage::enabled());

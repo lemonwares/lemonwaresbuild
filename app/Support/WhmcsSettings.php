@@ -74,7 +74,6 @@ class WhmcsSettings
 
         $envFallback = match (strtolower($planSlug)) {
             'cpanel' => config('site.hosting_plans.cpanel.whmcs_pid'),
-            'plesk' => config('site.hosting_plans.plesk.whmcs_pid'),
             'vps' => config('site.hosting_plans.vps.whmcs_pid'),
             default => null,
         };

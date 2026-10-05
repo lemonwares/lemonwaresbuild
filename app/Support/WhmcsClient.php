@@ -130,6 +130,29 @@ class WhmcsClient
     /**
      * @return array<string, mixed>|null
      */
+    /**
+     * Outstanding balance of a WHMCS invoice in the invoice's own currency:
+     * 0 when it is already settled, null when the invoice could not be read.
+     */
+    public static function invoiceOutstanding(int $invoiceId): ?float
+    {
+        $invoice = self::getInvoice($invoiceId);
+        if (! $invoice) {
+            return null;
+        }
+
+        if (strcasecmp((string) data_get($invoice, 'status', ''), 'Paid') === 0) {
+            return 0.0;
+        }
+
+        $balance = data_get($invoice, 'balance');
+        if ($balance === null || ! is_numeric($balance)) {
+            return null;
+        }
+
+        return max(0.0, round((float) $balance, 2));
+    }
+
     public static function getInvoice(int $invoiceId): ?array
     {
         $response = self::request('GetInvoice', [
@@ -193,6 +216,103 @@ class WhmcsClient
         }
 
         return $response;
+    }
+
+    /**
+     * One-click login to a provisioned service control panel (cPanel, Plesk, etc.).
+     *
+     * Tries the ModuleSingleSignOn API first, then WHMCS client-area dosinglesignon
+     * (the documented client-area SSO trigger) so we never dump users on product details.
+     *
+     * @see https://developers.whmcs.com/provisioning-modules/single-sign-on/
+     */
+    public static function moduleSingleSignOn(int $serviceId, ?int $clientId = null): ?string
+    {
+        if ($serviceId < 1) {
+            return null;
+        }
+
+        foreach ([['serviceid' => $serviceId], ['service_id' => $serviceId]] as $payload) {
+            $response = self::request('ModuleSingleSignOn', $payload);
+            if (($response['result'] ?? null) === 'success') {
+                $url = trim((string) ($response['redirect_url'] ?? $response['url'] ?? $response['redirectTo'] ?? ''));
+                if ($url !== '') {
+                    return $url;
+                }
+            }
+        }
+
+        // Fallback: SSO into WHMCS product details with dosinglesignon=1 so WHMCS
+        // immediately hands off to the server module (cPanel), not a dead product page.
+        if ($clientId !== null && $clientId > 0) {
+            $sso = self::createSsoToken(
+                $clientId,
+                'clientarea.php?action=productdetails&id='.$serviceId.'&dosinglesignon=1',
+            );
+            $url = trim((string) data_get($sso, 'redirect_url', ''));
+            if ($url !== '') {
+                return $url;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * SSO into WHMCS client-area product details for a service.
+     */
+    public static function createServiceSsoUrl(int $clientId, int $serviceId): ?string
+    {
+        if ($clientId < 1 || $serviceId < 1) {
+            return null;
+        }
+
+        $response = self::request('CreateSsoToken', [
+            'client_id' => $clientId,
+            'destination' => 'clientarea:product_details',
+            'service_id' => $serviceId,
+        ]);
+
+        if (! $response || ($response['result'] ?? null) !== 'success') {
+            // Fallback: custom redirect into product details.
+            $response = self::createSsoToken($clientId, 'clientarea.php?action=productdetails&id='.$serviceId);
+        }
+
+        if (! $response || ($response['result'] ?? null) !== 'success') {
+            return null;
+        }
+
+        $url = trim((string) ($response['redirect_url'] ?? ''));
+
+        return $url !== '' ? $url : null;
+    }
+
+    /**
+     * SSO into WHMCS client-area domain details.
+     */
+    public static function createDomainSsoUrl(int $clientId, int $domainId): ?string
+    {
+        if ($clientId < 1 || $domainId < 1) {
+            return null;
+        }
+
+        $response = self::request('CreateSsoToken', [
+            'client_id' => $clientId,
+            'destination' => 'clientarea:domain_details',
+            'domain_id' => $domainId,
+        ]);
+
+        if (! $response || ($response['result'] ?? null) !== 'success') {
+            $response = self::createSsoToken($clientId, 'clientarea.php?action=domaindetails&id='.$domainId);
+        }
+
+        if (! $response || ($response['result'] ?? null) !== 'success') {
+            return null;
+        }
+
+        $url = trim((string) ($response['redirect_url'] ?? ''));
+
+        return $url !== '' ? $url : null;
     }
 
     /**
@@ -369,9 +489,13 @@ class WhmcsClient
             }
         }
 
-        // Last resort: only if userid happens to equal a client id (older WHMCS).
+        // Last resort for older WHMCS where user and client ids coincide: only trust it
+        // when that client's own email is the one that just logged in.
         if ($whmcsUserId > 0) {
-            return self::findClientById($whmcsUserId);
+            $candidate = self::findClientById($whmcsUserId);
+            if ($candidate && strtolower(trim((string) ($candidate['email'] ?? ''))) === $email) {
+                return $candidate;
+            }
         }
 
         return null;
@@ -419,10 +543,10 @@ class WhmcsClient
             $id = (int) ($user['id'] ?? 0);
             $userEmail = strtolower(trim((string) ($user['email'] ?? '')));
 
-            $matchesUser = $whmcsUserId > 0 && $id === $whmcsUserId;
             $matchesEmail = $userEmail === $email;
+            $matchesUser = $whmcsUserId < 1 || $id === $whmcsUserId;
 
-            if (! $matchesUser && ! $matchesEmail) {
+            if (! $matchesEmail || ! $matchesUser) {
                 continue;
             }
 
@@ -435,26 +559,18 @@ class WhmcsClient
                 $clients = [$clients];
             }
 
-            $ownerId = 0;
-            $anyId = 0;
+            // Only an owned client counts: a WHMCS sub-user must not get owner-level access here.
             foreach ($clients as $client) {
                 if (! is_array($client)) {
                     continue;
                 }
                 $cid = (int) ($client['id'] ?? 0);
-                if ($cid < 1) {
-                    continue;
-                }
-                if ($anyId < 1) {
-                    $anyId = $cid;
-                }
-                if (filter_var($client['isOwner'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
-                    $ownerId = $cid;
-                    break;
+                if ($cid > 0 && filter_var($client['isOwner'] ?? false, FILTER_VALIDATE_BOOLEAN)) {
+                    return $cid;
                 }
             }
 
-            return $ownerId > 0 ? $ownerId : $anyId;
+            return 0;
         }
 
         return 0;

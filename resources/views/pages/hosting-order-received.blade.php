@@ -177,7 +177,7 @@
                         </a>
                     @endif
                 @elseif ($lead->isAwaitingPayment())
-                    <form method="POST" action="{{ route('hosting.flutterwave.pay', $lead) }}">
+                    <form method="POST" action="{{ \App\Support\OrderLinks::url('hosting.flutterwave.pay', $lead) }}">
                         @csrf
                         <button type="submit" class="inline-flex rounded-2xl bg-rose px-5 py-3 text-sm font-bold text-white">
                             {{ __('email.pay_with_flutterwave') }}

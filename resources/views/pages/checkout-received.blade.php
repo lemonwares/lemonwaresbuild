@@ -53,7 +53,7 @@
 
                 <div class="mt-6 flex flex-wrap gap-3">
                     @if (! $checkout->isPaid())
-                        <form method="POST" action="{{ route('checkout.pay', $checkout) }}" data-submit-form>
+                        <form method="POST" action="{{ \App\Support\OrderLinks::url('checkout.pay', $checkout) }}" data-submit-form>
                             @csrf
                             <x-ui.submit-button
                                 :label="__('cart.pay_again')"

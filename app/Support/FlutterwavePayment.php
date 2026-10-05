@@ -30,9 +30,18 @@ class FlutterwavePayment
             return null;
         }
 
+        if ($lead->isPaid() || in_array((string) $lead->status, ['cancelled', 'rejected', 'refunded'], true)) {
+            return null;
+        }
+
         $prefix = $lead->isShared() ? 'LW-HOST-' : 'LW-VPS-';
         $txRef = $lead->payment_reference ?: ($prefix . $lead->id . '-' . Str::upper(Str::random(8)));
-        $amountNgn = max(1, (int) round((float) ($lead->amount_ngn ?? 0)));
+        $amountNgn = self::payableAmountNgn((float) ($lead->amount_ngn ?? 0));
+        if ($amountNgn === null) {
+            Log::warning('Flutterwave payment link refused for a zero-amount order', ['payable' => $lead->getMorphClass().'#'.$lead->getKey()]);
+
+            return null;
+        }
 
         $payload = [
             'tx_ref' => $txRef,
@@ -87,15 +96,25 @@ class FlutterwavePayment
      */
     public static function confirmHostingLeadPayment(HostingLead $lead, array $verified): array
     {
-        if ($lead->isPaid()) {
+        $transactionId = (string) data_get($verified, 'id', '');
+        $alreadyPaid = [
+            'ok' => true,
+            'already_paid' => true,
+            'message' => __('hosting.payment_already_confirmed'),
+        ];
+
+        if ($lead->isPaid() || PaymentClaim::alreadyRecorded($lead, $transactionId)) {
+            return $alreadyPaid;
+        }
+
+        if (PaymentClaim::problem($lead, $verified, [(string) $lead->payment_reference]) !== null) {
             return [
-                'ok' => true,
-                'already_paid' => true,
-                'message' => __('hosting.payment_already_confirmed'),
+                'ok' => false,
+                'message' => __('cart.payment_wrong_order'),
             ];
         }
 
-        if (! in_array(strtolower((string) data_get($verified, 'status')), ['successful', 'completed'], true)) {
+        if (! self::isSuccessfulStatus($verified)) {
             $lead->update([
                 'payment_status' => strtolower((string) data_get($verified, 'status', 'failed')),
                 'status' => 'payment_failed',
@@ -107,15 +126,11 @@ class FlutterwavePayment
             ];
         }
 
-        $paidAmount = (float) data_get($verified, 'amount', 0);
-        $expected = (float) ($lead->amount_ngn ?? 0);
-        $currency = strtoupper((string) data_get($verified, 'currency', ''));
-
-        if ($currency !== 'NGN' || abs($paidAmount - $expected) > 1) {
+        if (! self::amountMatches($verified, (float) ($lead->amount_ngn ?? 0))) {
             $lead->update([
                 'payment_status' => 'amount_mismatch',
                 'status' => 'payment_failed',
-                'flutterwave_transaction_id' => (string) data_get($verified, 'id', ''),
+                'flutterwave_transaction_id' => $transactionId,
             ]);
 
             return [
@@ -124,11 +139,15 @@ class FlutterwavePayment
             ];
         }
 
-        $lead->update([
+        $claimed = PaymentClaim::claim($lead, $verified, 'initial', [
             'payment_status' => 'successful',
             'status' => 'paid',
-            'flutterwave_transaction_id' => (string) data_get($verified, 'id', ''),
+            'flutterwave_transaction_id' => $transactionId,
         ]);
+
+        if (! $claimed) {
+            return $alreadyPaid;
+        }
 
         if ($lead->checkout_provider === 'whmcs') {
             WhmcsLeadSync::syncPayment($lead->fresh());
@@ -152,7 +171,7 @@ class FlutterwavePayment
     public static function handleWebhookPayload(array $payload): array
     {
         $event = strtolower((string) data_get($payload, 'event', ''));
-        if ($event !== '' && ! in_array($event, ['charge.completed', 'transfer.completed'], true)) {
+        if ($event !== '' && $event !== 'charge.completed') {
             return [
                 'ok' => true,
                 'message' => 'Ignored unsupported event.',
@@ -186,6 +205,13 @@ class FlutterwavePayment
                 ];
             }
 
+            if ($checkout->isPaid() || PaymentClaim::alreadyRecorded($checkout, $transactionId)) {
+                return [
+                'ok' => true,
+                'message' => 'Payment already processed.',
+            ];
+            }
+
             $verified = self::verifyTransaction($transactionId);
             if (! $verified) {
                 return [
@@ -211,6 +237,14 @@ class FlutterwavePayment
                 ];
             }
 
+            $isRenewal = str_starts_with($txRef, 'LW-MAIL-R-');
+            if ((! $isRenewal && $order->isPaid()) || PaymentClaim::alreadyRecorded($order, $transactionId)) {
+                return [
+                'ok' => true,
+                'message' => 'Payment already processed.',
+            ];
+            }
+
             $verified = self::verifyTransaction($transactionId);
             if (! $verified) {
                 return [
@@ -230,6 +264,13 @@ class FlutterwavePayment
         if (str_starts_with($txRef, 'LW-DOM-') || str_starts_with($txRef, 'LW-DCART-')) {
             $checkout = DomainCheckout::query()->where('payment_reference', $txRef)->first();
             if ($checkout) {
+                if ($checkout->isPaid() || PaymentClaim::alreadyRecorded($checkout, $transactionId)) {
+                    return [
+                        'ok' => true,
+                        'message' => 'Payment already processed.',
+                    ];
+                }
+
                 $verified = self::verifyTransaction($transactionId);
                 if (! $verified) {
                     return [
@@ -252,6 +293,13 @@ class FlutterwavePayment
                     'ok' => false,
                     'message' => 'No domain order matched this payment reference.',
                 ];
+            }
+
+            if ($order->isPaid() || PaymentClaim::alreadyRecorded($order, $transactionId)) {
+                return [
+                'ok' => true,
+                'message' => 'Payment already processed.',
+            ];
             }
 
             $verified = self::verifyTransaction($transactionId);
@@ -278,7 +326,7 @@ class FlutterwavePayment
             ];
         }
 
-        if ($lead->isPaid()) {
+        if ($lead->isPaid() || PaymentClaim::alreadyRecorded($lead, $transactionId)) {
             return [
                 'ok' => true,
                 'message' => 'Payment already processed.',
@@ -329,7 +377,12 @@ class FlutterwavePayment
         }
 
         $txRef = $order->payment_reference ?: ('LW-DOM-' . $order->id . '-' . Str::upper(Str::random(8)));
-        $amountNgn = max(1, (int) round((float) ($order->amount_ngn ?? 0)));
+        $amountNgn = self::payableAmountNgn((float) ($order->amount_ngn ?? 0));
+        if ($amountNgn === null) {
+            Log::warning('Flutterwave payment link refused for a zero-amount order', ['payable' => $order->getMorphClass().'#'.$order->getKey()]);
+
+            return null;
+        }
         $order->loadMissing('user');
 
         $payload = [
@@ -390,12 +443,17 @@ class FlutterwavePayment
 
     public static function createSiteCheckoutPaymentLink(SiteCheckout $checkout): ?string
     {
-        if (! self::isConfigured()) {
+        if (! self::isConfigured() || $checkout->isPaid() || $checkout->isCancelled()) {
             return null;
         }
 
         $txRef = $checkout->payment_reference ?: ('LW-CART-'.$checkout->id.'-'.Str::upper(Str::random(8)));
-        $amountNgn = max(1, (int) round((float) ($checkout->amount_ngn ?? 0)));
+        $amountNgn = self::payableAmountNgn((float) ($checkout->amount_ngn ?? 0));
+        if ($amountNgn === null) {
+            Log::warning('Flutterwave payment link refused for a zero-amount order', ['payable' => $checkout->getMorphClass().'#'.$checkout->getKey()]);
+
+            return null;
+        }
         $checkout->loadMissing(['user', 'items']);
 
         $labels = $checkout->items->pluck('label')->filter()->take(4)->implode(', ');
@@ -462,28 +520,30 @@ class FlutterwavePayment
     public static function confirmSiteCheckoutPayment(SiteCheckout $checkout, array $verified): array
     {
         $transactionId = (string) data_get($verified, 'id', '');
+        $alreadyPaid = [
+            'ok' => true,
+            'already_paid' => true,
+            'message' => __('domain.payment_already_confirmed'),
+        ];
 
-        if ($transactionId !== '' && (string) $checkout->flutterwave_transaction_id === $transactionId) {
+        if ($checkout->isPaid() || PaymentClaim::alreadyRecorded($checkout, $transactionId)) {
+            return $alreadyPaid;
+        }
+
+        if (PaymentClaim::problem($checkout, $verified, [(string) $checkout->payment_reference]) !== null) {
             return [
-                'ok' => true,
-                'already_paid' => true,
-                'message' => __('domain.payment_already_confirmed'),
+                'ok' => false,
+                'message' => __('cart.payment_wrong_order'),
             ];
         }
 
-        if ($checkout->isPaid()) {
-            return [
-                'ok' => true,
-                'already_paid' => true,
-                'message' => __('domain.payment_already_confirmed'),
-            ];
-        }
-
-        if (! in_array(strtolower((string) data_get($verified, 'status')), ['successful', 'completed'], true)) {
-            $checkout->update([
-                'payment_status' => strtolower((string) data_get($verified, 'status', 'failed')),
-                'status' => 'payment_failed',
-            ]);
+        if (! self::isSuccessfulStatus($verified)) {
+            if (! $checkout->isCancelled()) {
+                $checkout->update([
+                    'payment_status' => strtolower((string) data_get($verified, 'status', 'failed')),
+                    'status' => 'payment_failed',
+                ]);
+            }
 
             return [
                 'ok' => false,
@@ -491,14 +551,10 @@ class FlutterwavePayment
             ];
         }
 
-        $paidAmount = (float) data_get($verified, 'amount', 0);
-        $expected = (float) ($checkout->amount_ngn ?? 0);
-        $currency = strtoupper((string) data_get($verified, 'currency', ''));
-
-        if ($currency !== 'NGN' || abs($paidAmount - $expected) > 1) {
+        if (! self::amountMatches($verified, (float) ($checkout->amount_ngn ?? 0))) {
             $checkout->update([
                 'payment_status' => 'amount_mismatch',
-                'status' => 'payment_failed',
+                'status' => $checkout->isCancelled() ? 'cancelled' : 'payment_failed',
                 'flutterwave_transaction_id' => $transactionId,
             ]);
 
@@ -508,12 +564,26 @@ class FlutterwavePayment
             ];
         }
 
-        $checkout->update([
+        if ($checkout->isCancelled()) {
+            self::recordPaymentOnCancelledOrder($checkout, $verified);
+
+            return [
+                'ok' => false,
+                'message' => __('cart.payment_order_cancelled'),
+            ];
+        }
+
+        $claimed = PaymentClaim::claim($checkout, $verified, 'initial', [
             'payment_status' => 'successful',
             'status' => 'paid',
             'flutterwave_transaction_id' => $transactionId,
         ]);
 
+        if (! $claimed) {
+            return $alreadyPaid;
+        }
+
+        Coupons::redeem($checkout);
         CartFulfillment::fulfill($checkout->fresh(['items', 'user']));
 
         return [
@@ -526,12 +596,17 @@ class FlutterwavePayment
 
     public static function createDomainCheckoutPaymentLink(DomainCheckout $checkout): ?string
     {
-        if (! self::isConfigured()) {
+        if (! self::isConfigured() || $checkout->isPaid() || $checkout->isCancelled()) {
             return null;
         }
 
         $txRef = $checkout->payment_reference ?: ('LW-DCART-' . $checkout->id . '-' . Str::upper(Str::random(8)));
-        $amountNgn = max(1, (int) round((float) ($checkout->amount_ngn ?? 0)));
+        $amountNgn = self::payableAmountNgn((float) ($checkout->amount_ngn ?? 0));
+        if ($amountNgn === null) {
+            Log::warning('Flutterwave payment link refused for a zero-amount order', ['payable' => $checkout->getMorphClass().'#'.$checkout->getKey()]);
+
+            return null;
+        }
         $checkout->loadMissing(['user', 'orders']);
 
         $domains = $checkout->orders->pluck('domain')->filter()->implode(', ');
@@ -592,7 +667,6 @@ class FlutterwavePayment
         ]);
 
         $checkout->orders()->update([
-            'payment_reference' => $txRef,
             'payment_provider' => 'flutterwave',
             'checkout_url' => $link,
             'status' => 'awaiting_payment',
@@ -607,24 +681,33 @@ class FlutterwavePayment
     public static function confirmDomainCheckoutPayment(DomainCheckout $checkout, array $verified): array
     {
         $transactionId = (string) data_get($verified, 'id', '');
+        $alreadyPaid = [
+            'ok' => true,
+            'already_paid' => true,
+            'message' => __('domain.payment_already_confirmed'),
+        ];
 
-        if ($transactionId !== '' && (string) $checkout->flutterwave_transaction_id === $transactionId) {
+        if ($checkout->isPaid() || PaymentClaim::alreadyRecorded($checkout, $transactionId)) {
+            return $alreadyPaid;
+        }
+
+        if (PaymentClaim::problem($checkout, $verified, [(string) $checkout->payment_reference]) !== null) {
             return [
-                'ok' => true,
-                'already_paid' => true,
-                'message' => __('domain.payment_already_confirmed'),
+                'ok' => false,
+                'message' => __('cart.payment_wrong_order'),
             ];
         }
 
-        if ($checkout->isPaid()) {
+        if ($checkout->isCancelled() && self::isSuccessfulStatus($verified)) {
+            self::recordPaymentOnCancelledOrder($checkout, $verified);
+
             return [
-                'ok' => true,
-                'already_paid' => true,
-                'message' => __('domain.payment_already_confirmed'),
+                'ok' => false,
+                'message' => __('cart.payment_order_cancelled'),
             ];
         }
 
-        if (! in_array(strtolower((string) data_get($verified, 'status')), ['successful', 'completed'], true)) {
+        if (! self::isSuccessfulStatus($verified)) {
             $checkout->update([
                 'payment_status' => strtolower((string) data_get($verified, 'status', 'failed')),
                 'status' => 'payment_failed',
@@ -640,11 +723,7 @@ class FlutterwavePayment
             ];
         }
 
-        $paidAmount = (float) data_get($verified, 'amount', 0);
-        $expected = (float) ($checkout->amount_ngn ?? 0);
-        $currency = strtoupper((string) data_get($verified, 'currency', ''));
-
-        if ($currency !== 'NGN' || abs($paidAmount - $expected) > 1) {
+        if (! self::amountMatches($verified, (float) ($checkout->amount_ngn ?? 0))) {
             $checkout->update([
                 'payment_status' => 'amount_mismatch',
                 'status' => 'payment_failed',
@@ -662,11 +741,15 @@ class FlutterwavePayment
             ];
         }
 
-        $checkout->update([
+        $claimed = PaymentClaim::claim($checkout, $verified, 'initial', [
             'payment_status' => 'successful',
             'status' => 'paid',
             'flutterwave_transaction_id' => $transactionId,
         ]);
+
+        if (! $claimed) {
+            return $alreadyPaid;
+        }
 
         $checkout->orders()->update([
             'payment_status' => 'successful',
@@ -700,24 +783,33 @@ class FlutterwavePayment
         }
 
         $transactionId = (string) data_get($verified, 'id', '');
+        $alreadyPaid = [
+            'ok' => true,
+            'already_paid' => true,
+            'message' => __('domain.payment_already_confirmed'),
+        ];
 
-        if ($transactionId !== '' && (string) $order->flutterwave_transaction_id === $transactionId) {
+        if ($order->isPaid() || PaymentClaim::alreadyRecorded($order, $transactionId)) {
+            return $alreadyPaid;
+        }
+
+        if (PaymentClaim::problem($order, $verified, [(string) $order->payment_reference]) !== null) {
             return [
-                'ok' => true,
-                'already_paid' => true,
-                'message' => __('domain.payment_already_confirmed'),
+                'ok' => false,
+                'message' => __('cart.payment_wrong_order'),
             ];
         }
 
-        if ($order->isPaid()) {
+        if ($order->isCancelled() && self::isSuccessfulStatus($verified)) {
+            self::recordPaymentOnCancelledOrder($order, $verified);
+
             return [
-                'ok' => true,
-                'already_paid' => true,
-                'message' => __('domain.payment_already_confirmed'),
+                'ok' => false,
+                'message' => __('cart.payment_order_cancelled'),
             ];
         }
 
-        if (! in_array(strtolower((string) data_get($verified, 'status')), ['successful', 'completed'], true)) {
+        if (! self::isSuccessfulStatus($verified)) {
             $order->update([
                 'payment_status' => strtolower((string) data_get($verified, 'status', 'failed')),
                 'status' => 'payment_failed',
@@ -729,11 +821,7 @@ class FlutterwavePayment
             ];
         }
 
-        $paidAmount = (float) data_get($verified, 'amount', 0);
-        $expected = (float) ($order->amount_ngn ?? 0);
-        $currency = strtoupper((string) data_get($verified, 'currency', ''));
-
-        if ($currency !== 'NGN' || abs($paidAmount - $expected) > 1) {
+        if (! self::amountMatches($verified, (float) ($order->amount_ngn ?? 0))) {
             $order->update([
                 'payment_status' => 'amount_mismatch',
                 'status' => 'payment_failed',
@@ -746,11 +834,15 @@ class FlutterwavePayment
             ];
         }
 
-        $order->update([
+        $claimed = PaymentClaim::claim($order, $verified, 'initial', [
             'payment_status' => 'successful',
             'status' => 'paid',
             'flutterwave_transaction_id' => $transactionId,
         ]);
+
+        if (! $claimed) {
+            return $alreadyPaid;
+        }
 
         WhmcsDomainOrderSync::syncPayment($order->fresh());
 
@@ -777,10 +869,19 @@ class FlutterwavePayment
             return null;
         }
 
+        if ($kind === 'initial' && $order->isPaid()) {
+            return null;
+        }
+
         $txRef = $kind === 'renewal'
             ? ('LW-MAIL-R-' . $order->id . '-' . Str::upper(Str::random(8)))
             : ($order->payment_reference ?: ('LW-MAIL-' . $order->id . '-' . Str::upper(Str::random(8))));
-        $amountNgn = max(1, (int) round((float) ($order->amount_ngn ?? 0)));
+        $amountNgn = self::payableAmountNgn((float) ($order->amount_ngn ?? 0));
+        if ($amountNgn === null) {
+            Log::warning('Flutterwave payment link refused for a zero-amount order', ['payable' => $order->getMorphClass().'#'.$order->getKey()]);
+
+            return null;
+        }
         $order->loadMissing('user');
 
         $payload = [
@@ -852,28 +953,27 @@ class FlutterwavePayment
     public static function confirmEmailOrderPayment(EmailOrder $order, array $verified): array
     {
         $transactionId = (string) data_get($verified, 'id', '');
-        $metaKind = strtolower((string) data_get($verified, 'meta.payment_kind', ''));
-        $isRenewal = $metaKind === 'renewal' || $order->isPendingRenewal();
+        $isRenewal = str_starts_with((string) data_get($verified, 'tx_ref', ''), 'LW-MAIL-R-');
+        $alreadyPaid = [
+            'ok' => true,
+            'already_paid' => true,
+            'message' => $isRenewal
+                ? __('email.renewal_already_confirmed')
+                : __('email.payment_already_confirmed'),
+        ];
 
-        if ($transactionId !== '' && (string) $order->flutterwave_transaction_id === $transactionId) {
+        if (PaymentClaim::alreadyRecorded($order, $transactionId) || (! $isRenewal && $order->isPaid())) {
+            return $alreadyPaid;
+        }
+
+        if (PaymentClaim::problem($order, $verified, [(string) $order->payment_reference]) !== null) {
             return [
-                'ok' => true,
-                'already_paid' => true,
-                'message' => $isRenewal
-                    ? __('email.renewal_already_confirmed')
-                    : __('email.payment_already_confirmed'),
+                'ok' => false,
+                'message' => __('cart.payment_wrong_order'),
             ];
         }
 
-        if (! $isRenewal && $order->isPaid()) {
-            return [
-                'ok' => true,
-                'already_paid' => true,
-                'message' => __('email.payment_already_confirmed'),
-            ];
-        }
-
-        if (! in_array(strtolower((string) data_get($verified, 'status')), ['successful', 'completed'], true)) {
+        if (! self::isSuccessfulStatus($verified)) {
             if (! $isRenewal) {
                 $order->update([
                     'payment_status' => strtolower((string) data_get($verified, 'status', 'failed')),
@@ -887,11 +987,7 @@ class FlutterwavePayment
             ];
         }
 
-        $paidAmount = (float) data_get($verified, 'amount', 0);
-        $expected = (float) ($order->amount_ngn ?? 0);
-        $currency = strtoupper((string) data_get($verified, 'currency', ''));
-
-        if ($currency !== 'NGN' || abs($paidAmount - $expected) > 1) {
+        if (! self::amountMatches($verified, (float) ($order->amount_ngn ?? 0))) {
             if (! $isRenewal) {
                 $order->update([
                     'payment_status' => 'amount_mismatch',
@@ -907,21 +1003,30 @@ class FlutterwavePayment
         }
 
         if ($isRenewal) {
+            if (! PaymentClaim::claim($order, $verified, 'renewal', [], requireUnsettled: false)) {
+                return $alreadyPaid;
+            }
+
             return self::confirmEmailOrderRenewal($order, $verified);
         }
 
-        $order->update([
+        $claimed = PaymentClaim::claim($order, $verified, 'initial', [
             'payment_status' => 'successful',
             'status' => $order->isManualFulfilment() ? 'awaiting_manual_fulfilment' : 'paid',
             'flutterwave_transaction_id' => $transactionId,
         ]);
 
-        $order->refresh();
+        if (! $claimed) {
+            return $alreadyPaid;
+        }
+
         $order->applyPaidPeriod();
         $order->loadMissing('user');
         AccountNotifier::send($order->user, new EmailOrderPaid($order));
 
-        if (! $order->isManualFulfilment()) {
+        if ($order->isManualFulfilment()) {
+            EmailFulfilment::queued($order);
+        } else {
             EmailProvisioner::provision($order->fresh(['mailboxes', 'user']));
         }
 
@@ -963,6 +1068,60 @@ class FlutterwavePayment
                 'date' => $order->period_ends_at?->format('d M Y') ?? '',
             ]),
         ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $verified
+     */
+    protected static function isSuccessfulStatus(array $verified): bool
+    {
+        return in_array(strtolower((string) data_get($verified, 'status')), ['successful', 'completed'], true);
+    }
+
+    /**
+     * @param  array<string, mixed>  $verified
+     */
+    protected static function amountMatches(array $verified, float $expectedNgn): bool
+    {
+        if ($expectedNgn < 1) {
+            return false;
+        }
+
+        $currency = strtoupper((string) data_get($verified, 'currency', ''));
+        $paid = (float) data_get($verified, 'amount', 0);
+
+        return $currency === 'NGN' && abs($paid - $expectedNgn) <= 1;
+    }
+
+    /**
+     * Money arrived for an order that staff already cancelled: keep it on the ledger for a refund
+     * decision, but never fulfil it.
+     *
+     * @param  array<string, mixed>  $verified
+     */
+    protected static function recordPaymentOnCancelledOrder(SiteCheckout|DomainCheckout|DomainOrder $order, array $verified): void
+    {
+        PaymentClaim::claim($order, $verified, 'initial', [
+            'payment_status' => 'received_after_cancel',
+            'flutterwave_transaction_id' => (string) data_get($verified, 'id', ''),
+        ], requireUnsettled: false);
+
+        Log::warning('Payment received for a cancelled order', [
+            'order' => $order->getMorphClass().'#'.$order->getKey(),
+            'transaction_id' => data_get($verified, 'id'),
+        ]);
+
+        AdminOrderActions::log($order, null, 'payment_after_cancel', 'A payment arrived after this order was cancelled. Refund or reopen it.', [
+            'transaction_id' => data_get($verified, 'id'),
+            'amount' => data_get($verified, 'amount'),
+        ]);
+    }
+
+    protected static function payableAmountNgn(float $amount): ?int
+    {
+        $rounded = (int) round($amount);
+
+        return $rounded >= 1 ? $rounded : null;
     }
 
     public static function verifyTransaction(string|int $transactionId): ?array

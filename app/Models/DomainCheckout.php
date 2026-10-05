@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasAdminOrderControls;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class DomainCheckout extends Model
 {
+    use HasAdminOrderControls;
+
     protected $fillable = [
         'user_id',
         'item_count',

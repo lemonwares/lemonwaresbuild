@@ -128,7 +128,7 @@ class WhmcsAuthAndConsoleTest extends TestCase
         ])->assertRedirect(route('account.show'));
     }
 
-    public function test_whmcs_login_with_two_factor_shows_clear_error(): void
+    public function test_whmcs_login_with_two_factor_shows_generic_error(): void
     {
         $this->configureWhmcs();
 
@@ -149,13 +149,10 @@ class WhmcsAuthAndConsoleTest extends TestCase
             ->assertSessionHasErrors('email');
 
         $this->assertGuest();
-        $this->assertStringContainsString(
-            'two-factor',
-            mb_strtolower((string) session('errors')->first('email')),
-        );
+        $this->assertSame(__('account.invalid_credentials'), session('errors')->first('email'));
     }
 
-    public function test_whmcs_login_surfaces_api_error_detail(): void
+    public function test_whmcs_login_api_error_hides_internal_detail(): void
     {
         $this->configureWhmcs();
 
@@ -175,8 +172,8 @@ class WhmcsAuthAndConsoleTest extends TestCase
             ->assertSessionHasErrors('email');
 
         $message = (string) session('errors')->first('email');
-        $this->assertStringContainsString('203.0.113.10', $message);
-        $this->assertStringContainsStringIgnoringCase('ip', $message);
+        $this->assertStringNotContainsString('203.0.113.10', $message);
+        $this->assertSame(__('account.login_whmcs_api_error'), $message);
     }
 
     public function test_whmcs_login_failure_shows_invalid_credentials(): void
@@ -334,9 +331,259 @@ class WhmcsAuthAndConsoleTest extends TestCase
 
     public function test_console_redirects_to_settings_when_whmcs_not_configured(): void
     {
+        config([
+            'site.whmcs.base_url' => '',
+            'site.whmcs.api_identifier' => '',
+            'site.whmcs.api_secret' => '',
+            'site.whmcs.api_access_key' => '',
+        ]);
+
         $this->actingAsAdmin();
 
         $this->get(route('admin.whmcs-console.clients'))
             ->assertRedirect(route('admin.whmcs-settings.index'));
+    }
+
+    public function test_client_area_pulls_whmcs_services_domains_and_sso_actions(): void
+    {
+        $this->configureWhmcs();
+
+        $user = User::factory()->create([
+            'email' => 'client@example.test',
+            'name' => 'Client User',
+        ]);
+
+        $customer = \App\Models\WhmcsCustomer::query()->create([
+            'user_id' => $user->id,
+            'whmcs_client_id' => 42,
+            'email' => 'client@example.test',
+            'full_name' => 'Client User',
+            'status' => 'Active',
+        ]);
+
+        $service = \App\Models\WhmcsService::query()->create([
+            'whmcs_customer_id' => $customer->id,
+            'user_id' => $user->id,
+            'whmcs_service_id' => 77,
+            'whmcs_client_id' => 42,
+            'product_name' => 'Cloud Hosting Starter',
+            'domain' => 'ada.example',
+            'status' => 'Active',
+            'billing_cycle' => 'Annually',
+            'next_due_date' => '2027-01-01',
+        ]);
+
+        Http::fake([
+            'billing.example.test/includes/api.php' => function ($request) {
+                $action = $request['action'] ?? '';
+
+                return match ($action) {
+                    'GetClientsProducts' => Http::response([
+                        'result' => 'success',
+                        'products' => [
+                            'product' => [
+                                'id' => 77,
+                                'clientid' => 42,
+                                'productname' => 'Cloud Hosting Starter',
+                                'domain' => 'ada.example',
+                                'status' => 'Active',
+                                'billingcycle' => 'Annually',
+                                'nextduedate' => '2027-01-01',
+                            ],
+                        ],
+                    ], 200),
+                    'GetClientsDomains' => Http::response([
+                        'result' => 'success',
+                        'domains' => [
+                            'domain' => [
+                                'id' => 9,
+                                'domainname' => 'ada.example',
+                                'status' => 'Active',
+                                'regperiod' => 1,
+                                'expirydate' => '2027-01-01',
+                            ],
+                        ],
+                    ], 200),
+                    'GetInvoices' => Http::response([
+                        'result' => 'success',
+                        'invoices' => [
+                            'invoice' => [
+                                'id' => 501,
+                                'status' => 'Unpaid',
+                                'total' => '12.00',
+                                'currencycode' => 'USD',
+                                'date' => '2026-09-01',
+                                'itemdescription' => 'Hosting renewal',
+                            ],
+                        ],
+                    ], 200),
+                    'GetInvoice' => Http::response([
+                        'result' => 'success',
+                        'invoiceid' => 501,
+                        'userid' => 42,
+                        'status' => 'Unpaid',
+                        'date' => '2026-09-01',
+                        'duedate' => '2026-09-15',
+                        'subtotal' => '12.00',
+                        'tax' => '0.00',
+                        'credit' => '0.00',
+                        'total' => '12.00',
+                        'balance' => '12.00',
+                        'paymentmethod' => 'banktransfer',
+                        'items' => [
+                            'item' => [
+                                'id' => 1,
+                                'description' => 'Cloud Hosting Starter - ada.example',
+                                'amount' => '12.00',
+                            ],
+                        ],
+                        'transactions' => ['transaction' => []],
+                    ], 200),
+                    'CreateSsoToken' => Http::response([
+                        'result' => 'success',
+                        'redirect_url' => 'https://billing.example.test/sso/product',
+                    ], 200),
+                    'ModuleSingleSignOn' => Http::response([
+                        'result' => 'success',
+                        'redirect_url' => 'https://cpanel.example.test:2083/sso',
+                    ], 200),
+                    default => Http::response(['result' => 'error', 'message' => 'Unexpected '.$action], 200),
+                };
+            },
+        ]);
+
+        $this->actingAs($user);
+
+        $this->get(route('account.show'))
+            ->assertOk()
+            ->assertSee('Products running')
+            ->assertSee('>1</span>', false);
+
+        $this->get(route('account.subscriptions.index'))
+            ->assertOk()
+            ->assertSee('Cloud Hosting Starter')
+            ->assertSee('Visit site')
+            ->assertSee('Open cPanel')
+            ->assertSee('Manage')
+            ->assertSee('https://ada.example');
+
+        $this->get(route('account.subscriptions.show', $service))
+            ->assertOk()
+            ->assertSee('Cloud Hosting Starter')
+            ->assertSee('Service details')
+            ->assertSee('Related invoices');
+
+        $this->get(route('account.subscriptions.manage', $service))
+            ->assertRedirect(route('account.subscriptions.show', $service));
+
+        $this->get(route('account.invoices.show', 'whmcs-501'))
+            ->assertOk()
+            ->assertSee('Invoice summary')
+            ->assertSee('Cloud Hosting Starter - ada.example')
+            ->assertSee('12.00');
+
+        $this->get(route('account.domains.index'))
+            ->assertOk()
+            ->assertSee('ada.example')
+            ->assertSee('Visit site');
+
+        $this->get(route('account.subscriptions.cpanel', $service))
+            ->assertRedirect('https://cpanel.example.test:2083/sso');
+
+        $this->get(route('account.domains.whmcs', 9))
+            ->assertRedirect('https://billing.example.test/sso/product');
+
+        $actions = collect(Http::recorded())
+            ->map(fn ($pair) => $pair[0]['action'] ?? null)
+            ->filter()
+            ->values()
+            ->all();
+
+        $this->assertContains('GetClientsProducts', $actions);
+        $this->assertContains('GetClientsDomains', $actions);
+        $this->assertContains('ModuleSingleSignOn', $actions);
+        $this->assertContains('CreateSsoToken', $actions);
+        $this->assertContains('GetInvoice', $actions);
+    }
+
+    public function test_cpanel_falls_back_to_dosinglesignon_not_plain_product_details(): void
+    {
+        $this->configureWhmcs();
+
+        $user = User::factory()->create(['email' => 'cpanel@example.test']);
+        $customer = \App\Models\WhmcsCustomer::query()->create([
+            'user_id' => $user->id,
+            'whmcs_client_id' => 42,
+            'email' => 'cpanel@example.test',
+            'status' => 'Active',
+        ]);
+        $service = \App\Models\WhmcsService::query()->create([
+            'whmcs_customer_id' => $customer->id,
+            'user_id' => $user->id,
+            'whmcs_service_id' => 54,
+            'whmcs_client_id' => 42,
+            'product_name' => 'cPanel Hosting',
+            'domain' => 'site.example',
+            'status' => 'Active',
+        ]);
+
+        Http::fake([
+            'billing.example.test/includes/api.php' => function ($request) {
+                $action = $request['action'] ?? '';
+
+                if ($action === 'ModuleSingleSignOn') {
+                    return Http::response([
+                        'result' => 'error',
+                        'message' => 'Module does not support SSO',
+                    ], 200);
+                }
+
+                if ($action === 'CreateSsoToken') {
+                    $path = (string) ($request['sso_redirect_path'] ?? '');
+                    $this->assertStringContainsString('dosinglesignon=1', $path);
+                    $this->assertStringContainsString('id=54', $path);
+
+                    return Http::response([
+                        'result' => 'success',
+                        'redirect_url' => 'https://billing.example.test/oauth/singlesignon.php?access_token=abc',
+                    ], 200);
+                }
+
+                return Http::response(['result' => 'error', 'message' => 'Unexpected '.$action], 200);
+            },
+        ]);
+
+        $this->actingAs($user)
+            ->get(route('account.subscriptions.cpanel', $service))
+            ->assertRedirect('https://billing.example.test/oauth/singlesignon.php?access_token=abc');
+    }
+
+    public function test_client_cannot_open_another_users_whmcs_service(): void
+    {
+        $this->configureWhmcs();
+
+        $owner = User::factory()->create(['email' => 'owner@example.test']);
+        $intruder = User::factory()->create(['email' => 'intruder@example.test']);
+
+        $customer = \App\Models\WhmcsCustomer::query()->create([
+            'user_id' => $owner->id,
+            'whmcs_client_id' => 42,
+            'email' => 'owner@example.test',
+            'status' => 'Active',
+        ]);
+
+        $service = \App\Models\WhmcsService::query()->create([
+            'whmcs_customer_id' => $customer->id,
+            'user_id' => $owner->id,
+            'whmcs_service_id' => 77,
+            'whmcs_client_id' => 42,
+            'product_name' => 'Private Hosting',
+            'domain' => 'private.example',
+            'status' => 'Active',
+        ]);
+
+        $this->actingAs($intruder)
+            ->get(route('account.subscriptions.show', $service))
+            ->assertNotFound();
     }
 }

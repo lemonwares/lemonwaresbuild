@@ -20,16 +20,12 @@ class WhmcsSyncTest extends TestCase
             'site.whmcs.order_route' => '/cart.php',
             'site.whmcs.payment_method' => 'banktransfer',
             'site.whmcs.defer_payment_redirect' => false,
-            'site.hosting_plans.cpanel.whmcs_pid' => '15',
+            'site.whmcs_pids.cpanel' => '15',
             'services.flutterwave.secret_key' => 'flw_test_key',
         ]);
 
         Http::fake([
-            'https://billing.example.test/includes/api.php' => Http::sequence()
-                ->push(['result' => 'success', 'status' => 'available', 'whois' => ''], 200)
-                ->push(['result' => 'error', 'message' => 'Client not found'], 200)
-                ->push(['result' => 'success', 'clientid' => '99'], 200)
-                ->push(['result' => 'success', 'orderid' => '321', 'invoiceid' => '654'], 200),
+            'https://billing.example.test/includes/api.php' => $this->whmcsHostingOrderResponder(),
             'https://api.flutterwave.com/v3/payments' => Http::response([
                 'status' => 'success',
                 'data' => ['link' => 'https://checkout.flutterwave.com/v3/hosted/pay/test-link'],
@@ -77,7 +73,7 @@ class WhmcsSyncTest extends TestCase
             'site.whmcs.order_route' => '/cart.php',
             'site.whmcs.payment_method' => 'banktransfer',
             'site.whmcs.defer_payment_redirect' => false,
-            'site.hosting_plans.cpanel.whmcs_pid' => '15',
+            'site.whmcs_pids.cpanel' => '15',
         ]);
 
         Http::fake([
@@ -151,12 +147,14 @@ class WhmcsSyncTest extends TestCase
                 'status' => 'success',
                 'data' => [
                     'id' => '9876',
+                    'tx_ref' => 'LW-TX-1',
                     'status' => 'successful',
                     'amount' => 7500,
                     'currency' => 'NGN',
                 ],
             ], 200),
             'https://billing.example.test/includes/api.php' => Http::sequence()
+                ->push(['result' => 'success', 'status' => 'Unpaid', 'balance' => '75.00'], 200)
                 ->push(['result' => 'success'], 200)
                 ->push(['result' => 'success'], 200),
         ]);
@@ -165,7 +163,7 @@ class WhmcsSyncTest extends TestCase
             'status' => 'successful',
             'tx_ref' => 'LW-TX-1',
             'transaction_id' => 'tx-900',
-        ]))->assertRedirect(route('hosting.order-received', $lead));
+        ]))->assertRedirectContains('/hosting/request/received/'.$lead->id.'?');
 
         $fresh = $lead->fresh();
         $this->assertSame('payment_synced', $fresh->whmcs_sync_status);
@@ -176,6 +174,7 @@ class WhmcsSyncTest extends TestCase
                 'status' => 'success',
                 'data' => [
                     'id' => '9876',
+                    'tx_ref' => 'LW-TX-1',
                     'status' => 'successful',
                     'amount' => 7500,
                     'currency' => 'NGN',
@@ -190,7 +189,7 @@ class WhmcsSyncTest extends TestCase
             'status' => 'successful',
             'tx_ref' => 'LW-TX-1',
             'transaction_id' => 'tx-900',
-        ]))->assertRedirect(route('hosting.order-received', $lead));
+        ]))->assertRedirectContains('/hosting/request/received/'.$lead->id.'?');
     }
 
     public function test_hosting_payment_callback_accepts_flutterwave_completed_redirect_status(): void
@@ -227,12 +226,14 @@ class WhmcsSyncTest extends TestCase
                 'status' => 'success',
                 'data' => [
                     'id' => '9876',
+                    'tx_ref' => 'LW-COMPLETED-1',
                     'status' => 'successful',
                     'amount' => 7500,
                     'currency' => 'NGN',
                 ],
             ], 200),
             'https://billing.example.test/includes/api.php' => Http::sequence()
+                ->push(['result' => 'success', 'status' => 'Unpaid', 'balance' => '75.00'], 200)
                 ->push(['result' => 'success'], 200)
                 ->push(['result' => 'success'], 200),
         ]);
@@ -241,7 +242,7 @@ class WhmcsSyncTest extends TestCase
             'status' => 'completed',
             'tx_ref' => 'LW-COMPLETED-1',
             'transaction_id' => 'tx-completed',
-        ]))->assertRedirect(route('hosting.order-received', $lead));
+        ]))->assertRedirectContains('/hosting/request/received/'.$lead->id.'?');
 
         $fresh = $lead->fresh();
         $this->assertTrue($fresh->isPaid());
@@ -258,15 +259,11 @@ class WhmcsSyncTest extends TestCase
             'site.whmcs.order_route' => '/cart.php',
             'site.whmcs.payment_method' => 'banktransfer',
             'site.whmcs.defer_payment_redirect' => true,
-            'site.hosting_plans.cpanel.whmcs_pid' => '15',
+            'site.whmcs_pids.cpanel' => '15',
         ]);
 
         Http::fake([
-            'https://billing.example.test/includes/api.php' => Http::sequence()
-                ->push(['result' => 'success', 'status' => 'available', 'whois' => ''], 200)
-                ->push(['result' => 'error', 'message' => 'Client not found'], 200)
-                ->push(['result' => 'success', 'clientid' => '99'], 200)
-                ->push(['result' => 'success', 'orderid' => '321', 'invoiceid' => '654'], 200),
+            'https://billing.example.test/includes/api.php' => $this->whmcsHostingOrderResponder(),
             'open.er-api.com/*' => Http::response(['rates' => ['NGN' => 1600]], 200),
         ]);
 
@@ -290,9 +287,24 @@ class WhmcsSyncTest extends TestCase
         ]);
 
         $lead = HostingLead::query()->latest()->firstOrFail();
-        $response->assertRedirect(route('hosting.order-received', $lead));
+        $response->assertRedirectContains('/hosting/request/received/'.$lead->id.'?');
         $this->assertSame('awaiting_payment', $lead->status);
         $this->assertSame('checkout_synced', $lead->whmcs_sync_status);
         $this->assertSame(321, (int) $lead->whmcs_order_id);
+    }
+
+    private function whmcsHostingOrderResponder(): \Closure
+    {
+        return fn ($request) => Http::response(match ($request['action'] ?? '') {
+            'DomainWhois' => ['result' => 'success', 'status' => 'available', 'whois' => ''],
+            'GetTLDPricing' => [
+                'result' => 'success',
+                'currency' => ['id' => 1, 'code' => 'NGN'],
+                'pricing' => ['ng' => ['register' => ['1' => '15000.00']]],
+            ],
+            'AddClient' => ['result' => 'success', 'clientid' => '99'],
+            'AddOrder' => ['result' => 'success', 'orderid' => '321', 'invoiceid' => '654'],
+            default => ['result' => 'error', 'message' => 'Client not found'],
+        }, 200);
     }
 }

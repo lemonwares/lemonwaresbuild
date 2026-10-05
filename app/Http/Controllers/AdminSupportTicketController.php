@@ -15,11 +15,28 @@ use Illuminate\View\View;
 
 class AdminSupportTicketController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
+        $status = (string) $request->query('status', '');
+        $priority = (string) $request->query('priority', '');
+        $assigned = (string) $request->query('assigned', '');
+        $search = trim((string) $request->query('q', ''));
+
         $tickets = SupportTicket::query()
+            ->with('assignedAdmin')
+            ->when(in_array($status, SupportTicket::STATUSES, true), fn ($q) => $q->where('status', $status))
+            ->when($status === 'active', fn ($q) => $q->whereIn('status', ['open', 'in_progress']))
+            ->when(in_array($priority, SupportTicket::PRIORITIES, true), fn ($q) => $q->where('priority', $priority))
+            ->when($assigned === 'me', fn ($q) => $q->where('assigned_admin_id', (int) $request->session()->get('admin_user_id')))
+            ->when($assigned === 'none', fn ($q) => $q->whereNull('assigned_admin_id'))
+            ->when($search !== '', fn ($q) => $q->where(fn ($inner) => $inner
+                ->where('reference', 'like', '%'.$search.'%')
+                ->orWhere('subject', 'like', '%'.$search.'%')
+                ->orWhere('email', 'like', '%'.$search.'%')
+                ->orWhere('full_name', 'like', '%'.$search.'%')))
             ->latest()
-            ->paginate(30);
+            ->paginate(30)
+            ->withQueryString();
 
         $totalTickets = SupportTicket::count();
         $openTickets = SupportTicket::query()->whereIn('status', ['open', 'in_progress'])->count();
@@ -34,6 +51,10 @@ class AdminSupportTicketController extends Controller
             'resolvedTickets',
             'highPriority',
             'newWeek',
+            'status',
+            'priority',
+            'assigned',
+            'search',
         ));
     }
 
@@ -44,6 +65,8 @@ class AdminSupportTicketController extends Controller
 
         return view('admin.support-tickets.show', [
             'ticket' => $supportTicket,
+            'admins' => User::query()->where('role', 'admin')->orderBy('name')->get(['id', 'name']),
+            'savedReplies' => \App\Models\SavedReply::query()->orderBy('title')->get(),
         ]);
     }
 
@@ -52,9 +75,17 @@ class AdminSupportTicketController extends Controller
         $validated = $request->validate([
             'status' => ['required', 'string', Rule::in(SupportTicket::STATUSES)],
             'admin_notes' => ['nullable', 'string', 'max:5000'],
+            'priority' => ['nullable', 'string', Rule::in(SupportTicket::PRIORITIES)],
+            'assigned_admin_id' => ['nullable', 'integer', Rule::exists('users', 'id')->where('role', 'admin')],
         ]);
 
         $supportTicket->status = $validated['status'];
+        if (! empty($validated['priority'])) {
+            $supportTicket->priority = $validated['priority'];
+        }
+        if ($request->has('assigned_admin_id')) {
+            $supportTicket->assigned_admin_id = $validated['assigned_admin_id'] ?? null;
+        }
         $supportTicket->admin_notes = filled($validated['admin_notes'] ?? null)
             ? trim($validated['admin_notes'])
             : null;

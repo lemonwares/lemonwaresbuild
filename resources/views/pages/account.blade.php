@@ -99,6 +99,28 @@
                 <span class="account-metric-meta">{{ $sharedHosting->first()?->plan_name ?: __('account.no_hosting_short') }}</span>
                 <span class="account-metric-cta">{{ __('account.manage') }} →</span>
             </a>
+            @if ($whmcsLinked ?? false)
+                <a href="{{ route('account.subscriptions.index') }}" class="account-metric">
+                    <span class="account-metric-label">{{ __('account.service_whmcs') }}</span>
+                    <span class="account-metric-value">{{ $whmcsActiveCount }}</span>
+                    <span class="account-metric-meta">
+                        {{ __('account.whmcs_services_meta', ['total' => $whmcsServiceCount]) }}
+                    </span>
+                    <span class="account-metric-cta">{{ __('account.manage') }} →</span>
+                </a>
+                <a href="{{ route('account.domains.index') }}" class="account-metric">
+                    <span class="account-metric-label">{{ __('account.nav_domains') }}</span>
+                    <span class="account-metric-value">{{ $whmcsDomainCount }}</span>
+                    <span class="account-metric-meta">{{ __('account.whmcs_domains_meta') }}</span>
+                    <span class="account-metric-cta">{{ __('account.manage') }} →</span>
+                </a>
+                <a href="{{ route('account.invoices.index') }}" class="account-metric">
+                    <span class="account-metric-label">{{ __('account.nav_invoices') }}</span>
+                    <span class="account-metric-value">{{ $whmcsUnpaidInvoices }}</span>
+                    <span class="account-metric-meta">{{ __('account.whmcs_invoices_meta') }}</span>
+                    <span class="account-metric-cta">{{ __('account.manage') }} →</span>
+                </a>
+            @endif
         </section>
     </div>
 @endsection

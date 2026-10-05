@@ -20,7 +20,7 @@ return [
     'continue_billing' => 'Continue to Billing Details',
     'select_prompt' => 'Select one or more specifications above, then continue to enter your billing and contact details.',
     'billed_monthly_vps' => 'VPS plans are handled by LemonWares. Choose a package and billing period below.',
-    'billed_monthly_shared' => 'cPanel and Plesk orders are synced to WHMCS, then you pay securely with Flutterwave.',
+    'billed_monthly_shared' => 'cPanel orders are synced to WHMCS, then you pay securely with Flutterwave.',
     'save_percent' => 'Save :percent%',
     'period_total' => 'Period total',
     'cycles' => [

@@ -18,9 +18,9 @@ class EmailAccountTest extends TestCase
 
     public function test_email_plans_page_is_translated(): void
     {
-        $this->get('/email')->assertOk()->assertSee('Lemon Mail', false);
-        $this->withSession(['locale' => 'fr'])->get('/email')->assertOk()->assertSee('Lemon Mail', false);
-        $this->withSession(['locale' => 'de'])->get('/email')->assertOk()->assertSee('Lemon Mail', false);
+        $this->get('/email')->assertOk()->assertSee('Mailemon', false);
+        $this->withSession(['locale' => 'fr'])->get('/email')->assertOk()->assertSee('Mailemon', false);
+        $this->withSession(['locale' => 'de'])->get('/email')->assertOk()->assertSee('Mailemon', false);
     }
 
     public function test_email_plans_page_uses_billing_tabs_and_two_column_layout(): void
@@ -430,14 +430,14 @@ class EmailAccountTest extends TestCase
         $this->assertSame('acme.ng', $order->domain);
         $this->assertSame('hello@acme.ng', $order->mailboxes()->first()?->address);
         $this->assertSame('awaiting_payment', $order->status);
-        $this->assertSame('manual', $order->fulfilment_mode);
-        $this->assertSame('queued', $order->fulfilment_status);
+        $this->assertSame('auto', $order->fulfilment_mode);
+        $this->assertNull($order->fulfilment_status);
         $this->assertTrue($order->requiresCheckoutPayment());
         $this->assertTrue($order->isAwaitingPayment());
         $this->assertSame('solo', $order->plan_key);
     }
 
-    public function test_manual_provider_email_plan_creates_fulfilment_ticket_without_payment(): void
+    public function test_manual_provider_email_plan_requires_payment_before_queueing(): void
     {
         $user = User::factory()->create();
 
@@ -450,7 +450,7 @@ class EmailAccountTest extends TestCase
                 'plan' => 'titan_business',
                 'billing_cycle' => 'monthly',
                 'domain' => 'https://Acme.ng/',
-                'mailboxes' => ['hello', 'sales', 'support', 'ops', 'billing'],
+                'mailboxes' => ['hello'],
                 'company' => 'Acme',
                 'phone' => '+2348055555555',
                 'billing_country' => 'NG',
@@ -460,9 +460,26 @@ class EmailAccountTest extends TestCase
         $response->assertRedirect(route('account.email.show', $order));
         $this->assertSame('manual', $order->fulfilment_mode);
         $this->assertSame('titan', $order->provider);
-        $this->assertSame('awaiting_manual_fulfilment', $order->status);
-        $this->assertSame('queued', $order->fulfilment_status);
-        $this->assertNull($order->payment_reference);
+        $this->assertSame('awaiting_payment', $order->status);
+        $this->assertNull($order->fulfilment_status);
+        $this->assertTrue($order->requiresCheckoutPayment());
+    }
+
+    public function test_renewal_reminders_are_sent_once_per_threshold(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        $user = User::factory()->create();
+        $order = EmailOrder::create([
+            'user_id' => $user->id, 'plan_key' => 'titan_business', 'plan_name' => 'Titan Business',
+            'provider' => 'titan', 'fulfilment_mode' => 'manual', 'domain' => 'acme.ng', 'mailbox_count' => 1,
+            'billing_cycle' => 'monthly', 'amount_usd' => 3, 'amount_ngn' => 4500, 'status' => 'provisioned',
+            'payment_status' => 'successful', 'period_ends_at' => now()->addDays(6),
+        ]);
+
+        $this->assertSame(1, \App\Support\EmailLifecycle::sendRenewalReminders());
+        $this->assertSame(0, \App\Support\EmailLifecycle::sendRenewalReminders());
+        \Illuminate\Support\Facades\Notification::assertSentTo($user, \App\Notifications\EmailRenewalReminder::class, fn ($n) => $n->days === 7);
+        $this->assertCount(1, $order->fresh()->renewal_reminders);
     }
 
     public function test_admin_can_update_manual_fulfilment_status(): void

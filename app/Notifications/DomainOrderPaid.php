@@ -19,7 +19,7 @@ class DomainOrderPaid extends AccountNotification
             return [
                 'title' => __('account.notif_domain_paid_title'),
                 'body' => __('account.notif_domain_cart_paid_body', ['count' => $count]),
-                'url' => route('domain.checkout-received', $this->order),
+                'url' => \App\Support\OrderLinks::url('domain.checkout-received', $this->order),
                 'product' => 'domain',
                 'action' => __('account.notifications_open'),
             ];
@@ -32,8 +32,8 @@ class DomainOrderPaid extends AccountNotification
                 'option' => $this->order->optionLabel(),
             ]),
             'url' => $this->order->domain_checkout_id
-                ? route('domain.checkout-received', $this->order->domain_checkout_id)
-                : route('domain.order-received', $this->order),
+                ? \App\Support\OrderLinks::url('domain.checkout-received', $this->order->domain_checkout_id)
+                : \App\Support\OrderLinks::url('domain.order-received', $this->order),
             'product' => 'domain',
             'action' => __('account.notifications_open'),
         ];

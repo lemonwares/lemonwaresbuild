@@ -36,10 +36,7 @@ class CloudflareDnsApplyTest extends TestCase
             'account_id' => 'acct_1',
         ])->assertRedirect(route('admin.cloudflare-settings.index'));
 
-        $this->assertDatabaseHas('integration_settings', [
-            'key' => 'cloudflare.api_token',
-            'value' => 'cf_test_token',
-        ]);
+        $this->assertSame('cf_test_token', \App\Models\IntegrationSetting::getValue('cloudflare.api_token'));
 
         Http::fake([
             'api.cloudflare.com/client/v4/user/tokens/verify' => Http::response([
@@ -205,6 +202,21 @@ class CloudflareDnsApplyTest extends TestCase
             ->assertSee('mx.trekmail.net', false)
             ->assertSee(__('email.dns_hint_namecheap'), false)
             ->assertSee(__('email.dns_copy_all'), false);
+    }
+
+    public function test_spf_include_is_merged_into_existing_record(): void
+    {
+        $client = (new \ReflectionClass(\App\Support\CloudflareDnsClient::class))->newInstanceWithoutConstructor();
+        $merge = new \ReflectionMethod($client, 'mergeSpf');
+
+        $this->assertSame(
+            'v=spf1 include:_spf.google.com include:_spf.trekmail.net ~all',
+            $merge->invoke($client, 'v=spf1 include:_spf.google.com ~all', 'v=spf1 include:_spf.trekmail.net ~all'),
+        );
+        $this->assertSame(
+            'v=spf1 include:_spf.trekmail.net ~all',
+            $merge->invoke($client, 'v=spf1 include:_spf.trekmail.net ~all', 'v=spf1 include:_spf.trekmail.net ~all'),
+        );
     }
 
     public function test_dns_client_rejects_missing_token(): void

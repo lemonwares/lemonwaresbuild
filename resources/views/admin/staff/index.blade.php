@@ -13,7 +13,11 @@
         class="mb-5"
     >
         <x-slot:actions>
-            <a href="{{ route('admin.staff.create') }}" class="admin-btn-primary">Add Staff</a>
+            <div class="admin-customers-toolbar">
+                <a href="{{ route('admin.audit-log.index') }}" class="admin-btn-ghost">Audit log</a>
+                <a href="{{ route('admin.roles.index') }}" class="admin-btn-ghost">Roles</a>
+                <a href="{{ route('admin.staff.create') }}" class="admin-btn-primary">Add Staff</a>
+            </div>
         </x-slot:actions>
     </x-admin.page-header>
 
@@ -61,7 +65,10 @@
                                     @if ($member->is_super_admin)
                                         <span class="admin-pill is-ok">Super admin</span>
                                     @else
-                                        <span class="admin-pill is-info">{{ count($member->admin_permissions ?? []) }} permissions</span>
+                                        @if ($member->adminRole)
+                                            <span class="admin-pill is-info">{{ $member->adminRole->name }}</span>
+                                        @endif
+                                        <span class="admin-pill is-info">{{ count($member->admin_permissions ?? []) }} extra permissions</span>
                                     @endif
                                 </td>
                                 <td>{{ $member->created_at?->timezone(config('app.timezone'))->format('d M Y') }}</td>

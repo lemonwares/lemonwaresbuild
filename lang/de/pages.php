@@ -330,12 +330,12 @@ return [
     'services' => [
         'hosting' => [
             'title' => 'Cloud Hosting',
-            'description' => 'Ihre Website ist oft der erste Kontaktpunkt mit Ihrer Marke — Ausfallzeiten kosten Vertrauen. Wir bieten gemanagtes Cloud Hosting auf cPanel und Plesk sowie VPS-Optionen, wenn Sie volle Kontrolle brauchen. Jeder Plan enthält SSL, automatische Backups und proaktives Monitoring, damit Ihr Business rund um die Uhr erreichbar bleibt.',
+            'description' => 'Ihre Website ist oft der erste Kontaktpunkt mit Ihrer Marke — Ausfallzeiten kosten Vertrauen. Wir bieten gemanagtes Cloud Hosting auf cPanel sowie VPS-Optionen, wenn Sie volle Kontrolle brauchen. Jeder Plan enthält SSL, automatische Backups und proaktives Monitoring, damit Ihr Business rund um die Uhr erreichbar bleibt.',
             'cta' => 'Hosting-Pläne ansehen',
             'highlights' => [
                 'Shared-, VPS- und Managed-Server-Optionen',
                 'Kostenlose SSL-Zertifikate und tägliche Backups',
-                'cPanel & Plesk für einfaches Site-Management',
+                'cPanel für einfaches Site-Management',
                 '24/7-Support, wenn etwas Aufmerksamkeit braucht',
             ],
         ],
@@ -870,12 +870,12 @@ return [
         'intro_lede' => 'Drei klare Schritte vom Stöbern zur live Website — ohne Root-Zugang.',
         'steps' => [
             [
-                'title' => 'cPanel oder Plesk wählen',
+                'title' => 'cPanel wählen',
                 'body' => 'Derselbe Cloud-Stack. Wählen Sie das Control Panel, das Ihr Team für WordPress, E-Mail und Everyday-Sites kennt.',
             ],
             [
                 'title' => 'Speicher und Site-Limits wählen',
-                'body' => 'Starter bis Pro (oder Web Basic bis Web Scale bei Plesk) — SSD, unmetered Bandwidth und klare Website-Limits.',
+                'body' => 'Starter bis Pro — SSD, unmetered Bandwidth und klare Website-Limits.',
             ],
             [
                 'title' => 'Domain hinzufügen und checkout',
@@ -883,7 +883,7 @@ return [
             ],
         ],
         'panels_eyebrow' => 'Panel wählen',
-        'panels_title' => 'cPanel oder Plesk',
+        'panels_title' => 'cPanel',
         'panels_lede' => 'Dieselbe Cloud-Plattform — wählen Sie das Panel, das Ihr Team kennt.',
         'cpanel_badge' => 'Beliebteste Wahl',
         'cpanel_title' => 'cPanel',
@@ -908,7 +908,7 @@ return [
         'features' => [
             [
                 'title' => 'Control Panel, das Sie kennen',
-                'body' => 'cPanel oder Plesk für Dateien, Datenbanken, E-Mail und One-Click-WordPress — ohne SSH für den Alltag.',
+                'body' => 'cPanel für Dateien, Datenbanken, E-Mail und One-Click-WordPress — ohne SSH für den Alltag.',
             ],
             [
                 'title' => 'SSL und tägliche Backups',
@@ -924,7 +924,7 @@ return [
             ],
             [
                 'title' => 'WordPress und moderne Stacks',
-                'body' => 'One-Click-WordPress auf cPanel; Plesk eignet sich auch für Node.js und Next.js.',
+                'body' => 'One-Click-WordPress auf cPanel.',
             ],
             [
                 'title' => 'Echter Support in der Nähe',
@@ -935,7 +935,7 @@ return [
         'benefits_title' => 'Für Sites, die erreichbar bleiben sollen',
         'benefits_lede' => 'SSL, Backups und Support in jedem Plan — ohne Root-Passwort, das Sie nicht wollten.',
         'highlights' => [
-            'cPanel- und Plesk-Cloud-Optionen',
+            'cPanel-Cloud-Optionen',
             'SSD-Speicher mit unmetered Bandwidth',
             'SSL und automatische Backups in jedem Plan',
             'Domains beim Checkout registrieren oder verbinden',
@@ -967,8 +967,8 @@ return [
                 'answer' => 'Ihre Site läuft auf verwalteter Shared-Infrastruktur mit Control Panel. Sie verwalten Inhalte und Apps — wir Server, SSL und Backups.',
             ],
             [
-                'question' => 'cPanel oder Plesk?',
-                'answer' => 'cPanel ist die vertrauteste Wahl für WordPress und klassische Business-Sites. Plesk, wenn Ihr Team es schon nutzt oder Node.js/Next.js bevorzugt.',
+                'question' => 'cPanel?',
+                'answer' => 'cPanel ist die vertrauteste Wahl für WordPress und klassische Business-Sites.',
             ],
             [
                 'question' => 'Was ist in jedem Plan enthalten?',
@@ -984,129 +984,11 @@ return [
             ],
             [
                 'question' => 'Wie bestelle ich?',
-                'answer' => 'cPanel oder Plesk wählen, Plan auf der Specs-Seite auswählen, in den Warenkorb — nach Zahlung provisionieren wir.',
+                'answer' => 'cPanel wählen, Plan auf der Specs-Seite auswählen, in den Warenkorb — nach Zahlung provisionieren wir.',
             ],
         ],
         'help_title' => 'Bereit, einen Plan zu wählen?',
-        'help_lede' => 'Wählen Sie cPanel oder Plesk, Specs — dann weiter zum Warenkorb.',
-    ],
-    'plesk' => [
-        'meta_title' => 'Plesk Hosting',
-        'meta_description' => 'Cloud Hosting mit Plesk von LemonWares — Web Basic, Web Plus und Web Scale mit SSD, SSL und Support für WordPress, Node.js und Next.js.',
-        'eyebrow' => 'Plesk Hosting',
-        'title' => 'Cloud-Hosting mit dem Plesk-Panel',
-        'lede' => 'Plesk auf LemonWares Cloud — klare Naira-Tarife für WordPress, Node.js und Next.js ohne Root-Server-Komplexität.',
-        'cta' => 'Plesk-Pläne ansehen',
-        'body' => 'Plesk-Hosting nutzt denselben Cloud-Stack wie unsere cPanel-Pläne — mit einem Panel, das viele Teams für moderne Apps bevorzugen. Wählen Sie Web Basic, Web Plus oder Web Scale — SSD-Speicher, unmetered Bandwidth, SSL und Backups inklusive.',
-        'intro_eyebrow' => 'So funktioniert es',
-        'intro_title' => 'Plesk-Plan wählen, dann live gehen',
-        'intro_lede' => 'Drei klare Schritte vom Stöbern bis zur Live-Site auf Plesk Cloud.',
-        'steps' => [
-            [
-                'title' => 'Web Basic, Plus oder Scale wählen',
-                'body' => 'Passen Sie Speicher und Website-Limits an Ihren Bedarf an — von einer einzelnen Site bis zu mehreren Projekten auf einem Plan.',
-            ],
-            [
-                'title' => 'Domain beim Checkout hinzufügen',
-                'body' => 'Registrieren Sie eine neue Domain oder verbinden Sie eine bestehende. Wir helfen bei DNS, damit die Site korrekt auflöst.',
-            ],
-            [
-                'title' => 'Wir provisionieren mit SSL und Backups',
-                'body' => 'Nach der Zahlung richten wir Plesk auf Cloud mit kostenlosem SSL und automatischen Backups ein — Sie verwalten Sites im Panel.',
-            ],
-        ],
-        'plans_eyebrow' => 'Plesk-Pläne',
-        'plans_title' => 'Web Basic, Web Plus, Web Scale',
-        'plans_lede' => 'Monatspreise in Naira. Plan wählen und weiter zum Warenkorb.',
-        'plans_from' => 'Ab',
-        'plans_storage' => 'Speicher',
-        'plans_bandwidth' => 'Bandbreite',
-        'plans_websites' => 'Websites',
-        'plans_select' => 'Plan wählen',
-        'features_eyebrow' => 'In jedem Plan enthalten',
-        'features_title' => 'Was Plesk Cloud-Hosting immer abdeckt',
-        'features_lede' => 'Ein vertrautes Panel auf verwalteter Shared-Infrastruktur — ohne Root-Passwort.',
-        'features' => [
-            [
-                'title' => 'Plesk-Control-Panel',
-                'body' => 'Verwalten Sie Dateien, Datenbanken, Domains und Apps in Plesk — ideal für WordPress und moderne Node- oder Next-Stacks.',
-            ],
-            [
-                'title' => 'WordPress, Node.js und Next.js',
-                'body' => 'Für alltägliche WordPress-Sites und Teams, die Plesk bevorzugen, wenn sie Node.js- oder Next.js-Apps ausliefern.',
-            ],
-            [
-                'title' => 'SSL und tägliche Backups',
-                'body' => 'Kostenloses SSL auf jeder Site und automatische Backups, damit ein schlechtes Update kein Wochenend-Ausfall wird.',
-            ],
-            [
-                'title' => 'SSD und unmetered Bandwidth',
-                'body' => 'Schneller Speicher mit ungemessenem Traffic — Pläne nach Speicher und Anzahl der Websites gestaffelt.',
-            ],
-            [
-                'title' => 'Domain- und E-Mail-bereit',
-                'body' => 'Domain beim Checkout registrieren oder verbinden, dann Mailemon oder Panel-E-Mail hinzufügen, wenn Sie Marken-Postfächer brauchen.',
-            ],
-            [
-                'title' => 'Echter Support in der Nähe',
-                'body' => 'WhatsApp, Telefon und E-Mail — dasselbe LemonWares-Team für Domains, cPanel-Hosting und Business-E-Mail.',
-            ],
-        ],
-        'highlights' => [
-            'Plesk auf LemonWares Cloud',
-            'Web Basic, Web Plus und Web Scale in Naira',
-            'SSD-Speicher mit unmetered Bandwidth',
-            'SSL und automatische Backups in jedem Plan',
-            'Stark für WordPress, Node.js und Next.js',
-            'Support per WhatsApp, Telefon und E-Mail',
-        ],
-        'fit_eyebrow' => 'Passt das zu Ihnen?',
-        'fit_title' => 'Plesk vs. cPanel',
-        'fit_lede' => 'Dieselbe Cloud-Plattform — wählen Sie das Panel, das Ihr Team schon kennt.',
-        'fit_plesk_title' => 'Plesk wählen, wenn Sie brauchen',
-        'fit_plesk' => [
-            'Ein Panel, das Ihr Team schon nutzt',
-            'WordPress plus Komfort für Node.js oder Next.js',
-            'Klare Web-Basic- / Plus- / Scale-Pläne',
-            'Cloud ohne Root-Server-Admin',
-        ],
-        'fit_cpanel_title' => 'cPanel wählen, wenn Sie brauchen',
-        'fit_cpanel' => [
-            'Das bekannteste WordPress-Hosting-Panel',
-            'Klassische Business-Sites und E-Mail-bereites Hosting',
-            'Den Workflow, den die meisten Agenturen kennen',
-            'Denselben Cloud-Stack unter einem anderen Panel',
-        ],
-        'fit_cpanel_cta' => 'Cloud Hosting ansehen',
-        'faq_title' => 'Plesk-Hosting-FAQ',
-        'faq_items' => [
-            [
-                'question' => 'Was ist Plesk-Hosting?',
-                'answer' => 'Cloud Hosting mit dem Plesk-Control-Panel. Sie verwalten Sites und Apps in Plesk; LemonWares kümmert sich um Server, SSL und Backups.',
-            ],
-            [
-                'question' => 'Worin unterscheidet sich das von cPanel?',
-                'answer' => 'Dieselbe Cloud-Infrastruktur. Plesk ist das Panel — eine starke Wahl, wenn Ihr Team es bevorzugt oder mit Node.js und Next.js neben WordPress arbeitet.',
-            ],
-            [
-                'question' => 'Welche Pläne gibt es?',
-                'answer' => 'Web Basic, Web Plus und Web Scale — monatlich in Naira mit klaren Speicher-, Bandbreiten- und Website-Limits.',
-            ],
-            [
-                'question' => 'Was ist in jedem Plan enthalten?',
-                'answer' => 'SSD-Speicher, unmetered Bandwidth, kostenloses SSL, automatische Backups und LemonWares-Support. Höhere Stufen: mehr Speicher und mehr Websites.',
-            ],
-            [
-                'question' => 'Kann ich meine eigene Domain verbinden?',
-                'answer' => 'Ja. Neue Domain beim Checkout registrieren oder eine bestehende verbinden. Wir helfen bei DNS, damit die Site korrekt auflöst.',
-            ],
-            [
-                'question' => 'Wie bestelle ich?',
-                'answer' => 'Plesk-Plan wählen, in den Warenkorb legen und Checkout abschließen. Wir provisionieren nach der Zahlung.',
-            ],
-        ],
-        'help_title' => 'Bereit für Plesk-Hosting?',
-        'help_lede' => 'Web Basic, Plus oder Scale wählen, in den Warenkorb — wir provisionieren mit LemonWares-Support.',
+        'help_lede' => 'Wählen Sie cPanel, Specs — dann weiter zum Warenkorb.',
     ],
     'vps' => [
         'meta_title' => 'VPS Root-Server',
@@ -1194,14 +1076,14 @@ return [
         'fit_shared_title' => 'Bei Cloud bleiben, wenn Sie brauchen',
         'fit_shared' => [
             'Eine Marketing-Site oder einen WordPress-Blog',
-            'cPanel oder Plesk ohne Server-Admin',
+            'cPanel ohne Server-Admin',
             'SSL und Backups ohne Root',
             'Schnelleres Setup für eine einfache Business-Site',
         ],
         'fit_shared_cta' => 'Cloud Hosting ansehen',
         'contrast_eyebrow' => 'Noch unsicher?',
         'contrast_title' => 'Vielleicht reicht Cloud',
-        'contrast_lede' => 'Wenn Sie vor allem ein Website-Panel brauchen — keinen Server — starten Sie mit cPanel oder Plesk Cloud.',
+        'contrast_lede' => 'Wenn Sie vor allem ein Website-Panel brauchen — keinen Server — starten Sie mit cPanel Cloud.',
         'contrast_cta' => 'Cloud Hosting ansehen',
         'faq_title' => 'VPS-FAQ',
         'faq_items' => [

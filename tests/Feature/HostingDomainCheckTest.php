@@ -21,7 +21,7 @@ class HostingDomainCheckTest extends TestCase
             'site.whmcs.api_secret' => 'secret',
             'site.whmcs.order_route' => '/cart.php',
             'site.whmcs.payment_method' => 'banktransfer',
-            'site.hosting_plans.cpanel.whmcs_pid' => '15',
+            'site.whmcs_pids.cpanel' => '15',
         ]);
     }
 
@@ -84,15 +84,21 @@ class HostingDomainCheckTest extends TestCase
     public function test_hosting_intake_continues_when_domain_is_available(): void
     {
         Http::fake([
-            'https://billing.example.test/includes/api.php' => Http::sequence()
-                ->push(['result' => 'success', 'status' => 'available'], 200)
-                ->push(['result' => 'error', 'message' => 'Client not found'], 200)
-                ->push(['result' => 'success', 'clientid' => '99'], 200)
-                ->push(['result' => 'success', 'orderid' => '321', 'invoiceid' => '654'], 200)
-                ->push([
+            'https://billing.example.test/includes/api.php' => fn ($request) => Http::response(match ($request['action'] ?? '') {
+                'DomainWhois' => ['result' => 'success', 'status' => 'available'],
+                'GetTLDPricing' => [
+                    'result' => 'success',
+                    'currency' => ['id' => 1, 'code' => 'NGN'],
+                    'pricing' => ['com' => ['register' => ['1' => '15000.00'], 'transfer' => ['1' => '15000.00']]],
+                ],
+                'AddClient' => ['result' => 'success', 'clientid' => '99'],
+                'AddOrder' => ['result' => 'success', 'orderid' => '321', 'invoiceid' => '654'],
+                'CreateSsoToken' => [
                     'result' => 'success',
                     'redirect_url' => 'https://billing.example.test/oauth/singlesignon.php?access_token=test-token',
-                ], 200),
+                ],
+                default => ['result' => 'error', 'message' => 'Client not found'],
+            }, 200),
             'open.er-api.com/*' => Http::response(['rates' => ['NGN' => 1600]], 200),
         ]);
 

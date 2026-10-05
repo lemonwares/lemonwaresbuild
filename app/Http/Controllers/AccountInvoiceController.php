@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\AccountListQuery;
 use App\Support\WhmcsClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -16,7 +17,7 @@ class AccountInvoiceController extends Controller
 
         $whmcsCustomer = $owner->whmcsCustomer;
         if ($whmcsCustomer?->whmcs_client_id) {
-            $remote = WhmcsClient::getInvoices((int) $whmcsCustomer->whmcs_client_id);
+            $remote = WhmcsClient::getInvoices((int) $whmcsCustomer->whmcs_client_id, 100);
             foreach ($remote as $row) {
                 $invoiceId = (int) ($row['id'] ?? 0);
                 $invoices->push([
@@ -85,8 +86,17 @@ class AccountInvoiceController extends Controller
             ->sortByDesc(fn ($row) => optional($row['date'])->timestamp ?? 0)
             ->values();
 
+        $search = trim((string) $request->query('q', ''));
+        $filtered = AccountListQuery::filter(
+            $invoices,
+            $search,
+            ['reference', 'label', 'status', 'source', 'currency'],
+        );
+
         return view('pages.account-invoices', [
-            'invoices' => $invoices,
+            'invoices' => AccountListQuery::paginate($filtered, 15),
+            'search' => $search,
+            'totalCount' => $invoices->count(),
         ]);
     }
 
@@ -107,15 +117,36 @@ class AccountInvoiceController extends Controller
         $clientId = (int) ($detail['userid'] ?? 0);
         abort_unless($clientId === (int) $whmcsCustomer->whmcs_client_id, 404);
 
+        $items = $this->normalizeList(data_get($detail, 'items.item', []));
+        $transactions = $this->normalizeList(data_get($detail, 'transactions.transaction', []));
+
         return view('pages.account-invoice', [
             'invoice' => $detail,
             'invoiceId' => $invoiceId,
+            'items' => $items,
+            'transactions' => $transactions,
             'payUrl' => $this->whmcsPayUrl(
                 (int) $whmcsCustomer->whmcs_client_id,
                 $invoiceId,
                 (string) ($detail['status'] ?? ''),
             ),
         ]);
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    protected function normalizeList(mixed $rows): array
+    {
+        if (! is_array($rows) || $rows === []) {
+            return [];
+        }
+
+        if (isset($rows['id']) || isset($rows['description']) || isset($rows['amount'])) {
+            return [$rows];
+        }
+
+        return array_values(array_filter($rows, 'is_array'));
     }
 
     protected function parseDate(mixed $value): ?Carbon

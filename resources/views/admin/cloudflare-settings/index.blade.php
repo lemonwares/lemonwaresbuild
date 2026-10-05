@@ -61,9 +61,9 @@
                         name="api_token"
                         rows="3"
                         class="admin-input admin-mono text-sm"
-                        placeholder="Cloudflare API token"
+                        placeholder="{{ filled($settings['api_token']) ? '•••••••• saved, leave blank to keep' : 'Cloudflare API token' }}"
                         autocomplete="off"
-                    >{{ old('api_token', $settings['api_token']) }}</textarea>
+                    ></textarea>
                 </label>
 
                 <label class="admin-field admin-field-span">

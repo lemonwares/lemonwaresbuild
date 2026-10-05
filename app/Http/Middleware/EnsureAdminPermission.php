@@ -11,7 +11,7 @@ class EnsureAdminPermission
 {
     public function handle(Request $request, Closure $next): Response
     {
-        AdminPermissions::abortUnlessRouteAllowed($request->route()?->getName());
+        AdminPermissions::abortUnlessRouteAllowed($request->route()?->getName(), $request->getMethod());
 
         return $next($request);
     }

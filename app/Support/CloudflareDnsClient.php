@@ -271,6 +271,25 @@ class CloudflareDnsClient
                 }
                 $match ??= $row;
             }
+        } elseif ($type === 'TXT') {
+            // Root TXT holds unrelated verification records; only touch a TXT of the same kind (SPF, DMARC).
+            $match = $this->findMatchingRecord($existing, $zoneName, $record);
+            if ($match !== null) {
+                return;
+            }
+
+            $kind = strtolower(strtok(trim($record['value'], '" '), ' ') ?: '');
+            foreach ($existing as $row) {
+                $content = trim((string) data_get($row, 'content', ''), '" ');
+                if ($kind !== '' && $this->namesEqual((string) data_get($row, 'name', ''), $record['name'], $zoneName)
+                    && str_starts_with(strtolower($content), $kind.' ')) {
+                    $match = $row;
+                    if ($kind === 'v=spf1') {
+                        $record['value'] = $this->mergeSpf($content, $record['value']);
+                    }
+                    break;
+                }
+            }
         } else {
             $match = $this->findMatchingRecord($existing, $zoneName, $record)
                 ?? $this->findMatchingName($existing, $zoneName, $record['name']);
@@ -296,6 +315,31 @@ class CloudflareDnsClient
         }
 
         $this->request('post', 'https://api.cloudflare.com/client/v4/zones/'.$zoneId.'/dns_records', [], $payload);
+    }
+
+    /**
+     * Adds our include: mechanisms to an existing SPF record instead of replacing it.
+     */
+    protected function mergeSpf(string $existing, string $wanted): string
+    {
+        $terms = preg_split('/\s+/', trim($existing)) ?: [];
+        preg_match_all('/include:\S+/i', $wanted, $includes);
+
+        foreach ($includes[0] as $include) {
+            if (in_array(strtolower($include), array_map('strtolower', $terms), true)) {
+                continue;
+            }
+            $allIndex = null;
+            foreach ($terms as $index => $term) {
+                if (preg_match('/^[~?+-]?all$/i', $term) || str_starts_with(strtolower($term), 'redirect=')) {
+                    $allIndex = $index;
+                    break;
+                }
+            }
+            $allIndex === null ? $terms[] = $include : array_splice($terms, $allIndex, 0, [$include]);
+        }
+
+        return implode(' ', $terms);
     }
 
     /**

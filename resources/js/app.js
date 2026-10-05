@@ -1,4 +1,5 @@
 import './chat-widget.js';
+import './sidebar-scroll.js';
 import './reviews-carousel.js';
 import './mobile-nav.js';
 import './locale-switcher.js';
@@ -17,6 +18,7 @@ import './domain-cart.js';
 import './header-domain-search.js';
 import './theme.js';
 import './case-live-preview.js';
+import './password-toggle.js';
 import './admin-sidebar.js';
 import './account-sidebar.js';
 import './admin-chrome.js';

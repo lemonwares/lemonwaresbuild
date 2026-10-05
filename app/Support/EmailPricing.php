@@ -21,19 +21,28 @@ class EmailPricing
 
         return EmailPlan::query()
             ->where('is_visible', true)
-            ->where('provider', '!=', 'titan')
             ->orderBy('sort_order')
             ->orderBy('plan_key')
             ->get()
-            ->map(fn (EmailPlan $plan) => [
-                'key' => $plan->plan_key,
-                'provider' => $plan->provider,
-                'fulfilment_mode' => $plan->fulfilment_mode,
-                'mailboxes' => (int) $plan->mailbox_count,
-                'monthly_usd' => (float) $plan->monthly_usd,
-                'featured' => (bool) $plan->featured,
-            ])
+            ->map(fn (EmailPlan $plan) => self::toArray($plan))
             ->all();
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private static function toArray(EmailPlan $plan): array
+    {
+        return [
+            'key' => $plan->plan_key,
+            'name' => $plan->displayName(),
+            'summary' => $plan->displaySummary(),
+            'provider' => $plan->provider,
+            'fulfilment_mode' => $plan->fulfilment_mode,
+            'mailboxes' => (int) $plan->mailbox_count,
+            'monthly_usd' => (float) $plan->monthly_usd,
+            'featured' => (bool) $plan->featured,
+        ];
     }
 
     /**
@@ -48,21 +57,13 @@ class EmailPricing
         $plan = EmailPlan::query()
             ->where('plan_key', $key)
             ->where('is_visible', true)
-            ->where('provider', '!=', 'titan')
             ->first();
 
         if (! $plan) {
             return null;
         }
 
-        return [
-            'key' => $plan->plan_key,
-            'provider' => $plan->provider,
-            'fulfilment_mode' => $plan->fulfilment_mode,
-            'mailboxes' => (int) $plan->mailbox_count,
-            'monthly_usd' => (float) $plan->monthly_usd,
-            'featured' => (bool) $plan->featured,
-        ];
+        return self::toArray($plan);
     }
 
     /**
@@ -168,8 +169,8 @@ class EmailPricing
             'per_mailbox_display' => HostingPricing::ngnPriceDisplay($perMailboxNgn, HostingPricing::monthlySuffix()),
             'billing_cycle_label' => self::cycleLabel($cycleKey),
             'discount_percent' => $discount,
-            'name' => __('email.plans.' . $plan['key'] . '.name'),
-            'summary' => __('email.plans.' . $plan['key'] . '.summary'),
+            'name' => $plan['name'] ?? __('email.plans.' . $plan['key'] . '.name'),
+            'summary' => $plan['summary'] ?? __('email.plans.' . $plan['key'] . '.summary'),
             'provider_label' => __('email.providers.' . ($plan['provider'] ?? 'lemonmail')),
             'is_manual' => ($plan['fulfilment_mode'] ?? 'auto') === 'manual',
         ]);

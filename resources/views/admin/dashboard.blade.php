@@ -13,7 +13,39 @@
         class="mb-5"
     />
 
-    <div class="admin-dash">
+    <div @class(['admin-dash', 'has-sales' => $sales])>
+        @if ($sales)
+            <section class="admin-dash-metrics admin-dash-sales" aria-label="Sales">
+                <a href="{{ route('admin.reports.index') }}" class="admin-metric">
+                    <span class="admin-metric-label">Sales this month</span>
+                    <span class="admin-metric-value admin-metric-value-sm">{{ \App\Support\HostingPricing::formatMoney($sales['monthNet']) }}</span>
+                    <span class="admin-metric-meta">{{ $sales['monthOrders'] }} paid orders</span>
+                </a>
+                <a href="{{ route('admin.orders.index', ['payment' => 'unpaid']) }}" class="admin-metric">
+                    <span class="admin-metric-label">Unpaid orders</span>
+                    <span class="admin-metric-value">{{ $sales['unpaidCount'] }}</span>
+                    <span class="admin-metric-meta">{{ \App\Support\HostingPricing::formatMoney($sales['unpaidValue']) }} waiting</span>
+                </a>
+                <a href="{{ route('admin.reports.index') }}" class="admin-metric">
+                    <span class="admin-metric-label">Renewals / 30d</span>
+                    <span class="admin-metric-value">{{ $sales['renewals'] }}</span>
+                    <span class="admin-metric-meta">Email &amp; WHMCS services</span>
+                </a>
+                <a href="{{ route('admin.domain-orders.index') }}" class="admin-metric">
+                    <span class="admin-metric-label">Domain &amp; cart / 7d</span>
+                    <span class="admin-metric-value">{{ $sales['domainOrdersWeek'] + $sales['cartOrdersWeek'] }}</span>
+                    <span class="admin-metric-meta">{{ $sales['domainOrdersWeek'] }} domains · {{ $sales['cartOrdersWeek'] }} carts</span>
+                </a>
+                @if ($sales['whmcsFailed'] + $sales['partialCarts'] > 0)
+                    <a href="{{ route('admin.domain-orders.index', ['whmcs' => 'failed']) }}" class="admin-metric">
+                        <span class="admin-metric-label">Needs fixing</span>
+                        <span class="admin-metric-value" style="color:#b91c1c;">{{ $sales['whmcsFailed'] + $sales['partialCarts'] }}</span>
+                        <span class="admin-metric-meta">{{ $sales['whmcsFailed'] }} WHMCS failures · {{ $sales['partialCarts'] }} partial carts</span>
+                    </a>
+                @endif
+            </section>
+        @endif
+
         <section class="admin-dash-metrics" aria-label="Key metrics">
             <a href="{{ route('admin.customers.index') }}" class="admin-metric">
                 <span class="admin-metric-label">Customers</span>

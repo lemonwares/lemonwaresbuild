@@ -50,12 +50,12 @@
                     {{ __('account.forgot') }}
                 </a>
             </div>
-            <input
-                id="password" name="password" type="password"
-                required autocomplete="current-password"
-                class="auth-input"
-                placeholder="••••••••"
-            >
+            <x-ui.password-input
+                id="password"
+                name="password"
+                autocomplete="current-password"
+                class="@error('password') border-rose/50 @enderror"
+            />
         </div>
 
         <label class="flex cursor-pointer items-center gap-2">

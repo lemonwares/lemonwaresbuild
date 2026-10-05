@@ -1198,6 +1198,70 @@
         gap: 0.45rem;
     }
 
+    .account-filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .account-input {
+        flex: 1 1 14rem;
+        min-width: 0;
+        border: 1px solid var(--color-border);
+        border-radius: 0.85rem;
+        background: #fff;
+        padding: 0.7rem 0.9rem;
+        font-size: 0.92rem;
+        color: #111;
+    }
+
+    .account-input:focus {
+        outline: 2px solid color-mix(in srgb, var(--color-rose) 35%, transparent);
+        outline-offset: 1px;
+        border-color: color-mix(in srgb, var(--color-rose) 45%, var(--color-border));
+    }
+
+    .account-pagination {
+        margin-top: 1rem;
+    }
+
+    .account-pagination nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        justify-content: flex-end;
+    }
+
+    .account-pagination span,
+    .account-pagination a {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.25rem;
+        padding: 0.4rem 0.65rem;
+        border-radius: 0.65rem;
+        border: 1px solid var(--color-border);
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--color-on-blush);
+        background: #fff;
+        text-decoration: none;
+    }
+
+    .account-pagination a:hover {
+        border-color: color-mix(in srgb, var(--color-rose) 40%, var(--color-border));
+        color: var(--color-rose);
+    }
+
+    .account-pagination [aria-current="page"] span,
+    .account-pagination .active span {
+        background: var(--color-rose);
+        border-color: var(--color-rose);
+        color: #fff;
+    }
+
     .account-empty {
         display: flex;
         flex-direction: column;
@@ -6228,6 +6292,42 @@
         border-color: #d1d1d1;
     }
 
+    .auth-password-field {
+        position: relative;
+    }
+
+    .auth-input-password {
+        padding-right: 2.85rem;
+    }
+
+    .auth-password-toggle {
+        position: absolute;
+        top: 50%;
+        right: 0.55rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.1rem;
+        height: 2.1rem;
+        transform: translateY(-50%);
+        border: 0;
+        border-radius: 0.65rem;
+        background: transparent;
+        color: #6b6b6b;
+        cursor: pointer;
+        transition: color 0.15s, background-color 0.15s;
+    }
+
+    .auth-password-toggle:hover {
+        color: #c51a13;
+        background: color-mix(in srgb, var(--color-blush) 70%, transparent);
+    }
+
+    .auth-password-toggle:focus-visible {
+        outline: 2px solid #c51a13;
+        outline-offset: 1px;
+    }
+
     .auth-error {
         display: flex;
         align-items: flex-start;
@@ -7691,4 +7791,73 @@
     .admin-whmcs-console-tab.is-settings {
         margin-left: auto;
     }
+}
+
+/* Admin UX pass: status labels, dashboard sales row, collapsible phone menu, nav groups. */
+@layer components {
+    .admin-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        white-space: nowrap;
+        border-radius: 9999px;
+        border: 1px solid transparent;
+        padding: 0.15rem 0.55rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        line-height: 1.4;
+        text-transform: capitalize;
+    }
+
+    .admin-status::before {
+        content: '';
+        width: 0.4rem;
+        height: 0.4rem;
+        border-radius: 9999px;
+        background: currentColor;
+    }
+
+    .admin-status.is-ok { border-color: #bbf7d0; background: #ecfdf5; color: #047857; }
+    .admin-status.is-wait { border-color: #fde68a; background: #fffbeb; color: #b45309; }
+    .admin-status.is-bad { border-color: #fecaca; background: #fef2f2; color: #b91c1c; }
+    .admin-status.is-muted { border-color: var(--color-border); background: #f8fafc; color: #475569; }
+
+    html[data-theme='dark'] .admin-status.is-ok { background: rgb(4 120 87 / 0.18); border-color: rgb(4 120 87 / 0.4); color: #6ee7b7; }
+    html[data-theme='dark'] .admin-status.is-wait { background: rgb(180 83 9 / 0.18); border-color: rgb(180 83 9 / 0.4); color: #fcd34d; }
+    html[data-theme='dark'] .admin-status.is-bad { background: rgb(185 28 28 / 0.18); border-color: rgb(185 28 28 / 0.4); color: #fca5a5; }
+    html[data-theme='dark'] .admin-status.is-muted { background: rgb(148 163 184 / 0.12); color: #cbd5e1; }
+
+    .admin-nowrap { white-space: nowrap; }
+
+    .admin-num {
+        font-family: var(--font-sans);
+        font-variant-numeric: tabular-nums;
+    }
+
+    @media (min-width: 1100px) {
+        .admin-dash.has-sales {
+            grid-template-areas:
+                "sales sales"
+                "metrics metrics"
+                "chart activity"
+                "lists lists";
+        }
+
+        .admin-dash-sales { grid-area: sales; }
+    }
+
+    .admin-mobile-menu > summary {
+        display: flex;
+        cursor: pointer;
+        list-style: none;
+        align-items: center;
+        justify-content: space-between;
+        font-family: var(--font-display);
+        font-weight: 600;
+    }
+
+    .admin-mobile-menu > summary::-webkit-details-marker { display: none; }
+    .admin-mobile-menu > summary::after { content: '▾'; transition: transform 150ms ease; }
+    .admin-mobile-menu[open] > summary::after { transform: rotate(180deg); }
+    .admin-mobile-menu[open] > summary { margin-bottom: 1rem; }
 }

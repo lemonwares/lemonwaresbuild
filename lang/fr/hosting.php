@@ -20,7 +20,7 @@ return [
     'continue_billing' => 'Continuer vers la facturation',
     'select_prompt' => 'Sélectionnez au moins une offre ci-dessus, puis continuez pour saisir vos informations de facturation.',
     'billed_monthly_vps' => 'Les VPS sont gérés par LemonWares. Choisissez une offre et une période ci-dessous.',
-    'billed_monthly_shared' => 'Le paiement cPanel et Plesk continue via WHMCS après les informations de facturation.',
+    'billed_monthly_shared' => 'Le paiement cPanel continue via WHMCS après les informations de facturation.',
     'save_percent' => 'Économisez :percent%',
     'period_total' => 'Total de la période',
     'cycles' => [

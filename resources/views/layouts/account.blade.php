@@ -118,6 +118,24 @@
                 </header>
 
                 <main class="account-content">
+                    @if (session('impersonator_admin_id'))
+                        <div class="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                            <span>You are viewing this account as LemonWares support. Everything you do is done as {{ auth()->user()?->email }}.</span>
+                            <form method="POST" action="{{ route('admin.impersonation.stop') }}">
+                                @csrf
+                                <button type="submit" class="font-semibold underline">Back to admin</button>
+                            </form>
+                        </div>
+                    @endif
+                    @if (auth()->user() && ! auth()->user()->hasVerifiedEmail() && ! session('impersonator_admin_id'))
+                        <div class="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                            <span>{{ __('account.verify_banner', ['email' => auth()->user()->email]) }}</span>
+                            <form method="POST" action="{{ route('verification.send') }}">
+                                @csrf
+                                <button type="submit" class="font-semibold underline">{{ __('account.verify_resend') }}</button>
+                            </form>
+                        </div>
+                    @endif
                     <x-ui.flash show-status />
                     <x-ui.flash />
                     <x-ui.flash key="hosting_feedback" />

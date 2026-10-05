@@ -42,8 +42,12 @@ class RegisterController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        \App\Models\HostingLead::claimFor($user);
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
 
-        return redirect()->intended(route('account.show'));
+        return redirect()->intended(route('account.show'))->with('status', __('account.verify_sent'));
     }
 }

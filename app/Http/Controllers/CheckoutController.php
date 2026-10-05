@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Support\Cart;
 use App\Support\DomainName;
 use App\Support\FlutterwavePayment;
+use App\Support\OrderLinks;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -151,6 +152,7 @@ class CheckoutController extends Controller
             'mailboxes' => ['nullable', 'array'],
             'hostname' => ['nullable', 'array'],
             'domain_option' => ['nullable', 'array'],
+            'coupon_code' => ['nullable', 'string', 'max:40'],
         ], $guestRules, $billingRules, $extraRules));
 
         $shippingSame = $request->boolean('shipping_same_as_billing', true);
@@ -215,6 +217,13 @@ class CheckoutController extends Controller
             ];
 
         $totals = Cart::totals();
+        $couponResult = null;
+        if (filled($payload['coupon_code'] ?? null)) {
+            $couponResult = \App\Support\Coupons::evaluate((string) $payload['coupon_code'], $items, $user);
+            if (! $couponResult['ok']) {
+                throw ValidationException::withMessages(['coupon_code' => $couponResult['message']]);
+            }
+        }
         $eppMap = is_array($payload['epp'] ?? null) ? $payload['epp'] : [];
         $emailDomains = is_array($payload['email_domain'] ?? null) ? $payload['email_domain'] : [];
         $mailboxes = is_array($payload['mailboxes'] ?? null) ? $payload['mailboxes'] : [];
@@ -232,13 +241,21 @@ class CheckoutController extends Controller
             $hostnames,
             $domainOptions,
             $shippingSame,
-            $shippingAddress
+            $shippingAddress,
+            $couponResult
         ) {
+            $discountNgn = (float) ($couponResult['discount_ngn'] ?? 0);
+            $discountUsd = (float) ($couponResult['discount_usd'] ?? 0);
+
             $checkout = SiteCheckout::create([
                 'user_id' => $user->id,
                 'item_count' => count($items),
-                'amount_usd' => $totals['amount_usd'],
-                'amount_ngn' => $totals['amount_ngn'],
+                'amount_usd' => max(0, round($totals['amount_usd'] - $discountUsd, 2)),
+                'amount_ngn' => max(1, round($totals['amount_ngn'] - $discountNgn, 2)),
+                'coupon_id' => $couponResult['coupon']->id ?? null,
+                'coupon_code' => $couponResult['coupon']->code ?? null,
+                'discount_ngn' => $couponResult ? $discountNgn : null,
+                'discount_usd' => $couponResult ? $discountUsd : null,
                 'status' => 'awaiting_payment',
                 'ip_address' => $request->ip(),
                 'shipping_same_as_billing' => $shippingSame,
@@ -252,9 +269,9 @@ class CheckoutController extends Controller
                 $linePayload = $item;
 
                 if ($type === Cart::TYPE_DOMAIN) {
-                    $linePayload['epp_code'] = (($item['option'] ?? '') === 'transfer')
-                        ? trim((string) ($eppMap[$id] ?? ''))
-                        : null;
+                    $epp = (($item['option'] ?? '') === 'transfer') ? trim((string) ($eppMap[$id] ?? '')) : '';
+                    unset($linePayload['epp_code']);
+                    $linePayload['epp_code_encrypted'] = $epp !== '' ? \Illuminate\Support\Facades\Crypt::encryptString($epp) : null;
                 }
 
                 if ($type === Cart::TYPE_EMAIL) {
@@ -294,7 +311,7 @@ class CheckoutController extends Controller
         }
 
         return redirect()
-            ->route('checkout.received', $checkout)
+            ->to(OrderLinks::url('checkout.received', $checkout))
             ->with('cart_feedback', [
                 'type' => 'error',
                 'message' => __('domain.payment_unavailable'),
@@ -326,7 +343,7 @@ class CheckoutController extends Controller
                 ]);
         }
 
-        $receivedRoute = route('checkout.received', $checkout);
+        $receivedRoute = OrderLinks::url('checkout.received', $checkout);
 
         if ($checkout->isPaid()) {
             return redirect()
@@ -368,9 +385,18 @@ class CheckoutController extends Controller
 
     public function pay(Request $request, SiteCheckout $checkout): RedirectResponse
     {
+        if ($checkout->isCancelled()) {
+            return redirect()
+                ->to(OrderLinks::url('checkout.received', $checkout))
+                ->with('cart_feedback', [
+                    'type' => 'error',
+                    'message' => __('domain.order_cancelled'),
+                ]);
+        }
+
         if ($checkout->isPaid()) {
             return redirect()
-                ->route('checkout.received', $checkout)
+                ->to(OrderLinks::url('checkout.received', $checkout))
                 ->with('cart_feedback', [
                     'type' => 'info',
                     'message' => __('domain.payment_already_confirmed'),
@@ -383,7 +409,7 @@ class CheckoutController extends Controller
         }
 
         return redirect()
-            ->route('checkout.received', $checkout)
+            ->to(OrderLinks::url('checkout.received', $checkout))
             ->with('cart_feedback', [
                 'type' => 'error',
                 'message' => __('domain.payment_unavailable'),
@@ -434,7 +460,11 @@ class CheckoutController extends Controller
 
         Auth::login($user);
         $request->session()->regenerate();
-        HostingLead::claimFor($user);
+        try {
+            $user->sendEmailVerificationNotification();
+        } catch (\Throwable $exception) {
+            report($exception);
+        }
 
         return $user;
     }

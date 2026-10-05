@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CareerOpening;
 use App\Models\EmailOrder;
 use App\Models\HostingLead;
-use App\Models\HostingPlanPrice;
+use App\Models\CatalogPlan;
 use App\Models\NewsletterSubscriber;
 use App\Models\SupportTicket;
 use App\Models\TeamMember;
@@ -25,7 +25,7 @@ class AdminDashboardController extends Controller
         $subscribersCount = NewsletterSubscriber::count();
         $pendingEmailSetupCount = EmailOrder::query()->where('status', 'paid_pending_setup')->count();
         $teamMembersCount = TeamMember::count();
-        $pricedSpecsCount = HostingPlanPrice::query()->where('is_visible', true)->where('price_amount', '>', 0)->count();
+        $pricedSpecsCount = CatalogPlan::query()->where('is_active', true)->where('price_ngn', '>', 0)->count();
         $openTicketsCount = SupportTicket::query()->whereIn('status', ['open', 'in_progress'])->count();
         $careerOpeningsCount = CareerOpening::query()->where('is_active', true)->count();
         $newCustomersWeek = User::query()->customers()->where('created_at', '>=', now()->subDays(7))->count();
@@ -90,7 +90,35 @@ class AdminDashboardController extends Controller
             'customerSeries',
             'chartMax',
             'activity',
-        ));
+        ) + $this->salesSnapshot());
+    }
+
+    /**
+     * Money and to-do figures for the top of the dashboard, shown to staff who can see reports or orders.
+     *
+     * @return array<string, mixed>
+     */
+    private function salesSnapshot(): array
+    {
+        if (! \App\Support\AdminPermissions::currentCan('reports') && ! \App\Support\AdminPermissions::currentCan('orders')) {
+            return ['sales' => null];
+        }
+
+        $monthStart = \Carbon\CarbonImmutable::now()->startOfMonth();
+        $thisMonth = \App\Support\AdminReports::summary($monthStart, \Carbon\CarbonImmutable::now());
+        $attention = \App\Support\AdminReports::attention();
+
+        return ['sales' => [
+            'monthNet' => $thisMonth['net'],
+            'monthOrders' => $thisMonth['orders'],
+            'unpaidCount' => $attention['unpaidCount'],
+            'unpaidValue' => $attention['unpaidValue'],
+            'renewals' => $attention['emailRenewals']->count() + $attention['whmcsRenewals']->count(),
+            'domainOrdersWeek' => \App\Models\DomainOrder::query()->where('created_at', '>=', now()->subDays(7))->count(),
+            'cartOrdersWeek' => \App\Models\SiteCheckout::query()->where('created_at', '>=', now()->subDays(7))->count(),
+            'whmcsFailed' => \App\Models\DomainOrder::query()->where('whmcs_sync_status', 'failed')->count(),
+            'partialCarts' => \App\Models\SiteCheckout::query()->where('fulfilment_status', 'partial')->count(),
+        ]];
     }
 
     /**
