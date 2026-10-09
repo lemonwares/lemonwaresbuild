@@ -31,7 +31,7 @@
             })();
         </script>
     </head>
-    <body class="min-h-screen bg-blush-soft text-black">
+    <body class="account-body min-h-screen text-black">
         <div class="account-shell" data-account-shell>
             <aside class="account-sidebar" data-account-sidebar id="account-sidebar">
                 <div class="account-sidebar-brand">
@@ -101,9 +101,13 @@
                                     class="account-topbar-mobile-logo"
                                 >
                             </a>
-                            <span class="hidden text-sm font-semibold uppercase tracking-wide text-rose sm:inline lg:ml-0">
-                                {{ __('account.client_area') }}
-                            </span>
+                            <div class="acc-topbar-title">
+                                <strong>{{ __('account.client_area') }}</strong>
+                                @php $topbarOwner = auth()->user()?->accountOwner(); @endphp
+                                @if ($topbarOwner)
+                                    <span>{{ $topbarOwner->company ?: $topbarOwner->name }}</span>
+                                @endif
+                            </div>
                         </div>
 
                         <div class="account-topbar-actions">
@@ -116,6 +120,10 @@
                         </div>
                     </div>
                 </header>
+
+                @hasSection('breadcrumbs')
+                    @yield('breadcrumbs')
+                @endif
 
                 <main class="account-content">
                     @if (session('impersonator_admin_id'))

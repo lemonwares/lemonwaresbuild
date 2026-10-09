@@ -92,15 +92,21 @@ class AccountInvoiceController extends Controller
             ->values();
 
         $search = trim((string) $request->query('q', ''));
+        $status = trim((string) $request->query('status', ''));
         $filtered = AccountListQuery::filter(
             $invoices,
             $search,
             ['reference', 'label', 'status', 'source', 'currency'],
         );
+        if ($status !== '') {
+            $filtered = $filtered->filter(fn ($row) => strcasecmp((string) $row['status'], $status) === 0)->values();
+        }
 
         return view('pages.account-invoices', [
             'invoices' => AccountListQuery::paginate($filtered, 15),
             'search' => $search,
+            'status' => $status,
+            'statusCounts' => $invoices->countBy(fn ($row) => ucfirst(strtolower((string) $row['status'])))->filter(fn ($count, $label) => $label !== '')->sortKeys(),
             'totalCount' => $invoices->count(),
         ]);
     }

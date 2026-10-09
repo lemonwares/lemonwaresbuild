@@ -1,0 +1,465 @@
+/* Logged-in app shell: card, table, pager and status primitives shared by account pages. */
+@layer components {
+    .account-body {
+        background: #f6f6f8;
+    }
+
+    .acc-topbar-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 0;
+    }
+
+    .acc-topbar-title strong {
+        font-family: var(--font-display);
+        font-size: 1.05rem;
+        font-weight: 650;
+        color: #111;
+        white-space: nowrap;
+    }
+
+    .acc-topbar-title span {
+        display: none;
+        border-left: 1px solid var(--color-border);
+        padding-left: 0.75rem;
+        font-size: 0.8125rem;
+        color: #6b6b72;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    @media (min-width: 640px) {
+        .acc-topbar-title span {
+            display: inline;
+        }
+    }
+
+    .acc-crumbs {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem;
+        border-bottom: 1px solid var(--color-border);
+        background: #fff;
+        padding: 0.65rem 1rem;
+        font-size: 0.8125rem;
+    }
+
+    @media (min-width: 640px) {
+        .acc-crumbs {
+            padding: 0.65rem 1.5rem;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .acc-crumbs {
+            padding: 0.65rem 1.75rem;
+        }
+    }
+
+    .acc-crumbs a {
+        font-weight: 500;
+        color: var(--color-rose);
+    }
+
+    .acc-crumbs a:hover {
+        text-decoration: underline;
+    }
+
+    .acc-crumbs-sep {
+        color: #b5b5bb;
+    }
+
+    .acc-crumbs-current {
+        font-weight: 600;
+        color: #111;
+    }
+
+    .acc-card {
+        overflow: hidden;
+        border: 1px solid #e7e7eb;
+        border-radius: 0.9rem;
+        background: #fff;
+    }
+
+    .acc-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.1rem 1.25rem;
+    }
+
+    .acc-card-heading {
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+        min-width: 0;
+    }
+
+    .acc-card-title {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: 1.125rem;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+        color: #111;
+    }
+
+    .acc-count {
+        font-size: 0.75rem;
+        color: #8a8a92;
+        white-space: nowrap;
+    }
+
+    .acc-card-tools {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .acc-icon-btn {
+        display: inline-flex;
+        width: 2.25rem;
+        height: 2.25rem;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e7e7eb;
+        border-radius: 0.6rem;
+        background: #fff;
+        color: #333;
+        transition: border-color 150ms ease, color 150ms ease;
+    }
+
+    .acc-icon-btn svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .acc-icon-btn:hover,
+    .acc-icon-btn[aria-expanded='true'] {
+        border-color: color-mix(in srgb, var(--color-rose) 40%, #e7e7eb);
+        color: var(--color-rose);
+    }
+
+    .acc-filters {
+        border-top: 1px solid #f0f0f2;
+        background: #fbfbfc;
+        padding: 0.85rem 1.25rem;
+    }
+
+    .acc-filters[hidden] {
+        display: none;
+    }
+
+    .acc-filter-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .acc-input {
+        flex: 1 1 16rem;
+        min-width: 0;
+        border: 1px solid #e2e2e6;
+        border-radius: 0.6rem;
+        background: #fff;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .acc-input:focus {
+        border-color: var(--color-rose);
+        outline: 2px solid color-mix(in srgb, var(--color-rose) 18%, transparent);
+        outline-offset: 0;
+    }
+
+    .acc-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        border: 1px solid #e2e2e6;
+        border-radius: 0.6rem;
+        background: #fff;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #222;
+        white-space: nowrap;
+        transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
+    }
+
+    .acc-btn:hover {
+        border-color: color-mix(in srgb, var(--color-rose) 40%, #e2e2e6);
+        color: var(--color-rose);
+    }
+
+    .acc-btn.is-primary {
+        border-color: var(--color-rose);
+        background: var(--color-rose);
+        color: #fff;
+    }
+
+    .acc-btn.is-primary:hover {
+        background: color-mix(in srgb, var(--color-rose) 88%, #000);
+        color: #fff;
+    }
+
+    .acc-btn.is-quiet {
+        border-color: transparent;
+        background: transparent;
+        color: #6b6b72;
+    }
+
+    .acc-btn.is-sm {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.75rem;
+    }
+
+    .acc-tabs {
+        display: flex;
+        gap: 0.25rem;
+        overflow-x: auto;
+        border-top: 1px solid #f0f0f2;
+        padding: 0 1rem;
+        scrollbar-width: none;
+    }
+
+    .acc-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        border-bottom: 2px solid transparent;
+        padding: 0.7rem 0.5rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: #6b6b72;
+        white-space: nowrap;
+    }
+
+    .acc-tab span {
+        border-radius: 999px;
+        background: #f1f1f4;
+        padding: 0.05rem 0.45rem;
+        font-size: 0.6875rem;
+        color: #6b6b72;
+    }
+
+    .acc-tab:hover {
+        color: #111;
+    }
+
+    .acc-tab.is-active {
+        border-bottom-color: var(--color-rose);
+        font-weight: 600;
+        color: var(--color-rose);
+    }
+
+    .acc-tab.is-active span {
+        background: color-mix(in srgb, var(--color-rose) 12%, #fff);
+        color: var(--color-rose);
+    }
+
+    .acc-table-wrap {
+        overflow-x: auto;
+        border-top: 1px solid #f0f0f2;
+    }
+
+    .acc-table {
+        width: 100%;
+        min-width: 44rem;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+    }
+
+    .acc-table th {
+        background: #fafafb;
+        padding: 0.7rem 1.25rem;
+        text-align: left;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #7a7a82;
+        white-space: nowrap;
+    }
+
+    .acc-table td {
+        border-top: 1px solid #f0f0f2;
+        padding: 0.8rem 1.25rem;
+        vertical-align: middle;
+        color: #222;
+    }
+
+    .acc-table tbody tr {
+        transition: background 120ms ease;
+    }
+
+    .acc-table tbody tr:hover {
+        background: #fcfafa;
+    }
+
+    .acc-table .is-num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+    .acc-table .is-actions {
+        width: 1%;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .acc-link {
+        font-weight: 600;
+        color: var(--color-rose);
+        white-space: nowrap;
+    }
+
+    a.acc-link:hover {
+        text-decoration: underline;
+    }
+
+    .acc-cell-main {
+        display: block;
+        color: #111;
+    }
+
+    .acc-cell-sub {
+        display: block;
+        margin-top: 0.1rem;
+        font-size: 0.75rem;
+        color: #8a8a92;
+    }
+
+    .acc-cell-muted {
+        color: #55555c;
+        white-space: nowrap;
+    }
+
+    .acc-status {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 0.4rem;
+        padding: 0.18rem 0.55rem;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .acc-status.is-success { background: #e8f7ee; color: #157a3e; }
+    .acc-status.is-warning { background: #fff4e0; color: #9a5b00; }
+    .acc-status.is-danger { background: #fdecec; color: #b42318; }
+    .acc-status.is-neutral { background: #f1f1f4; color: #55555c; }
+
+    .acc-pager {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        border-top: 1px solid #f0f0f2;
+        padding: 0.8rem 1.25rem;
+    }
+
+    .acc-pager-summary {
+        margin: 0;
+        font-size: 0.8125rem;
+        color: #6b6b72;
+    }
+
+    .acc-pager-links {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .acc-page {
+        display: inline-flex;
+        min-width: 2rem;
+        height: 2rem;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e7e7eb;
+        border-radius: 0.5rem;
+        padding: 0 0.5rem;
+        font-size: 0.8125rem;
+        color: #333;
+    }
+
+    a.acc-page:hover {
+        border-color: color-mix(in srgb, var(--color-rose) 40%, #e7e7eb);
+        color: var(--color-rose);
+    }
+
+    .acc-page.is-current {
+        border-color: var(--color-rose);
+        background: var(--color-rose);
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .acc-page.is-disabled {
+        color: #c4c4ca;
+    }
+
+    .acc-page.is-gap {
+        border-color: transparent;
+    }
+
+    .acc-empty {
+        border-top: 1px solid #f0f0f2;
+        padding: 3rem 1.25rem;
+        text-align: center;
+        font-size: 0.875rem;
+        color: #6b6b72;
+    }
+
+    .acc-empty-title {
+        margin-bottom: 0.35rem;
+        font-weight: 600;
+        color: #111;
+    }
+
+    html[data-theme='dark'] .account-body { background: #131111; }
+
+    html[data-theme='dark'] .acc-card,
+    html[data-theme='dark'] .acc-crumbs,
+    html[data-theme='dark'] .acc-icon-btn,
+    html[data-theme='dark'] .acc-btn:not(.is-primary),
+    html[data-theme='dark'] .acc-input {
+        border-color: #2e2828;
+        background: #1c1818;
+        color: #efe9e9;
+    }
+
+    html[data-theme='dark'] .acc-table th,
+    html[data-theme='dark'] .acc-filters {
+        background: #211c1c;
+    }
+
+    html[data-theme='dark'] .acc-table td,
+    html[data-theme='dark'] .acc-table-wrap,
+    html[data-theme='dark'] .acc-tabs,
+    html[data-theme='dark'] .acc-pager,
+    html[data-theme='dark'] .acc-empty {
+        border-color: #2e2828;
+        color: #e4dede;
+    }
+
+    html[data-theme='dark'] .acc-table tbody tr:hover {
+        background: #221d1d;
+    }
+
+    html[data-theme='dark'] .acc-card-title,
+    html[data-theme='dark'] .acc-topbar-title strong,
+    html[data-theme='dark'] .acc-cell-main,
+    html[data-theme='dark'] .acc-crumbs-current,
+    html[data-theme='dark'] .acc-empty-title {
+        color: #f7f1f1;
+    }
+}
