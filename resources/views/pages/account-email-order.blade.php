@@ -24,7 +24,7 @@
 
     @if ($order->isAwaitingPayment())
         <section class="mb-6 rounded-3xl border border-rose/20 bg-white p-6 sm:p-8">
-            <p class="text-xs font-semibold uppercase tracking-widest text-rose">{{ __('account.next_step') }}</p>
+            <p class="text-xs font-semibold uppercase tracking-wide text-rose">{{ __('account.next_step') }}</p>
             <h2 class="mt-2 text-2xl font-bold text-black">{{ __('account.next_pay_title') }}</h2>
             <p class="mt-2 body-text">{{ __('email.awaiting_payment') }}</p>
             <form method="POST" action="{{ route('email.pay', $order) }}" class="mt-5" data-submit-form>
@@ -34,7 +34,7 @@
         </section>
     @elseif ($order->isDeactivated())
         <section class="mb-6 rounded-3xl border border-rose/20 bg-rose/5 p-6 sm:p-8">
-            <p class="text-xs font-semibold uppercase tracking-widest text-rose">{{ __('account.next_step') }}</p>
+            <p class="text-xs font-semibold uppercase tracking-wide text-rose">{{ __('account.next_step') }}</p>
             <h2 class="mt-2 text-2xl font-bold text-black">{{ __('email.service_inactive_title') }}</h2>
             <p class="mt-2 body-text">{{ __('email.service_inactive_lede') }}</p>
             @if ($order->period_ends_at)
@@ -55,7 +55,7 @@
         </section>
     @elseif ($order->isManualFulfilment() && $order->fulfilment_status !== 'completed' && ! $order->isAwaitingPayment())
         <section class="mb-6 rounded-3xl border border-sky-200 bg-sky-50 p-6 sm:p-8">
-            <p class="text-xs font-semibold uppercase tracking-widest text-sky-700">{{ __('account.next_step') }}</p>
+            <p class="text-xs font-semibold uppercase tracking-wide text-sky-700">{{ __('account.next_step') }}</p>
             <h2 class="mt-2 text-2xl font-bold text-black">{{ __('email.request_setup') }}</h2>
             <p class="mt-2 body-text">
                 @if ($order->isPaid())
@@ -69,7 +69,7 @@
         </section>
     @elseif ($order->status === 'provisioned' || $order->trekmail_domain_id || ($order->isManualFulfilment() && $order->fulfilment_status === 'completed'))
         <section class="mb-6 rounded-3xl bg-rose p-6 text-white sm:p-8">
-            <p class="text-xs font-semibold uppercase tracking-widest text-white/75">{{ __('account.next_step') }}</p>
+            <p class="text-xs font-semibold uppercase tracking-wide text-white/75">{{ __('account.next_step') }}</p>
             <h2 class="mt-2 text-2xl font-bold">{{ __('account.next_webmail_title') }}</h2>
             <p class="mt-2 text-base font-light text-white/90">
                 @if ($order->provider === 'lemonmail')
@@ -102,7 +102,7 @@
         @endif
     @else
         <section class="mb-6 rounded-3xl bg-rose p-6 text-white sm:p-8">
-            <p class="text-xs font-semibold uppercase tracking-widest text-white/75">{{ __('account.next_step') }}</p>
+            <p class="text-xs font-semibold uppercase tracking-wide text-white/75">{{ __('account.next_step') }}</p>
             <h2 class="mt-2 text-2xl font-bold">{{ __('account.next_dns_title') }}</h2>
             <p class="mt-2 text-base font-light text-white/90">{{ __('email.pending_setup') }}</p>
             @if ($order->isPaid() && $order->status !== 'provisioned' && ! $order->isManualFulfilment())
@@ -179,7 +179,7 @@
             <div class="mt-4 overflow-x-auto rounded-2xl border border-border">
                 <table class="min-w-full text-left text-sm">
                     <thead>
-                        <tr class="border-b border-border bg-blush-soft/40 text-xs uppercase tracking-widest text-on-blush/55">
+                        <tr class="border-b border-border bg-blush-soft/40 text-xs uppercase tracking-wide text-on-blush/55">
                             <th class="px-4 py-3 font-semibold">{{ __('email.dns_col_type') }}</th>
                             <th class="px-4 py-3 font-semibold">{{ __('email.dns_col_host') }}</th>
                             <th class="px-4 py-3 font-semibold">{{ __('email.dns_col_value') }}</th>

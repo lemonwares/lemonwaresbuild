@@ -11,7 +11,7 @@
                 <x-ui.icons.arrow-left class="page-back-icon" />
                 {{ __('site.common.go_back') }}
             </a>
-            <h1 class="mt-8 max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-5xl">
+            <h1 class="mt-8 max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-4xl">
                 {{ __('cart.title') }}
             </h1>
             <p class="domain-cart-lede mt-4 max-w-2xl text-base sm:text-lg">
@@ -65,7 +65,7 @@
                             >
                                 <div class="domain-cart-line-main">
                                     <div>
-                                        <p class="text-xs font-semibold uppercase tracking-widest text-rose/80">
+                                        <p class="text-xs font-semibold uppercase tracking-wide text-rose/80">
                                             {{ __('cart.type_'.$type) }}
                                         </p>
                                         <p class="domain-cart-domain mt-1">{{ $item['label'] ?? $item['domain'] ?? 'Item' }}</p>

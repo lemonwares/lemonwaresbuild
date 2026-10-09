@@ -35,10 +35,10 @@
                     <x-ui.icons.arrow-left class="size-4" />
                     {{ __('pages.careers.back_to_roles') }}
                 </a>
-                <p class="mt-6 text-xs font-semibold uppercase tracking-widest text-white/75">
+                <p class="mt-6 text-xs font-semibold uppercase tracking-wide text-white/75">
                     {{ __('pages.careers.eyebrow') }}
                 </p>
-                <h1 class="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                <h1 class="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
                     {{ $opening->title }}
                 </h1>
                 <div class="mt-4 flex flex-wrap items-center gap-2">

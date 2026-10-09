@@ -101,7 +101,7 @@
                                     class="account-topbar-mobile-logo"
                                 >
                             </a>
-                            <span class="hidden text-sm font-semibold uppercase tracking-[0.12em] text-rose sm:inline lg:ml-0">
+                            <span class="hidden text-sm font-semibold uppercase tracking-wide text-rose sm:inline lg:ml-0">
                                 {{ __('account.client_area') }}
                             </span>
                         </div>

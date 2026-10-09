@@ -51,7 +51,7 @@
 
             {{-- Step: plan summary --}}
             <div class="rounded-2xl border border-border bg-blush-soft p-4">
-                <p class="text-xs font-semibold uppercase tracking-widest text-on-blush/60">{{ __('email.selected_plan') }}</p>
+                <p class="text-xs font-semibold uppercase tracking-wide text-on-blush/60">{{ __('email.selected_plan') }}</p>
                 <p class="mt-1 text-base font-semibold text-black">{{ $plan['name'] }}</p>
                 <p class="mt-1 text-sm text-on-blush/80">
                     {{ $plan['period_display'] }} · {{ $plan['billing_cycle_label'] }} ·

@@ -102,7 +102,7 @@
 
             @if ($lead->isPaid())
                 <section class="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
-                    <p class="text-xs font-semibold uppercase tracking-widest text-emerald-800">{{ __('hosting.next_steps_title') }}</p>
+                    <p class="text-xs font-semibold uppercase tracking-wide text-emerald-800">{{ __('hosting.next_steps_title') }}</p>
                     <p class="mt-2 text-sm text-emerald-900">{{ __('hosting.next_steps_body') }}</p>
                     <ul class="mt-3 list-disc space-y-1 pl-5 text-sm text-emerald-900">
                         @guest

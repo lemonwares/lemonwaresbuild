@@ -45,10 +45,10 @@
         <div class="domain-landing-hero-glow" aria-hidden="true"></div>
         <div class="container-page relative z-10 py-14 sm:py-18">
             <div class="max-w-3xl">
-                <p class="text-xs font-semibold uppercase tracking-widest text-white/75">
+                <p class="text-xs font-semibold uppercase tracking-wide text-white/75">
                     {{ __('hosting.step_1') }} · {{ $planName }}
                 </p>
-                <h1 class="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                <h1 class="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">
                     {{ __('hosting.choose_spec_title') }}
                 </h1>
                 <p class="mt-4 max-w-2xl text-lg font-light text-white/90">
@@ -187,7 +187,7 @@
                                     @else
                                         <p class="mt-3 text-sm font-semibold text-on-blush/50">{{ __('hosting.price_on_request') }}</p>
                                     @endif
-                                    <p class="mt-1 text-xs font-semibold uppercase tracking-widest text-on-blush/55" data-spec-cycle-label>
+                                    <p class="mt-1 text-xs font-semibold uppercase tracking-wide text-on-blush/55" data-spec-cycle-label>
                                         {{ $spec['billing_cycle_label'] ?? __('hosting.cycles.monthly') }}
                                     </p>
                                     <p class="mt-3 text-sm leading-relaxed text-on-blush/70">{{ $spec['description'] }}</p>
@@ -215,7 +215,7 @@
                                     @endif
                                 </div>
 
-                                <p class="mt-4 text-xs font-semibold uppercase tracking-widest text-rose" data-spec-selected-label>
+                                <p class="mt-4 text-xs font-semibold uppercase tracking-wide text-rose" data-spec-selected-label>
                                     {{ __('hosting.selected') }}
                                 </p>
                             </label>
@@ -236,14 +236,14 @@
                                         <div class="space-y-4 pb-2 pt-2" data-spec-accordion-inner>
                                             @if (! empty($specDetails['best_for']))
                                                 <div>
-                                                    <p class="mb-1 text-xs font-semibold uppercase tracking-widest text-on-blush/60">{{ __('hosting.best_for') }}</p>
+                                                    <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-on-blush/60">{{ __('hosting.best_for') }}</p>
                                                     <p class="text-sm leading-relaxed text-on-blush/80">{{ $specDetails['best_for'] }}</p>
                                                 </div>
                                             @endif
 
                                             @if (! empty($specDetails['includes']))
                                                 <div>
-                                                    <p class="mb-2 text-xs font-semibold uppercase tracking-widest text-on-blush/60">{{ __('hosting.whats_included') }}</p>
+                                                    <p class="mb-2 text-xs font-semibold uppercase tracking-wide text-on-blush/60">{{ __('hosting.whats_included') }}</p>
                                                     <ul class="check-list flex flex-col gap-2 text-sm">
                                                         @foreach ($specDetails['includes'] as $item)
                                                             <li>{{ $item }}</li>

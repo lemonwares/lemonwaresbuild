@@ -19,10 +19,10 @@
         <div class="domain-landing-hero-glow" aria-hidden="true"></div>
         <div class="container-page relative z-10 py-16 sm:py-20">
             <div class="max-w-3xl">
-                <p class="text-xs font-semibold uppercase tracking-widest text-white/75">
+                <p class="text-xs font-semibold uppercase tracking-wide text-white/75">
                     {{ __('pages.careers.eyebrow') }}
                 </p>
-                <h1 class="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                <h1 class="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
                     {{ __('pages.careers.title') }}
                 </h1>
                 <p class="mt-5 max-w-xl text-lg font-light text-white/90">

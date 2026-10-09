@@ -64,7 +64,7 @@
 
                 @if (($selectedPlan ?? '') !== 'vps')
                     <div class="rounded-2xl border border-border bg-blush-soft p-4">
-                        <p class="text-xs font-semibold uppercase tracking-widest text-on-blush/60">{{ __('hosting.domain_section_title') }}</p>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-on-blush/60">{{ __('hosting.domain_section_title') }}</p>
                         <p class="mt-1 text-sm text-on-blush/75">{{ __('hosting.domain_section_help') }}</p>
 
                         <div class="mt-4 grid gap-5 sm:grid-cols-2">

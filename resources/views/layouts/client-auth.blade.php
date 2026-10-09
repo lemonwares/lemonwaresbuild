@@ -35,7 +35,7 @@
                 </a>
 
                 <div class="max-w-md">
-                    <p class="text-xs font-semibold uppercase tracking-widest text-white/70">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-white/70">
                         {{ __('account.client_area') }}
                     </p>
                     <p class="auth-brand-title mt-4 text-[2.1rem] text-white xl:text-[2.65rem]" style="font-family: Syne, ui-sans-serif, system-ui, sans-serif; color: #fff;">

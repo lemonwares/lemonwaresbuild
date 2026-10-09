@@ -17,7 +17,7 @@
                 <x-ui.icons.arrow-left class="page-back-icon" />
                 {{ __('site.common.go_back') }}
             </a>
-            <h1 class="mt-8 max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-5xl">
+            <h1 class="mt-8 max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-4xl">
                 {{ __('cart.checkout_title') }}
             </h1>
             <p class="domain-cart-lede mt-4 max-w-2xl text-base sm:text-lg">
