@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\AccountContact;
 use App\Models\HostingLead;
 use App\Models\User;
+use App\Models\WhmcsDomain;
+use App\Models\WhmcsInvoice;
 use App\Support\TrekMailClient;
 use App\Support\Whmcs\Whmcs;
 use App\Support\WhmcsClient;
@@ -22,7 +24,11 @@ class AccountController extends Controller
 {
     public function show(Request $request): View
     {
-        return view('pages.account', $this->workspace($request));
+        $clientId = (int) $request->user()->accountOwner()->whmcsCustomer?->whmcs_client_id;
+
+        return view('pages.account', $this->workspace($request) + [
+            'recentInvoices' => $clientId > 0 ? AccountInvoiceController::localInvoices($clientId)->take(5) : collect(),
+        ]);
     }
 
     public function email(Request $request): View
@@ -335,7 +341,9 @@ class AccountController extends Controller
 
         if ($whmcsCustomer?->whmcs_client_id) {
             $whmcsLinked = true;
-            WhmcsSyncService::syncServicesForCustomer($whmcsCustomer);
+            if (! $whmcsCustomer->details_synced_at) {
+                WhmcsSyncService::syncServicesForCustomer($whmcsCustomer);
+            }
 
             $whmcsServices = $user->whmcsServices()->get();
             $whmcsServiceCount = $whmcsServices->count();
@@ -344,9 +352,9 @@ class AccountController extends Controller
             })->count();
 
             $clientId = (int) $whmcsCustomer->whmcs_client_id;
-            $whmcsDomainCount = count(WhmcsClient::getClientDomains($clientId));
-            $whmcsUnpaidInvoices = collect(WhmcsClient::getInvoices($clientId))
-                ->filter(fn ($row) => in_array(strtolower((string) ($row['status'] ?? '')), ['unpaid', 'overdue'], true))
+            $whmcsDomainCount = WhmcsDomain::query()->where('whmcs_client_id', $clientId)->count();
+            $whmcsUnpaidInvoices = WhmcsInvoice::query()->where('whmcs_client_id', $clientId)
+                ->whereIn('status', ['Unpaid', 'Overdue'])
                 ->count();
         }
 

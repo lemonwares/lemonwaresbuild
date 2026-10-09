@@ -492,4 +492,7 @@ return [
     'domain_term' => 'Term',
     'activity_event' => 'Event',
     'activity_by' => 'By',
+    'recent_invoices' => 'Recent invoices',
+    'view_all' => 'View all',
+    'vps_ip' => 'IP address',
 ];

@@ -486,4 +486,7 @@ return [
     'domain_term' => 'Laufzeit',
     'activity_event' => 'Ereignis',
     'activity_by' => 'Von',
+    'recent_invoices' => 'Letzte Rechnungen',
+    'view_all' => 'Alle anzeigen',
+    'vps_ip' => 'IP-Adresse',
 ];
