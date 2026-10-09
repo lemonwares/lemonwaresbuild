@@ -12,10 +12,14 @@ class WhmcsService extends Model
         'user_id',
         'whmcs_service_id',
         'whmcs_client_id',
+        'whmcs_product_id',
         'product_name',
         'domain',
         'username',
+        'server_name',
         'billing_cycle',
+        'amount',
+        'registration_date',
         'next_due_date',
         'status',
         'last_synced_at',
@@ -26,6 +30,8 @@ class WhmcsService extends Model
     {
         return [
             'next_due_date' => 'date',
+            'registration_date' => 'date',
+            'amount' => 'decimal:2',
             'last_synced_at' => 'datetime',
             'raw_payload' => 'array',
         ];

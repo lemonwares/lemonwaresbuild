@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\User;
 use App\Models\WhmcsCustomer;
 use App\Models\WhmcsService;
+use App\Support\Whmcs\WhmcsMirror;
 use Illuminate\Support\Facades\Log;
 
 class WhmcsSyncService
@@ -87,7 +88,7 @@ class WhmcsSyncService
     /**
      * @param  array<string,mixed>  $payload
      */
-    protected static function upsertCustomer(array $payload): WhmcsCustomer
+    public static function upsertCustomer(array $payload): WhmcsCustomer
     {
         $email = strtolower(trim((string) data_get($payload, 'email', '')));
         $existing = WhmcsCustomer::query()->where('whmcs_client_id', (int) data_get($payload, 'id'))->first();
@@ -120,7 +121,7 @@ class WhmcsSyncService
                 'status' => (string) data_get($payload, 'status', '') ?: null,
                 'country' => strtoupper((string) data_get($payload, 'countrycode', '')) ?: null,
                 'last_synced_at' => now(),
-                'raw_payload' => $payload,
+                'raw_payload' => WhmcsMirror::sanitize($payload),
             ]
         );
 
@@ -130,7 +131,7 @@ class WhmcsSyncService
     /**
      * @param  array<string,mixed>  $payload
      */
-    protected static function upsertService(WhmcsCustomer $customer, array $payload): void
+    public static function upsertService(WhmcsCustomer $customer, array $payload): void
     {
         $serviceId = (int) data_get($payload, 'id', 0);
         if ($serviceId < 1) {
@@ -148,14 +149,18 @@ class WhmcsSyncService
                 'whmcs_customer_id' => $customer->id,
                 'user_id' => $customer->user_id,
                 'whmcs_client_id' => (int) $customer->whmcs_client_id,
+                'whmcs_product_id' => (int) data_get($payload, 'pid', 0) ?: null,
                 'product_name' => (string) data_get($payload, 'productname', '') ?: null,
                 'domain' => (string) data_get($payload, 'domain', '') ?: null,
                 'username' => (string) data_get($payload, 'username', '') ?: null,
+                'server_name' => (string) data_get($payload, 'servername', '') ?: null,
                 'billing_cycle' => (string) data_get($payload, 'billingcycle', '') ?: null,
+                'amount' => is_numeric(data_get($payload, 'recurringamount')) ? data_get($payload, 'recurringamount') : null,
+                'registration_date' => preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) data_get($payload, 'regdate')) && data_get($payload, 'regdate') !== '0000-00-00' ? data_get($payload, 'regdate') : null,
                 'next_due_date' => $nextDueDate !== '' ? $nextDueDate : null,
                 'status' => (string) data_get($payload, 'status', '') ?: null,
                 'last_synced_at' => now(),
-                'raw_payload' => $payload,
+                'raw_payload' => WhmcsMirror::sanitize($payload),
             ]
         );
     }

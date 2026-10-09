@@ -73,6 +73,10 @@ final class Whmcs
 
         if ($definition['write']) {
             self::audit($action, $definition, $params, $result, $admin ?? AdminPermissions::currentUser());
+
+            if ($result->ok && $admin) {
+                WhmcsMirror::refreshAfter($params, $result->data);
+            }
         }
 
         return $result;

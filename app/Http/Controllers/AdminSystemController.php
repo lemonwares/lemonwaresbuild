@@ -28,7 +28,7 @@ class AdminSystemController extends Controller
      * Scheduled tasks an admin may run on demand => description.
      */
     public const TASKS = [
-        'whmcs:sync' => 'Sync customers and services from WHMCS (runs every 15 minutes)',
+        'whmcs:sync' => 'Mirror WHMCS clients, services, domains, invoices, orders and tickets (runs every 15 minutes)',
         'email:expire-orders' => 'Deactivate email orders whose paid period has ended (runs daily at 01:15)',
     ];
 

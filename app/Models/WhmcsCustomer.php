@@ -19,14 +19,19 @@ class WhmcsCustomer extends Model
         'phone',
         'status',
         'country',
+        'credit',
+        'currency_code',
         'last_synced_at',
+        'details_synced_at',
         'raw_payload',
     ];
 
     protected function casts(): array
     {
         return [
+            'credit' => 'decimal:2',
             'last_synced_at' => 'datetime',
+            'details_synced_at' => 'datetime',
             'raw_payload' => 'array',
         ];
     }
@@ -39,5 +44,25 @@ class WhmcsCustomer extends Model
     public function services(): HasMany
     {
         return $this->hasMany(WhmcsService::class)->latest();
+    }
+
+    public function domains(): HasMany
+    {
+        return $this->hasMany(WhmcsDomain::class, 'whmcs_client_id', 'whmcs_client_id');
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(WhmcsInvoice::class, 'whmcs_client_id', 'whmcs_client_id');
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(WhmcsOrder::class, 'whmcs_client_id', 'whmcs_client_id');
+    }
+
+    public function tickets(): HasMany
+    {
+        return $this->hasMany(WhmcsTicket::class, 'whmcs_client_id', 'whmcs_client_id');
     }
 }
