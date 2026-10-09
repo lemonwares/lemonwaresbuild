@@ -21,6 +21,13 @@
         </x-slot:actions>
     </x-account.page-header>
 
+    @if (session('status'))
+        <p class="mb-5 rounded-xl border border-emerald-600/20 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('status') }}</p>
+    @endif
+    @if ($errors->any())
+        <p class="mb-5 rounded-xl border border-rose/20 bg-rose/5 px-4 py-3 text-sm text-rose">{{ $errors->first() }}</p>
+    @endif
+
     <div class="account-page-stack">
         <section class="account-panel">
             <h2 class="account-panel-title">{{ __('account.subscription_details') }}</h2>
@@ -63,6 +70,32 @@
                 <a href="{{ route('account.invoices.index') }}" class="account-btn-ghost">{{ __('account.nav_invoices') }}</a>
             </div>
         </section>
+
+        @if ($canCancel)
+            <section class="account-panel">
+                <h2 class="account-panel-title">{{ __('account.service_cancel_title') }}</h2>
+                <p class="account-panel-lede">{{ __('account.service_cancel_lede') }}</p>
+                <form method="POST" action="{{ route('account.subscriptions.cancel', $service) }}" class="mt-5">
+                    @csrf
+                    <div class="account-form-grid">
+                        <div class="account-field">
+                            <label for="type">{{ __('account.service_cancel_when') }}</label>
+                            <select id="type" name="type" required>
+                                <option value="End of Billing Period" @selected(old('type') !== 'Immediate')>{{ __('account.service_cancel_end_of_period') }}</option>
+                                <option value="Immediate" @selected(old('type') === 'Immediate')>{{ __('account.service_cancel_immediate') }}</option>
+                            </select>
+                        </div>
+                        <div class="account-field is-full">
+                            <label for="reason">{{ __('account.service_cancel_reason') }}</label>
+                            <textarea id="reason" name="reason" rows="3" maxlength="500" required>{{ old('reason') }}</textarea>
+                        </div>
+                    </div>
+                    <div class="mt-5">
+                        <button type="submit" class="account-btn-ghost">{{ __('account.service_cancel_submit') }}</button>
+                    </div>
+                </form>
+            </section>
+        @endif
 
         @if ($relatedInvoices->isNotEmpty())
             <section class="account-panel account-panel-flush">

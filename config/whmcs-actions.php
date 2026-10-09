@@ -44,6 +44,7 @@ return [
     'GetClientsAddons' => ['group' => 'services'],
     'UpdateClientProduct' => ['group' => 'services', 'write' => true, 'required' => ['serviceid']],
     'UpgradeProduct' => ['group' => 'services', 'write' => true, 'required' => ['serviceid', 'type']],
+    'AddCancelRequest' => ['group' => 'services', 'write' => true, 'required' => ['serviceid', 'type']],
     'ModuleCreate' => ['group' => 'services', 'write' => true, 'required' => ['serviceid']],
     'ModuleSuspend' => ['group' => 'services', 'write' => true, 'required' => ['serviceid']],
     'ModuleUnsuspend' => ['group' => 'services', 'write' => true, 'required' => ['serviceid']],

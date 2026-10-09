@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\AccountContact;
 use App\Models\HostingLead;
+use App\Models\User;
 use App\Support\TrekMailClient;
+use App\Support\Whmcs\Whmcs;
 use App\Support\WhmcsClient;
 use App\Support\WhmcsSyncService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
@@ -83,6 +86,7 @@ class AccountController extends Controller
             'website' => $website !== '' ? $website : null,
             'phone' => $payload['phone'] ?? null,
         ]);
+        $this->pushBillingDetailsToWhmcs($request->user());
 
         return redirect()
             ->route('account.profile')
@@ -158,10 +162,43 @@ class AccountController extends Controller
             'website' => $website !== '' ? $website : null,
             'phone' => $payload['phone'],
         ]);
+        $this->pushBillingDetailsToWhmcs($user);
 
         return redirect()
             ->back()
             ->with('status', __('account.profile_complete_saved'));
+    }
+
+    /**
+     * Keeps the WHMCS client record (used on invoices) in step with the profile on our site.
+     */
+    protected function pushBillingDetailsToWhmcs(User $user): void
+    {
+        $clientId = (int) $user->whmcsCustomer?->whmcs_client_id;
+        if ($clientId < 1) {
+            return;
+        }
+
+        [$first, $last] = array_pad(explode(' ', trim((string) $user->name), 2), 2, '');
+
+        $result = Whmcs::call('UpdateClient', array_filter([
+            'clientid' => $clientId,
+            'firstname' => $first,
+            'lastname' => $last !== '' ? $last : $first,
+            'companyname' => $user->company,
+            'address1' => $user->billing_address_line_1,
+            'address2' => $user->billing_address_line_2,
+            'city' => $user->billing_city,
+            'state' => $user->billing_state,
+            'postcode' => $user->billing_postcode,
+            'country' => $user->billing_country,
+            'phonenumber' => $user->phone,
+            'tax_id' => $user->tax_id,
+        ], fn ($value) => filled($value)));
+
+        if (! $result->ok) {
+            Log::warning('Could not update WHMCS client details from profile', ['user_id' => $user->id, 'error' => $result->error]);
+        }
     }
 
     public function settings(Request $request): View

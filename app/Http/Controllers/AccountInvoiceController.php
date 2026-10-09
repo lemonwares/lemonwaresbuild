@@ -3,12 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\InvoicePayment;
+use App\Models\WhmcsInvoice;
 use App\Support\AccountListQuery;
 use App\Support\FlutterwavePayment;
+use App\Support\Whmcs\WhmcsMirror;
 use App\Support\WhmcsClient;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
 
@@ -21,22 +24,18 @@ class AccountInvoiceController extends Controller
 
         $whmcsCustomer = $owner->whmcsCustomer;
         if ($whmcsCustomer?->whmcs_client_id) {
-            $remote = WhmcsClient::getInvoices((int) $whmcsCustomer->whmcs_client_id, 100);
-            foreach ($remote as $row) {
-                $invoiceId = (int) ($row['id'] ?? 0);
+            foreach (self::localInvoices((int) $whmcsCustomer->whmcs_client_id, ! $whmcsCustomer->details_synced_at) as $row) {
                 $invoices->push([
                     'source' => 'whmcs',
-                    'id' => 'whmcs-'.$invoiceId,
-                    'reference' => '#'.$invoiceId,
-                    'label' => (string) ($row['itemdescription'] ?? __('account.invoice_whmcs')),
-                    'amount' => (float) ($row['total'] ?? 0),
-                    'currency' => (string) ($row['currencycode'] ?? 'USD'),
-                    'status' => (string) ($row['status'] ?? ''),
-                    'date' => $this->parseDate($row['date'] ?? null),
-                    'pay_url' => $invoiceId > 0 && strcasecmp((string) ($row['status'] ?? ''), 'Unpaid') === 0
-                        ? route('account.invoices.show', ['invoice' => 'whmcs-'.$invoiceId])
-                        : null,
-                    'url' => $invoiceId > 0 ? route('account.invoices.show', ['invoice' => 'whmcs-'.$invoiceId]) : null,
+                    'id' => 'whmcs-'.$row['id'],
+                    'reference' => $row['reference'],
+                    'label' => $row['label'],
+                    'amount' => $row['amount'],
+                    'currency' => $row['currency'],
+                    'status' => $row['status'],
+                    'date' => $row['date'],
+                    'pay_url' => strcasecmp($row['status'], 'Unpaid') === 0 ? $row['url'] : null,
+                    'url' => $row['url'],
                 ]);
             }
         }
@@ -200,6 +199,32 @@ class AccountInvoiceController extends Controller
         $result = FlutterwavePayment::confirmInvoicePayment($payment, $verified);
 
         return $back->with($result['ok'] ? 'status' : 'error', $result['message']);
+    }
+
+    /**
+     * WHMCS invoices from our local copy, pulled from WHMCS first if this client was never synced.
+     *
+     * @return Collection<int, array{id:int,reference:string,label:string,amount:float,currency:string,status:string,date:?Carbon,url:string}>
+     */
+    public static function localInvoices(int $clientId, bool $syncIfMissing = false): Collection
+    {
+        $query = fn () => WhmcsInvoice::query()->where('whmcs_client_id', $clientId)->orderByDesc('date')->orderByDesc('whmcs_invoice_id')->limit(100)->get();
+
+        $rows = $query();
+        if ($rows->isEmpty() && $syncIfMissing && WhmcsMirror::syncClientInvoices($clientId)) {
+            $rows = $query();
+        }
+
+        return $rows->map(fn (WhmcsInvoice $invoice) => [
+            'id' => (int) $invoice->whmcs_invoice_id,
+            'reference' => '#'.($invoice->invoice_num ?: $invoice->whmcs_invoice_id),
+            'label' => (string) (data_get($invoice->raw_payload, 'itemdescription') ?: __('account.invoice_whmcs')),
+            'amount' => (float) $invoice->total,
+            'currency' => (string) ($invoice->currency_code ?: 'NGN'),
+            'status' => (string) $invoice->status,
+            'date' => $invoice->date,
+            'url' => route('account.invoices.show', ['invoice' => 'whmcs-'.$invoice->whmcs_invoice_id]),
+        ]);
     }
 
     /**

@@ -153,6 +153,12 @@ class WhmcsMirror
             && self::syncList($clientId, WhmcsDomain::class, 'GetClientsDomains', ['clientid' => $clientId], 'domains.domain');
     }
 
+    public static function syncClientInvoices(int $clientId): bool
+    {
+        return $clientId > 0
+            && self::syncList($clientId, WhmcsInvoice::class, 'GetInvoices', ['userid' => $clientId], 'invoices.invoice');
+    }
+
     /**
      * @param  class-string<Model>  $model
      * @param  array<string, mixed>  $params

@@ -355,6 +355,9 @@ Route::middleware('auth')->group(function (): void {
             ->name('account.subscriptions.manage');
         Route::get('/account/subscriptions/{service}/cpanel', [AccountSubscriptionController::class, 'cpanel'])
             ->name('account.subscriptions.cpanel');
+        Route::post('/account/subscriptions/{service}/cancel', [AccountSubscriptionController::class, 'cancel'])
+            ->middleware('throttle:5,1,account.subscriptions.cancel')
+            ->name('account.subscriptions.cancel');
         Route::get('/account/invoices', [AccountInvoiceController::class, 'index'])->name('account.invoices.index');
         Route::middleware('throttle:account-invoice-pay')->group(function (): void {
             Route::post('/account/invoices/{invoice}/pay', [AccountInvoiceController::class, 'pay'])->whereNumber('invoice')->name('account.invoices.pay');
