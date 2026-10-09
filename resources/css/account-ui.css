@@ -389,6 +389,17 @@
         white-space: nowrap;
     }
 
+    .acc-row-actions {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.35rem;
+    }
+
+    .acc-row-actions form {
+        display: contents;
+    }
+
     .acc-link {
         font-weight: 600;
         color: var(--color-rose);

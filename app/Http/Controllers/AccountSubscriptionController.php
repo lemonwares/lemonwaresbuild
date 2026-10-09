@@ -20,7 +20,7 @@ class AccountSubscriptionController extends Controller
         $owner = $request->user()->accountOwner();
 
         $whmcsCustomer = $owner->whmcsCustomer;
-        if ($whmcsCustomer?->whmcs_client_id) {
+        if ($whmcsCustomer?->whmcs_client_id && ! $whmcsCustomer->details_synced_at) {
             WhmcsSyncService::syncServicesForCustomer($whmcsCustomer);
             $whmcsCustomer->refresh();
         }
@@ -89,15 +89,21 @@ class AccountSubscriptionController extends Controller
         }
 
         $search = trim((string) $request->query('q', ''));
+        $status = trim((string) $request->query('status', ''));
         $filtered = AccountListQuery::filter(
             $subscriptions->values(),
             $search,
             ['label', 'domain', 'status', 'billing_cycle', 'source'],
         );
+        if ($status !== '') {
+            $filtered = $filtered->filter(fn ($row) => strcasecmp((string) $row['status'], $status) === 0)->values();
+        }
 
         return view('pages.account-subscriptions', [
             'subscriptions' => AccountListQuery::paginate($filtered, 15),
             'search' => $search,
+            'status' => $status,
+            'statusCounts' => $subscriptions->countBy(fn ($row) => ucfirst(strtolower((string) $row['status'])))->filter(fn ($count, $label) => $label !== '')->sortKeys(),
             'totalCount' => $subscriptions->count(),
         ]);
     }

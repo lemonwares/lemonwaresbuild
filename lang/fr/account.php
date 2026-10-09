@@ -481,4 +481,6 @@ return [
     'invoice_sources' => ['whmcs' => 'Facture', 'email' => 'Commande e-mail', 'hosting' => 'Commande d’hébergement', 'domain' => 'Commande de domaine'],
     'back' => 'Retour',
     'toggle_sidebar' => 'Réduire ou agrandir la barre latérale',
+    'subscription_type' => 'Type',
+    'subscription_sources' => ['whmcs' => 'Service d’hébergement', 'email' => 'E-mail professionnel', 'hosting' => 'Hébergement web', 'vps' => 'VPS'],
 ];
