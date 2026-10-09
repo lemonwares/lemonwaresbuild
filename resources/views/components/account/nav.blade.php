@@ -14,6 +14,7 @@
             'label' => __('account.nav_group_billing'),
             'items' => [
                 ['label' => __('account.nav_invoices'), 'route' => 'account.invoices.index', 'match' => 'account.invoices.*', 'icon' => 'clipboard-check', 'permission' => 'invoices'],
+                ['label' => __('account.nav_support'), 'route' => 'account.support.index', 'match' => 'account.support.*', 'icon' => 'send', 'permission' => 'support'],
                 ['label' => __('account.nav_activity'), 'route' => 'account.activity.index', 'match' => 'account.activity.*', 'icon' => 'mail', 'permission' => 'activity'],
             ],
         ],

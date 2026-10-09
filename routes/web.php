@@ -8,6 +8,7 @@ use App\Http\Controllers\AccountNotificationController;
 use App\Http\Controllers\AccountProductController;
 use App\Http\Controllers\AccountStaffController;
 use App\Http\Controllers\AccountSubscriptionController;
+use App\Http\Controllers\AccountSupportController;
 use App\Http\Controllers\AdminEmailCatalogController;
 use App\Http\Controllers\AdminEmailProviderSettingsController;
 use App\Http\Controllers\AdminAuthController;
@@ -334,6 +335,12 @@ Route::middleware('auth')->group(function (): void {
             ->whereNumber('domainId')
             ->name('account.domains.whmcs');
         Route::get('/account/domains/{order}', [AccountDomainController::class, 'show'])->name('account.domains.show');
+        Route::get('/account/support', [AccountSupportController::class, 'index'])->name('account.support.index');
+        Route::get('/account/support/new', [AccountSupportController::class, 'create'])->name('account.support.create');
+        Route::post('/account/support', [AccountSupportController::class, 'store'])->middleware('throttle:10,1')->name('account.support.store');
+        Route::get('/account/support/{ticket}', [AccountSupportController::class, 'show'])->name('account.support.show');
+        Route::post('/account/support/{ticket}/reply', [AccountSupportController::class, 'reply'])->middleware('throttle:20,1')->name('account.support.reply');
+        Route::post('/account/support/{ticket}/close', [AccountSupportController::class, 'close'])->name('account.support.close');
         Route::get('/account/subscriptions', [AccountSubscriptionController::class, 'index'])->name('account.subscriptions.index');
         Route::get('/account/subscriptions/{service}', [AccountSubscriptionController::class, 'show'])
             ->name('account.subscriptions.show');
