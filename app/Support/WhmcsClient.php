@@ -904,9 +904,29 @@ class WhmcsClient
      * @param  array<string, mixed>  $payload
      * @return array<string, mixed>|null
      */
+    /**
+     * Raw transport for App\Support\Whmcs\Whmcs::call(); prefer that, it validates and audits.
+     *
+     * @param  array<string, mixed>  $payload
+     * @return array<string, mixed>|null
+     */
+    public static function send(string $action, array $payload): ?array
+    {
+        return self::request($action, $payload);
+    }
+
     protected static function request(string $action, array $payload): ?array
     {
         self::$lastError = null;
+
+        $definition = \App\Support\Whmcs\Whmcs::definition($action);
+        if ($definition === null) {
+            self::$lastError = "WHMCS action {$action} is not enabled in config/whmcs-actions.php.";
+            Log::error('Blocked WHMCS action not in allow-list', ['action' => $action]);
+
+            return null;
+        }
+        $logResponse = fn ($json) => $definition['sensitive'] ? ['result' => data_get($json, 'result'), 'message' => data_get($json, 'message')] : $json;
 
         if (! self::isConfigured()) {
             self::$lastError = 'WHMCS API credentials are missing.';
@@ -942,8 +962,8 @@ class WhmcsClient
                 Log::warning('WHMCS request failed', [
                     'action' => $action,
                     'status' => $response->status(),
-                    'response' => $json,
-                    'body' => $body,
+                    'response' => $logResponse($json),
+                    'body' => $definition['sensitive'] ? '[redacted]' : $body,
                 ]);
 
                 return null;
@@ -954,7 +974,7 @@ class WhmcsClient
 
                 Log::warning('WHMCS API returned non-success', [
                     'action' => $action,
-                    'response' => $json,
+                    'response' => $logResponse($json),
                 ]);
             }
 

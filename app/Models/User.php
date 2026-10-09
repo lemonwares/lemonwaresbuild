@@ -45,7 +45,7 @@ use Illuminate\Notifications\Notifiable;
     'admin_tags',
 ])]
 #[Hidden(['password', 'remember_token'])]
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements \Filament\Models\Contracts\FilamentUser, MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
@@ -113,6 +113,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    public function canAccessPanel(\Filament\Panel $panel): bool
+    {
+        return $this->hasAdminPermission('whmcs');
     }
 
     public function isSuperAdmin(): bool

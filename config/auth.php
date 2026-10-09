@@ -42,6 +42,12 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        // Filament /console: the signed-in admin from the existing admin session is set on this guard per request.
+        'console' => [
+            'driver' => 'session',
+            'provider' => 'users',
+        ],
     ],
 
     /*
