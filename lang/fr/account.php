@@ -479,4 +479,6 @@ return [
     'total_count' => '{1} :count au total|[0,*] :count au total',
     'showing_results' => 'Affichage de :from à :to sur :total',
     'invoice_sources' => ['whmcs' => 'Facture', 'email' => 'Commande e-mail', 'hosting' => 'Commande d’hébergement', 'domain' => 'Commande de domaine'],
+    'back' => 'Retour',
+    'toggle_sidebar' => 'Réduire ou agrandir la barre latérale',
 ];

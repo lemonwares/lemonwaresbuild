@@ -479,4 +479,6 @@ return [
     'total_count' => '{1} :count insgesamt|[0,*] :count insgesamt',
     'showing_results' => ':from–:to von :total',
     'invoice_sources' => ['whmcs' => 'Rechnung', 'email' => 'E-Mail-Bestellung', 'hosting' => 'Hosting-Bestellung', 'domain' => 'Domain-Bestellung'],
+    'back' => 'Zurück',
+    'toggle_sidebar' => 'Seitenleiste ein- oder ausklappen',
 ];

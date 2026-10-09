@@ -485,4 +485,6 @@ return [
     'total_count' => '{1} :count total|[0,*] :count total',
     'showing_results' => 'Showing :from–:to of :total',
     'invoice_sources' => ['whmcs' => 'Billing invoice', 'email' => 'Email order', 'hosting' => 'Hosting order', 'domain' => 'Domain order'],
+    'back' => 'Back',
+    'toggle_sidebar' => 'Collapse or expand sidebar',
 ];
