@@ -375,7 +375,9 @@ class WhmcsAuthAndConsoleTest extends TestCase
             ->assertRedirect('https://cpanel.example.test:2083/sso');
 
         $this->get(route('account.domains.whmcs', 9))
-            ->assertRedirect('https://billing.example.test/sso/product');
+            ->assertOk()
+            ->assertSee('ada.example')
+            ->assertSee('Nameservers');
 
         $actions = collect(Http::recorded())
             ->map(fn ($pair) => $pair[0]['action'] ?? null)

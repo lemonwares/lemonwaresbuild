@@ -119,33 +119,33 @@ Route::get('/careers', [CareerController::class, 'index'])->name('careers');
 Route::get('/careers/{careerOpening}', [CareerController::class, 'show'])->name('careers.show');
 Route::view('/domain', 'pages.domain')->name('domain');
 Route::get('/cart', [CartController::class, 'show'])->name('cart');
-Route::post('/cart/domain', [CartController::class, 'addDomain'])->middleware('throttle:30,1')->name('cart.domain.add');
-Route::get('/cart/domain/add', [CartController::class, 'addDomainRedirect'])->middleware('throttle:30,1')->name('cart.domain.add-redirect');
-Route::post('/cart/email', [CartController::class, 'addEmail'])->middleware('throttle:30,1')->name('cart.email.add');
-Route::post('/cart/hosting', [CartController::class, 'addHosting'])->middleware('throttle:30,1')->name('cart.hosting.add');
-Route::patch('/cart/{item}', [CartController::class, 'update'])->middleware('throttle:30,1')->name('cart.update');
-Route::delete('/cart/{item}', [CartController::class, 'destroy'])->middleware('throttle:30,1')->name('cart.destroy');
-Route::get('/cart/count', [CartController::class, 'count'])->middleware('throttle:60,1')->name('cart.count');
+Route::post('/cart/domain', [CartController::class, 'addDomain'])->middleware('throttle:30,1,cart.domain.add')->name('cart.domain.add');
+Route::get('/cart/domain/add', [CartController::class, 'addDomainRedirect'])->middleware('throttle:30,1,cart.domain.add-redirect')->name('cart.domain.add-redirect');
+Route::post('/cart/email', [CartController::class, 'addEmail'])->middleware('throttle:30,1,cart.email.add')->name('cart.email.add');
+Route::post('/cart/hosting', [CartController::class, 'addHosting'])->middleware('throttle:30,1,cart.hosting.add')->name('cart.hosting.add');
+Route::patch('/cart/{item}', [CartController::class, 'update'])->middleware('throttle:30,1,cart.update')->name('cart.update');
+Route::delete('/cart/{item}', [CartController::class, 'destroy'])->middleware('throttle:30,1,cart.destroy')->name('cart.destroy');
+Route::get('/cart/count', [CartController::class, 'count'])->middleware('throttle:60,1,cart.count')->name('cart.count');
 Route::get('/checkout', [CheckoutController::class, 'create'])->name('checkout');
-Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:10,1')->name('checkout.store');
+Route::post('/checkout', [CheckoutController::class, 'store'])->middleware('throttle:10,1,checkout.store')->name('checkout.store');
 Route::post('/checkout/account-status', [CheckoutController::class, 'accountStatus'])
-    ->middleware('throttle:30,1')
+    ->middleware('throttle:30,1,checkout.account-status')
     ->name('checkout.account-status');
 Route::get('/checkout/payment/flutterwave/callback', [CheckoutController::class, 'callback'])->name('checkout.flutterwave.callback');
 Route::get('/checkout/received/{checkout}', [CheckoutController::class, 'received'])->middleware(EnsureOrderAccess::class)->name('checkout.received');
-Route::post('/checkout/{checkout}/pay', [CheckoutController::class, 'pay'])->middleware(['throttle:10,1', EnsureOrderAccess::class])->name('checkout.pay');
+Route::post('/checkout/{checkout}/pay', [CheckoutController::class, 'pay'])->middleware(['throttle:10,1,checkout.pay', EnsureOrderAccess::class])->name('checkout.pay');
 Route::get('/domain/cart', [DomainCartController::class, 'show'])->name('domain.cart');
-Route::post('/domain/cart/add', [DomainCartController::class, 'add'])->middleware('throttle:30,1')->name('domain.cart.add');
-Route::get('/domain/cart/add', [DomainCartController::class, 'addRedirect'])->middleware('throttle:30,1')->name('domain.cart.add-redirect');
-Route::patch('/domain/cart/{item}', [DomainCartController::class, 'update'])->middleware('throttle:30,1')->name('domain.cart.update');
-Route::delete('/domain/cart/{item}', [DomainCartController::class, 'destroy'])->middleware('throttle:30,1')->name('domain.cart.destroy');
-Route::get('/domain/cart/count', [DomainCartController::class, 'count'])->middleware('throttle:60,1')->name('domain.cart.count');
+Route::post('/domain/cart/add', [DomainCartController::class, 'add'])->middleware('throttle:30,1,domain.cart.add')->name('domain.cart.add');
+Route::get('/domain/cart/add', [DomainCartController::class, 'addRedirect'])->middleware('throttle:30,1,domain.cart.add-redirect')->name('domain.cart.add-redirect');
+Route::patch('/domain/cart/{item}', [DomainCartController::class, 'update'])->middleware('throttle:30,1,domain.cart.update')->name('domain.cart.update');
+Route::delete('/domain/cart/{item}', [DomainCartController::class, 'destroy'])->middleware('throttle:30,1,domain.cart.destroy')->name('domain.cart.destroy');
+Route::get('/domain/cart/count', [DomainCartController::class, 'count'])->middleware('throttle:60,1,domain.cart.count')->name('domain.cart.count');
 Route::get('/domain/checkout', [DomainOrderController::class, 'create'])->name('domain.checkout');
 Route::get('/domain/payment/flutterwave/callback', [DomainOrderController::class, 'callback'])->name('domain.flutterwave.callback');
 Route::get('/domain/order/received/{order}', [DomainOrderController::class, 'received'])->middleware(EnsureOrderAccess::class)->name('domain.order-received');
 Route::get('/domain/checkout/received/{checkout}', [DomainOrderController::class, 'receivedCheckout'])->middleware(EnsureOrderAccess::class)->name('domain.checkout-received');
-Route::post('/domain/order/{order}/pay', [DomainOrderController::class, 'pay'])->middleware(['throttle:10,1', EnsureOrderAccess::class])->name('domain.pay');
-Route::post('/domain/checkout/{checkout}/pay', [DomainOrderController::class, 'payCheckout'])->middleware(['throttle:10,1', EnsureOrderAccess::class])->name('domain.checkout.pay');
+Route::post('/domain/order/{order}/pay', [DomainOrderController::class, 'pay'])->middleware(['throttle:10,1,domain.pay', EnsureOrderAccess::class])->name('domain.pay');
+Route::post('/domain/checkout/{checkout}/pay', [DomainOrderController::class, 'payCheckout'])->middleware(['throttle:10,1,domain.checkout.pay', EnsureOrderAccess::class])->name('domain.checkout.pay');
 Route::view('/microservices', 'pages.microservices')->name('microservices');
 Route::get('/development', function () {
     $featuredBuilds = \App\Models\CaseStudy::query()
@@ -299,11 +299,11 @@ Route::middleware('guest')->group(function (): void {
     Route::get('/login', [LoginController::class, 'create'])->name('login');
     Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:auth-login')->name('login.store');
     Route::get('/register', [RegisterController::class, 'create'])->name('register');
-    Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:8,1')->name('register.store');
+    Route::post('/register', [RegisterController::class, 'store'])->middleware('throttle:8,1,register.store')->name('register.store');
     Route::get('/forgot-password', [PasswordResetController::class, 'request'])->name('password.request');
     Route::post('/forgot-password', [PasswordResetController::class, 'email'])->middleware('throttle:auth-forgot-password')->name('password.email');
     Route::get('/reset-password/{token}', [PasswordResetController::class, 'reset'])->name('password.reset');
-    Route::post('/reset-password', [PasswordResetController::class, 'update'])->middleware('throttle:8,1')->name('password.update');
+    Route::post('/reset-password', [PasswordResetController::class, 'update'])->middleware('throttle:8,1,password.update')->name('password.update');
 });
 
 Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')->name('logout');
@@ -311,18 +311,18 @@ Route::post('/logout', [LoginController::class, 'destroy'])->middleware('auth')-
 Route::middleware('auth')->group(function (): void {
     Route::get('/account/verify-email', [EmailVerificationController::class, 'notice'])->name('verification.notice');
     Route::get('/account/verify-email/{id}/{hash}', [EmailVerificationController::class, 'verify'])
-        ->middleware(['signed', 'throttle:6,1'])
+        ->middleware(['signed', 'throttle:6,1,verification.verify'])
         ->name('verification.verify');
     Route::post('/account/verify-email/send', [EmailVerificationController::class, 'send'])
-        ->middleware('throttle:3,1')
+        ->middleware('throttle:3,1,verification.send')
         ->name('verification.send');
 });
 
 Route::get('/email', [EmailOrderController::class, 'plans'])->name('email.plans');
 Route::get('/email/checkout', [EmailOrderController::class, 'create'])->name('email.checkout');
-Route::post('/email/checkout', [EmailOrderController::class, 'store'])->middleware('throttle:10,1')->name('email.checkout.store');
+Route::post('/email/checkout', [EmailOrderController::class, 'store'])->middleware('throttle:10,1,email.checkout.store')->name('email.checkout.store');
 Route::post('/email/checkout/account-status', [EmailOrderController::class, 'accountStatus'])
-    ->middleware('throttle:20,1')
+    ->middleware('throttle:20,1,email.checkout.account-status')
     ->name('email.checkout.account-status');
 Route::get('/email/payment/flutterwave/callback', [EmailOrderController::class, 'callback'])->name('email.flutterwave.callback');
 
@@ -334,12 +334,18 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/account/domains/whmcs/{domainId}', [AccountDomainController::class, 'whmcs'])
             ->whereNumber('domainId')
             ->name('account.domains.whmcs');
+        Route::middleware('throttle:account-domains')->whereNumber('domainId')->group(function (): void {
+            Route::post('/account/domains/whmcs/{domainId}/nameservers', [AccountDomainController::class, 'updateNameservers'])->name('account.domains.nameservers');
+            Route::post('/account/domains/whmcs/{domainId}/auto-renew', [AccountDomainController::class, 'updateAutoRenew'])->name('account.domains.auto-renew');
+            Route::post('/account/domains/whmcs/{domainId}/lock', [AccountDomainController::class, 'updateLock'])->name('account.domains.lock');
+            Route::post('/account/domains/whmcs/{domainId}/epp', [AccountDomainController::class, 'requestEpp'])->middleware('throttle:account-domain-epp')->name('account.domains.epp');
+        });
         Route::get('/account/domains/{order}', [AccountDomainController::class, 'show'])->name('account.domains.show');
         Route::get('/account/support', [AccountSupportController::class, 'index'])->name('account.support.index');
         Route::get('/account/support/new', [AccountSupportController::class, 'create'])->name('account.support.create');
-        Route::post('/account/support', [AccountSupportController::class, 'store'])->middleware('throttle:10,1')->name('account.support.store');
+        Route::post('/account/support', [AccountSupportController::class, 'store'])->middleware('throttle:account-support')->name('account.support.store');
         Route::get('/account/support/{ticket}', [AccountSupportController::class, 'show'])->name('account.support.show');
-        Route::post('/account/support/{ticket}/reply', [AccountSupportController::class, 'reply'])->middleware('throttle:20,1')->name('account.support.reply');
+        Route::post('/account/support/{ticket}/reply', [AccountSupportController::class, 'reply'])->middleware('throttle:account-support')->name('account.support.reply');
         Route::post('/account/support/{ticket}/close', [AccountSupportController::class, 'close'])->name('account.support.close');
         Route::get('/account/subscriptions', [AccountSubscriptionController::class, 'index'])->name('account.subscriptions.index');
         Route::get('/account/subscriptions/{service}', [AccountSubscriptionController::class, 'show'])
@@ -355,27 +361,27 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/account/profile', [AccountController::class, 'profile'])->name('account.profile');
         Route::put('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');
         Route::put('/account/profile/password', [AccountController::class, 'updatePassword'])
-            ->middleware('throttle:10,1')
+            ->middleware('throttle:10,1,account.profile.password')
             ->name('account.profile.password');
         Route::put('/account/profile/business', [AccountController::class, 'updateBusinessProfile'])
-            ->middleware('throttle:20,1')
+            ->middleware('throttle:20,1,account.profile.business')
             ->name('account.profile.business');
         Route::get('/account/settings', [AccountController::class, 'settings'])->name('account.settings');
         Route::put('/account/settings/notifications', [AccountController::class, 'updateNotificationPreferences'])->name('account.notifications.update');
         Route::get('/account/notifications', [AccountNotificationController::class, 'index'])->name('account.notifications.index');
         Route::post('/account/notifications/read-all', [AccountNotificationController::class, 'markAllRead'])->name('account.notifications.read-all');
         Route::post('/account/notifications/{notification}/read', [AccountNotificationController::class, 'markRead'])->name('account.notifications.read');
-        Route::post('/account/settings/contacts', [AccountController::class, 'storeContact'])->middleware('throttle:20,1')->name('account.contacts.store');
+        Route::post('/account/settings/contacts', [AccountController::class, 'storeContact'])->middleware('throttle:20,1,account.contacts.store')->name('account.contacts.store');
         Route::delete('/account/settings/contacts/{contact}', [AccountController::class, 'destroyContact'])->name('account.contacts.destroy');
         Route::get('/account/staff', [AccountStaffController::class, 'index'])->name('account.staff.index');
-        Route::post('/account/staff', [AccountStaffController::class, 'store'])->middleware('throttle:10,1')->name('account.staff.store');
+        Route::post('/account/staff', [AccountStaffController::class, 'store'])->middleware('throttle:10,1,account.staff.store')->name('account.staff.store');
         Route::delete('/account/staff/invites/{invite}', [AccountStaffController::class, 'destroyInvite'])->name('account.staff.invites.destroy');
         Route::delete('/account/staff/{member}', [AccountStaffController::class, 'destroy'])->name('account.staff.destroy');
         Route::get('/account/email', [AccountController::class, 'email'])->name('account.email.index');
         Route::get('/account/email/{order}', [EmailOrderController::class, 'show'])->name('account.email.show');
-        Route::post('/account/email/{order}/pay', [EmailOrderController::class, 'pay'])->middleware('throttle:10,1')->name('email.pay');
-        Route::post('/account/email/{order}/renew', [EmailOrderController::class, 'renew'])->middleware('throttle:10,1')->name('email.renew');
-        Route::post('/account/email/{order}/provision', [EmailOrderController::class, 'provision'])->middleware('throttle:5,1')->name('email.provision');
+        Route::post('/account/email/{order}/pay', [EmailOrderController::class, 'pay'])->middleware('throttle:10,1,email.pay')->name('email.pay');
+        Route::post('/account/email/{order}/renew', [EmailOrderController::class, 'renew'])->middleware('throttle:10,1,email.renew')->name('email.renew');
+        Route::post('/account/email/{order}/provision', [EmailOrderController::class, 'provision'])->middleware('throttle:5,1,email.provision')->name('email.provision');
         Route::get('/account/vps', [AccountController::class, 'vps'])->name('account.vps.index');
         Route::get('/account/vps/{lead}', [AccountController::class, 'vpsShow'])->name('account.vps.show');
         Route::get('/account/hosting', [AccountController::class, 'hosting'])->name('account.hosting.index');
@@ -385,7 +391,7 @@ Route::middleware('auth')->group(function (): void {
 
 Route::get('/account/invites/{token}', [AccountStaffController::class, 'showInvite'])->name('account.invites.show');
 Route::post('/account/invites/{token}', [AccountStaffController::class, 'acceptInvite'])
-    ->middleware('throttle:10,1')
+    ->middleware('throttle:10,1,account.invites.accept')
     ->name('account.invites.accept');
 
 Route::get('/hosting/request', function (Request $request) {
@@ -667,7 +673,7 @@ Route::post('/hosting/request/received/{lead}/pay', function (HostingLead $lead)
     }
 
     return redirect()->away($link);
-})->middleware(['throttle:10,1', EnsureOrderAccess::class])->name('hosting.flutterwave.pay');
+})->middleware(['throttle:10,1,hosting.flutterwave.pay', EnsureOrderAccess::class])->name('hosting.flutterwave.pay');
 
 Route::post('/hosting/domain/check', function (Request $request) {
     $validator = Validator::make($request->all(), [
@@ -697,7 +703,7 @@ Route::post('/hosting/domain/check', function (Request $request) {
     $result = WhmcsDomainCheck::validate($domain, (string) $payload['domain_option']);
 
     return response()->json($result, $result['ok'] ? 200 : 422);
-})->middleware('throttle:30,1')->name('hosting.domain.check');
+})->middleware('throttle:30,1,hosting.domain.check')->name('hosting.domain.check');
 
 Route::post('/hosting/domain/suggest', function (Request $request) {
     $validator = Validator::make($request->all(), [
@@ -726,7 +732,7 @@ Route::post('/hosting/domain/suggest', function (Request $request) {
         'ok' => true,
         'suggestions' => $suggestions,
     ]);
-})->middleware('throttle:20,1')->name('hosting.domain.suggest');
+})->middleware('throttle:20,1,hosting.domain.suggest')->name('hosting.domain.suggest');
 
 Route::post('/hosting/domain/quote', function (Request $request) {
     $validated = Validator::make($request->all(), [
@@ -750,7 +756,7 @@ Route::post('/hosting/domain/quote', function (Request $request) {
     );
 
     return response()->json($quote, ($quote['ok'] ?? false) ? 200 : 422);
-})->middleware('throttle:30,1')->name('hosting.domain.quote');
+})->middleware('throttle:30,1,hosting.domain.quote')->name('hosting.domain.quote');
 
 Route::post('/hosting/request/details', function (Request $request) {
     $planOptions = config('site.hosting_plans', []);
@@ -1061,7 +1067,7 @@ Route::post('/hosting/request/details', function (Request $request) {
     ]);
 
     return redirect()->away($checkoutUrl);
-})->middleware('throttle:10,1')->name('hosting.intake.submit');
+})->middleware('throttle:10,1,hosting.intake.submit')->name('hosting.intake.submit');
 
 Route::get('/location/countries', function () {
     try {
@@ -1207,12 +1213,12 @@ Route::post('/newsletter-subscribe', function (Request $request) {
             'type' => 'success',
             'message' => 'Thanks for subscribing to our newsletter.',
         ]);
-})->middleware('throttle:10,1')->name('newsletter.subscribe');
+})->middleware('throttle:10,1,newsletter.subscribe')->name('newsletter.subscribe');
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
     Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('login');
     Route::post('/login', [AdminAuthController::class, 'login'])
-        ->middleware('throttle:5,1')
+        ->middleware('throttle:5,1,login.submit')
         ->name('login.submit');
 
     Route::middleware([EnsureAdminAuthenticated::class, \App\Http\Middleware\EnsureAdminPermission::class, \App\Http\Middleware\RecordAdminAudit::class])->group(function (): void {

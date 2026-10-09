@@ -138,18 +138,41 @@ class WhmcsMirror
         ];
 
         foreach ($lists as [$model, $action, $params, $path]) {
-            $seen = [];
-            $synced = self::paged($action, $params, $path, function (array $row) use ($model, &$seen): void {
-                if ($record = self::store($model, $row)) {
-                    $seen[] = $record->getAttribute(self::key($model));
-                }
-            });
-
-            // Records WHMCS no longer returns for this client were deleted there.
-            if ($synced >= 0) {
-                $model::query()->where('whmcs_client_id', $clientId)->whereNotIn(self::key($model), $seen ?: [0])->delete();
-            }
+            self::syncList($clientId, $model, $action, $params, $path);
         }
+
+        return true;
+    }
+
+    /**
+     * Domains only, for pages that need a client's domains before their first full refresh.
+     */
+    public static function syncClientDomains(int $clientId): bool
+    {
+        return $clientId > 0
+            && self::syncList($clientId, WhmcsDomain::class, 'GetClientsDomains', ['clientid' => $clientId], 'domains.domain');
+    }
+
+    /**
+     * @param  class-string<Model>  $model
+     * @param  array<string, mixed>  $params
+     */
+    private static function syncList(int $clientId, string $model, string $action, array $params, string $path): bool
+    {
+        $seen = [];
+        $synced = self::paged($action, $params, $path, function (array $row) use ($model, $clientId, &$seen): void {
+            $row['userid'] ??= $clientId;
+            if ($record = self::store($model, $row)) {
+                $seen[] = $record->getAttribute(self::key($model));
+            }
+        });
+
+        if ($synced < 0) {
+            return false;
+        }
+
+        // Records WHMCS no longer returns for this client were deleted there.
+        $model::query()->where('whmcs_client_id', $clientId)->whereNotIn(self::key($model), $seen ?: [0])->delete();
 
         return true;
     }
