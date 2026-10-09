@@ -59,7 +59,7 @@
                                 <a href="{{ $invoice['url'] }}" class="account-btn-ghost">{{ __('account.view') }}</a>
                             @endif
                             @if ($invoice['pay_url'])
-                                <a href="{{ $invoice['pay_url'] }}" target="_blank" rel="noopener noreferrer" class="account-btn-primary">{{ __('account.pay') }}</a>
+                                <a href="{{ $invoice['pay_url'] }}" class="account-btn-primary">{{ __('account.pay') }}</a>
                             @endif
                         </div>
                     </div>
@@ -96,7 +96,7 @@
                                                 <a href="{{ $invoice['url'] }}" class="account-btn-ghost">{{ __('account.view') }}</a>
                                             @endif
                                             @if ($invoice['pay_url'])
-                                                <a href="{{ $invoice['pay_url'] }}" target="_blank" rel="noopener noreferrer" class="account-btn-primary">{{ __('account.pay') }}</a>
+                                                <a href="{{ $invoice['pay_url'] }}" class="account-btn-primary">{{ __('account.pay') }}</a>
                                             @endif
                                         </div>
                                     </td>

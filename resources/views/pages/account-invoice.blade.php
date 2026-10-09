@@ -10,12 +10,22 @@
         :back-href="route('account.invoices.index')"
         :back-label="__('account.nav_invoices')"
     >
-        @if ($payUrl)
+        @if ($canPay)
             <x-slot:actions>
-                <a href="{{ $payUrl }}" target="_blank" rel="noopener noreferrer" class="account-btn-primary">{{ __('account.pay') }}</a>
+                <form method="POST" action="{{ route('account.invoices.pay', ['invoice' => $invoiceId]) }}">
+                    @csrf
+                    <button type="submit" class="account-btn-primary">{{ __('account.pay') }}</button>
+                </form>
             </x-slot:actions>
         @endif
     </x-account.page-header>
+
+    @if (session('status'))
+        <p class="mb-5 rounded-xl border border-emerald-600/20 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('status') }}</p>
+    @endif
+    @if (session('error'))
+        <p class="mb-5 rounded-xl border border-rose/20 bg-rose/5 px-4 py-3 text-sm text-rose">{{ session('error') }}</p>
+    @endif
 
     <div class="account-page-stack">
         <section class="account-panel">

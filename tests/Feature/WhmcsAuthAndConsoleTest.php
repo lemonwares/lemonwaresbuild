@@ -388,7 +388,7 @@ class WhmcsAuthAndConsoleTest extends TestCase
         $this->assertContains('GetClientsProducts', $actions);
         $this->assertContains('GetClientsDomains', $actions);
         $this->assertContains('ModuleSingleSignOn', $actions);
-        $this->assertContains('CreateSsoToken', $actions);
+        $this->assertNotContains('CreateSsoToken', $actions);
         $this->assertContains('GetInvoice', $actions);
     }
 

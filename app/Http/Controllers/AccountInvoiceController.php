@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\InvoicePayment;
 use App\Support\AccountListQuery;
+use App\Support\FlutterwavePayment;
 use App\Support\WhmcsClient;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
 
 class AccountInvoiceController extends Controller
@@ -29,7 +33,9 @@ class AccountInvoiceController extends Controller
                     'currency' => (string) ($row['currencycode'] ?? 'USD'),
                     'status' => (string) ($row['status'] ?? ''),
                     'date' => $this->parseDate($row['date'] ?? null),
-                    'pay_url' => $this->whmcsPayUrl((int) $whmcsCustomer->whmcs_client_id, $invoiceId, (string) ($row['status'] ?? '')),
+                    'pay_url' => $invoiceId > 0 && strcasecmp((string) ($row['status'] ?? ''), 'Unpaid') === 0
+                        ? route('account.invoices.show', ['invoice' => 'whmcs-'.$invoiceId])
+                        : null,
                     'url' => $invoiceId > 0 ? route('account.invoices.show', ['invoice' => 'whmcs-'.$invoiceId]) : null,
                 ]);
             }
@@ -125,12 +131,75 @@ class AccountInvoiceController extends Controller
             'invoiceId' => $invoiceId,
             'items' => $items,
             'transactions' => $transactions,
-            'payUrl' => $this->whmcsPayUrl(
-                (int) $whmcsCustomer->whmcs_client_id,
-                $invoiceId,
-                (string) ($detail['status'] ?? ''),
-            ),
+            'canPay' => strcasecmp((string) ($detail['status'] ?? ''), 'Unpaid') === 0
+                && (float) ($detail['balance'] ?? 0) > 0
+                && FlutterwavePayment::isConfigured(),
         ]);
+    }
+
+    public function pay(Request $request, int $invoice): RedirectResponse
+    {
+        $owner = $request->user()->accountOwner();
+        $customer = $owner->whmcsCustomer;
+        abort_unless($customer?->whmcs_client_id, 404);
+
+        $detail = WhmcsClient::getInvoice($invoice);
+        abort_unless(is_array($detail) && (int) ($detail['userid'] ?? 0) === (int) $customer->whmcs_client_id, 404);
+
+        $back = redirect()->route('account.invoices.show', ['invoice' => 'whmcs-'.$invoice]);
+        $balance = round((float) ($detail['balance'] ?? 0), 2);
+
+        if (strcasecmp((string) ($detail['status'] ?? ''), 'Unpaid') !== 0 || $balance <= 0) {
+            return $back->with('error', __('account.invoice_not_payable'));
+        }
+        if ($customer->currency_code && strtoupper($customer->currency_code) !== 'NGN') {
+            return $back->with('error', __('account.invoice_currency_unsupported'));
+        }
+        if (InvoicePayment::query()->where('whmcs_invoice_id', $invoice)->where('status', 'paid')->whereNull('whmcs_recorded_at')->exists()) {
+            return $back->with('status', __('account.invoice_payment_processing'));
+        }
+
+        $payment = InvoicePayment::query()->create([
+            'user_id' => $owner->id,
+            'whmcs_client_id' => $customer->whmcs_client_id,
+            'whmcs_invoice_id' => $invoice,
+            'amount_ngn' => $balance,
+            'payment_reference' => 'LW-INV-'.$invoice.'-'.Str::upper(Str::random(10)),
+        ]);
+
+        $link = FlutterwavePayment::createInvoicePaymentLink($payment);
+        if (! $link) {
+            $payment->update(['status' => 'payment_failed', 'payment_status' => 'init_failed']);
+
+            return $back->with('error', __('account.invoice_payment_unavailable'));
+        }
+
+        return redirect()->away($link);
+    }
+
+    public function callback(Request $request): RedirectResponse
+    {
+        $payment = InvoicePayment::query()
+            ->where('payment_reference', (string) $request->query('tx_ref', ''))
+            ->where('user_id', $request->user()->accountOwner()->id)
+            ->first();
+        abort_unless($payment, 404);
+
+        $back = redirect()->route('account.invoices.show', ['invoice' => 'whmcs-'.$payment->whmcs_invoice_id]);
+        $transactionId = (string) $request->query('transaction_id', '');
+
+        if ($transactionId === '' || in_array(strtolower((string) $request->query('status')), ['cancelled', 'failed'], true)) {
+            return $back->with('error', __('account.invoice_payment_incomplete'));
+        }
+
+        $verified = FlutterwavePayment::verifyTransaction($transactionId);
+        if (! $verified) {
+            return $back->with('error', __('account.invoice_payment_unverified'));
+        }
+
+        $result = FlutterwavePayment::confirmInvoicePayment($payment, $verified);
+
+        return $back->with($result['ok'] ? 'status' : 'error', $result['message']);
     }
 
     /**
@@ -160,16 +229,5 @@ class AccountInvoiceController extends Controller
         } catch (\Throwable) {
             return null;
         }
-    }
-
-    protected function whmcsPayUrl(int $clientId, int $invoiceId, string $status): ?string
-    {
-        if ($invoiceId <= 0 || ! in_array(strtolower($status), ['unpaid', 'overdue'], true)) {
-            return null;
-        }
-
-        $sso = WhmcsClient::createSsoToken($clientId, 'viewinvoice.php?id='.$invoiceId);
-
-        return is_array($sso) ? ($sso['redirect_url'] ?? null) : null;
     }
 }

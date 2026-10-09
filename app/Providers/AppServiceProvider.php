@@ -95,6 +95,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('account-support', fn (Request $request) => Limit::perMinute(10)->by('account-support|'.$request->user()?->id));
+        RateLimiter::for('account-invoice-pay', fn (Request $request) => Limit::perMinute(10)->by('account-invoice-pay|'.($request->user()?->id ?? $request->ip())));
         RateLimiter::for('account-domains', fn (Request $request) => Limit::perMinute(20)->by('account-domains|'.$request->user()?->id));
         RateLimiter::for('account-domain-epp', fn (Request $request) => Limit::perMinutes(10, 3)->by('account-domain-epp|'.$request->user()?->id));
 

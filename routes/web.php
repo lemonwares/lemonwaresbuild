@@ -356,6 +356,10 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/account/subscriptions/{service}/cpanel', [AccountSubscriptionController::class, 'cpanel'])
             ->name('account.subscriptions.cpanel');
         Route::get('/account/invoices', [AccountInvoiceController::class, 'index'])->name('account.invoices.index');
+        Route::middleware('throttle:account-invoice-pay')->group(function (): void {
+            Route::post('/account/invoices/{invoice}/pay', [AccountInvoiceController::class, 'pay'])->whereNumber('invoice')->name('account.invoices.pay');
+            Route::get('/account/invoices/payment/callback', [AccountInvoiceController::class, 'callback'])->name('account.invoices.callback');
+        });
         Route::get('/account/invoices/{invoice}', [AccountInvoiceController::class, 'show'])->name('account.invoices.show');
         Route::get('/account/activity', [AccountActivityController::class, 'index'])->name('account.activity.index');
         Route::get('/account/profile', [AccountController::class, 'profile'])->name('account.profile');
