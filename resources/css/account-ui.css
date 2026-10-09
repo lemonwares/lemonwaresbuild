@@ -791,4 +791,181 @@
     html[data-theme='dark'] .acc-empty-title {
         color: #f7f1f1;
     }
+
+    /* Admin area: same card/table language as the client area. */
+    .admin-body .admin-main {
+        background: #f6f6f8;
+    }
+
+    .admin-sidebar-brand {
+        position: relative;
+    }
+
+    html.admin-sidebar-collapsed .acc-sidebar-chevron svg,
+    .admin-shell.is-collapsed .acc-sidebar-chevron svg {
+        transform: rotate(180deg);
+    }
+
+    .admin-body .admin-topbar {
+        background: #fff;
+        border-bottom: 1px solid #e7e7eb;
+        box-shadow: none;
+    }
+
+    .admin-body .admin-page-title {
+        font-size: 1.25rem;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+    }
+
+    .admin-body .admin-page-lede,
+    .admin-body .admin-dash-panel-lede {
+        font-size: 0.875rem;
+        color: #6b6b72;
+    }
+
+    .admin-body .admin-panel {
+        border-color: #e7e7eb;
+        border-radius: 0.9rem;
+        box-shadow: none;
+    }
+
+    .admin-body .admin-panel-toolbar {
+        border-bottom: 1px solid #f0f0f2;
+        padding: 0.9rem 1.25rem;
+    }
+
+    .admin-body .admin-panel-toolbar.compact {
+        border-bottom: 0;
+        padding: 0 0 0.75rem;
+    }
+
+    .admin-body .admin-dash-panel-title {
+        font-size: 1rem;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+        text-transform: none;
+    }
+
+    .admin-body .admin-metric {
+        border-color: #e7e7eb;
+        border-radius: 0.9rem;
+        padding: 1rem 1.1rem;
+    }
+
+    .admin-body .admin-metric:hover {
+        transform: none;
+    }
+
+    .admin-body .admin-metric-label {
+        font-size: 0.8125rem;
+        font-weight: 500;
+        letter-spacing: 0;
+        text-transform: none;
+        color: #6b6b72;
+    }
+
+    .admin-body .admin-metric-value {
+        font-size: 1.5rem;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+    }
+
+    .admin-body .admin-metric-meta {
+        font-size: 0.8125rem;
+        color: #8a8a92;
+    }
+
+    .admin-body .admin-table {
+        font-size: 0.875rem;
+    }
+
+    .admin-body .admin-table th {
+        border-bottom-color: #f0f0f2;
+        background: #fafafb;
+        padding: 0.7rem 1.25rem;
+        font-family: var(--font-sans);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        color: #7a7a82;
+    }
+
+    .admin-body .admin-table td {
+        border-bottom-color: #f0f0f2;
+        padding: 0.8rem 1.25rem;
+        color: #222;
+    }
+
+    .admin-body .admin-table tbody tr:hover td {
+        background: #fcfafa;
+    }
+
+    .admin-body .admin-pill,
+    .admin-body .admin-status {
+        border-radius: 0.4rem;
+        padding: 0.18rem 0.55rem;
+        font-family: var(--font-sans);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0;
+        text-transform: capitalize;
+    }
+
+    .admin-body .admin-pill:not(.is-ok):not(.is-info) {
+        border-color: transparent;
+        background: #f1f1f4;
+        color: #55555c;
+    }
+
+    .admin-body .admin-btn-primary,
+    .admin-body .admin-btn-ghost,
+    .admin-body .admin-btn-danger {
+        min-height: 2.25rem;
+        border-radius: 0.6rem;
+        padding: 0.45rem 0.9rem;
+        font-family: var(--font-sans);
+        font-size: 0.8125rem;
+        font-weight: 600;
+    }
+
+    .admin-body .admin-btn-ghost {
+        border-color: #e2e2e6;
+        color: #222;
+    }
+
+    .admin-body .admin-input {
+        border-color: #e2e2e6;
+        border-radius: 0.6rem;
+        padding: 0.5rem 0.75rem;
+        font-family: var(--font-sans);
+        font-weight: 500;
+    }
+
+    .admin-body .admin-field label,
+    .admin-body .admin-dl dt {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: none;
+        color: #6b6b72;
+    }
+
+    .admin-body .admin-empty,
+    .admin-body .admin-table-empty {
+        color: #6b6b72;
+    }
+
+    .admin-body .admin-pagination a,
+    .admin-body .admin-pagination span {
+        border-radius: 0.5rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+    }
+
+    html[data-theme='dark'] .admin-body .admin-main { background: #131111; }
+    html[data-theme='dark'] .admin-body .admin-topbar {
+        border-color: #2e2828;
+        background: #1c1818;
+    }
 }

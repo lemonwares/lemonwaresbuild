@@ -7,17 +7,9 @@
 ])
 
 <header {{ $attributes->class('admin-page-header') }}>
-    @if ($backHref)
-        <a href="{{ $backHref }}" class="admin-go-back">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M19 12H5" />
-                <path d="m12 19-7-7 7-7" />
-            </svg>
-            <span>{{ $backLabel }}</span>
-        </a>
-    @endif
-
-    <x-admin.breadcrumbs :items="$breadcrumbs" />
+    @push('admin_breadcrumbs')
+        <x-admin.breadcrumbs :items="$breadcrumbs" :back="$backHref" />
+    @endpush
 
     <div class="admin-page-header-row">
         @if ($title !== '')

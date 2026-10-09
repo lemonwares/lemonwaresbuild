@@ -34,7 +34,7 @@
             })();
         </script>
     </head>
-    <body @class(['min-h-screen text-black', 'bg-blush-soft' => $adminAuthed, 'bg-white' => ! $adminAuthed])>
+    <body @class(['min-h-screen text-black', 'admin-body account-body' => $adminAuthed, 'bg-white' => ! $adminAuthed])>
         @if ($adminAuthed)
             <div class="admin-shell" data-admin-shell>
                 <aside class="admin-sidebar" data-admin-sidebar id="admin-sidebar">
@@ -48,6 +48,18 @@
                                 class="admin-sidebar-logo"
                             >
                         </a>
+                        <button
+                            type="button"
+                            class="acc-sidebar-chevron"
+                            data-admin-sidebar-toggle
+                            aria-controls="admin-sidebar"
+                            title="Collapse or expand sidebar"
+                        >
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="m15 18-6-6 6-6" />
+                            </svg>
+                            <span class="sr-only">Collapse or expand sidebar</span>
+                        </button>
                     </div>
 
                     <div class="admin-sidebar-scroll">
@@ -92,6 +104,10 @@
                                             class="admin-topbar-mobile-logo"
                                         >
                                     </a>
+                                </div>
+                                <div class="acc-topbar-title">
+                                    <strong>Platform Admin</strong>
+                                    <span>{{ \App\Support\AdminPermissions::currentUser()?->is_super_admin ? 'Super Admin' : 'Staff' }}</span>
                                 </div>
                             </div>
 
@@ -168,10 +184,13 @@
                         </details>
                     </div>
 
+                    @if ($__env->hasSection('hide_auto_breadcrumbs') && trim($__env->yieldPushContent('admin_breadcrumbs')) !== '')
+                        @stack('admin_breadcrumbs')
+                    @else
+                        <x-admin.breadcrumbs :items="\App\Support\AdminBreadcrumbs::fromCurrentRoute()" />
+                    @endif
+
                     <main class="admin-content">
-                        @unless ($__env->hasSection('hide_auto_breadcrumbs'))
-                            <x-admin.breadcrumbs :items="\App\Support\AdminBreadcrumbs::fromCurrentRoute()" class="mb-5" />
-                        @endunless
 
                         @if (session('status'))
                             <p class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{{ session('status') }}</p>
