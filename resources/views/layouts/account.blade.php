@@ -135,6 +135,8 @@
 
                 @hasSection('breadcrumbs')
                     @yield('breadcrumbs')
+                @else
+                    @stack('breadcrumbs')
                 @endif
 
                 <main class="account-content">

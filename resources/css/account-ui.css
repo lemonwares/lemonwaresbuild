@@ -396,8 +396,23 @@
         gap: 0.35rem;
     }
 
-    .acc-row-actions form {
+    .acc-row-actions form,
+    .acc-card-tools form {
         display: contents;
+    }
+
+    .acc-table tr.is-unread td {
+        background: #fffafa;
+    }
+
+    .acc-dot {
+        display: inline-block;
+        width: 0.45rem;
+        height: 0.45rem;
+        margin-right: 0.35rem;
+        border-radius: 999px;
+        background: var(--color-rose);
+        vertical-align: middle;
     }
 
     .acc-link {
@@ -509,6 +524,154 @@
         margin-bottom: 0.35rem;
         font-weight: 600;
         color: #111;
+    }
+
+    /* Bring the older account building blocks in line with the card/table look above. */
+    .account-body .account-page-header {
+        margin-bottom: 1.1rem;
+    }
+
+    .account-body .account-page-title {
+        font-size: 1.25rem;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+    }
+
+    .account-body .account-page-lede {
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: #6b6b72;
+    }
+
+    .account-body .account-panel {
+        border-color: #e7e7eb;
+        border-radius: 0.9rem;
+        box-shadow: none;
+    }
+
+    .account-body .account-panel-toolbar {
+        border-bottom-color: #f0f0f2;
+    }
+
+    .account-body .account-panel-title {
+        font-size: 1rem;
+        font-weight: 650;
+    }
+
+    .account-body .account-panel-lede {
+        font-size: 0.8125rem;
+        color: #6b6b72;
+    }
+
+    .account-body .account-dl dt {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        color: #7a7a82;
+    }
+
+    .account-body .account-dl dd {
+        margin-top: 0.25rem;
+        font-family: var(--font-sans);
+        font-size: 0.9375rem;
+        font-weight: 600;
+    }
+
+    .account-body .account-table {
+        font-size: 0.875rem;
+    }
+
+    .account-body .account-table th {
+        border-bottom-color: #f0f0f2;
+        background: #fafafb;
+        padding: 0.7rem 1.25rem;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        color: #7a7a82;
+    }
+
+    .account-body .account-table td {
+        border-bottom-color: #f0f0f2;
+        padding: 0.8rem 1.25rem;
+        color: #222;
+    }
+
+    .account-body .account-table tbody tr:hover td {
+        background: #fcfafa;
+    }
+
+    .account-body .account-table strong {
+        font-weight: 600;
+    }
+
+    .account-body .account-pill {
+        border-radius: 0.4rem;
+        padding: 0.18rem 0.55rem;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0;
+        text-transform: none;
+    }
+
+    .account-body .account-pill.is-ok { background: #e8f7ee; color: #157a3e; }
+    .account-body .account-pill.is-warn { background: #fff4e0; color: #9a5b00; }
+    .account-body .account-pill.is-muted { background: #f1f1f4; color: #55555c; }
+
+    .account-body .account-btn-primary,
+    .account-body .account-btn-ghost,
+    .account-body .account-btn-danger {
+        min-height: 2.25rem;
+        border-radius: 0.6rem;
+        padding: 0.45rem 0.9rem;
+        font-family: var(--font-sans);
+        font-size: 0.8125rem;
+        font-weight: 600;
+    }
+
+    .account-body .account-btn-ghost {
+        border-color: #e2e2e6;
+        color: #222;
+    }
+
+    .account-body .account-btn-ghost:hover {
+        background: #fff;
+    }
+
+    .account-body .account-input {
+        border-color: #e2e2e6;
+        border-radius: 0.6rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .account-body .account-empty {
+        border: 1px solid #e7e7eb;
+        border-radius: 0.9rem;
+        background: #fff;
+        padding: 2.5rem 1.25rem;
+        align-items: center;
+        text-align: center;
+    }
+
+    .account-body .account-empty-title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+    }
+
+    .account-body .account-empty-lede {
+        font-size: 0.875rem;
+        color: #6b6b72;
+    }
+
+    .account-body .account-pagination span,
+    .account-body .account-pagination a {
+        min-width: 2rem;
+        border-color: #e7e7eb;
+        border-radius: 0.5rem;
+        padding: 0.3rem 0.55rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
     }
 
     html[data-theme='dark'] .account-body { background: #131111; }

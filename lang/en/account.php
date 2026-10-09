@@ -489,4 +489,7 @@ return [
     'toggle_sidebar' => 'Collapse or expand sidebar',
     'subscription_type' => 'Type',
     'subscription_sources' => ['whmcs' => 'Hosting service', 'email' => 'Business email', 'hosting' => 'Web hosting', 'vps' => 'VPS'],
+    'domain_term' => 'Term',
+    'activity_event' => 'Event',
+    'activity_by' => 'By',
 ];

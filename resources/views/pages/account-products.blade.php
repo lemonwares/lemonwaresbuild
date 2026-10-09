@@ -39,7 +39,7 @@
                             <p class="account-list-meta">{{ $product['meta'] }}</p>
                         </div>
                         <div class="account-list-side">
-                            <span class="account-pill is-muted">{{ $product['status'] }}</span>
+                            <x-account.status :value="$product['status']" />
                             <span class="account-metric-cta">{{ __('account.manage') }} →</span>
                         </div>
                     </a>

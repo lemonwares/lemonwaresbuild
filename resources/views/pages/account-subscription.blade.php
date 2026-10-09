@@ -34,7 +34,7 @@
             <dl class="account-dl mt-5">
                 <div>
                     <dt>{{ __('account.status_label') }}</dt>
-                    <dd><span class="account-pill is-muted">{{ $service->status ?: '—' }}</span></dd>
+                    <dd><x-account.status :value="$service->status ?: '—'" /></dd>
                 </div>
                 <div>
                     <dt>{{ __('account.stat_domain') }}</dt>
@@ -117,7 +117,7 @@
                                 </p>
                             </div>
                             <div class="account-list-side">
-                                <span class="account-pill is-muted">{{ $invoice['status'] ?: '—' }}</span>
+                                <x-account.status :value="$invoice['status'] ?: '—'" />
                                 <span class="account-metric-cta">{{ __('account.view') }} →</span>
                             </div>
                         </a>

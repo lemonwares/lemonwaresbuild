@@ -28,7 +28,7 @@
             <dl class="account-dl">
                 <div>
                     <dt>{{ __('account.status_label') }}</dt>
-                    <dd><span class="account-pill is-muted">{{ $domain->status }}</span></dd>
+                    <dd><x-account.status :value="$domain->status" /></dd>
                 </div>
                 <div>
                     <dt>{{ __('account.domain_registered_on') }}</dt>

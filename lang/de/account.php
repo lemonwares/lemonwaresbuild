@@ -483,4 +483,7 @@ return [
     'toggle_sidebar' => 'Seitenleiste ein- oder ausklappen',
     'subscription_type' => 'Typ',
     'subscription_sources' => ['whmcs' => 'Hosting-Dienst', 'email' => 'Geschäfts-E-Mail', 'hosting' => 'Webhosting', 'vps' => 'VPS'],
+    'domain_term' => 'Laufzeit',
+    'activity_event' => 'Ereignis',
+    'activity_by' => 'Von',
 ];

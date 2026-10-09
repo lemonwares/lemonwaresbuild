@@ -33,7 +33,7 @@
             <dl class="account-dl mt-5">
                 <div>
                     <dt>{{ __('account.status_label') }}</dt>
-                    <dd><span class="account-pill is-muted">{{ $invoice['status'] ?? '—' }}</span></dd>
+                    <dd><x-account.status :value="$invoice['status'] ?? '—'" /></dd>
                 </div>
                 <div>
                     <dt>{{ __('account.date') }}</dt>

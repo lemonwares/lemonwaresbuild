@@ -483,4 +483,7 @@ return [
     'toggle_sidebar' => 'Réduire ou agrandir la barre latérale',
     'subscription_type' => 'Type',
     'subscription_sources' => ['whmcs' => 'Service d’hébergement', 'email' => 'E-mail professionnel', 'hosting' => 'Hébergement web', 'vps' => 'VPS'],
+    'domain_term' => 'Durée',
+    'activity_event' => 'Événement',
+    'activity_by' => 'Par',
 ];
