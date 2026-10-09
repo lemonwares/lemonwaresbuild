@@ -7754,43 +7754,6 @@
             opacity: 0.7;
         }
     }
-
-    /* —— WHMCS Console tabs —— */
-    .admin-whmcs-console-tabs {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-
-    .admin-whmcs-console-tab {
-        display: inline-flex;
-        align-items: center;
-        min-height: 2.5rem;
-        padding: 0.4rem 0.9rem;
-        border-radius: 999px;
-        border: 1px solid var(--color-border);
-        background: #fff;
-        color: color-mix(in srgb, var(--color-on-blush) 70%, transparent);
-        font-size: 0.8125rem;
-        font-weight: 600;
-        text-decoration: none;
-        transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
-    }
-
-    .admin-whmcs-console-tab:hover {
-        border-color: color-mix(in srgb, var(--color-rose) 35%, var(--color-border));
-        color: var(--color-rose);
-    }
-
-    .admin-whmcs-console-tab.is-active {
-        border-color: var(--color-rose);
-        background: color-mix(in srgb, var(--color-rose) 10%, #fff);
-        color: var(--color-rose);
-    }
-
-    .admin-whmcs-console-tab.is-settings {
-        margin-left: auto;
-    }
 }
 
 /* Admin UX pass: status labels, dashboard sales row, collapsible phone menu, nav groups. */

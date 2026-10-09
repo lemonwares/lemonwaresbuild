@@ -50,7 +50,7 @@
         [
             'label' => 'Integrations',
             'items' => [
-                ['label' => 'WHMCS Console', 'route' => 'admin.whmcs-console.index', 'match' => 'admin.whmcs-console.*', 'icon' => 'boxes', 'permission' => 'whmcs'],
+                ['label' => 'WHMCS Console', 'route' => 'filament.console.pages.dashboard', 'match' => 'filament.console.*', 'icon' => 'boxes', 'permission' => 'whmcs'],
                 ['label' => 'WHMCS Settings', 'route' => 'admin.whmcs-settings.index', 'match' => 'admin.whmcs-settings.*', 'icon' => 'wrench', 'permission' => 'whmcs'],
                 ['label' => 'Flutterwave Settings', 'route' => 'admin.flutterwave-settings.index', 'match' => 'admin.flutterwave-settings.*', 'icon' => 'zap', 'permission' => 'flutterwave'],
                 ['label' => 'ZeptoMail Settings', 'route' => 'admin.zeptomail-settings.index', 'match' => 'admin.zeptomail-settings.*', 'icon' => 'send', 'permission' => 'zeptomail'],
