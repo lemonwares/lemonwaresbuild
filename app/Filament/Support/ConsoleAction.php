@@ -7,6 +7,7 @@ use App\Support\Whmcs\Whmcs;
 use App\Support\Whmcs\WhmcsResult;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 class ConsoleAction
@@ -29,6 +30,16 @@ class ConsoleAction
     public static function make(string $name, string $level = 'edit'): Action
     {
         return Action::make($name)->visible(fn (): bool => self::can($level));
+    }
+
+    /**
+     * Reloads a mirrored record after a write; the post-write sync may have removed it.
+     */
+    public static function reload(Model $record): void
+    {
+        if ($record->newQuery()->whereKey($record->getKey())->exists()) {
+            $record->refresh();
+        }
     }
 
     /**

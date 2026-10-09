@@ -26,6 +26,23 @@ class ConsoleOptions
     }
 
     /**
+     * @return array<int, string> department id => name
+     */
+    public static function departments(): array
+    {
+        return self::cached('console.whmcs.departments', function (): array {
+            $options = [];
+            foreach (Whmcs::call('GetSupportDepartments', ['ignore_dept_assignments' => true])->rows('departments.department') as $dept) {
+                if (! empty($dept['id'])) {
+                    $options[(int) $dept['id']] = (string) ($dept['name'] ?? "Department {$dept['id']}");
+                }
+            }
+
+            return $options;
+        });
+    }
+
+    /**
      * @return array<int, string> WHMCS client id => label
      */
     public static function searchClients(string $search): array

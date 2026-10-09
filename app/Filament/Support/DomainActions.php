@@ -37,7 +37,7 @@ class DomainActions
      */
     public static function all(): array
     {
-        $reload = fn (WhmcsDomain $record) => $record->refresh();
+        $reload = fn (WhmcsDomain $record) => ConsoleAction::reload($record);
         $id = fn (WhmcsDomain $record): array => ['domainid' => $record->whmcs_domain_id];
         $live = fn (WhmcsDomain $record): bool => in_array($record->status, ['Active', 'Grace', 'Redemption', 'Expired'], true);
 

@@ -26,7 +26,7 @@ class InvoiceActions
      */
     public static function all(): array
     {
-        $reload = fn (WhmcsInvoice $record) => $record->refresh();
+        $reload = fn (WhmcsInvoice $record) => ConsoleAction::reload($record);
         $open = fn (WhmcsInvoice $record): bool => in_array($record->status, self::OPEN, true);
 
         return [

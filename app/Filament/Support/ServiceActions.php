@@ -35,7 +35,7 @@ class ServiceActions
      */
     public static function all(): array
     {
-        $reload = fn (WhmcsService $record) => $record->refresh();
+        $reload = fn (WhmcsService $record) => ConsoleAction::reload($record);
 
         return [
             ConsoleAction::make('provision')
