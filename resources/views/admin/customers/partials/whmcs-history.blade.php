@@ -5,6 +5,12 @@
 @endphp
 
 <section class="admin-panel admin-panel-flush admin-panel-span" id="whmcs-history" aria-label="WHMCS history">
+    @error('whmcs')
+        <p class="m-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ $message }}</p>
+    @enderror
+    @if ($errors->any() && ! $errors->has('whmcs'))
+        <p class="m-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ $errors->first() }}</p>
+    @endif
     <div class="admin-panel-toolbar">
         <div>
             <h2 class="admin-dash-panel-title">WHMCS history</h2>
@@ -48,6 +54,7 @@
                         @default
                             <th>Service</th><th>Domain / username</th><th>Server</th><th>Cycle</th><th>Amount</th><th>Next due</th><th>Status</th>
                     @endswitch
+                    <th></th>
                 </tr>
             </thead>
             <tbody>
@@ -95,9 +102,10 @@
                                 <td>{{ $date($row->next_due_date) }}</td>
                         @endswitch
                         <td><x-admin.status :value="strtolower(str_replace(' ', '_', (string) $row->status))" :label="$row->status ?: 'Unknown'" /></td>
+                        <td>@include('admin.customers.partials.whmcs-row-actions', ['tab' => $history['tab'], 'row' => $row, 'gateways' => $history['gateways']])</td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="admin-table-empty">No {{ strtolower($labels[$history['tab']]) }} in WHMCS for this customer.</td></tr>
+                    <tr><td colspan="8" class="admin-table-empty">No {{ strtolower($labels[$history['tab']]) }} in WHMCS for this customer.</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -107,3 +115,24 @@
         <div class="admin-pagination">{{ $history['rows']->fragment('whmcs-history')->links() }}</div>
     @endif
 </section>
+
+@once
+    @push('scripts')
+        <script>
+            document.addEventListener('toggle', (event) => {
+                const panel = event.target;
+                if (!(panel instanceof HTMLDetailsElement) || !panel.open || !panel.dataset.nsUrl || panel.dataset.nsLoaded) {
+                    return;
+                }
+                panel.dataset.nsLoaded = '1';
+                fetch(panel.dataset.nsUrl, { headers: { Accept: 'application/json' } })
+                    .then((response) => response.ok ? response.json() : {})
+                    .then((values) => Object.entries(values).forEach(([name, value]) => {
+                        const input = panel.querySelector(`input[name="${name}"]`);
+                        if (input && value && !input.value) input.value = value;
+                    }))
+                    .catch(() => {});
+            }, true);
+        </script>
+    @endpush
+@endonce

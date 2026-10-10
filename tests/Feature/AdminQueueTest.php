@@ -68,6 +68,30 @@ class AdminQueueTest extends TestCase
         Http::assertSent(fn ($r) => $r['action'] === 'ModuleCreate' && (int) $r['serviceid'] === 41);
     }
 
+    public function test_customer_page_tabs_offer_and_run_row_actions(): void
+    {
+        $service = WhmcsService::query()->create(['whmcs_customer_id' => $this->client->id, 'whmcs_service_id' => 51, 'whmcs_client_id' => 9, 'status' => 'Active', 'product_name' => 'Pro Hosting']);
+        $domain = WhmcsDomain::query()->create(['whmcs_domain_id' => 61, 'whmcs_client_id' => 9, 'domain' => 'live-site.com', 'status' => 'Active']);
+        $invoice = WhmcsInvoice::query()->create(['whmcs_invoice_id' => 71, 'whmcs_client_id' => 9, 'status' => 'Unpaid', 'total' => 5000]);
+        $page = route('admin.customers.legacy.show', $this->client);
+
+        $this->get($page)->assertOk()->assertSee('Control panel')->assertSee('Suspend')->assertSee('Terminate');
+        $this->get($page.'?wtab=domains')->assertOk()->assertSee('Renew')->assertSee('Nameservers')->assertSee('EPP code');
+        $this->get($page.'?wtab=invoices')->assertOk()->assertSee('Record payment')->assertSee('Remind');
+
+        $this->from($page)->post(route('admin.queue.services.suspend', $service), ['reason' => 'Overdue'])->assertRedirect($page);
+        Http::assertSent(fn ($r) => $r['action'] === 'ModuleSuspend' && (int) $r['serviceid'] === 51 && $r['suspendreason'] === 'Overdue');
+
+        $this->from($page)->post(route('admin.queue.domains.renew', $domain), ['years' => 2])->assertRedirect($page);
+        Http::assertSent(fn ($r) => $r['action'] === 'DomainRenew' && (int) $r['regperiod'] === 2);
+
+        $this->from($page)->put(route('admin.queue.domains.nameservers.update', $domain), ['ns1' => 'ns1.host.ng', 'ns2' => 'ns2.host.ng'])->assertRedirect($page);
+        Http::assertSent(fn ($r) => $r['action'] === 'DomainUpdateNameservers' && $r['ns1'] === 'ns1.host.ng' && ! isset($r['ns3']));
+
+        $this->from($page)->post(route('admin.queue.invoices.reminder', $invoice))->assertRedirect($page);
+        Http::assertSent(fn ($r) => $r['action'] === 'SendEmail' && $r['messagename'] === 'Invoice Payment Reminder' && (int) $r['id'] === 71);
+    }
+
     public function test_actions_refuse_records_that_are_no_longer_pending(): void
     {
         $service = WhmcsService::query()->create(['whmcs_customer_id' => $this->client->id, 'whmcs_service_id' => 42, 'whmcs_client_id' => 9, 'status' => 'Active']);

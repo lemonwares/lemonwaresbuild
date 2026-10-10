@@ -1267,6 +1267,16 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::post('/queue/invoices/{invoice}/payment', [\App\Http\Controllers\AdminQueueController::class, 'addPayment'])->name('queue.invoices.payment');
         Route::post('/queue/domains/{domain}/send', [\App\Http\Controllers\AdminQueueController::class, 'sendDomain'])->name('queue.domains.send');
         Route::post('/queue/services/{service}/provision', [\App\Http\Controllers\AdminQueueController::class, 'provisionService'])->name('queue.services.provision');
+        Route::post('/queue/services/{service}/suspend', [\App\Http\Controllers\AdminQueueController::class, 'suspendService'])->name('queue.services.suspend');
+        Route::post('/queue/services/{service}/unsuspend', [\App\Http\Controllers\AdminQueueController::class, 'unsuspendService'])->name('queue.services.unsuspend');
+        Route::post('/queue/services/{service}/terminate', [\App\Http\Controllers\AdminQueueController::class, 'terminateService'])->name('queue.services.terminate');
+        Route::post('/queue/services/{service}/cpanel', [\App\Http\Controllers\AdminQueueController::class, 'cpanelLogin'])->name('queue.services.cpanel');
+        Route::post('/queue/domains/{domain}/renew', [\App\Http\Controllers\AdminQueueController::class, 'renewDomain'])->name('queue.domains.renew');
+        Route::get('/queue/domains/{domain}/nameservers', [\App\Http\Controllers\AdminQueueController::class, 'currentNameservers'])->name('queue.domains.nameservers');
+        Route::put('/queue/domains/{domain}/nameservers', [\App\Http\Controllers\AdminQueueController::class, 'updateNameservers'])->name('queue.domains.nameservers.update');
+        Route::post('/queue/domains/{domain}/epp', [\App\Http\Controllers\AdminQueueController::class, 'eppCode'])->name('queue.domains.epp');
+        Route::post('/queue/invoices/{invoice}/reminder', [\App\Http\Controllers\AdminQueueController::class, 'invoiceReminder'])->name('queue.invoices.reminder');
+        Route::post('/queue/invoices/{invoice}/cancel', [\App\Http\Controllers\AdminQueueController::class, 'cancelInvoice'])->name('queue.invoices.cancel');
         Route::get('/orders', [\App\Http\Controllers\AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/domain-orders', [\App\Http\Controllers\AdminDomainOrderController::class, 'index'])->name('domain-orders.index');
         Route::get('/domain-orders/{domainOrder}', [\App\Http\Controllers\AdminDomainOrderController::class, 'show'])->name('domain-orders.show');
