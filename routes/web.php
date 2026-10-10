@@ -332,6 +332,7 @@ Route::middleware('auth')->group(function (): void {
         Route::get('/account/products', [AccountProductController::class, 'index'])->name('account.products.index');
         Route::get('/account/domains', [AccountDomainController::class, 'index'])->name('account.domains.index');
         Route::get('/account/domains/whmcs/{domainId}', [AccountDomainController::class, 'whmcs'])
+            ->middleware('whmcs.client-area:domain,domainId')
             ->whereNumber('domainId')
             ->name('account.domains.whmcs');
         Route::middleware('throttle:account-domains')->whereNumber('domainId')->group(function (): void {
@@ -341,14 +342,15 @@ Route::middleware('auth')->group(function (): void {
             Route::post('/account/domains/whmcs/{domainId}/epp', [AccountDomainController::class, 'requestEpp'])->middleware('throttle:account-domain-epp')->name('account.domains.epp');
         });
         Route::get('/account/domains/{order}', [AccountDomainController::class, 'show'])->name('account.domains.show');
-        Route::get('/account/support', [AccountSupportController::class, 'index'])->name('account.support.index');
-        Route::get('/account/support/new', [AccountSupportController::class, 'create'])->name('account.support.create');
+        Route::get('/account/support', [AccountSupportController::class, 'index'])->middleware('whmcs.client-area:tickets')->name('account.support.index');
+        Route::get('/account/support/new', [AccountSupportController::class, 'create'])->middleware('whmcs.client-area:new-ticket')->name('account.support.create');
         Route::post('/account/support', [AccountSupportController::class, 'store'])->middleware('throttle:account-support')->name('account.support.store');
         Route::get('/account/support/{ticket}', [AccountSupportController::class, 'show'])->name('account.support.show');
         Route::post('/account/support/{ticket}/reply', [AccountSupportController::class, 'reply'])->middleware('throttle:account-support')->name('account.support.reply');
         Route::post('/account/support/{ticket}/close', [AccountSupportController::class, 'close'])->name('account.support.close');
-        Route::get('/account/subscriptions', [AccountSubscriptionController::class, 'index'])->name('account.subscriptions.index');
+        Route::get('/account/subscriptions', [AccountSubscriptionController::class, 'index'])->middleware('whmcs.client-area:services')->name('account.subscriptions.index');
         Route::get('/account/subscriptions/{service}', [AccountSubscriptionController::class, 'show'])
+            ->middleware('whmcs.client-area:service,service')
             ->name('account.subscriptions.show');
         // Legacy /manage URL (older links) → in-app subscription detail.
         Route::get('/account/subscriptions/{service}/manage', [AccountSubscriptionController::class, 'manage'])
@@ -358,12 +360,12 @@ Route::middleware('auth')->group(function (): void {
         Route::post('/account/subscriptions/{service}/cancel', [AccountSubscriptionController::class, 'cancel'])
             ->middleware('throttle:5,1,account.subscriptions.cancel')
             ->name('account.subscriptions.cancel');
-        Route::get('/account/invoices', [AccountInvoiceController::class, 'index'])->name('account.invoices.index');
+        Route::get('/account/invoices', [AccountInvoiceController::class, 'index'])->middleware('whmcs.client-area:invoices')->name('account.invoices.index');
         Route::middleware('throttle:account-invoice-pay')->group(function (): void {
             Route::post('/account/invoices/{invoice}/pay', [AccountInvoiceController::class, 'pay'])->whereNumber('invoice')->name('account.invoices.pay');
             Route::get('/account/invoices/payment/callback', [AccountInvoiceController::class, 'callback'])->name('account.invoices.callback');
         });
-        Route::get('/account/invoices/{invoice}', [AccountInvoiceController::class, 'show'])->name('account.invoices.show');
+        Route::get('/account/invoices/{invoice}', [AccountInvoiceController::class, 'show'])->middleware('whmcs.client-area:invoice,invoice')->name('account.invoices.show');
         Route::get('/account/activity', [AccountActivityController::class, 'index'])->name('account.activity.index');
         Route::get('/account/profile', [AccountController::class, 'profile'])->name('account.profile');
         Route::put('/account/profile', [AccountController::class, 'updateProfile'])->name('account.profile.update');

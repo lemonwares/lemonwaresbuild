@@ -44,8 +44,10 @@ return [
     ],
 
     'whmcs' => [
-        'base_url' => rtrim(env('WHMCS_BASE_URL', 'https://billing.lemonwares.com'), '/'),
-        'client_login_url' => env('WHMCS_CLIENT_LOGIN_URL', 'https://billing.lemonwares.com/clientarea.php'),
+        'base_url' => rtrim(env('WHMCS_BASE_URL', 'https://my.lemonwares.com'), '/'),
+        'client_login_url' => env('WHMCS_CLIENT_LOGIN_URL', 'https://my.lemonwares.com/clientarea.php'),
+        // Send WHMCS-linked customers to the themed WHMCS client area for services, invoices and tickets.
+        'client_area_redirect' => (bool) env('WHMCS_CLIENT_AREA_REDIRECT', true),
         'order_route' => env('WHMCS_ORDER_ROUTE', '/cart.php'),
         'api_identifier' => env('WHMCS_API_IDENTIFIER', ''),
         'api_secret' => env('WHMCS_API_SECRET', ''),
