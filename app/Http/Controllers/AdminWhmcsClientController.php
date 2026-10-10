@@ -47,10 +47,17 @@ class AdminWhmcsClientController extends Controller
 
     public function signIn(WhmcsCustomer $legacyCustomer): RedirectResponse
     {
-        $result = Whmcs::call('CreateSsoToken', [
-            'client_id' => (int) $legacyCustomer->whmcs_client_id,
-            'destination' => 'clientarea:homepage',
-        ], AdminPermissions::currentUser());
+        $clientId = (int) $legacyCustomer->whmcs_client_id;
+
+        // No destination = WHMCS client area homepage; custom redirect is the fallback some installs need.
+        $result = Whmcs::call('CreateSsoToken', ['client_id' => $clientId], AdminPermissions::currentUser());
+        if (! $result->ok || ! $result->get('redirect_url')) {
+            $result = Whmcs::call('CreateSsoToken', [
+                'client_id' => $clientId,
+                'destination' => 'sso:custom_redirect',
+                'sso_redirect_path' => 'clientarea.php',
+            ], AdminPermissions::currentUser());
+        }
 
         $url = (string) $result->get('redirect_url', '');
 
