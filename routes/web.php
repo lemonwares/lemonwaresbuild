@@ -1261,6 +1261,12 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::post('/legacy-customers/{legacyCustomer}/invite', [\App\Http\Controllers\AdminWhmcsClientController::class, 'invite'])->name('customers.legacy.invite');
         Route::get('/reports', [\App\Http\Controllers\AdminReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export', [\App\Http\Controllers\AdminReportController::class, 'export'])->name('reports.export');
+        Route::get('/queue', [\App\Http\Controllers\AdminQueueController::class, 'index'])->name('queue.index');
+        Route::post('/queue/orders/{order}/accept', [\App\Http\Controllers\AdminQueueController::class, 'acceptOrder'])->name('queue.orders.accept');
+        Route::post('/queue/orders/{order}/cancel', [\App\Http\Controllers\AdminQueueController::class, 'cancelOrder'])->name('queue.orders.cancel');
+        Route::post('/queue/invoices/{invoice}/payment', [\App\Http\Controllers\AdminQueueController::class, 'addPayment'])->name('queue.invoices.payment');
+        Route::post('/queue/domains/{domain}/send', [\App\Http\Controllers\AdminQueueController::class, 'sendDomain'])->name('queue.domains.send');
+        Route::post('/queue/services/{service}/provision', [\App\Http\Controllers\AdminQueueController::class, 'provisionService'])->name('queue.services.provision');
         Route::get('/orders', [\App\Http\Controllers\AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/domain-orders', [\App\Http\Controllers\AdminDomainOrderController::class, 'index'])->name('domain-orders.index');
         Route::get('/domain-orders/{domainOrder}', [\App\Http\Controllers\AdminDomainOrderController::class, 'show'])->name('domain-orders.show');

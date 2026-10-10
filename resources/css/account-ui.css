@@ -976,4 +976,42 @@
     .account-body table td {
         white-space: nowrap;
     }
+
+    .admin-nav-badge {
+        margin-left: auto;
+        min-width: 1.35rem;
+        border-radius: 999px;
+        background: var(--color-rose);
+        padding: 0.05rem 0.4rem;
+        text-align: center;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .admin-nav-link-active .admin-nav-badge {
+        background: #fff;
+        color: var(--color-rose);
+    }
+
+    html.admin-sidebar-collapsed .admin-nav-badge {
+        display: none;
+    }
+
+    .admin-queue-pay summary {
+        list-style: none;
+        cursor: pointer;
+    }
+
+    .admin-queue-pay[open] .admin-queue-pay-form {
+        display: grid;
+    }
+
+    .admin-queue-pay-form {
+        display: none;
+        grid-template-columns: repeat(2, minmax(8rem, 1fr));
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+        min-width: 22rem;
+    }
 }
