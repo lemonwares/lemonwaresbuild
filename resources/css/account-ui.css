@@ -968,4 +968,12 @@
         border-color: #2e2828;
         background: #1c1818;
     }
+
+    /* Tables scroll sideways inside their wrappers instead of wrapping cell text. */
+    .admin-body table th,
+    .admin-body table td,
+    .account-body table th,
+    .account-body table td {
+        white-space: nowrap;
+    }
 }

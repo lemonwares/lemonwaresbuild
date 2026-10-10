@@ -36,6 +36,28 @@ class WhmcsCustomer extends Model
         ];
     }
 
+    /**
+     * WHMCS sometimes holds placeholder names ("Name Placeholder"); fall back to company, then the email.
+     */
+    public static function cleanName(?string $name, ?string $company = null, ?string $email = null): string
+    {
+        $name = trim((string) $name);
+        if ($name !== '' && ! str_contains(strtolower($name), 'placeholder')) {
+            return $name;
+        }
+        if (filled($company)) {
+            return trim((string) $company);
+        }
+        $local = (string) strstr((string) $email, '@', true);
+
+        return $local !== '' ? ucwords(str_replace(['.', '_', '-'], ' ', $local)) : 'Unnamed customer';
+    }
+
+    public function displayName(): string
+    {
+        return self::cleanName($this->full_name, $this->company, $this->email);
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

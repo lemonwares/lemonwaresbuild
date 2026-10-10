@@ -186,13 +186,13 @@
                 <span class="admin-metric-meta">On this account</span>
             </div>
             <div class="admin-metric is-static">
-                <span class="admin-metric-label">Hosting</span>
-                <span class="admin-metric-value">{{ $hostingLeads->count() }}</span>
-                <span class="admin-metric-meta">VPS / shared leads</span>
+                <span class="admin-metric-label">Unpaid invoices</span>
+                <span class="admin-metric-value">{{ $history['unpaidCount'] }}</span>
+                <span class="admin-metric-meta">{{ number_format($history['unpaidTotal'], 2) }} outstanding</span>
             </div>
             <div class="admin-metric is-static">
                 <span class="admin-metric-label">WHMCS services</span>
-                <span class="admin-metric-value">{{ array_sum($whmcsServiceSummary) }}</span>
+                <span class="admin-metric-value">{{ $history['counts']['services'] }}</span>
                 <span class="admin-metric-meta">{{ $customer->whmcsCustomer ? 'Client #'.$customer->whmcsCustomer->whmcs_client_id : 'Not linked' }}</span>
             </div>
             <div class="admin-metric is-static">
@@ -275,57 +275,7 @@
             </section>
         </div>
 
-        <section class="admin-panel admin-panel-flush">
-            <div class="admin-panel-toolbar">
-                <div>
-                    <h2 class="admin-dash-panel-title">WHMCS services</h2>
-                    <p class="admin-dash-panel-lede">Legacy services linked to this customer email.</p>
-                </div>
-                <form method="GET" action="{{ route('admin.customers.show', $customer) }}" class="admin-filter-search">
-                    <select name="service_status" class="admin-input admin-input-sm">
-                        @foreach (['all', 'active', 'pending', 'suspended', 'terminated', 'cancelled'] as $statusOption)
-                            <option value="{{ $statusOption }}" @selected($serviceStatus === $statusOption)>{{ ucfirst($statusOption) }}</option>
-                        @endforeach
-                    </select>
-                    <button type="submit" class="admin-btn-ghost">Filter</button>
-                </form>
-            </div>
-
-            <div class="admin-pill-row admin-panel-pad">
-                @foreach (['active', 'pending', 'suspended', 'cancelled', 'terminated', 'unknown'] as $statusKey)
-                    <span class="admin-pill">{{ ucfirst($statusKey) }}: {{ (int) ($whmcsServiceSummary[$statusKey] ?? 0) }}</span>
-                @endforeach
-            </div>
-
-            <div class="admin-table-wrap is-full">
-                <table class="admin-table is-full">
-                    <thead>
-                        <tr>
-                            <th>Product</th>
-                            <th>Domain / user</th>
-                            <th>Cycle</th>
-                            <th>Next due</th>
-                            <th>Status</th>
-                            <th>ID</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($whmcsServices as $service)
-                            <tr>
-                                <td><strong>{{ $service->product_name ?: 'Service #'.$service->whmcs_service_id }}</strong></td>
-                                <td>{{ $service->domain ?: ($service->username ?: '—') }}</td>
-                                <td>{{ $service->billing_cycle ?: '—' }}</td>
-                                <td>{{ $service->next_due_date?->format('d M Y') ?: '—' }}</td>
-                                <td><span class="admin-mini-status">{{ $service->status ?: 'unknown' }}</span></td>
-                                <td>{{ $service->whmcs_service_id }}</td>
-                            </tr>
-                        @empty
-                            <tr><td colspan="6" class="admin-table-empty">No WHMCS services linked yet.</td></tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </section>
+        @include('admin.customers.partials.whmcs-history')
 
         <div class="admin-customer-grid">
             <section class="admin-panel">

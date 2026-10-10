@@ -164,15 +164,17 @@ class AdminCrmTest extends TestCase
             'password' => 'password',
         ])->assertRedirect(route('admin.dashboard'));
 
-        $this->get(route('admin.customers.index', ['source' => 'native']))
+        $this->get(route('admin.customers.index', ['q' => 'Amara']))
             ->assertOk()
-            ->assertSee('Native', false)
+            ->assertSee('All customers', false)
+            ->assertSee('Amara Okonkwo', false)
+            ->assertSee('#5001', false);
+
+        $this->get(route('admin.customers.index', ['source' => 'whmcs', 'q' => '5001']))
+            ->assertOk()
             ->assertSee('Amara Okonkwo', false);
 
-        $this->get(route('admin.customers.index', ['source' => 'legacy']))
-            ->assertOk()
-            ->assertSee('Legacy WHMCS', false)
-            ->assertSee('Legacy Amara', false);
+        $this->get(route('admin.customers.index', ['source' => 'legacy']))->assertOk()->assertSee('WHMCS clients', false);
     }
 
     public function test_admin_can_run_whmcs_sync_from_customers_page(): void
@@ -220,7 +222,7 @@ class AdminCrmTest extends TestCase
         ])->assertRedirect(route('admin.dashboard'));
 
         $this->post(route('admin.customers.sync-whmcs'))
-            ->assertRedirect(route('admin.customers.index', ['source' => 'legacy']));
+            ->assertRedirect(route('admin.customers.index', ['source' => 'whmcs']));
 
         $this->assertDatabaseHas('whmcs_customers', [
             'whmcs_client_id' => 7001,
