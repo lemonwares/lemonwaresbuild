@@ -1255,6 +1255,10 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::put('/customers/{customer}', [AdminCustomerController::class, 'update'])->name('customers.update');
         Route::delete('/customers/{customer}', [AdminCustomerController::class, 'destroy'])->name('customers.destroy');
         Route::get('/legacy-customers/{legacyCustomer}', [AdminCustomerController::class, 'showLegacy'])->name('customers.legacy.show');
+        Route::post('/legacy-customers/{legacyCustomer}/password-reset', [\App\Http\Controllers\AdminWhmcsClientController::class, 'sendPasswordReset'])->middleware('throttle:10,1')->name('customers.legacy.password-reset');
+        Route::post('/legacy-customers/{legacyCustomer}/status', [\App\Http\Controllers\AdminWhmcsClientController::class, 'setStatus'])->name('customers.legacy.status');
+        Route::post('/legacy-customers/{legacyCustomer}/sign-in', [\App\Http\Controllers\AdminWhmcsClientController::class, 'signIn'])->name('customers.legacy.sign-in');
+        Route::post('/legacy-customers/{legacyCustomer}/invite', [\App\Http\Controllers\AdminWhmcsClientController::class, 'invite'])->name('customers.legacy.invite');
         Route::get('/reports', [\App\Http\Controllers\AdminReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export', [\App\Http\Controllers\AdminReportController::class, 'export'])->name('reports.export');
         Route::get('/orders', [\App\Http\Controllers\AdminOrderController::class, 'index'])->name('orders.index');

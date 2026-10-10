@@ -48,7 +48,45 @@
             </div>
         </section>
 
+        @php
+            $isActive = strtolower((string) $legacyCustomer->status) === 'active';
+        @endphp
         <div class="admin-customer-grid">
+            <section class="admin-panel">
+                <div class="admin-panel-toolbar compact">
+                    <div>
+                        <h2 class="admin-dash-panel-title">Account access</h2>
+                        <p class="admin-dash-panel-lede">This customer only exists in WHMCS. These actions run in WHMCS.</p>
+                    </div>
+                </div>
+
+                @error('whmcs')
+                    <p class="mb-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">{{ $message }}</p>
+                @enderror
+
+                <div class="flex flex-wrap gap-2">
+                    @unless ($legacyCustomer->user)
+                        <form method="POST" action="{{ route('admin.customers.legacy.invite', $legacyCustomer) }}" onsubmit="return confirm('Create a LemonWares site account for {{ e($legacyCustomer->email) }} and email them a set-password link?')">
+                            @csrf
+                            <button type="submit" class="admin-btn-primary">Invite to site account</button>
+                        </form>
+                    @endunless
+                    <form method="POST" action="{{ route('admin.customers.legacy.sign-in', $legacyCustomer) }}" target="_blank">
+                        @csrf
+                        <button type="submit" class="admin-btn-ghost">Log in as client (WHMCS)</button>
+                    </form>
+                    <form method="POST" action="{{ route('admin.customers.legacy.password-reset', $legacyCustomer) }}" onsubmit="return confirm('Email a WHMCS password reset link to {{ e($legacyCustomer->email) }}?')">
+                        @csrf
+                        <button type="submit" class="admin-btn-ghost">Send password reset</button>
+                    </form>
+                    <form method="POST" action="{{ route('admin.customers.legacy.status', $legacyCustomer) }}" onsubmit="return confirm('{{ $isActive ? 'Deactivate this client in WHMCS? Their status becomes Closed and they cannot log in. Services are not cancelled.' : 'Reactivate this client in WHMCS?' }}')">
+                        @csrf
+                        <input type="hidden" name="status" value="{{ $isActive ? 'Closed' : 'Active' }}">
+                        <button type="submit" class="{{ $isActive ? 'admin-btn-danger' : 'admin-btn-ghost' }}">{{ $isActive ? 'Deactivate' : 'Reactivate' }}</button>
+                    </form>
+                </div>
+            </section>
+
             <section class="admin-panel">
                 <div class="admin-panel-toolbar compact">
                     <h2 class="admin-dash-panel-title">Profile</h2>
