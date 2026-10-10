@@ -8,6 +8,7 @@ use App\Support\Whmcs\Whmcs;
 use App\Support\WhmcsCheckout;
 use App\Support\WhmcsClient;
 use App\Support\WhmcsSyncService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -114,6 +115,12 @@ class AccountSubscriptionController extends Controller
         abort_unless($this->ownsService($owner->id, $service), 404);
 
         $clientId = (int) ($owner->whmcsCustomer?->whmcs_client_id ?? $service->whmcs_client_id ?? 0);
+
+        if ($owner->whmcsCustomer && $clientId > 0 && Cache::add('whmcs-view-sync:'.$clientId, true, 60)) {
+            WhmcsSyncService::syncServicesForCustomer($owner->whmcsCustomer);
+            $service->refresh();
+        }
+
         $serviceId = (int) $service->whmcs_service_id;
         $status = strtolower(trim((string) $service->status));
         $isActive = in_array($status, ['active', 'pending'], true);

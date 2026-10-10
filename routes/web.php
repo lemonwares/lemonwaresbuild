@@ -653,6 +653,9 @@ Route::get('/hosting/payment/flutterwave/callback', function (Request $request) 
 })->name('hosting.flutterwave.callback');
 
 Route::post('/webhooks/flutterwave', FlutterwaveWebhookController::class)->name('webhooks.flutterwave');
+Route::post('/webhooks/whmcs', \App\Http\Controllers\WhmcsWebhookController::class)
+    ->middleware('throttle:120,1')
+    ->name('webhooks.whmcs');
 
 Route::post('/hosting/request/received/{lead}/pay', function (HostingLead $lead) {
     abort_unless(($lead->checkout_provider === 'internal' || $lead->payment_provider === 'flutterwave'), 404);

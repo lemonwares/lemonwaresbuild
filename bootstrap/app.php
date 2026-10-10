@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->validateCsrfTokens(except: [
             'webhooks/flutterwave',
+            'webhooks/whmcs',
         ]);
         $middleware->redirectGuestsTo('/login');
         $middleware->redirectUsersTo('/account');

@@ -51,6 +51,8 @@ return [
         'api_secret' => env('WHMCS_API_SECRET', ''),
         'api_access_key' => env('WHMCS_API_ACCESS_KEY', ''),
         'payment_method' => env('WHMCS_PAYMENT_METHOD', 'banktransfer'),
+        // Shared secret for change notifications sent by the WHMCS hook (whmcs-hooks/lemonwares_sync.php).
+        'webhook_secret' => env('WHMCS_WEBHOOK_SECRET', ''),
         // null = auto (enabled on local only). true/false to force.
         'defer_payment_redirect' => env('WHMCS_DEFER_PAYMENT'),
     ],
