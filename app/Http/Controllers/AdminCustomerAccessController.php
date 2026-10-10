@@ -211,12 +211,12 @@ class AdminCustomerAccessController extends Controller
             ->withCount('emailOrders')
             ->when($search !== '', function ($q) use ($search) {
                 $q->where(function ($inner) use ($search) {
-                    $inner->where('name', 'like', '%'.$search.'%')
-                        ->orWhere('email', 'like', '%'.$search.'%')
-                        ->orWhere('company', 'like', '%'.$search.'%');
+                    $inner->whereLike('name', '%'.$search.'%')
+                        ->orWhereLike('email', '%'.$search.'%')
+                        ->orWhereLike('company', '%'.$search.'%');
                 });
             })
-            ->when($tag !== '', fn ($q) => $q->where('admin_tags', 'like', '%"'.strtolower($tag).'"%'))
+            ->when($tag !== '', fn ($q) => $q->whereLike('admin_tags', '%"'.strtolower($tag).'"%'))
             ->orderBy('id');
 
         $filename = 'lemonwares-customers-'.now()->format('Y-m-d').'.csv';

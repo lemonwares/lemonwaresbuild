@@ -150,7 +150,7 @@ class SiteSettings
         try {
             return Cache::rememberForever(self::CACHE_KEY, function () {
                 return IntegrationSetting::query()
-                    ->where('key', 'like', self::PREFIX.'%')
+                    ->whereLike('key', self::PREFIX.'%')
                     ->pluck('value', 'key')
                     ->mapWithKeys(fn ($value, $key) => [substr((string) $key, strlen(self::PREFIX)) => (string) IntegrationSetting::decode((string) $value)])
                     ->filter(fn ($value) => $value !== '')

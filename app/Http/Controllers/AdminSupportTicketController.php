@@ -30,10 +30,10 @@ class AdminSupportTicketController extends Controller
             ->when($assigned === 'me', fn ($q) => $q->where('assigned_admin_id', (int) $request->session()->get('admin_user_id')))
             ->when($assigned === 'none', fn ($q) => $q->whereNull('assigned_admin_id'))
             ->when($search !== '', fn ($q) => $q->where(fn ($inner) => $inner
-                ->where('reference', 'like', '%'.$search.'%')
-                ->orWhere('subject', 'like', '%'.$search.'%')
-                ->orWhere('email', 'like', '%'.$search.'%')
-                ->orWhere('full_name', 'like', '%'.$search.'%')))
+                ->whereLike('reference', '%'.$search.'%')
+                ->orWhereLike('subject', '%'.$search.'%')
+                ->orWhereLike('email', '%'.$search.'%')
+                ->orWhereLike('full_name', '%'.$search.'%')))
             ->latest()
             ->paginate(30)
             ->withQueryString();

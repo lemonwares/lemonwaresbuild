@@ -39,10 +39,10 @@ class AdminHostingLeadController extends Controller
             ->with('assignedAdmin')
             ->when($search !== '', function (Builder $q) use ($search) {
                 $q->where(function (Builder $inner) use ($search) {
-                    $inner->where('full_name', 'like', '%'.$search.'%')
-                        ->orWhere('email', 'like', '%'.$search.'%')
-                        ->orWhere('hostname', 'like', '%'.$search.'%')
-                        ->orWhere('payment_reference', 'like', '%'.$search.'%');
+                    $inner->whereLike('full_name', '%'.$search.'%')
+                        ->orWhereLike('email', '%'.$search.'%')
+                        ->orWhereLike('hostname', '%'.$search.'%')
+                        ->orWhereLike('payment_reference', '%'.$search.'%');
                 });
             })
             ->when(in_array($status, self::STATUSES, true), fn (Builder $q) => $q->where('status', $status))

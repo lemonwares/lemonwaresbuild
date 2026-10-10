@@ -63,12 +63,12 @@ class AdminCustomerController extends Controller
             ->when($source === 'site', fn ($q) => $q->whereNotNull('user_id'))
             ->when($search !== '', function ($q) use ($search) {
                 $like = '%'.$search.'%';
-                $q->where(fn ($inner) => $inner->where('name', 'like', $like)
-                    ->orWhere('email', 'like', $like)
-                    ->orWhere('company', 'like', $like)
+                $q->where(fn ($inner) => $inner->whereLike('name', $like)
+                    ->orWhereLike('email', $like)
+                    ->orWhereLike('company', $like)
                     ->when(ctype_digit(ltrim($search, '#')), fn ($q) => $q->orWhere('whmcs_client_id', (int) ltrim($search, '#'))));
             })
-            ->when($tag !== '', fn ($q) => $q->whereIn('user_id', User::query()->where('admin_tags', 'like', '%"'.$tag.'"%')->select('id')))
+            ->when($tag !== '', fn ($q) => $q->whereIn('user_id', User::query()->whereLike('admin_tags', '%"'.$tag.'"%')->select('id')))
             ->orderByDesc('joined_at')
             ->paginate(25)
             ->withQueryString();

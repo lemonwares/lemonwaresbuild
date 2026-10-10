@@ -23,9 +23,9 @@ class AdminAuditLogController extends Controller
             ->when($kind === 'failed', fn (Builder $q) => $q->where(fn (Builder $inner) => $inner->where('action', 'login_failed')->orWhere('status_code', '>=', 400)))
             ->when($search !== '', function (Builder $q) use ($search) {
                 $q->where(function (Builder $inner) use ($search) {
-                    $inner->where('action', 'like', '%'.$search.'%')
-                        ->orWhere('url', 'like', '%'.$search.'%')
-                        ->orWhere('admin_email', 'like', '%'.$search.'%')
+                    $inner->whereLike('action', '%'.$search.'%')
+                        ->orWhereLike('url', '%'.$search.'%')
+                        ->orWhereLike('admin_email', '%'.$search.'%')
                         ->orWhere('subject_id', $search);
                 });
             })

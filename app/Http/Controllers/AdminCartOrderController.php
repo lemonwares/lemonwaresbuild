@@ -27,9 +27,9 @@ class AdminCartOrderController extends Controller
 
         if ($search !== '') {
             $query->where(function (Builder $q) use ($search) {
-                $q->where('payment_reference', 'like', '%'.$search.'%')
-                    ->orWhereHas('items', fn (Builder $i) => $i->where('label', 'like', '%'.$search.'%'))
-                    ->orWhereHas('user', fn (Builder $u) => $u->where('email', 'like', '%'.$search.'%')->orWhere('name', 'like', '%'.$search.'%'));
+                $q->whereLike('payment_reference', '%'.$search.'%')
+                    ->orWhereHas('items', fn (Builder $i) => $i->whereLike('label', '%'.$search.'%'))
+                    ->orWhereHas('user', fn (Builder $u) => $u->whereLike('email', '%'.$search.'%')->orWhereLike('name', '%'.$search.'%'));
             });
         }
         if (in_array($status, self::STATUSES, true)) {

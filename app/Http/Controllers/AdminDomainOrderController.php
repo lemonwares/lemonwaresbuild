@@ -30,9 +30,9 @@ class AdminDomainOrderController extends Controller
 
         if ($search !== '') {
             $query->where(function (Builder $q) use ($search) {
-                $q->where('domain', 'like', '%'.$search.'%')
-                    ->orWhere('payment_reference', 'like', '%'.$search.'%')
-                    ->orWhereHas('user', fn (Builder $u) => $u->where('email', 'like', '%'.$search.'%')->orWhere('name', 'like', '%'.$search.'%'));
+                $q->whereLike('domain', '%'.$search.'%')
+                    ->orWhereLike('payment_reference', '%'.$search.'%')
+                    ->orWhereHas('user', fn (Builder $u) => $u->whereLike('email', '%'.$search.'%')->orWhereLike('name', '%'.$search.'%'));
             });
         }
         if (in_array($status, self::STATUSES, true)) {

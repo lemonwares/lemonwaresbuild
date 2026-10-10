@@ -48,9 +48,9 @@ class ConsoleOptions
     public static function searchClients(string $search): array
     {
         return WhmcsCustomer::query()
-            ->where(fn ($q) => $q->where('full_name', 'like', "%{$search}%")
-                ->orWhere('email', 'like', "%{$search}%")
-                ->orWhere('company', 'like', "%{$search}%"))
+            ->where(fn ($q) => $q->whereLike('full_name', "%{$search}%")
+                ->orWhereLike('email', "%{$search}%")
+                ->orWhereLike('company', "%{$search}%"))
             ->limit(25)
             ->get()
             ->mapWithKeys(fn (WhmcsCustomer $c) => [$c->whmcs_client_id => "{$c->full_name} ({$c->email})"])
