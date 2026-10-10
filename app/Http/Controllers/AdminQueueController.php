@@ -171,17 +171,17 @@ class AdminQueueController extends Controller
         return $this->run('UpdateInvoice', ['invoiceid' => $invoice->whmcs_invoice_id, 'status' => 'Cancelled'], 'Invoice #'.($invoice->invoice_num ?: $invoice->whmcs_invoice_id).' cancelled.');
     }
 
-    private function requireFull(): void
+    protected function requireFull(): void
     {
         abort_unless(AdminPermissions::currentCan('orders', 'full'), 403, 'Your access does not include this action.');
     }
 
-    private function back(): RedirectResponse
+    protected function back(): RedirectResponse
     {
         return redirect()->to(url()->previous(route('admin.queue.index')));
     }
 
-    private function run(string $action, array $params, string $success): RedirectResponse
+    protected function run(string $action, array $params, string $success): RedirectResponse
     {
         $result = Whmcs::call($action, $params, AdminPermissions::currentUser());
 

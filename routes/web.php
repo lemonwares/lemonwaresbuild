@@ -1277,6 +1277,18 @@ Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::post('/queue/domains/{domain}/epp', [\App\Http\Controllers\AdminQueueController::class, 'eppCode'])->name('queue.domains.epp');
         Route::post('/queue/invoices/{invoice}/reminder', [\App\Http\Controllers\AdminQueueController::class, 'invoiceReminder'])->name('queue.invoices.reminder');
         Route::post('/queue/invoices/{invoice}/cancel', [\App\Http\Controllers\AdminQueueController::class, 'cancelInvoice'])->name('queue.invoices.cancel');
+        Route::post('/queue/invoices/{invoice}/apply-credit', [\App\Http\Controllers\AdminWhmcsToolsController::class, 'applyCredit'])->name('queue.invoices.apply-credit');
+        Route::post('/queue/invoices/{invoice}/refund', [\App\Http\Controllers\AdminWhmcsToolsController::class, 'refundInvoice'])->name('queue.invoices.refund');
+        Route::post('/queue/clients/{customer}/invoice', [\App\Http\Controllers\AdminWhmcsToolsController::class, 'createInvoice'])->name('queue.clients.invoice');
+        Route::post('/queue/clients/{customer}/order', [\App\Http\Controllers\AdminWhmcsToolsController::class, 'createOrder'])->name('queue.clients.order');
+        Route::post('/queue/clients/{customer}/credit', [\App\Http\Controllers\AdminWhmcsToolsController::class, 'adjustCredit'])->name('queue.clients.credit');
+        Route::post('/queue/services/{service}/package', [\App\Http\Controllers\AdminWhmcsToolsController::class, 'changePackage'])->name('queue.services.package');
+        Route::get('/queue/domains/{domain}/details', [\App\Http\Controllers\AdminWhmcsToolsController::class, 'domainDetails'])->name('queue.domains.details');
+        Route::post('/queue/domains/{domain}/lock', [\App\Http\Controllers\AdminWhmcsToolsController::class, 'domainLock'])->name('queue.domains.lock');
+        Route::put('/queue/domains/{domain}/contacts', [\App\Http\Controllers\AdminWhmcsToolsController::class, 'updateDomainContacts'])->name('queue.domains.contacts');
+        Route::get('/queue/tickets/{ticket}', [\App\Http\Controllers\AdminWhmcsToolsController::class, 'showTicket'])->name('queue.tickets.show');
+        Route::post('/queue/tickets/{ticket}/reply', [\App\Http\Controllers\AdminWhmcsToolsController::class, 'replyTicket'])->name('queue.tickets.reply');
+        Route::post('/queue/tickets/{ticket}/status', [\App\Http\Controllers\AdminWhmcsToolsController::class, 'updateTicketStatus'])->name('queue.tickets.status');
         Route::get('/orders', [\App\Http\Controllers\AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/domain-orders', [\App\Http\Controllers\AdminDomainOrderController::class, 'index'])->name('domain-orders.index');
         Route::get('/domain-orders/{domainOrder}', [\App\Http\Controllers\AdminDomainOrderController::class, 'show'])->name('domain-orders.show');

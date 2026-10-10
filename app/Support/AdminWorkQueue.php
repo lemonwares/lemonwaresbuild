@@ -10,6 +10,7 @@ use App\Models\WhmcsDomain;
 use App\Models\WhmcsInvoice;
 use App\Models\WhmcsOrder;
 use App\Models\WhmcsService;
+use App\Models\WhmcsTicket;
 use Illuminate\Support\Collection;
 
 /**
@@ -18,6 +19,8 @@ use Illuminate\Support\Collection;
 class AdminWorkQueue
 {
     public const DOMAIN_PENDING = ['Pending', 'Pending Registration', 'Pending Transfer'];
+
+    public const TICKETS_WAITING = ['Open', 'Customer-Reply'];
 
     public const PAYMENT_PROBLEMS = ['amount_mismatch', 'received_after_cancel', 'unverified'];
 
@@ -45,9 +48,12 @@ class AdminWorkQueue
         $emails = EmailOrder::query()->with('user')->where('status', 'awaiting_manual_fulfilment')->latest()->limit($limit)->get()
             ->filter(fn (EmailOrder $order) => $order->isPaid())->values();
 
+        $tickets = WhmcsTicket::query()->whereIn('status', self::TICKETS_WAITING)->latest('last_reply_at')->limit($limit)->get();
+
         $clientIds = $orders->pluck('whmcs_client_id')
             ->merge($domains->pluck('whmcs_client_id'))
             ->merge($services->pluck('whmcs_client_id'))
+            ->merge($tickets->pluck('whmcs_client_id'))
             ->filter()->unique();
 
         return [
@@ -58,6 +64,7 @@ class AdminWorkQueue
             'handoff' => $handoff,
             'carts' => $carts,
             'emails' => $emails,
+            'tickets' => $tickets,
             'clients' => WhmcsCustomer::query()->whereIn('whmcs_client_id', $clientIds)->get()->keyBy('whmcs_client_id'),
         ];
     }
@@ -67,6 +74,7 @@ class AdminWorkQueue
         return WhmcsOrder::query()->where('status', 'Pending')->count()
             + WhmcsDomain::query()->whereIn('status', self::DOMAIN_PENDING)->count()
             + WhmcsService::query()->where('status', 'Pending')->count()
+            + WhmcsTicket::query()->whereIn('status', self::TICKETS_WAITING)->count()
             + DomainOrder::query()->where('status', '!=', 'cancelled')
                 ->where(fn ($q) => $q->where('payment_status', 'successful')->where(fn ($s) => $s->whereNull('whmcs_sync_status')->orWhere('whmcs_sync_status', '!=', 'payment_synced'))
                     ->orWhereIn('payment_status', self::PAYMENT_PROBLEMS))->count()

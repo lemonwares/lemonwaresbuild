@@ -32,6 +32,21 @@
                     <button type="submit" class="admin-btn-primary">Unsuspend</button>
                 </form>
             @endif
+            @if (in_array($row->status, ['Active', 'Suspended'], true) && ($products ?? []) !== [])
+                <details class="admin-queue-pay">
+                    <summary class="admin-btn-ghost">Change package</summary>
+                    <form method="POST" action="{{ route('admin.queue.services.package', $row) }}" class="admin-queue-pay-form" onsubmit="{{ $confirm('Move this service to the new package? The server account is changed straight away.') }}">
+                        @csrf
+                        <select name="pid" class="admin-input" required aria-label="New package" style="grid-column: 1 / -1">
+                            @foreach ($products as $pid => $name)
+                                <option value="{{ $pid }}" @disabled($pid === (int) $row->whmcs_product_id)>{{ $name }}{{ $pid === (int) $row->whmcs_product_id ? ' (current)' : '' }}</option>
+                            @endforeach
+                        </select>
+                        <input name="recurringamount" type="number" step="0.01" min="0" class="admin-input" placeholder="New renewal price (optional)" aria-label="New renewal price" style="grid-column: 1 / -1">
+                        <button type="submit" class="admin-btn-primary" style="grid-column: 1 / -1">Change package</button>
+                    </form>
+                </details>
+            @endif
             @if ($canFull && ! in_array($row->status, ['Terminated', 'Cancelled', 'Pending'], true))
                 <form method="POST" action="{{ route('admin.queue.services.terminate', $row) }}" onsubmit="{{ $confirm('Terminate this service? The account is removed from the server and this cannot be undone.') }}">
                     @csrf
@@ -72,6 +87,26 @@
                         <button type="submit" class="admin-btn-primary">Save</button>
                     </form>
                 </details>
+                <details class="admin-queue-pay" data-details-url="{{ route('admin.queue.domains.details', $row) }}">
+                    <summary class="admin-btn-ghost">Lock &amp; contacts</summary>
+                    <div class="admin-queue-pay-form">
+                        <p class="admin-mini-status" data-lock-state style="grid-column: 1 / -1">Loading registrar details…</p>
+                        <form method="POST" action="{{ route('admin.queue.domains.lock', $row) }}" style="display: contents">
+                            @csrf
+                            <button type="submit" name="lock" value="1" class="admin-btn-ghost">Lock</button>
+                            <button type="submit" name="lock" value="0" class="admin-btn-ghost" onclick="{{ $confirm('Unlock this domain? It can then be transferred away.') }}">Unlock</button>
+                        </form>
+                    </div>
+                    <form method="POST" action="{{ route('admin.queue.domains.contacts', $row) }}" class="admin-queue-pay-form">
+                        @csrf
+                        @method('PUT')
+                        @foreach (\App\Http\Controllers\AdminWhmcsToolsController::CONTACT_FIELDS as $key => $label)
+                            <input name="contact[{{ $key }}]" type="{{ $key === 'Email' ? 'email' : 'text' }}" class="admin-input" placeholder="{{ $label }}" aria-label="{{ $label }}" @required(in_array($key, ['First_Name', 'Last_Name', 'Email', 'Country'], true)) @if ($key === 'Country') maxlength="2" @endif>
+                        @endforeach
+                        <label class="admin-mini-status" style="grid-column: 1 / -1"><input type="checkbox" name="all_contacts" value="1" checked> Use for admin, tech and billing contacts too</label>
+                        <button type="submit" class="admin-btn-primary" style="grid-column: 1 / -1">Save contacts</button>
+                    </form>
+                </details>
                 @if ($canFull)
                     <form method="POST" action="{{ route('admin.queue.domains.epp', $row) }}" onsubmit="{{ $confirm('Request the EPP (transfer) code? Only share it with the verified domain owner.') }}">
                         @csrf
@@ -100,6 +135,14 @@
                         <button type="submit" class="admin-btn-primary" style="grid-column: 1 / -1">Save payment</button>
                     </form>
                 </details>
+                <details class="admin-queue-pay">
+                    <summary class="admin-btn-ghost">Apply credit</summary>
+                    <form method="POST" action="{{ route('admin.queue.invoices.apply-credit', $row) }}" class="admin-queue-pay-form">
+                        @csrf
+                        <input name="amount" type="number" step="0.01" min="0.01" value="{{ $row->total }}" class="admin-input" required aria-label="Amount">
+                        <button type="submit" class="admin-btn-primary">Apply</button>
+                    </form>
+                </details>
                 <form method="POST" action="{{ route('admin.queue.invoices.reminder', $row) }}" onsubmit="{{ $confirm('Email a payment reminder for this invoice?') }}">
                     @csrf
                     <button type="submit" class="admin-btn-ghost">Remind</button>
@@ -111,6 +154,25 @@
                     </form>
                 @endif
             @endif
+            @if ($row->status === 'Paid' && $canFull)
+                <details class="admin-queue-pay">
+                    <summary class="admin-btn-ghost">Refund</summary>
+                    <form method="POST" action="{{ route('admin.queue.invoices.refund', $row) }}" class="admin-queue-pay-form" onsubmit="{{ $confirm('Record this refund in WHMCS?') }}">
+                        @csrf
+                        <input name="amount" type="number" step="0.01" min="0.01" max="{{ $row->total }}" value="{{ $row->total }}" class="admin-input" required aria-label="Amount">
+                        <select name="method" class="admin-input" aria-label="Refund to">
+                            <option value="gateway">Sent back to the client (bank / gateway)</option>
+                            <option value="credit">Add to client credit balance</option>
+                        </select>
+                        <input name="transid" type="text" placeholder="Refund reference (for bank / gateway)" class="admin-input" aria-label="Refund reference" style="grid-column: 1 / -1">
+                        <button type="submit" class="admin-btn-danger" style="grid-column: 1 / -1">Record refund</button>
+                    </form>
+                </details>
+            @endif
+            @break
+
+        @case('tickets')
+            <a href="{{ route('admin.queue.tickets.show', $row) }}" class="admin-btn-primary">{{ in_array($row->status, ['Open', 'Customer-Reply'], true) ? 'Reply' : 'Open' }}</a>
             @break
 
         @case('orders')

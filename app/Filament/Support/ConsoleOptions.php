@@ -26,6 +26,24 @@ class ConsoleOptions
     }
 
     /**
+     * @return array<int, string> WHMCS product id => "Group: Name"
+     */
+    public static function products(): array
+    {
+        return self::cached('console.whmcs.products', function (): array {
+            $options = [];
+            foreach (Whmcs::call('GetProducts')->rows('products.product') as $product) {
+                if (! empty($product['pid'])) {
+                    $group = trim((string) ($product['groupname'] ?? ''));
+                    $options[(int) $product['pid']] = ($group !== '' ? $group.': ' : '').(string) ($product['name'] ?? 'Product '.$product['pid']);
+                }
+            }
+
+            return $options;
+        });
+    }
+
+    /**
      * @return array<int, string> department id => name
      */
     public static function departments(): array

@@ -15,7 +15,7 @@
 
             return $link['href'] ? '<a href="'.e($link['href']).'">'.e($link['label']).'</a>' : e($link['label']);
         };
-        $total = $orders->count() + $domains->count() + $services->count() + $handoff->count() + $carts->count() + $emails->count();
+        $total = $orders->count() + $domains->count() + $services->count() + $handoff->count() + $carts->count() + $emails->count() + $tickets->count();
     @endphp
 
     <x-admin.page-header
@@ -253,6 +253,37 @@
                                     <td>{{ $email->plan_name ?: ($email->plan_key ?: '—') }}</td>
                                     <td>{{ $date($email->created_at) }}</td>
                                     <td><a href="{{ route('admin.email-orders.show', $email) }}" class="admin-btn-primary">Fulfil</a></td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        @endif
+
+        @if ($tickets->isNotEmpty())
+            <section class="admin-panel admin-panel-flush">
+                <div class="admin-panel-toolbar">
+                    <div>
+                        <h2 class="admin-dash-panel-title">Tickets waiting for a reply</h2>
+                        <p class="admin-dash-panel-lede">Open WHMCS tickets and tickets where the client replied last.</p>
+                    </div>
+                </div>
+                <div class="admin-table-wrap is-full">
+                    <table class="admin-table is-full">
+                        <thead>
+                            <tr><th>Ticket</th><th>Subject</th><th>Customer</th><th>Department</th><th>Last reply</th><th>Status</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($tickets as $ticket)
+                                <tr>
+                                    <td><strong>#{{ $ticket->tid ?: $ticket->whmcs_ticket_id }}</strong></td>
+                                    <td>{{ $ticket->subject ?: '—' }}</td>
+                                    <td>{!! $customer($ticket->whmcs_client_id) !!}</td>
+                                    <td>{{ $ticket->department ?: '—' }}</td>
+                                    <td>{{ $date($ticket->last_reply_at) }}</td>
+                                    <td><x-admin.status :value="$ticket->status" /></td>
+                                    <td><a href="{{ route('admin.queue.tickets.show', $ticket) }}" class="admin-btn-primary">Reply</a></td>
                                 </tr>
                             @endforeach
                         </tbody>

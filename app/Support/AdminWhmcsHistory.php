@@ -53,7 +53,9 @@ class AdminWhmcsHistory
             'rows' => $rows,
             'unpaidCount' => $unpaid ? (clone $unpaid)->count() : 0,
             'unpaidTotal' => $unpaid ? (float) (clone $unpaid)->sum('total') : 0.0,
-            'gateways' => $tab === 'invoices' && $clientId > 0 ? \App\Filament\Support\ConsoleOptions::gateways() : [],
+            'gateways' => $clientId > 0 ? \App\Filament\Support\ConsoleOptions::gateways() : [],
+            'products' => $clientId > 0 ? \App\Filament\Support\ConsoleOptions::products() : [],
+            'customer' => $clientId > 0 ? \App\Models\WhmcsCustomer::query()->where('whmcs_client_id', $clientId)->first() : null,
             'activeServices' => $clientId > 0
                 ? WhmcsService::query()->where('whmcs_client_id', $clientId)->where('status', 'Active')->count()
                 : 0,

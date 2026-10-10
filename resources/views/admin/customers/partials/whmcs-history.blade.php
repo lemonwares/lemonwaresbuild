@@ -34,6 +34,10 @@
         </div>
     </div>
 
+    @if ($history['customer'])
+        @include('admin.customers.partials.whmcs-billing-tools', ['customer' => $history['customer'], 'gateways' => $history['gateways'], 'products' => $history['products']])
+    @endif
+
     <div class="admin-table-wrap is-full">
         <table class="admin-table is-full">
             <thead>
@@ -102,7 +106,7 @@
                                 <td>{{ $date($row->next_due_date) }}</td>
                         @endswitch
                         <td><x-admin.status :value="strtolower(str_replace(' ', '_', (string) $row->status))" :label="$row->status ?: 'Unknown'" /></td>
-                        <td>@include('admin.customers.partials.whmcs-row-actions', ['tab' => $history['tab'], 'row' => $row, 'gateways' => $history['gateways']])</td>
+                        <td>@include('admin.customers.partials.whmcs-row-actions', ['tab' => $history['tab'], 'row' => $row, 'gateways' => $history['gateways'], 'products' => $history['products']])</td>
                     </tr>
                 @empty
                     <tr><td colspan="8" class="admin-table-empty">No {{ strtolower($labels[$history['tab']]) }} in WHMCS for this customer.</td></tr>
@@ -132,6 +136,25 @@
                         if (input && value && !input.value) input.value = value;
                     }))
                     .catch(() => {});
+            }, true);
+            document.addEventListener('toggle', (event) => {
+                const panel = event.target;
+                if (!(panel instanceof HTMLDetailsElement) || !panel.open || !panel.dataset.detailsUrl || panel.dataset.detailsLoaded) {
+                    return;
+                }
+                panel.dataset.detailsLoaded = '1';
+                const state = panel.querySelector('[data-lock-state]');
+                fetch(panel.dataset.detailsUrl, { headers: { Accept: 'application/json' } })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (state) state.textContent = data.lock ? `Registrar lock: ${data.lock}` : 'Registrar lock status not available.';
+                        if (data.error && state) state.textContent += ` Contacts: ${data.error}`;
+                        Object.entries(data.contact || {}).forEach(([name, value]) => {
+                            const input = panel.querySelector(`input[name="contact[${name}]"]`);
+                            if (input && value && !input.value) input.value = value;
+                        });
+                    })
+                    .catch(() => { if (state) state.textContent = 'Could not reach the registrar.'; });
             }, true);
         </script>
     @endpush
