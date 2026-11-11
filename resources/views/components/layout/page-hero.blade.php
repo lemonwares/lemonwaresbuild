@@ -41,13 +41,13 @@
             ])>
                 <div class="hero-copy relative z-10 max-w-xl">
                     <p @class([
-                        'mb-4 text-base font-medium uppercase tracking-[0.18em]',
+                        'mb-4 text-base font-medium uppercase tracking-wide',
                         'text-white/80' => ! $darkInk,
                         'text-black' => $darkInk,
                     ])>
                         {{ $eyebrow ?? config('site.tagline') }}
                     </p>
-                    <h1 class="mb-4 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
+                    <h1 class="mb-4 text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
                         {{ $title }}
                     </h1>
                     @if ($lede)

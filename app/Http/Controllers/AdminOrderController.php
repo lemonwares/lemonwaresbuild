@@ -107,13 +107,13 @@ class AdminOrderController extends Controller
 
         return $query->where(function (Builder $q) use ($search, $columns, $relationColumn) {
             foreach ($columns as $column) {
-                $q->orWhere($column, 'like', '%'.$search.'%');
+                $q->orWhereLike($column, '%'.$search.'%');
             }
             if ($relationColumn) {
                 [$relation, $column] = explode('.', $relationColumn, 2);
-                $q->orWhereHas($relation, fn (Builder $r) => $r->where($column, 'like', '%'.$search.'%'));
+                $q->orWhereHas($relation, fn (Builder $r) => $r->whereLike($column, '%'.$search.'%'));
             }
-            $q->orWhereHas('user', fn (Builder $u) => $u->where('email', 'like', '%'.$search.'%')->orWhere('name', 'like', '%'.$search.'%'));
+            $q->orWhereHas('user', fn (Builder $u) => $u->whereLike('email', '%'.$search.'%')->orWhereLike('name', '%'.$search.'%'));
         });
     }
 

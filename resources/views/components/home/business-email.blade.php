@@ -15,30 +15,6 @@
                 {{ __('site.home.email_lede') }}
             </p>
 
-            <x-ui.accordion>
-                <x-ui.accordion-item
-                    :title="__('site.home.email_lw_title')"
-                    logo="images/brands/mailemon-logo.png"
-                    :default-open="true"
-                >
-                    {{ __('site.home.email_lw') }}
-                </x-ui.accordion-item>
-
-                <x-ui.accordion-item
-                    :title="__('site.home.email_m365_title')"
-                    logo="images/brands/microsoft-365.svg"
-                >
-                    {{ __('site.home.email_m365') }}
-                </x-ui.accordion-item>
-
-                <x-ui.accordion-item
-                    :title="__('site.home.email_google_title')"
-                    logo="images/brands/google-workspace.svg"
-                >
-                    {{ __('site.home.email_google') }}
-                </x-ui.accordion-item>
-            </x-ui.accordion>
-
             <div class="mt-8 flex flex-wrap items-center gap-4">
                 <x-ui.button href="{{ route('email.plans') }}">
                     <x-ui.icons.arrow-up-right class="size-4" />

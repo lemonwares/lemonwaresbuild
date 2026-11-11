@@ -1,0 +1,251 @@
+/*
+ * LemonWares brand layer for the WHMCS Nexus theme and the Premium Comparison / Standard Cart order forms.
+ * Colours and font match lemonwares.com (resources/css/app.css in the site repo).
+ * Nexus reads its whole palette from these variables; the rules further down only cover order-form
+ * styles that ship with hard-coded colours.
+ */
+
+:root {
+    --white: #fff;
+
+    --neutral-50: #f6f6f8;
+    --neutral-100: #f2f2f4;
+    --neutral-200: #e2e6ea;
+    --neutral-300: #d1d1d1;
+    --neutral-400: #9a9292;
+    --neutral-500: #6b6b6b;
+    --neutral-600: #484f56;
+    --neutral-700: #3a3a3a;
+    --neutral-800: #222222;
+    --neutral-900: #111111;
+    --neutral-950: #050505;
+
+    --primary-50: #fff6f6;
+    --primary-100: #ffeded;
+    --primary-200: #f0c9c9;
+    --primary-300: #e6a19e;
+    --primary-400: #d96a64;
+    --primary-500: #cf3d36;
+    --primary-600: #c51a13;
+    --primary-700: #a5150f;
+    --primary-800: #84120d;
+    --primary-900: #5e0e0a;
+    --primary-950: #3d0805;
+
+    --primary: var(--primary-600);
+    --primary-lifted: var(--primary-700);
+    --primary-accented: var(--primary-800);
+
+    --secondary: var(--neutral-600);
+    --secondary-lifted: var(--neutral-700);
+    --secondary-accented: var(--neutral-800);
+
+    --success: #00a63e;
+    --success-lifted: #008236;
+    --success-accented: #016630;
+
+    --info: var(--neutral-600);
+    --info-lifted: var(--neutral-700);
+    --info-accented: var(--neutral-800);
+
+    --notice: #7f22fe;
+    --notice-lifted: #7008e7;
+    --notice-accented: #5d0ec0;
+
+    --warning: #f54a00;
+    --warning-lifted: #ca3500;
+    --warning-accented: #9f2d00;
+
+    --error: #dc2626;
+    --error-lifted: #b91c1c;
+    --error-accented: #991b1b;
+
+    --grayscale: var(--neutral-900);
+    --grayscale-lifted: var(--neutral-800);
+    --grayscale-accented: var(--neutral-700);
+
+    --neutral: var(--neutral-500);
+    --neutral-lifted: var(--neutral-600);
+    --neutral-accented: var(--neutral-700);
+
+    --text-inverted: var(--white);
+    --text-muted: var(--neutral-400);
+    --text-lifted: var(--neutral-500);
+    --text-accented: var(--neutral-700);
+    --text: var(--neutral-900);
+
+    --border-muted: var(--neutral-200);
+    --border: var(--neutral-200);
+    --border-lifted: var(--neutral-300);
+    --border-accented: var(--neutral-600);
+
+    --bg: var(--white);
+    --bg-muted: var(--neutral-50);
+    --bg-lifted: var(--neutral-50);
+    --bg-accented: var(--primary-100);
+    --bg-inverted: var(--neutral-900);
+
+    --yellow-200: #fff085;
+    --yellow-300: #ffdf20;
+    --teal-300: #46edd5;
+    --teal-400: #00d5be;
+    --emerald-300: #5ee9b5;
+    --pink-400: #fb64b6;
+
+    --text-xs: 0.625rem;
+    --text-sm: 0.75rem;
+    --text-md: 0.875rem;
+    --text-lg: 1rem;
+
+    --outline-sm: 1px;
+    --outline-md: 2px;
+    --outline-lg: 3px;
+
+    --rounding-sm: 0.375rem;
+    --rounding-md: 0.625rem;
+    --rounding-lg: 0.875rem;
+
+    --letter-spacing: -0.005em;
+    --disabled-opacity: 25%;
+
+    --lw-font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+body,
+button,
+input,
+select,
+textarea,
+.btn,
+.form-control,
+.tooltip,
+.popover {
+    font-family: var(--lw-font);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--lw-font);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+::selection {
+    background: var(--primary-200);
+}
+
+.btn-primary,
+.btn-primary:disabled,
+.btn-primary.disabled {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:not(:disabled):not(.disabled):active {
+    background: var(--primary-lifted);
+    border-color: var(--primary-lifted);
+    color: #fff;
+}
+
+.btn-primary:focus {
+    box-shadow: 0 0 0 0.2rem rgba(197, 26, 19, 0.25);
+}
+
+/* Premium Comparison order form (ships with blue gradients) */
+body #order-premium_comparison .price-table-container .price-table .top-head,
+body #order-premium_comparison .price-table-container .price-table .top-head .top-area {
+    background: var(--neutral-900);
+    background-image: none;
+    filter: none;
+    border-color: var(--neutral-800);
+}
+
+body #order-premium_comparison .price-table-container .price-table .top-head .top-area p {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+body #order-premium_comparison .price-table-container .price-table .top-head .price-area {
+    background: var(--primary-600);
+    background-image: none;
+    color: #fff;
+    filter: none;
+    border-color: var(--primary-700);
+}
+
+body #order-premium_comparison .price-table-container .order-button,
+body #order-premium_comparison .price-table-container .order-button:hover {
+    background: #fff;
+    background-image: none;
+    filter: none;
+    border: 0;
+    border-radius: 999px;
+    color: var(--primary-600);
+    font-weight: 700;
+}
+
+body #order-premium_comparison .price-table-container .order-button:hover {
+    background: var(--primary-100);
+}
+
+body #order-premium_comparison .price-table-container .order-button.unavailable:hover {
+    background: var(--neutral-600);
+    background-image: none;
+}
+
+body #order-premium_comparison .price-table-container .price-table ul li a {
+    color: var(--primary-600);
+}
+
+body #order-premium_comparison .price-table-container .price-table .popular-plan {
+    background: var(--primary-800);
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
+
+body #order-premium_comparison .price-table-container .price-table .top-head .price-area .price {
+    color: #fff;
+}
+
+body #order-premium_comparison .price-table-container .price-table {
+    border-radius: var(--rounding-lg);
+    overflow: hidden;
+}
+
+/* Standard Cart (domain search, configure, view cart, checkout) */
+body #order-standard_cart .btn-checkout,
+body #order-standard_cart .btn-order-now,
+body #order-standard_cart .btn-primary {
+    background: var(--primary-600);
+    border-color: var(--primary-600);
+    color: #fff;
+}
+
+body #order-standard_cart .btn-checkout:hover,
+body #order-standard_cart .btn-order-now:hover,
+body #order-standard_cart .btn-primary:hover {
+    background: var(--primary-700);
+    border-color: var(--primary-700);
+}
+
+body #order-standard_cart .order-summary {
+    background: var(--neutral-900);
+    border-color: var(--neutral-900);
+    border-radius: var(--rounding-lg);
+    overflow: hidden;
+}
+
+body #order-standard_cart .order-summary h2 {
+    color: #fff;
+}
+
+body #order-standard_cart .order-summary .total-due-today .amt,
+body #order-standard_cart .products .product div.product-pricing span.price {
+    color: var(--primary-600);
+}
+
+body #order-standard_cart .view-cart-items-header {
+    background: var(--neutral-600);
+}

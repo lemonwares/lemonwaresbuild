@@ -1,11 +1,12 @@
 @php
-    $directionsHref = 'https://www.google.com/maps/search/?api=1&query=' . urlencode(config('site.address'));
+    $directionsHref = config('site.directions_url') ?: 'https://www.google.com/maps/dir/?api=1&destination='.rawurlencode(config('site.address'));
+    $reviews = \App\Support\GoogleReviews::get();
 
     $businessLinks = [
         ['label' => __('site.nav.about'), 'href' => route('about')],
         ['label' => __('site.nav.team'), 'href' => route('team')],
         ['label' => __('site.nav.careers'), 'href' => route('careers')],
-        ['label' => __('site.footer.hosting_plans'), 'href' => route('domain')],
+        ['label' => __('site.footer.hosting_plans'), 'href' => route('home').'#hosting-plans'],
         ['label' => __('site.nav.email'), 'href' => route('email.plans')],
         ['label' => __('site.common.contact_us'), 'href' => route('contact')],
         ['label' => __('site.footer.case_studies'), 'href' => route('case-studies')],
@@ -42,6 +43,7 @@
 
                 <div class="flex items-center gap-3">
                     @foreach (config('site.social') as $social)
+                        @continue(blank($social['href']))
                         <a
                             href="{{ $social['href'] }}"
                             target="_blank"
@@ -190,7 +192,7 @@
                             </svg>
                             <div>
                                 <p class="text-sm font-semibold text-on-blush">{{ __('site.footer.verified_reviews') }}</p>
-                                <p class="text-xs text-on-blush/60">{{ __('site.footer.google_rating') }}</p>
+                                <p class="text-xs text-on-blush/60">{{ __('site.footer.google_rating', ['rating' => number_format($reviews['rating'], 1), 'count' => $reviews['total']]) }}</p>
                             </div>
                         </div>
                     </div>

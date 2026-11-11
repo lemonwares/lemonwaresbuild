@@ -5,7 +5,7 @@
     data-hosting-amount-usd="{{ number_format((float) ($hostingAmountUsd ?? $orderTotalUsd ?? 0), 2, '.', '') }}"
     data-requires-domain="{{ ($requiresDomain ?? false) ? '1' : '0' }}"
 >
-    <p class="text-xs font-semibold uppercase tracking-widest text-on-blush/60">{{ __('hosting.order_summary_title') }}</p>
+    <p class="text-xs font-semibold uppercase tracking-wide text-on-blush/60">{{ __('hosting.order_summary_title') }}</p>
 
     <div class="mt-4 space-y-4">
         <div class="border-b border-border pb-4">
@@ -15,7 +15,7 @@
                     @if ($specItem)
                         <li class="text-sm text-on-blush/80">
                             <span class="font-semibold text-black">{{ $specItem['label'] ?? 'Specification' }}</span>
-                            <span class="block text-xs font-semibold uppercase tracking-widest text-on-blush/55">
+                            <span class="block text-xs font-semibold uppercase tracking-wide text-on-blush/55">
                                 {{ $specItem['billing_cycle_label'] ?? __('hosting.cycles.' . ($selectedBillingCycle ?? 'monthly')) }}
                             </span>
                         </li>

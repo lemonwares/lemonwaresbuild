@@ -29,7 +29,7 @@
                             </a>
                         @endif
                         @if ($project->client_name)
-                            <p class="text-xs font-semibold uppercase tracking-widest text-on-blush/55">{{ $project->client_name }}</p>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-on-blush/55">{{ $project->client_name }}</p>
                         @endif
                         <h2 class="mt-3 text-2xl font-bold tracking-tight text-black">
                             <a href="{{ route('projects.show', $project) }}" class="transition hover:text-rose">{{ $project->title }}</a>

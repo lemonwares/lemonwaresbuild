@@ -7,7 +7,6 @@ return [
     'domain' => 'lemonwares.com',
     'url' => env('APP_URL', 'https://lemonwares.com'),
     'tagline' => 'Hosting · Email · Web & Mobile',
-    'years_experience' => 12,
 
     'locales' => [
         'en' => 'English',
@@ -44,13 +43,17 @@ return [
     ],
 
     'whmcs' => [
-        'base_url' => rtrim(env('WHMCS_BASE_URL', 'https://billing.lemonwares.com'), '/'),
-        'client_login_url' => env('WHMCS_CLIENT_LOGIN_URL', 'https://billing.lemonwares.com/clientarea.php'),
+        'base_url' => rtrim(env('WHMCS_BASE_URL', 'https://my.lemonwares.com'), '/'),
+        'client_login_url' => env('WHMCS_CLIENT_LOGIN_URL', 'https://my.lemonwares.com/clientarea.php'),
+        // Send WHMCS-linked customers to the themed WHMCS client area for services, invoices and tickets.
+        'client_area_redirect' => (bool) env('WHMCS_CLIENT_AREA_REDIRECT', true),
         'order_route' => env('WHMCS_ORDER_ROUTE', '/cart.php'),
         'api_identifier' => env('WHMCS_API_IDENTIFIER', ''),
         'api_secret' => env('WHMCS_API_SECRET', ''),
         'api_access_key' => env('WHMCS_API_ACCESS_KEY', ''),
         'payment_method' => env('WHMCS_PAYMENT_METHOD', 'banktransfer'),
+        // Shared secret for change notifications sent by the WHMCS hook (whmcs-hooks/lemonwares_sync.php).
+        'webhook_secret' => env('WHMCS_WEBHOOK_SECRET', ''),
         // null = auto (enabled on local only). true/false to force.
         'defer_payment_redirect' => env('WHMCS_DEFER_PAYMENT'),
     ],
@@ -120,10 +123,12 @@ return [
 
     'address' => '26, Akin Leigh Crescent, Lekki Phase 1, Lagos, Nigeria.',
 
+    'directions_url' => env('SITE_DIRECTIONS_URL'),
+
     'social' => [
-        ['label' => 'LinkedIn', 'href' => 'https://linkedin.com', 'icon' => 'linkedin'],
-        ['label' => 'Facebook', 'href' => 'https://facebook.com', 'icon' => 'facebook'],
-        ['label' => 'Instagram', 'href' => 'https://instagram.com', 'icon' => 'instagram'],
+        ['label' => 'LinkedIn', 'href' => env('SITE_LINKEDIN_URL', 'https://www.linkedin.com/company/lemonwares-technology/'), 'icon' => 'linkedin'],
+        ['label' => 'Facebook', 'href' => env('SITE_FACEBOOK_URL'), 'icon' => 'facebook'],
+        ['label' => 'Instagram', 'href' => env('SITE_INSTAGRAM_URL'), 'icon' => 'instagram'],
     ],
 
     'technologies' => [

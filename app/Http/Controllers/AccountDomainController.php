@@ -3,16 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\DomainOrder;
+use App\Models\WhmcsDomain;
 use App\Support\AccountListQuery;
+use App\Support\Whmcs\Whmcs;
+use App\Support\Whmcs\WhmcsMirror;
 use App\Support\WhmcsCheckout;
-use App\Support\WhmcsClient;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Illuminate\View\View;
 
 class AccountDomainController extends Controller
 {
+    private const MANAGEABLE = ['Active', 'Grace', 'Redemption'];
+
     public function index(Request $request): View
     {
         $owner = $request->user()->accountOwner();
@@ -22,26 +25,23 @@ class AccountDomainController extends Controller
         $clientId = (int) ($whmcsCustomer?->whmcs_client_id ?? 0);
 
         if ($clientId > 0) {
-            foreach (WhmcsClient::getClientDomains($clientId) as $row) {
-                $domainId = (int) ($row['id'] ?? 0);
-                $domainName = trim((string) ($row['domainname'] ?? $row['domain'] ?? ''));
-                if ($domainName === '') {
-                    continue;
-                }
+            if (! $whmcsCustomer->details_synced_at && ! WhmcsDomain::query()->where('whmcs_client_id', $clientId)->exists()) {
+                WhmcsMirror::syncClientDomains($clientId);
+            }
 
+            foreach (WhmcsDomain::query()->where('whmcs_client_id', $clientId)->get() as $domain) {
+                $expiry = $domain->expiry_date ?? $domain->next_due_date;
                 $domains->push([
                     'source' => 'whmcs',
-                    'id' => 'whmcs-'.$domainId,
-                    'domain' => $domainName,
+                    'id' => 'whmcs-'.$domain->whmcs_domain_id,
+                    'domain' => $domain->domain,
                     'label' => __('account.product_domain'),
-                    'status' => (string) ($row['status'] ?? ''),
-                    'reg_period' => (int) ($row['regperiod'] ?? 0) ?: null,
-                    'expiry' => $this->parseDate($row['expirydate'] ?? $row['nextduedate'] ?? null),
-                    'expiry_label' => optional($this->parseDate($row['expirydate'] ?? $row['nextduedate'] ?? null))?->format('d M Y'),
-                    'site_url' => WhmcsCheckout::websiteUrl($domainName),
-                    'url' => $domainId > 0
-                        ? route('account.domains.whmcs', $domainId)
-                        : null,
+                    'status' => (string) $domain->status,
+                    'reg_period' => (int) data_get($domain->raw_payload, 'regperiod') ?: null,
+                    'expiry' => $expiry,
+                    'expiry_label' => $expiry?->format('d M Y'),
+                    'site_url' => WhmcsCheckout::websiteUrl($domain->domain),
+                    'url' => route('account.domains.whmcs', $domain->whmcs_domain_id),
                 ]);
             }
         }
@@ -92,41 +92,115 @@ class AccountDomainController extends Controller
         ]);
     }
 
-    public function whmcs(Request $request, int $domainId): RedirectResponse
+    public function whmcs(Request $request, int $domainId): View
     {
-        $owner = $request->user()->accountOwner();
-        $clientId = (int) ($owner->whmcsCustomer?->whmcs_client_id ?? 0);
-        abort_unless($clientId > 0 && $domainId > 0, 404);
+        $domain = $this->ownedDomain($request, $domainId);
+        $manageable = in_array($domain->status, self::MANAGEABLE, true);
 
-        $owned = collect(WhmcsClient::getClientDomains($clientId))
-            ->contains(fn ($row) => (int) ($row['id'] ?? 0) === $domainId);
-        abort_unless($owned, 404);
-
-        $url = WhmcsClient::createDomainSsoUrl($clientId, $domainId)
-            ?: WhmcsCheckout::clientAreaUrl($clientId);
-
-        if (! $url) {
-            return redirect()
-                ->route('account.domains.index')
-                ->with('email_feedback', [
-                    'type' => 'error',
-                    'message' => __('account.domain_sso_failed'),
-                ]);
+        $nameservers = [];
+        $locked = null;
+        if ($manageable) {
+            $ns = Whmcs::call('DomainGetNameservers', ['domainid' => $domainId]);
+            $nameservers = $ns->ok ? array_values(array_filter(array_map(fn ($n) => $ns->get("ns{$n}"), range(1, 5)))) : [];
+            $lock = Whmcs::call('DomainGetLockingStatus', ['domainid' => $domainId]);
+            $locked = $lock->ok ? strtolower((string) $lock->get('lockstatus')) === 'locked' : null;
         }
 
-        return redirect()->away($url);
+        return view('pages.account-domain-manage', [
+            'domain' => $domain,
+            'manageable' => $manageable,
+            'nameservers' => $nameservers,
+            'locked' => $locked,
+        ]);
     }
 
-    protected function parseDate(mixed $value): ?Carbon
+    public function updateNameservers(Request $request, int $domainId): RedirectResponse
     {
-        if (! is_string($value) || trim($value) === '' || $value === '0000-00-00') {
-            return null;
+        $domain = $this->ownedManageableDomain($request, $domainId);
+
+        $hostname = ['nullable', 'string', 'max:253', 'regex:/^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}\.?$/i'];
+        $data = $request->validate([
+            'ns1' => ['required', ...array_slice($hostname, 1)],
+            'ns2' => ['required', ...array_slice($hostname, 1)],
+            'ns3' => $hostname,
+            'ns4' => $hostname,
+            'ns5' => $hostname,
+        ]);
+
+        $result = Whmcs::call('DomainUpdateNameservers', ['domainid' => $domainId] + array_map('strtolower', array_filter($data)));
+
+        return $this->feedback($domain, $result->ok, 'account.domain_nameservers_saved');
+    }
+
+    public function updateAutoRenew(Request $request, int $domainId): RedirectResponse
+    {
+        $domain = $this->ownedManageableDomain($request, $domainId);
+        $autoRenew = $request->boolean('auto_renew');
+
+        $result = Whmcs::call('UpdateClientDomain', ['domainid' => $domainId, 'donotrenew' => ! $autoRenew]);
+        if ($result->ok) {
+            $domain->update(['auto_renew' => $autoRenew]);
         }
 
-        try {
-            return Carbon::parse($value);
-        } catch (\Throwable) {
-            return null;
+        return $this->feedback($domain, $result->ok, 'account.domain_autorenew_saved');
+    }
+
+    public function updateLock(Request $request, int $domainId): RedirectResponse
+    {
+        $domain = $this->ownedManageableDomain($request, $domainId);
+
+        $result = Whmcs::call('DomainUpdateLocking', ['domainid' => $domainId, 'lockstatus' => $request->boolean('locked')]);
+
+        return $this->feedback($domain, $result->ok, 'account.domain_lock_saved');
+    }
+
+    public function requestEpp(Request $request, int $domainId): RedirectResponse
+    {
+        $domain = $this->ownedManageableDomain($request, $domainId);
+
+        $result = Whmcs::call('DomainRequestEPP', ['domainid' => $domainId]);
+        if (! $result->ok) {
+            return $this->feedback($domain, false, '');
         }
+
+        $code = (string) $result->get('eppcode');
+
+        return redirect()->route('account.domains.whmcs', $domainId)
+            ->with('status', $code !== '' ? __('account.domain_epp_ready') : __('account.domain_epp_emailed'))
+            ->with('epp_code', $code !== '' ? $code : null);
+    }
+
+    private function ownedDomain(Request $request, int $domainId): WhmcsDomain
+    {
+        $clientId = (int) ($request->user()->accountOwner()->whmcsCustomer?->whmcs_client_id ?? 0);
+        abort_unless($clientId > 0 && $domainId > 0, 404);
+
+        $find = fn () => WhmcsDomain::query()->where('whmcs_domain_id', $domainId)->where('whmcs_client_id', $clientId)->first();
+
+        $domain = $find();
+        if (! $domain && WhmcsMirror::syncClientDomains($clientId)) {
+            $domain = $find();
+        }
+
+        abort_unless($domain, 404);
+
+        return $domain;
+    }
+
+    private function ownedManageableDomain(Request $request, int $domainId): WhmcsDomain
+    {
+        $domain = $this->ownedDomain($request, $domainId);
+        abort_unless(in_array($domain->status, self::MANAGEABLE, true), 403);
+
+        return $domain;
+    }
+
+    private function feedback(WhmcsDomain $domain, bool $ok, string $successKey): RedirectResponse
+    {
+        $redirect = redirect()->route('account.domains.whmcs', $domain->whmcs_domain_id);
+
+        return $ok
+            ? $redirect->with('status', __($successKey))
+            : $redirect->withErrors(['domain' => __('account.domain_update_failed')]);
     }
 }

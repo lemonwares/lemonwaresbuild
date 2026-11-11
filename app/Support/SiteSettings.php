@@ -31,6 +31,7 @@ class SiteSettings
             'site.phone_e164' => ['label' => 'Phone for links (+234…)', 'type' => 'text', 'group' => 'general'],
             'site.whatsapp' => ['label' => 'WhatsApp link', 'type' => 'url', 'group' => 'general'],
             'site.address' => ['label' => 'Office address', 'type' => 'textarea', 'group' => 'general'],
+            'site.directions_url' => ['label' => 'Office directions URL', 'type' => 'url', 'group' => 'general'],
             'social.linkedin' => ['label' => 'LinkedIn URL', 'type' => 'url', 'group' => 'social'],
             'social.facebook' => ['label' => 'Facebook URL', 'type' => 'url', 'group' => 'social'],
             'social.instagram' => ['label' => 'Instagram URL', 'type' => 'url', 'group' => 'social'],
@@ -150,7 +151,7 @@ class SiteSettings
         try {
             return Cache::rememberForever(self::CACHE_KEY, function () {
                 return IntegrationSetting::query()
-                    ->where('key', 'like', self::PREFIX.'%')
+                    ->whereLike('key', self::PREFIX.'%')
                     ->pluck('value', 'key')
                     ->mapWithKeys(fn ($value, $key) => [substr((string) $key, strlen(self::PREFIX)) => (string) IntegrationSetting::decode((string) $value)])
                     ->filter(fn ($value) => $value !== '')

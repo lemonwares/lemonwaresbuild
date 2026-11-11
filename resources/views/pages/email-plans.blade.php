@@ -60,10 +60,10 @@
         <div class="container-page relative z-10 py-16 sm:py-20">
             <div class="grid items-center gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-widest text-white/75">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-white/75">
                         {{ __('email.eyebrow') }}
                     </p>
-                    <h1 class="mt-4 max-w-2xl text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                    <h1 class="mt-4 max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
                         {{ __('email.title') }}
                     </h1>
                     <p class="mt-5 max-w-xl text-lg font-light text-white/90">
@@ -179,7 +179,7 @@
                                 <span
                                     data-email-cycle-badge
                                     @class([
-                                        'mt-1 text-[0.65rem] font-semibold uppercase tracking-widest',
+                                        'mt-1 text-[0.65rem] font-semibold uppercase tracking-wide',
                                         'text-white/80' => $option['key'] === $selectedCycle,
                                         'text-rose' => $option['key'] !== $selectedCycle,
                                     ])
@@ -190,7 +190,7 @@
                                 <span
                                     data-email-cycle-badge
                                     @class([
-                                        'mt-1 text-[0.65rem] font-semibold uppercase tracking-widest',
+                                        'mt-1 text-[0.65rem] font-semibold uppercase tracking-wide',
                                         'text-white/70' => $option['key'] === $selectedCycle,
                                         'text-on-blush/55' => $option['key'] !== $selectedCycle,
                                     ])
@@ -216,7 +216,7 @@
                             <p class="hosting-panel-badge mb-3">{{ __('email.most_popular') }}</p>
                         @endif
                         <p @class([
-                            'text-xs font-semibold uppercase tracking-widest',
+                            'text-xs font-semibold uppercase tracking-wide',
                             'text-white/75' => $plan['featured'],
                             'text-rose' => ! $plan['featured'],
                         ])>
@@ -229,7 +229,7 @@
                             {{ $plan['summary'] }}
                         </p>
                         <p @class([
-                            'mt-3 inline-flex w-fit rounded-full px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-widest',
+                            'mt-3 inline-flex w-fit rounded-full px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide',
                             'bg-white/15 text-white' => $plan['featured'],
                             'bg-blush-soft text-rose' => ! $plan['featured'],
                         ])>
@@ -359,7 +359,7 @@
             <div class="hosting-feature-grid" data-reveal-stagger>
                 @foreach ($authItems as $item)
                     <article class="hosting-feature-card">
-                        <p class="inline-flex rounded-full bg-blush-soft px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-widest text-rose">
+                        <p class="inline-flex rounded-full bg-blush-soft px-2.5 py-1 text-[0.65rem] font-semibold uppercase tracking-wide text-rose">
                             {{ $item['code'] ?? '' }}
                         </p>
                         <h3 class="mt-3 text-base font-bold text-black">{{ $item['title'] ?? '' }}</h3>

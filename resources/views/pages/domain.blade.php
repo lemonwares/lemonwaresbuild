@@ -85,7 +85,7 @@
 
         <div class="container-page relative z-10 py-14 sm:py-20 lg:py-24">
             <div class="mx-auto max-w-3xl text-center">
-                <h1 class="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                <h1 class="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
                     {{ __('pages.domain.hero_title') }}
                 </h1>
                 <p class="domain-landing-hero-lede mx-auto mt-4 max-w-2xl text-base font-normal sm:text-lg">
@@ -207,7 +207,7 @@
     <section class="domain-landing-why">
         <div class="container-page">
             <div class="domain-landing-why-card">
-                <h2 class="text-center text-3xl font-bold tracking-tight text-black sm:text-4xl">
+                <h2 class="text-center text-3xl font-bold tracking-tight text-black sm:text-3xl">
                     {{ __('pages.domain.why_title') }}
                 </h2>
                 <p class="mt-6 text-center text-base leading-relaxed text-on-blush/75">
@@ -219,7 +219,7 @@
 
     <section class="domain-landing-choose">
         <div class="container-page py-16 text-center sm:py-20">
-            <h2 class="mx-auto max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            <h2 class="mx-auto max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-3xl">
                 {{ __('pages.domain.choose_title') }}
             </h2>
             <p class="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-white/90">
@@ -242,7 +242,7 @@
                     data-reveal
                 >
                     <div class="domain-landing-feature-copy">
-                        <h2 class="text-3xl font-bold tracking-tight text-black sm:text-4xl">
+                        <h2 class="text-3xl font-bold tracking-tight text-black sm:text-3xl">
                             {{ $feature['title'] }}
                         </h2>
                         <p class="mt-5 max-w-xl text-base leading-relaxed text-on-blush/80">
@@ -281,7 +281,7 @@
 
     <section class="domain-landing-faq" id="domain-faq">
         <div class="container-page py-16 sm:py-20">
-            <h2 class="mx-auto mb-10 max-w-3xl text-center text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            <h2 class="mx-auto mb-10 max-w-3xl text-center text-3xl font-bold tracking-tight text-white sm:text-3xl">
                 {{ __('pages.domain.faq_title') }}
             </h2>
             <div class="mx-auto max-w-2xl">

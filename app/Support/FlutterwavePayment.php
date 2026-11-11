@@ -7,11 +7,13 @@ use App\Models\DomainOrder;
 use App\Models\EmailOrder;
 use App\Models\HostingLead;
 use App\Models\IntegrationSetting;
+use App\Models\InvoicePayment;
 use App\Models\SiteCheckout;
 use App\Notifications\DomainOrderPaid;
 use App\Notifications\EmailOrderPaid;
 use App\Notifications\EmailOrderRenewed;
 use App\Notifications\HostingOrderPaid;
+use App\Support\Whmcs\WhmcsInvoicePayments;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -316,6 +318,26 @@ class FlutterwavePayment
                 'ok' => (bool) ($result['ok'] ?? false),
                 'message' => (string) ($result['message'] ?? 'Payment processed.'),
             ];
+        }
+
+        if (str_starts_with($txRef, 'LW-INV-')) {
+            $payment = InvoicePayment::query()->where('payment_reference', $txRef)->first();
+            if (! $payment) {
+                return ['ok' => false, 'message' => 'No invoice payment matched this payment reference.'];
+            }
+
+            if ($payment->isPaid() && $payment->whmcs_recorded_at) {
+                return ['ok' => true, 'message' => 'Payment already processed.'];
+            }
+
+            $verified = self::verifyTransaction($transactionId);
+            if (! $verified) {
+                return ['ok' => false, 'message' => 'Unable to verify Flutterwave transaction.'];
+            }
+
+            $result = self::confirmInvoicePayment($payment->fresh(), $verified);
+
+            return ['ok' => (bool) $result['ok'], 'message' => (string) $result['message']];
         }
 
         $lead = HostingLead::query()->where('payment_reference', $txRef)->first();
@@ -1073,6 +1095,97 @@ class FlutterwavePayment
     /**
      * @param  array<string, mixed>  $verified
      */
+    public static function createInvoicePaymentLink(InvoicePayment $payment): ?string
+    {
+        $amountNgn = self::payableAmountNgn((float) $payment->amount_ngn);
+        if (! self::isConfigured() || $amountNgn === null) {
+            return null;
+        }
+
+        $payment->loadMissing('user');
+
+        $response = Http::timeout(20)
+            ->withToken(FlutterwaveSettings::secretKey())
+            ->acceptJson()
+            ->post('https://api.flutterwave.com/v3/payments', [
+                'tx_ref' => $payment->payment_reference,
+                'amount' => $amountNgn,
+                'currency' => 'NGN',
+                'redirect_url' => route('account.invoices.callback'),
+                'payment_options' => 'card,banktransfer,ussd,account',
+                'customer' => array_filter([
+                    'email' => $payment->user?->email,
+                    'name' => $payment->user?->name,
+                    'phonenumber' => $payment->user?->phone,
+                ], fn ($value) => filled($value)),
+                'customizations' => [
+                    'title' => config('site.short_name', 'LemonWares'),
+                    'description' => 'Invoice #'.$payment->whmcs_invoice_id,
+                ],
+                'meta' => [
+                    'invoice_payment_id' => $payment->id,
+                    'whmcs_invoice_id' => $payment->whmcs_invoice_id,
+                ],
+            ]);
+
+        $link = data_get($response->json(), 'data.link');
+        if (! $response->successful() || data_get($response->json(), 'status') !== 'success'
+            || ! is_string($link) || ! preg_match('#/hosted/pay/[A-Za-z0-9_-]+#', $link)) {
+            Log::warning('Flutterwave invoice payment init failed', ['invoice_payment_id' => $payment->id, 'body' => $response->json()]);
+
+            return null;
+        }
+
+        return $link;
+    }
+
+    /**
+     * @param  array<string, mixed>  $verified
+     * @return array{ok:bool,already_paid?:bool,message:string}
+     */
+    public static function confirmInvoicePayment(InvoicePayment $payment, array $verified): array
+    {
+        $transactionId = (string) data_get($verified, 'id', '');
+        $alreadyPaid = ['ok' => true, 'already_paid' => true, 'message' => __('account.invoice_payment_confirmed')];
+
+        if ($payment->isPaid() || PaymentClaim::alreadyRecorded($payment, $transactionId)) {
+            WhmcsInvoicePayments::record($payment);
+
+            return $alreadyPaid;
+        }
+
+        if (PaymentClaim::problem($payment, $verified, [(string) $payment->payment_reference]) !== null) {
+            return ['ok' => false, 'message' => __('cart.payment_wrong_order')];
+        }
+
+        if (! self::isSuccessfulStatus($verified)) {
+            $payment->update(['payment_status' => strtolower((string) data_get($verified, 'status', 'failed')), 'status' => 'payment_failed']);
+
+            return ['ok' => false, 'message' => __('account.invoice_payment_incomplete')];
+        }
+
+        if (! self::amountMatches($verified, (float) $payment->amount_ngn)) {
+            $payment->update(['payment_status' => 'amount_mismatch', 'status' => 'payment_failed', 'flutterwave_transaction_id' => $transactionId]);
+            Log::warning('Invoice payment amount mismatch', ['invoice_payment_id' => $payment->id, 'paid' => data_get($verified, 'amount')]);
+
+            return ['ok' => false, 'message' => __('account.invoice_payment_mismatch')];
+        }
+
+        $claimed = PaymentClaim::claim($payment, $verified, 'invoice', [
+            'payment_status' => 'successful',
+            'status' => 'paid',
+            'flutterwave_transaction_id' => $transactionId,
+        ]);
+
+        if (! $claimed) {
+            return $alreadyPaid;
+        }
+
+        WhmcsInvoicePayments::record($payment->fresh());
+
+        return ['ok' => true, 'message' => __('account.invoice_payment_confirmed')];
+    }
+
     protected static function isSuccessfulStatus(array $verified): bool
     {
         return in_array(strtolower((string) data_get($verified, 'status')), ['successful', 'completed'], true);

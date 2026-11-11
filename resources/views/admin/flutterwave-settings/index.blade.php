@@ -130,7 +130,7 @@
                 ])>
                     {{ $test['message'] ?? 'Connection test completed.' }}
                     @if (! empty($test['mode']))
-                        <span class="ml-2 text-xs uppercase tracking-widest">({{ $test['mode'] }})</span>
+                        <span class="ml-2 text-xs uppercase tracking-wide">({{ $test['mode'] }})</span>
                     @endif
                 </p>
             </div>

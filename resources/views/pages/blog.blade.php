@@ -28,7 +28,7 @@
                                 <img src="{{ $post->coverUrl() }}" alt="" class="aspect-[16/9] w-full object-cover" loading="lazy" />
                             </a>
                         @endif
-                        <p class="text-xs font-semibold uppercase tracking-widest text-on-blush/55">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-on-blush/55">
                             {{ $post->published_at?->timezone(config('app.timezone'))->format('d M Y') }}
                             @if ($post->author)
                                 · {{ $post->author->name }}

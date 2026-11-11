@@ -20,10 +20,10 @@
         <div class="container-page relative z-10 py-16 sm:py-20">
             <div class="grid items-center gap-10 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-widest text-white/75">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-white/75">
                         {{ __('pages.about.eyebrow') }}
                     </p>
-                    <h1 class="mt-4 max-w-2xl text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                    <h1 class="mt-4 max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
                         {{ __('pages.about.title') }}
                     </h1>
                     <p class="mt-5 max-w-xl text-lg font-light text-white/90">
@@ -104,15 +104,7 @@
 
     <section class="border-t border-border bg-white" data-reveal>
         <div class="container-page py-16 sm:py-20">
-            <div class="grid gap-8 sm:grid-cols-3">
-                <div>
-                    <p class="mb-2 text-4xl font-bold tracking-tight text-rose sm:text-5xl">{{ config('site.years_experience') }}+</p>
-                    <p class="text-base font-light text-on-blush/75">{{ __('pages.about.stat_years') }}</p>
-                </div>
-                <div>
-                    <p class="mb-2 text-4xl font-bold tracking-tight text-rose sm:text-5xl">99%</p>
-                    <p class="text-base font-light text-on-blush/75">{{ __('pages.about.stat_uptime') }}</p>
-                </div>
+            <div class="grid gap-8">
                 <div>
                     <p class="mb-2 text-4xl font-bold tracking-tight text-rose sm:text-5xl">24/7</p>
                     <p class="text-base font-light text-on-blush/75">{{ __('pages.about.stat_support') }}</p>
@@ -132,7 +124,7 @@
                 <ol class="grid gap-6 lg:grid-cols-3" data-reveal-stagger>
                     @foreach ($milestones as $index => $item)
                         <li class="rounded-3xl border border-border bg-white p-6 sm:p-7">
-                            <p class="text-sm font-bold uppercase tracking-widest text-rose">{{ $item['year'] ?? '' }}</p>
+                            <p class="text-sm font-bold uppercase tracking-wide text-rose">{{ $item['year'] ?? '' }}</p>
                             <h3 class="mt-3 text-lg font-bold text-black">{{ $item['title'] ?? '' }}</h3>
                             <p class="mt-2 text-sm font-light leading-relaxed text-on-blush/75">{{ $item['body'] ?? '' }}</p>
                         </li>

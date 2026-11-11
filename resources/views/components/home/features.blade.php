@@ -7,7 +7,6 @@
                         {{ __('site.home.features_foundation') }}
                     </h2>
                     <div class="mb-2 h-px w-16 bg-black/20"></div>
-                    <p class="text-6xl font-bold tracking-tight">99%</p>
                     <p class="text-base font-medium text-black/70">{{ __('site.home.features_uptime') }}</p>
                 </div>
                 <div class="pointer-events-none absolute -bottom-8 -right-8 size-40 rounded-full bg-rose/10" aria-hidden="true"></div>
@@ -15,9 +14,9 @@
 
             @php
                 $topFeatures = [
-                    ['icon' => 'zap', 'title' => __('site.home.feature_fast')],
+                    ['icon' => 'zap', 'title' => __('site.home.feature_fast'), 'body' => __('site.home.feature_fast_body')],
                     ['icon' => 'mail', 'title' => __('site.home.feature_email'), 'href' => route('email.plans')],
-                    ['icon' => 'shield-check', 'title' => __('site.home.feature_secure')],
+                    ['icon' => 'shield-check', 'title' => __('site.home.feature_secure'), 'body' => __('site.home.feature_secure_body')],
                 ];
             @endphp
 
@@ -35,6 +34,7 @@
                             <x-dynamic-component :component="'ui.icons.'.$feature['icon']" class="size-5" />
                         </span>
                         <h3 class="text-base font-semibold text-on-blush">{{ $feature['title'] }}</h3>
+                        <p class="text-base text-on-blush/75">{{ $feature['body'] }}</p>
                     </article>
                 @endif
             @endforeach

@@ -1,0 +1,1017 @@
+/* Logged-in app shell: card, table, pager and status primitives shared by account pages. */
+@layer components {
+    .account-body {
+        background: #f6f6f8;
+    }
+
+    .acc-topbar-title {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        min-width: 0;
+    }
+
+    .acc-topbar-title strong {
+        font-family: var(--font-display);
+        font-size: 1.05rem;
+        font-weight: 650;
+        color: #111;
+        white-space: nowrap;
+    }
+
+    .acc-topbar-title span {
+        display: none;
+        border-left: 1px solid var(--color-border);
+        padding-left: 0.75rem;
+        font-size: 0.8125rem;
+        color: #6b6b72;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    @media (min-width: 640px) {
+        .acc-topbar-title span {
+            display: inline;
+        }
+    }
+
+    .acc-crumbs {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem;
+        border-bottom: 1px solid var(--color-border);
+        background: #fff;
+        padding: 0.65rem 1rem;
+        font-size: 0.8125rem;
+    }
+
+    @media (min-width: 640px) {
+        .acc-crumbs {
+            padding: 0.65rem 1.5rem;
+        }
+    }
+
+    @media (min-width: 1024px) {
+        .acc-crumbs {
+            padding: 0.65rem 1.75rem;
+        }
+    }
+
+    .acc-crumbs a {
+        font-weight: 500;
+        color: var(--color-rose);
+    }
+
+    .acc-crumbs a:hover {
+        text-decoration: underline;
+    }
+
+    .acc-crumbs .acc-crumbs-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        border: 1px solid #e7e7eb;
+        border-radius: 0.5rem;
+        padding: 0.2rem 0.6rem 0.2rem 0.45rem;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .acc-crumbs .acc-crumbs-back:hover {
+        border-color: color-mix(in srgb, var(--color-rose) 40%, #e7e7eb);
+        color: var(--color-rose);
+        text-decoration: none;
+    }
+
+    .acc-crumbs-back svg {
+        width: 0.9rem;
+        height: 0.9rem;
+    }
+
+    .acc-crumbs-divider {
+        width: 1px;
+        height: 1rem;
+        margin: 0 0.25rem;
+        background: #e2e2e6;
+    }
+
+    .account-sidebar-brand {
+        position: relative;
+    }
+
+    .acc-sidebar-chevron {
+        position: absolute;
+        top: 50%;
+        right: -0.8rem;
+        z-index: 2;
+        display: inline-flex;
+        width: 1.6rem;
+        height: 1.6rem;
+        align-items: center;
+        justify-content: center;
+        transform: translateY(-50%);
+        border: 1px solid #e2e2e6;
+        border-radius: 999px;
+        background: #fff;
+        color: #55555c;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        transition: color 150ms ease, border-color 150ms ease;
+    }
+
+    .acc-sidebar-chevron:hover {
+        border-color: var(--color-rose);
+        color: var(--color-rose);
+    }
+
+    .acc-sidebar-chevron svg {
+        width: 0.85rem;
+        height: 0.85rem;
+        transition: transform 200ms ease;
+    }
+
+    html.account-sidebar-collapsed .acc-sidebar-chevron svg,
+    .account-shell.is-collapsed .acc-sidebar-chevron svg {
+        transform: rotate(180deg);
+    }
+
+    html[data-theme='dark'] .acc-sidebar-chevron,
+    html[data-theme='dark'] .acc-crumbs .acc-crumbs-back {
+        border-color: #2e2828;
+        background: #1c1818;
+        color: #efe9e9;
+    }
+
+    .acc-crumbs-sep {
+        color: #b5b5bb;
+    }
+
+    .acc-crumbs-current {
+        font-weight: 600;
+        color: #111;
+    }
+
+    .acc-card {
+        overflow: hidden;
+        border: 1px solid #e7e7eb;
+        border-radius: 0.9rem;
+        background: #fff;
+    }
+
+    .acc-card-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 1.1rem 1.25rem;
+    }
+
+    .acc-card-heading {
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+        min-width: 0;
+    }
+
+    .acc-card-title {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: 1.125rem;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+        color: #111;
+    }
+
+    .acc-count {
+        font-size: 0.75rem;
+        color: #8a8a92;
+        white-space: nowrap;
+    }
+
+    .acc-card-tools {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .acc-icon-btn {
+        display: inline-flex;
+        width: 2.25rem;
+        height: 2.25rem;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e7e7eb;
+        border-radius: 0.6rem;
+        background: #fff;
+        color: #333;
+        transition: border-color 150ms ease, color 150ms ease;
+    }
+
+    .acc-icon-btn svg {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    .acc-icon-btn:hover,
+    .acc-icon-btn[aria-expanded='true'] {
+        border-color: color-mix(in srgb, var(--color-rose) 40%, #e7e7eb);
+        color: var(--color-rose);
+    }
+
+    .acc-filters {
+        border-top: 1px solid #f0f0f2;
+        background: #fbfbfc;
+        padding: 0.85rem 1.25rem;
+    }
+
+    .acc-filters[hidden] {
+        display: none;
+    }
+
+    .acc-filter-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .acc-input {
+        flex: 1 1 16rem;
+        min-width: 0;
+        border: 1px solid #e2e2e6;
+        border-radius: 0.6rem;
+        background: #fff;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .acc-input:focus {
+        border-color: var(--color-rose);
+        outline: 2px solid color-mix(in srgb, var(--color-rose) 18%, transparent);
+        outline-offset: 0;
+    }
+
+    .acc-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        border: 1px solid #e2e2e6;
+        border-radius: 0.6rem;
+        background: #fff;
+        padding: 0.5rem 0.9rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #222;
+        white-space: nowrap;
+        transition: border-color 150ms ease, background 150ms ease, color 150ms ease;
+    }
+
+    .acc-btn:hover {
+        border-color: color-mix(in srgb, var(--color-rose) 40%, #e2e2e6);
+        color: var(--color-rose);
+    }
+
+    .acc-btn.is-primary {
+        border-color: var(--color-rose);
+        background: var(--color-rose);
+        color: #fff;
+    }
+
+    .acc-btn.is-primary:hover {
+        background: color-mix(in srgb, var(--color-rose) 88%, #000);
+        color: #fff;
+    }
+
+    .acc-btn.is-quiet {
+        border-color: transparent;
+        background: transparent;
+        color: #6b6b72;
+    }
+
+    .acc-btn.is-sm {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.75rem;
+    }
+
+    .acc-tabs {
+        display: flex;
+        gap: 0.25rem;
+        overflow-x: auto;
+        border-top: 1px solid #f0f0f2;
+        padding: 0 1rem;
+        scrollbar-width: none;
+    }
+
+    .acc-tab {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        border-bottom: 2px solid transparent;
+        padding: 0.7rem 0.5rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: #6b6b72;
+        white-space: nowrap;
+    }
+
+    .acc-tab span {
+        border-radius: 999px;
+        background: #f1f1f4;
+        padding: 0.05rem 0.45rem;
+        font-size: 0.6875rem;
+        color: #6b6b72;
+    }
+
+    .acc-tab:hover {
+        color: #111;
+    }
+
+    .acc-tab.is-active {
+        border-bottom-color: var(--color-rose);
+        font-weight: 600;
+        color: var(--color-rose);
+    }
+
+    .acc-tab.is-active span {
+        background: color-mix(in srgb, var(--color-rose) 12%, #fff);
+        color: var(--color-rose);
+    }
+
+    .acc-table-wrap {
+        overflow-x: auto;
+        border-top: 1px solid #f0f0f2;
+    }
+
+    .acc-table {
+        width: 100%;
+        min-width: 44rem;
+        border-collapse: collapse;
+        font-size: 0.875rem;
+    }
+
+    .acc-table th {
+        background: #fafafb;
+        padding: 0.7rem 1.25rem;
+        text-align: left;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #7a7a82;
+        white-space: nowrap;
+    }
+
+    .acc-table td {
+        border-top: 1px solid #f0f0f2;
+        padding: 0.8rem 1.25rem;
+        vertical-align: middle;
+        color: #222;
+    }
+
+    .acc-table tbody tr {
+        transition: background 120ms ease;
+    }
+
+    .acc-table tbody tr:hover {
+        background: #fcfafa;
+    }
+
+    .acc-table .is-num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+    .acc-table .is-actions {
+        width: 1%;
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    .acc-row-actions {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.35rem;
+    }
+
+    .acc-row-actions form,
+    .acc-card-tools form {
+        display: contents;
+    }
+
+    .acc-table tr.is-unread td {
+        background: #fffafa;
+    }
+
+    .acc-dot {
+        display: inline-block;
+        width: 0.45rem;
+        height: 0.45rem;
+        margin-right: 0.35rem;
+        border-radius: 999px;
+        background: var(--color-rose);
+        vertical-align: middle;
+    }
+
+    .acc-link {
+        font-weight: 600;
+        color: var(--color-rose);
+        white-space: nowrap;
+    }
+
+    a.acc-link:hover {
+        text-decoration: underline;
+    }
+
+    .acc-cell-main {
+        display: block;
+        color: #111;
+    }
+
+    .acc-cell-sub {
+        display: block;
+        margin-top: 0.1rem;
+        font-size: 0.75rem;
+        color: #8a8a92;
+    }
+
+    .acc-cell-muted {
+        color: #55555c;
+        white-space: nowrap;
+    }
+
+    .acc-status {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 0.4rem;
+        padding: 0.18rem 0.55rem;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .acc-status.is-success { background: #e8f7ee; color: #157a3e; }
+    .acc-status.is-warning { background: #fff4e0; color: #9a5b00; }
+    .acc-status.is-danger { background: #fdecec; color: #b42318; }
+    .acc-status.is-neutral { background: #f1f1f4; color: #55555c; }
+
+    .acc-pager {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        border-top: 1px solid #f0f0f2;
+        padding: 0.8rem 1.25rem;
+    }
+
+    .acc-pager-summary {
+        margin: 0;
+        font-size: 0.8125rem;
+        color: #6b6b72;
+    }
+
+    .acc-pager-links {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .acc-page {
+        display: inline-flex;
+        min-width: 2rem;
+        height: 2rem;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e7e7eb;
+        border-radius: 0.5rem;
+        padding: 0 0.5rem;
+        font-size: 0.8125rem;
+        color: #333;
+    }
+
+    a.acc-page:hover {
+        border-color: color-mix(in srgb, var(--color-rose) 40%, #e7e7eb);
+        color: var(--color-rose);
+    }
+
+    .acc-page.is-current {
+        border-color: var(--color-rose);
+        background: var(--color-rose);
+        font-weight: 600;
+        color: #fff;
+    }
+
+    .acc-page.is-disabled {
+        color: #c4c4ca;
+    }
+
+    .acc-page.is-gap {
+        border-color: transparent;
+    }
+
+    .acc-empty {
+        border-top: 1px solid #f0f0f2;
+        padding: 3rem 1.25rem;
+        text-align: center;
+        font-size: 0.875rem;
+        color: #6b6b72;
+    }
+
+    .acc-empty-title {
+        margin-bottom: 0.35rem;
+        font-weight: 600;
+        color: #111;
+    }
+
+    /* Bring the older account building blocks in line with the card/table look above. */
+    .account-body .account-page-header {
+        margin-bottom: 1.1rem;
+    }
+
+    .account-body .account-page-title {
+        font-size: 1.25rem;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+    }
+
+    .account-body .account-page-lede {
+        margin-top: 0.25rem;
+        font-size: 0.875rem;
+        color: #6b6b72;
+    }
+
+    .account-body .account-panel {
+        border-color: #e7e7eb;
+        border-radius: 0.9rem;
+        box-shadow: none;
+    }
+
+    .account-body .account-panel-toolbar {
+        border-bottom-color: #f0f0f2;
+    }
+
+    .account-body .account-panel-title {
+        font-size: 1rem;
+        font-weight: 650;
+    }
+
+    .account-body .account-panel-lede {
+        font-size: 0.8125rem;
+        color: #6b6b72;
+    }
+
+    .account-body .account-hero,
+    .account-body .account-hero-soft {
+        border: 1px solid #e7e7eb;
+        border-left: 4px solid var(--color-rose);
+        border-radius: 0.9rem;
+        background: #fff;
+        padding: 1.1rem 1.25rem;
+        color: #111;
+        box-shadow: none;
+    }
+
+    .account-body .account-hero-kicker {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        color: var(--color-rose);
+    }
+
+    .account-body .account-hero-title,
+    .account-body .account-hero-soft .account-panel-title {
+        margin-top: 0.3rem;
+        font-family: var(--font-display);
+        font-size: 1.0625rem !important;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+        color: #111;
+    }
+
+    .account-body .account-hero-lede {
+        margin-top: 0.3rem;
+        font-size: 0.875rem;
+        color: #6b6b72;
+    }
+
+    .account-body .account-hero-actions {
+        margin-top: 0.85rem;
+        gap: 0.5rem;
+    }
+
+    .account-body .account-metric {
+        border-color: #e7e7eb;
+        border-radius: 0.9rem;
+        padding: 1rem 1.1rem;
+    }
+
+    .account-body a.account-metric:hover {
+        box-shadow: none;
+        transform: none;
+    }
+
+    .account-body .account-metric-label {
+        font-size: 0.8125rem;
+        font-weight: 500;
+        letter-spacing: 0;
+        text-transform: none;
+        color: #6b6b72;
+    }
+
+    .account-body .account-metric-value {
+        margin-top: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+    }
+
+    .account-body .account-metric-meta {
+        font-size: 0.8125rem;
+        color: #8a8a92;
+    }
+
+    .account-body .account-metric-cta {
+        margin-top: 0.6rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+    }
+
+    .account-body .account-chip {
+        border-radius: 0.6rem;
+    }
+
+    .account-body .account-dl dt {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        color: #7a7a82;
+    }
+
+    .account-body .account-dl dd {
+        margin-top: 0.25rem;
+        font-family: var(--font-sans);
+        font-size: 0.9375rem;
+        font-weight: 600;
+    }
+
+    .account-body .account-table {
+        font-size: 0.875rem;
+    }
+
+    .account-body .account-table th {
+        border-bottom-color: #f0f0f2;
+        background: #fafafb;
+        padding: 0.7rem 1.25rem;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        color: #7a7a82;
+    }
+
+    .account-body .account-table td {
+        border-bottom-color: #f0f0f2;
+        padding: 0.8rem 1.25rem;
+        color: #222;
+    }
+
+    .account-body .account-table tbody tr:hover td {
+        background: #fcfafa;
+    }
+
+    .account-body .account-table strong {
+        font-weight: 600;
+    }
+
+    .account-body .account-pill {
+        border-radius: 0.4rem;
+        padding: 0.18rem 0.55rem;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0;
+        text-transform: none;
+    }
+
+    .account-body .account-pill.is-ok { background: #e8f7ee; color: #157a3e; }
+    .account-body .account-pill.is-warn { background: #fff4e0; color: #9a5b00; }
+    .account-body .account-pill.is-muted { background: #f1f1f4; color: #55555c; }
+
+    .account-body .account-btn-primary,
+    .account-body .account-btn-ghost,
+    .account-body .account-btn-danger {
+        min-height: 2.25rem;
+        border-radius: 0.6rem;
+        padding: 0.45rem 0.9rem;
+        font-family: var(--font-sans);
+        font-size: 0.8125rem;
+        font-weight: 600;
+    }
+
+    .account-body .account-btn-ghost {
+        border-color: #e2e2e6;
+        color: #222;
+    }
+
+    .account-body .account-btn-ghost:hover {
+        background: #fff;
+    }
+
+    .account-body .account-input {
+        border-color: #e2e2e6;
+        border-radius: 0.6rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    .account-body .account-empty {
+        border: 1px solid #e7e7eb;
+        border-radius: 0.9rem;
+        background: #fff;
+        padding: 2.5rem 1.25rem;
+        align-items: center;
+        text-align: center;
+    }
+
+    .account-body .account-empty-title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+    }
+
+    .account-body .account-empty-lede {
+        font-size: 0.875rem;
+        color: #6b6b72;
+    }
+
+    .account-body .account-pagination span,
+    .account-body .account-pagination a {
+        min-width: 2rem;
+        border-color: #e7e7eb;
+        border-radius: 0.5rem;
+        padding: 0.3rem 0.55rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+    }
+
+    html[data-theme='dark'] .account-body { background: #131111; }
+
+    html[data-theme='dark'] .acc-card,
+    html[data-theme='dark'] .acc-crumbs,
+    html[data-theme='dark'] .acc-icon-btn,
+    html[data-theme='dark'] .acc-btn:not(.is-primary),
+    html[data-theme='dark'] .acc-input {
+        border-color: #2e2828;
+        background: #1c1818;
+        color: #efe9e9;
+    }
+
+    html[data-theme='dark'] .acc-table th,
+    html[data-theme='dark'] .acc-filters {
+        background: #211c1c;
+    }
+
+    html[data-theme='dark'] .acc-table td,
+    html[data-theme='dark'] .acc-table-wrap,
+    html[data-theme='dark'] .acc-tabs,
+    html[data-theme='dark'] .acc-pager,
+    html[data-theme='dark'] .acc-empty {
+        border-color: #2e2828;
+        color: #e4dede;
+    }
+
+    html[data-theme='dark'] .acc-table tbody tr:hover {
+        background: #221d1d;
+    }
+
+    html[data-theme='dark'] .acc-card-title,
+    html[data-theme='dark'] .acc-topbar-title strong,
+    html[data-theme='dark'] .acc-cell-main,
+    html[data-theme='dark'] .acc-crumbs-current,
+    html[data-theme='dark'] .acc-empty-title {
+        color: #f7f1f1;
+    }
+
+    /* Admin area: same card/table language as the client area. */
+    .admin-body .admin-main {
+        background: #f6f6f8;
+    }
+
+    .admin-sidebar-brand {
+        position: relative;
+    }
+
+    html.admin-sidebar-collapsed .acc-sidebar-chevron svg,
+    .admin-shell.is-collapsed .acc-sidebar-chevron svg {
+        transform: rotate(180deg);
+    }
+
+    .admin-body .admin-topbar {
+        background: #fff;
+        border-bottom: 1px solid #e7e7eb;
+        box-shadow: none;
+    }
+
+    .admin-body .admin-page-title {
+        font-size: 1.25rem;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+    }
+
+    .admin-body .admin-page-lede,
+    .admin-body .admin-dash-panel-lede {
+        font-size: 0.875rem;
+        color: #6b6b72;
+    }
+
+    .admin-body .admin-panel {
+        border-color: #e7e7eb;
+        border-radius: 0.9rem;
+        box-shadow: none;
+    }
+
+    .admin-body .admin-panel-toolbar {
+        border-bottom: 1px solid #f0f0f2;
+        padding: 0.9rem 1.25rem;
+    }
+
+    .admin-body .admin-panel-toolbar.compact {
+        border-bottom: 0;
+        padding: 0 0 0.75rem;
+    }
+
+    .admin-body .admin-dash-panel-title {
+        font-size: 1rem;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+        text-transform: none;
+    }
+
+    .admin-body .admin-metric {
+        border-color: #e7e7eb;
+        border-radius: 0.9rem;
+        padding: 1rem 1.1rem;
+    }
+
+    .admin-body .admin-metric:hover {
+        transform: none;
+    }
+
+    .admin-body .admin-metric-label {
+        font-size: 0.8125rem;
+        font-weight: 500;
+        letter-spacing: 0;
+        text-transform: none;
+        color: #6b6b72;
+    }
+
+    .admin-body .admin-metric-value {
+        font-size: 1.5rem;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+    }
+
+    .admin-body .admin-metric-meta {
+        font-size: 0.8125rem;
+        color: #8a8a92;
+    }
+
+    .admin-body .admin-table {
+        font-size: 0.875rem;
+    }
+
+    .admin-body .admin-table th {
+        border-bottom-color: #f0f0f2;
+        background: #fafafb;
+        padding: 0.7rem 1.25rem;
+        font-family: var(--font-sans);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        color: #7a7a82;
+    }
+
+    .admin-body .admin-table td {
+        border-bottom-color: #f0f0f2;
+        padding: 0.8rem 1.25rem;
+        color: #222;
+    }
+
+    .admin-body .admin-table tbody tr:hover td {
+        background: #fcfafa;
+    }
+
+    .admin-body .admin-pill,
+    .admin-body .admin-status {
+        border-radius: 0.4rem;
+        padding: 0.18rem 0.55rem;
+        font-family: var(--font-sans);
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0;
+        text-transform: capitalize;
+    }
+
+    .admin-body .admin-pill:not(.is-ok):not(.is-info) {
+        border-color: transparent;
+        background: #f1f1f4;
+        color: #55555c;
+    }
+
+    .admin-body .admin-btn-primary,
+    .admin-body .admin-btn-ghost,
+    .admin-body .admin-btn-danger {
+        min-height: 2.25rem;
+        border-radius: 0.6rem;
+        padding: 0.45rem 0.9rem;
+        font-family: var(--font-sans);
+        font-size: 0.8125rem;
+        font-weight: 600;
+    }
+
+    .admin-body .admin-btn-ghost {
+        border-color: #e2e2e6;
+        color: #222;
+    }
+
+    .admin-body .admin-input {
+        border-color: #e2e2e6;
+        border-radius: 0.6rem;
+        padding: 0.5rem 0.75rem;
+        font-family: var(--font-sans);
+        font-weight: 500;
+    }
+
+    .admin-body .admin-field label,
+    .admin-body .admin-dl dt {
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-transform: none;
+        color: #6b6b72;
+    }
+
+    .admin-body .admin-empty,
+    .admin-body .admin-table-empty {
+        color: #6b6b72;
+    }
+
+    .admin-body .admin-pagination a,
+    .admin-body .admin-pagination span {
+        border-radius: 0.5rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+    }
+
+    html[data-theme='dark'] .admin-body .admin-main { background: #131111; }
+    html[data-theme='dark'] .admin-body .admin-topbar {
+        border-color: #2e2828;
+        background: #1c1818;
+    }
+
+    /* Tables scroll sideways inside their wrappers instead of wrapping cell text. */
+    .admin-body table th,
+    .admin-body table td,
+    .account-body table th,
+    .account-body table td {
+        white-space: nowrap;
+    }
+
+    .admin-nav-badge {
+        margin-left: auto;
+        min-width: 1.35rem;
+        border-radius: 999px;
+        background: var(--color-rose);
+        padding: 0.05rem 0.4rem;
+        text-align: center;
+        font-size: 0.6875rem;
+        font-weight: 700;
+        color: #fff;
+    }
+
+    .admin-nav-link-active .admin-nav-badge {
+        background: #fff;
+        color: var(--color-rose);
+    }
+
+    html.admin-sidebar-collapsed .admin-nav-badge {
+        display: none;
+    }
+
+    .admin-queue-pay summary {
+        list-style: none;
+        cursor: pointer;
+    }
+
+    .admin-queue-pay[open] .admin-queue-pay-form {
+        display: grid;
+    }
+
+    .admin-queue-pay-form {
+        display: none;
+        grid-template-columns: repeat(2, minmax(8rem, 1fr));
+        gap: 0.4rem;
+        margin-top: 0.5rem;
+        min-width: 22rem;
+    }
+}

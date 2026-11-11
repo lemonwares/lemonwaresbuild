@@ -17,7 +17,7 @@
                 <x-ui.icons.arrow-left class="page-back-icon" />
                 {{ __('site.common.go_back') }}
             </a>
-            <h1 class="mt-8 max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-5xl">
+            <h1 class="mt-8 max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-4xl">
                 {{ __('cart.checkout_title') }}
             </h1>
             <p class="domain-cart-lede mt-4 max-w-2xl text-base sm:text-lg">
@@ -103,10 +103,10 @@
 
                                 <div class="{{ $guestAccountStatus === 'new' ? '' : 'hidden' }}" data-password-wrap>
                                     <label for="password" class="mb-2 block text-sm font-semibold text-black">{{ __('cart.checkout_create_password') }}</label>
-                                    <input id="password" name="password" type="password" autocomplete="new-password" class="footer-input w-full rounded-xl border border-border bg-white px-4 py-3" data-checkout-password @if ($guestAccountStatus === 'new') required @endif>
-                                    <p class="mt-2 text-sm text-on-blush/65">{{ __('cart.checkout_create_password_help') }}</p>
+                                    <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" aria-describedby="checkout-password-help @error('password') checkout-password-error @enderror" class="footer-input w-full rounded-xl border border-border bg-white px-4 py-3" data-checkout-password @if ($guestAccountStatus === 'new') required @endif>
+                                    <p id="checkout-password-help" class="mt-2 text-sm text-on-blush/65">{{ __('cart.checkout_create_password_help') }}</p>
                                     @error('password')
-                                        <p class="mt-2 text-sm text-rose">{{ $message }}</p>
+                                        <p id="checkout-password-error" class="mt-2 text-sm text-rose">{{ $message }}</p>
                                     @enderror
                                 </div>
 

@@ -17,8 +17,8 @@ class AdminSubscriberController extends Controller
 
         $subscribers = NewsletterSubscriber::query()
             ->when($search !== '', fn ($q) => $q->where(fn ($inner) => $inner
-                ->where('email', 'like', '%'.$search.'%')
-                ->orWhere('full_name', 'like', '%'.$search.'%')))
+                ->whereLike('email', '%'.$search.'%')
+                ->orWhereLike('full_name', '%'.$search.'%')))
             ->latest()
             ->paginate(30)
             ->withQueryString();

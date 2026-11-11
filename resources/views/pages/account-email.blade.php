@@ -43,7 +43,7 @@
                             <div class="account-list-copy">
                                 <p class="account-list-title">{{ $mailbox->address }}</p>
                             </div>
-                            <span class="account-pill is-muted">{{ $mailbox->statusLabel() }}</span>
+                            <x-account.status :value="$mailbox->statusLabel()" />
                         </div>
                     @endforeach
                 </div>

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\WhmcsCustomer;
+use App\Models\WhmcsInvoice;
 use App\Models\WhmcsService;
+use App\Support\AdminWhmcsHistory;
 use App\Support\WhmcsClient;
 use App\Support\WhmcsSyncService;
 use Illuminate\Http\RedirectResponse;
@@ -21,83 +23,91 @@ class AdminCustomerController extends Controller
     {
         $search = trim((string) $request->query('q', ''));
         $tag = strtolower(trim((string) $request->query('tag', '')));
-        $source = strtolower((string) $request->query('source', 'native'));
-        if (! in_array($source, ['native', 'legacy'], true)) {
-            $source = 'native';
+        $source = strtolower((string) $request->query('source', 'all'));
+        $source = ['native' => 'site', 'legacy' => 'whmcs'][$source] ?? $source;
+        if (! in_array($source, ['all', 'whmcs', 'site'], true)) {
+            $source = 'all';
         }
 
-        if ($source === 'legacy') {
-            $customers = WhmcsCustomer::query()
-                ->withCount('services')
-                ->when($search !== '', function ($query) use ($search) {
-                    $query->where(function ($inner) use ($search) {
-                        $inner->where('full_name', 'like', '%' . $search . '%')
-                            ->orWhere('email', 'like', '%' . $search . '%')
-                            ->orWhere('company', 'like', '%' . $search . '%');
-                    });
-                })
-                ->latest('last_synced_at')
-                ->paginate(20)
-                ->withQueryString();
-        } else {
-            $customers = User::query()
-                ->customers()
-                ->withCount('emailOrders')
-                ->when($search !== '', function ($query) use ($search) {
-                    $query->where(function ($inner) use ($search) {
-                        $inner->where('name', 'like', '%' . $search . '%')
-                            ->orWhere('email', 'like', '%' . $search . '%')
-                            ->orWhere('company', 'like', '%' . $search . '%');
-                    });
-                })
-                ->when($tag !== '', fn ($query) => $query->where('admin_tags', 'like', '%"'.$tag.'"%'))
-                ->latest()
-                ->paginate(20)
-                ->withQueryString();
-        }
+        // One row per person: every WHMCS client (with its site account if linked) plus site-only accounts.
+        $whmcsRows = DB::table('whmcs_customers')
+            ->leftJoin('users', 'users.id', '=', 'whmcs_customers.user_id')
+            ->select([
+                'whmcs_customers.id as whmcs_row_id',
+                'whmcs_customers.user_id',
+                'whmcs_customers.whmcs_client_id',
+                DB::raw('COALESCE(users.name, whmcs_customers.full_name) as name'),
+                DB::raw('COALESCE(users.email, whmcs_customers.email) as email'),
+                DB::raw('COALESCE(users.company, whmcs_customers.company) as company'),
+                'whmcs_customers.status',
+                'whmcs_customers.credit',
+                'whmcs_customers.currency_code',
+                DB::raw('COALESCE(users.created_at, whmcs_customers.created_at) as joined_at'),
+            ]);
 
-        $nativeCount = User::query()->customers()->count();
-        $legacyCount = WhmcsCustomer::query()->count();
-        $newNativeWeek = User::query()->customers()->where('created_at', '>=', now()->subDays(7))->count();
-        $withOrdersCount = User::query()->customers()->whereHas('emailOrders')->count();
-        $linkedLegacyCount = User::query()->customers()->whereHas('whmcsCustomer')->count();
+        $siteRows = User::query()->customers()->whereDoesntHave('whmcsCustomer')->toBase()->select([
+            DB::raw('NULL as whmcs_row_id'),
+            'users.id as user_id',
+            DB::raw('NULL as whmcs_client_id'),
+            'users.name',
+            'users.email',
+            'users.company',
+            DB::raw("CASE WHEN users.suspended_at IS NULL THEN 'Active' ELSE 'Suspended' END as status"),
+            DB::raw('NULL as credit'),
+            DB::raw('NULL as currency_code'),
+            'users.created_at as joined_at',
+        ]);
 
-        return view('admin.customers.index', compact(
-            'customers',
-            'search',
-            'tag',
-            'source',
-            'nativeCount',
-            'legacyCount',
-            'newNativeWeek',
-            'withOrdersCount',
-            'linkedLegacyCount',
-        ));
+        $customers = DB::query()->fromSub($whmcsRows->unionAll($siteRows), 'c')
+            ->when($source === 'whmcs', fn ($q) => $q->whereNotNull('whmcs_client_id'))
+            ->when($source === 'site', fn ($q) => $q->whereNotNull('user_id'))
+            ->when($search !== '', function ($q) use ($search) {
+                $like = '%'.$search.'%';
+                $q->where(fn ($inner) => $inner->whereLike('name', $like)
+                    ->orWhereLike('email', $like)
+                    ->orWhereLike('company', $like)
+                    ->when(ctype_digit(ltrim($search, '#')), fn ($q) => $q->orWhere('whmcs_client_id', (int) ltrim($search, '#'))));
+            })
+            ->when($tag !== '', fn ($q) => $q->whereIn('user_id', User::query()->whereLike('admin_tags', '%"'.$tag.'"%')->select('id')))
+            ->orderByDesc('joined_at')
+            ->paginate(25)
+            ->withQueryString();
+
+        $clientIds = collect($customers->items())->pluck('whmcs_client_id')->filter()->all();
+        $services = WhmcsService::query()->whereIn('whmcs_client_id', $clientIds)
+            ->selectRaw("whmcs_client_id, COUNT(*) as total, SUM(CASE WHEN status = 'Active' THEN 1 ELSE 0 END) as active")
+            ->groupBy('whmcs_client_id')->get()->keyBy('whmcs_client_id');
+        $unpaid = WhmcsInvoice::query()->whereIn('whmcs_client_id', $clientIds)->where('status', 'Unpaid')
+            ->selectRaw('whmcs_client_id, COUNT(*) as invoice_count, SUM(total) as amount, MAX(currency_code) as currency')
+            ->groupBy('whmcs_client_id')->get()->keyBy('whmcs_client_id');
+        $users = User::query()->whereIn('id', collect($customers->items())->pluck('user_id')->filter())->get()->keyBy('id');
+
+        $siteCount = User::query()->customers()->count();
+        $whmcsCount = WhmcsCustomer::query()->count();
+        $metrics = [
+            'total' => $whmcsCount + User::query()->customers()->whereDoesntHave('whmcsCustomer')->count(),
+            'whmcs' => $whmcsCount,
+            'site' => $siteCount,
+            'linked' => User::query()->customers()->whereHas('whmcsCustomer')->count(),
+            'new_week' => User::query()->customers()->where('created_at', '>=', now()->subDays(7))->count(),
+            'active_services' => WhmcsService::query()->where('status', 'Active')->count(),
+            'unpaid_count' => WhmcsInvoice::query()->where('status', 'Unpaid')->count(),
+            'unpaid_by_currency' => WhmcsInvoice::query()->where('status', 'Unpaid')
+                ->selectRaw('COALESCE(currency_code, ?) as currency, SUM(total) as amount', ['NGN'])
+                ->groupBy('currency')->orderByDesc('amount')->pluck('amount', 'currency')->all(),
+        ];
+
+        return view('admin.customers.index', compact('customers', 'search', 'tag', 'source', 'services', 'unpaid', 'users', 'metrics'));
     }
 
     public function show(Request $request, User $customer): View
     {
         abort_unless($customer->isCustomer(), 404);
 
-        $serviceStatus = strtolower((string) $request->query('service_status', 'all'));
-        if (! in_array($serviceStatus, ['all', 'active', 'suspended', 'terminated', 'cancelled', 'pending'], true)) {
-            $serviceStatus = 'all';
-        }
-
         $customer->load(['emailOrders.mailboxes', 'contacts', 'whmcsCustomer', 'accountStaffMembers', 'accountInvites']);
         $activities = \App\Models\AccountActivity::query()->where('user_id', $customer->id)->latest()->limit(15)->get();
         $hostingLeads = $customer->hostingLeads;
-        $whmcsServiceSummary = $customer->whmcsServices()
-            ->reorder()
-            ->selectRaw('LOWER(COALESCE(status, ?)) as status_key, COUNT(*) as total', ['unknown'])
-            ->groupBy('status_key')
-            ->pluck('total', 'status_key')
-            ->toArray();
-
-        $whmcsServices = $customer->whmcsServices()
-            ->when($serviceStatus !== 'all', fn ($query) => $query->whereRaw('LOWER(status) = ?', [$serviceStatus]))
-            ->latest()
-            ->get();
+        $history = AdminWhmcsHistory::for($request, (int) ($customer->whmcsCustomer?->whmcs_client_id ?? 0));
 
         $industries = __('account.industries');
         $countries = config('site.country_options', []);
@@ -106,9 +116,7 @@ class AdminCustomerController extends Controller
             'customer',
             'activities',
             'hostingLeads',
-            'whmcsServices',
-            'serviceStatus',
-            'whmcsServiceSummary',
+            'history',
             'industries',
             'countries',
         ));
@@ -226,29 +234,11 @@ class AdminCustomerController extends Controller
 
     public function showLegacy(Request $request, WhmcsCustomer $legacyCustomer): View
     {
-        $serviceStatus = strtolower((string) $request->query('service_status', 'all'));
-        if (! in_array($serviceStatus, ['all', 'active', 'suspended', 'terminated', 'cancelled', 'pending'], true)) {
-            $serviceStatus = 'all';
-        }
-
         $legacyCustomer->load(['user']);
-        $whmcsServiceSummary = $legacyCustomer->services()
-            ->reorder()
-            ->selectRaw('LOWER(COALESCE(status, ?)) as status_key, COUNT(*) as total', ['unknown'])
-            ->groupBy('status_key')
-            ->pluck('total', 'status_key')
-            ->toArray();
-
-        $services = $legacyCustomer->services()
-            ->when($serviceStatus !== 'all', fn ($query) => $query->whereRaw('LOWER(status) = ?', [$serviceStatus]))
-            ->latest()
-            ->get();
 
         return view('admin.customers.show-legacy', [
             'legacyCustomer' => $legacyCustomer,
-            'services' => $services,
-            'serviceStatus' => $serviceStatus,
-            'whmcsServiceSummary' => $whmcsServiceSummary,
+            'history' => AdminWhmcsHistory::for($request, (int) $legacyCustomer->whmcs_client_id),
         ]);
     }
 
@@ -257,7 +247,7 @@ class AdminCustomerController extends Controller
         $result = WhmcsSyncService::syncCustomersAndServices();
 
         return redirect()
-            ->route('admin.customers.index', ['source' => 'legacy'])
+            ->route('admin.customers.index', ['source' => 'whmcs'])
             ->with('status', sprintf(
                 'WHMCS sync complete. %d customers, %d services synced.',
                 $result['customers_synced'],

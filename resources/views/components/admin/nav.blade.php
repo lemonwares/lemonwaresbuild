@@ -12,6 +12,7 @@
         [
             'label' => 'Sales',
             'items' => [
+                ['label' => 'Needs Action', 'route' => 'admin.queue.index', 'match' => 'admin.queue.*', 'icon' => 'zap', 'permission' => 'orders', 'badge' => 'queue'],
                 ['label' => 'All Orders', 'route' => 'admin.orders.index', 'match' => 'admin.orders.*', 'icon' => 'clipboard-check', 'permission' => 'orders'],
                 ['label' => 'Domain Orders', 'route' => 'admin.domain-orders.index', 'match' => 'admin.domain-orders.*', 'icon' => 'shield', 'permission' => 'orders'],
                 ['label' => 'Cart Orders', 'route' => 'admin.cart-orders.index', 'match' => 'admin.cart-orders.*', 'icon' => 'boxes', 'permission' => 'orders'],
@@ -50,7 +51,7 @@
         [
             'label' => 'Integrations',
             'items' => [
-                ['label' => 'WHMCS Console', 'route' => 'admin.whmcs-console.index', 'match' => 'admin.whmcs-console.*', 'icon' => 'boxes', 'permission' => 'whmcs'],
+                ['label' => 'WHMCS Console', 'route' => 'filament.console.pages.dashboard', 'match' => 'filament.console.*', 'icon' => 'boxes', 'permission' => 'whmcs'],
                 ['label' => 'WHMCS Settings', 'route' => 'admin.whmcs-settings.index', 'match' => 'admin.whmcs-settings.*', 'icon' => 'wrench', 'permission' => 'whmcs'],
                 ['label' => 'Flutterwave Settings', 'route' => 'admin.flutterwave-settings.index', 'match' => 'admin.flutterwave-settings.*', 'icon' => 'zap', 'permission' => 'flutterwave'],
                 ['label' => 'ZeptoMail Settings', 'route' => 'admin.zeptomail-settings.index', 'match' => 'admin.zeptomail-settings.*', 'icon' => 'send', 'permission' => 'zeptomail'],
@@ -96,6 +97,9 @@
                         >
                             <x-dynamic-component :component="'ui.icons.' . $item['icon']" class="admin-nav-icon" />
                             <span class="admin-nav-label">{{ $item['label'] }}</span>
+                            @if (($item['badge'] ?? null) === 'queue' && ($queueCount ??= \App\Support\AdminWorkQueue::count()) > 0)
+                                <span class="admin-nav-badge">{{ $queueCount > 99 ? '99+' : $queueCount }}</span>
+                            @endif
                         </a>
                     @endforeach
                 </div>

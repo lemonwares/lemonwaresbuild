@@ -4,24 +4,30 @@
     'lede' => null,
     'backHref' => null,
     'backLabel' => null,
+    'crumbs' => null,
 ])
 
-<header {{ $attributes->class('account-page-header') }}>
-    @if ($backHref)
-        <a href="{{ $backHref }}" class="account-back">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M19 12H5" />
-                <path d="m12 19-7-7 7-7" />
-            </svg>
-            <span>{{ $backLabel ?: __('account.manage') }}</span>
-        </a>
-    @endif
+@php
+    // Pages without their own breadcrumbs get a trail built from the back link and title.
+    $trail = $crumbs;
+    if ($trail === null) {
+        $trail = [];
+        if ($backHref && $backLabel) {
+            $trail[$backLabel] = $backHref;
+        }
+        $trail[$title !== '' ? $title : (string) $kicker] = null;
+    }
+@endphp
 
+@unless (\Illuminate\Support\Facades\View::hasSection('breadcrumbs') || request()->routeIs('account.show'))
+    @push('breadcrumbs')
+        <x-account.breadcrumbs :items="$trail" :back="$backHref" />
+    @endpush
+@endunless
+
+<header {{ $attributes->class('account-page-header') }}>
     <div class="account-page-header-row">
         <div>
-            @if ($kicker)
-                <p class="account-page-kicker">{{ $kicker }}</p>
-            @endif
             @if ($title !== '')
                 <h1 class="account-page-title">{{ $title }}</h1>
             @endif

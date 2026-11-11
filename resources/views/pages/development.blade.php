@@ -85,10 +85,10 @@
         <div class="container-page relative z-10 py-16 sm:py-20">
             <div class="grid items-center gap-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-widest text-white/75">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-white/75">
                         {{ __('pages.development.eyebrow') }}
                     </p>
-                    <h1 class="mt-4 max-w-2xl text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                    <h1 class="mt-4 max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
                         {{ __('pages.development.title') }}
                     </h1>
                     <p class="mt-5 max-w-xl text-lg font-light text-white/90">
@@ -369,9 +369,9 @@
                         <span class="dev-icon-badge is-on-rose" aria-hidden="true">
                             <x-ui.icons.layout class="size-5 text-white" />
                         </span>
-                        <p class="text-xs font-semibold uppercase tracking-widest text-white/75">{{ $wordpress['eyebrow'] ?? '' }}</p>
+                        <p class="text-xs font-semibold uppercase tracking-wide text-white/75">{{ $wordpress['eyebrow'] ?? '' }}</p>
                     </div>
-                    <h2 class="mt-1 text-3xl font-bold tracking-tight text-white sm:text-4xl">{{ $wordpress['title'] ?? '' }}</h2>
+                    <h2 class="mt-1 text-3xl font-bold tracking-tight text-white sm:text-3xl">{{ $wordpress['title'] ?? '' }}</h2>
                     <p class="mt-4 max-w-xl text-base font-light leading-relaxed text-white/90">{{ $wordpress['summary'] ?? '' }}</p>
                     @if (! empty($wordpress['tags']) && is_array($wordpress['tags']))
                         <div class="mt-6 flex flex-wrap gap-2">

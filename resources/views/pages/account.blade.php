@@ -43,7 +43,7 @@
                 <h2 class="account-hero-title">{{ __('account.next_dns_title') }}</h2>
                 <p class="account-hero-lede">{{ __('account.next_dns_body') }}</p>
                 <div class="account-hero-actions">
-                    <a href="{{ route('account.email.index') }}#dns-records" class="account-btn-ghost" style="background:#fff;color:var(--color-rose)">{{ __('account.manage') }}</a>
+                    <a href="{{ route('account.email.index') }}#dns-records" class="acc-btn is-primary">{{ __('account.manage') }}</a>
                 </div>
             </section>
         @elseif ($nextStep === 'webmail')
@@ -52,8 +52,8 @@
                 <h2 class="account-hero-title">{{ __('account.next_webmail_title') }}</h2>
                 <p class="account-hero-lede">{{ __('account.next_webmail_body') }}</p>
                 <div class="account-hero-actions">
-                    <a href="{{ $webmailUrl }}" target="_blank" rel="noopener noreferrer" class="account-btn-ghost" style="background:#fff;color:var(--color-rose)">{{ __('email.open_webmail') }}</a>
-                    <a href="{{ route('account.email.index') }}" class="account-btn-ghost" style="border-color:rgba(255,255,255,.4);background:transparent;color:#fff">{{ __('account.manage') }}</a>
+                    <a href="{{ $webmailUrl }}" target="_blank" rel="noopener noreferrer" class="acc-btn is-primary">{{ __('email.open_webmail') }}</a>
+                    <a href="{{ route('account.email.index') }}" class="acc-btn">{{ __('account.manage') }}</a>
                 </div>
             </section>
         @elseif ($nextStep === 'all_set')
@@ -68,9 +68,9 @@
                 <h2 class="account-hero-title">{{ __('account.next_browse_title') }}</h2>
                 <p class="account-hero-lede">{{ __('account.next_browse_body') }}</p>
                 <div class="account-hero-actions">
-                    <a href="{{ route('email.plans') }}" class="account-btn-ghost" style="background:#fff;color:var(--color-rose)">{{ __('account.buy_email') }}</a>
-                    <a href="{{ route('hosting.specifications', ['plan' => 'vps']) }}" class="account-btn-ghost" style="border-color:rgba(255,255,255,.4);background:transparent;color:#fff">{{ __('account.buy_vps') }}</a>
-                    <a href="{{ route('hosting.specifications', ['plan' => 'cpanel']) }}" class="account-btn-ghost" style="border-color:rgba(255,255,255,.4);background:transparent;color:#fff">{{ __('account.buy_hosting') }}</a>
+                    <a href="{{ route('email.plans') }}" class="acc-btn is-primary">{{ __('account.buy_email') }}</a>
+                    <a href="{{ route('hosting.specifications', ['plan' => 'vps']) }}" class="acc-btn">{{ __('account.buy_vps') }}</a>
+                    <a href="{{ route('hosting.specifications', ['plan' => 'cpanel']) }}" class="acc-btn">{{ __('account.buy_hosting') }}</a>
                 </div>
             </section>
         @endif
@@ -122,5 +122,37 @@
                 </a>
             @endif
         </section>
+
+        @if ($recentInvoices->isNotEmpty())
+            <x-account.table-card :title="__('account.recent_invoices')">
+                <x-slot:tools>
+                    <a href="{{ route('account.invoices.index') }}" class="acc-btn is-sm">{{ __('account.view_all') }}</a>
+                </x-slot:tools>
+                <div class="acc-table-wrap">
+                    <table class="acc-table">
+                        <thead>
+                            <tr>
+                                <th>{{ __('account.reference') }}</th>
+                                <th>{{ __('account.description') }}</th>
+                                <th class="is-num">{{ __('account.amount') }}</th>
+                                <th>{{ __('account.status_label') }}</th>
+                                <th>{{ __('account.date') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($recentInvoices as $invoice)
+                                <tr>
+                                    <td><a href="{{ $invoice['url'] }}" class="acc-link">{{ $invoice['reference'] }}</a></td>
+                                    <td><span class="acc-cell-main">{{ $invoice['label'] }}</span></td>
+                                    <td class="is-num">{{ strtoupper($invoice['currency']) === 'NGN' ? '₦' : $invoice['currency'] . ' ' }}{{ number_format($invoice['amount'], 2) }}</td>
+                                    <td><x-account.status :value="$invoice['status']" /></td>
+                                    <td class="acc-cell-muted">{{ $invoice['date']?->format('d M Y') ?? '—' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </x-account.table-card>
+        @endif
     </div>
 @endsection

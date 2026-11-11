@@ -18,7 +18,7 @@
         aria-labelledby="complete-profile-title"
     >
         <div class="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-border bg-white p-6 shadow-2xl sm:p-8" data-complete-profile-panel>
-            <p class="text-xs font-semibold uppercase tracking-widest text-rose">{{ __('account.complete_profile_eyebrow') }}</p>
+            <p class="text-xs font-semibold uppercase tracking-wide text-rose">{{ __('account.complete_profile_eyebrow') }}</p>
             <h2 id="complete-profile-title" class="mt-2 text-2xl font-bold text-black">{{ __('account.complete_profile_title') }}</h2>
             <p class="mt-2 text-sm text-on-blush/75">{{ __('account.complete_profile_lede') }}</p>
 

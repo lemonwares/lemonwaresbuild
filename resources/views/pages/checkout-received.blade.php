@@ -11,7 +11,7 @@
                 <x-ui.icons.arrow-left class="page-back-icon" />
                 {{ __('site.common.go_back') }}
             </a>
-            <h1 class="mt-8 max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-5xl">
+            <h1 class="mt-8 max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-4xl">
                 {{ __('cart.received_title') }}
             </h1>
             <p class="domain-cart-lede mt-4 max-w-2xl text-base sm:text-lg">
@@ -32,7 +32,7 @@
             @endif
 
             <div class="mx-auto max-w-2xl rounded-md border border-border bg-white p-6 shadow-[0_8px_28px_rgba(0,0,0,0.04)] sm:p-8">
-                <p class="text-xs font-semibold uppercase tracking-widest text-on-blush/55">{{ __('cart.order_summary') }}</p>
+                <p class="text-xs font-semibold uppercase tracking-wide text-on-blush/55">{{ __('cart.order_summary') }}</p>
                 <ul class="mt-4 space-y-2">
                     @foreach ($checkout->items as $item)
                         <li class="flex flex-wrap items-baseline justify-between gap-2 text-sm">

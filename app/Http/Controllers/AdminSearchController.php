@@ -57,9 +57,9 @@ class AdminSearchController extends Controller
         if (AdminPermissions::currentCan('customers')) {
             User::query()->customers()
                 ->where(function ($query) use ($like): void {
-                    $query->where('name', 'like', $like)
-                        ->orWhere('email', 'like', $like)
-                        ->orWhere('company', 'like', $like);
+                    $query->whereLike('name', $like)
+                        ->orWhereLike('email', $like)
+                        ->orWhereLike('company', $like);
                 })
                 ->limit(6)
                 ->get(['id', 'name', 'email', 'company'])
@@ -76,9 +76,9 @@ class AdminSearchController extends Controller
         if (AdminPermissions::currentCan('email_orders')) {
             EmailOrder::query()
                 ->where(function ($query) use ($like): void {
-                    $query->where('domain', 'like', $like)
-                        ->orWhere('plan_name', 'like', $like)
-                        ->orWhere('payment_reference', 'like', $like);
+                    $query->whereLike('domain', $like)
+                        ->orWhereLike('plan_name', $like)
+                        ->orWhereLike('payment_reference', $like);
                 })
                 ->latest()
                 ->limit(6)
@@ -96,10 +96,10 @@ class AdminSearchController extends Controller
         if (AdminPermissions::currentCan('hosting_leads')) {
             HostingLead::query()
                 ->where(function ($query) use ($like): void {
-                    $query->where('full_name', 'like', $like)
-                        ->orWhere('email', 'like', $like)
-                        ->orWhere('plan_name', 'like', $like)
-                        ->orWhere('hostname', 'like', $like);
+                    $query->whereLike('full_name', $like)
+                        ->orWhereLike('email', $like)
+                        ->orWhereLike('plan_name', $like)
+                        ->orWhereLike('hostname', $like);
                 })
                 ->latest()
                 ->limit(6)
@@ -117,10 +117,10 @@ class AdminSearchController extends Controller
         if (AdminPermissions::currentCan('support')) {
             SupportTicket::query()
                 ->where(function ($query) use ($like): void {
-                    $query->where('subject', 'like', $like)
-                        ->orWhere('email', 'like', $like)
-                        ->orWhere('full_name', 'like', $like)
-                        ->orWhere('reference', 'like', $like);
+                    $query->whereLike('subject', $like)
+                        ->orWhereLike('email', $like)
+                        ->orWhereLike('full_name', $like)
+                        ->orWhereLike('reference', $like);
                 })
                 ->latest()
                 ->limit(6)
@@ -138,8 +138,8 @@ class AdminSearchController extends Controller
         if (AdminPermissions::currentCan('subscribers')) {
             NewsletterSubscriber::query()
                 ->where(function ($query) use ($like): void {
-                    $query->where('email', 'like', $like)
-                        ->orWhere('full_name', 'like', $like);
+                    $query->whereLike('email', $like)
+                        ->orWhereLike('full_name', $like);
                 })
                 ->limit(4)
                 ->get(['id', 'email', 'full_name'])
@@ -156,8 +156,8 @@ class AdminSearchController extends Controller
         if (AdminPermissions::currentCan('team')) {
             TeamMember::query()
                 ->where(function ($query) use ($like): void {
-                    $query->where('name', 'like', $like)
-                        ->orWhere('role', 'like', $like);
+                    $query->whereLike('name', $like)
+                        ->orWhereLike('role', $like);
                 })
                 ->limit(4)
                 ->get(['id', 'name', 'role'])
@@ -174,9 +174,9 @@ class AdminSearchController extends Controller
         if (AdminPermissions::currentCan('case_studies')) {
             CaseStudy::query()
                 ->where(function ($query) use ($like): void {
-                    $query->where('title', 'like', $like)
-                        ->orWhere('client_name', 'like', $like)
-                        ->orWhere('summary', 'like', $like);
+                    $query->whereLike('title', $like)
+                        ->orWhereLike('client_name', $like)
+                        ->orWhereLike('summary', $like);
                 })
                 ->limit(4)
                 ->get(['id', 'title', 'client_name', 'slug'])

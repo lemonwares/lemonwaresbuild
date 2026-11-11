@@ -62,6 +62,7 @@ return [
         'admin.roles' => 'staff',
         'admin.audit-log' => 'audit_log',
         'admin.orders' => 'orders',
+        'admin.queue' => 'orders',
         'admin.domain-orders' => 'orders',
         'admin.cart-orders' => 'orders',
         'admin.email-orders' => 'email_orders',

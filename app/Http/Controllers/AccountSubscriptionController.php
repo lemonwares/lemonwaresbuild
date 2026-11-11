@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\WhmcsService;
 use App\Support\AccountListQuery;
+use App\Support\Whmcs\Whmcs;
 use App\Support\WhmcsCheckout;
 use App\Support\WhmcsClient;
 use App\Support\WhmcsSyncService;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AccountSubscriptionController extends Controller
@@ -18,7 +21,7 @@ class AccountSubscriptionController extends Controller
         $owner = $request->user()->accountOwner();
 
         $whmcsCustomer = $owner->whmcsCustomer;
-        if ($whmcsCustomer?->whmcs_client_id) {
+        if ($whmcsCustomer?->whmcs_client_id && ! $whmcsCustomer->details_synced_at) {
             WhmcsSyncService::syncServicesForCustomer($whmcsCustomer);
             $whmcsCustomer->refresh();
         }
@@ -87,15 +90,21 @@ class AccountSubscriptionController extends Controller
         }
 
         $search = trim((string) $request->query('q', ''));
+        $status = trim((string) $request->query('status', ''));
         $filtered = AccountListQuery::filter(
             $subscriptions->values(),
             $search,
             ['label', 'domain', 'status', 'billing_cycle', 'source'],
         );
+        if ($status !== '') {
+            $filtered = $filtered->filter(fn ($row) => strcasecmp((string) $row['status'], $status) === 0)->values();
+        }
 
         return view('pages.account-subscriptions', [
             'subscriptions' => AccountListQuery::paginate($filtered, 15),
             'search' => $search,
+            'status' => $status,
+            'statusCounts' => $subscriptions->countBy(fn ($row) => ucfirst(strtolower((string) $row['status'])))->filter(fn ($count, $label) => $label !== '')->sortKeys(),
             'totalCount' => $subscriptions->count(),
         ]);
     }
@@ -106,30 +115,20 @@ class AccountSubscriptionController extends Controller
         abort_unless($this->ownsService($owner->id, $service), 404);
 
         $clientId = (int) ($owner->whmcsCustomer?->whmcs_client_id ?? $service->whmcs_client_id ?? 0);
+
+        if ($owner->whmcsCustomer && $clientId > 0 && Cache::add('whmcs-view-sync:'.$clientId, true, 60)) {
+            WhmcsSyncService::syncServicesForCustomer($owner->whmcsCustomer);
+            $service->refresh();
+        }
+
         $serviceId = (int) $service->whmcs_service_id;
         $status = strtolower(trim((string) $service->status));
         $isActive = in_array($status, ['active', 'pending'], true);
 
-        $relatedInvoices = collect();
-        if ($clientId > 0) {
-            foreach (WhmcsClient::getInvoices($clientId, 50) as $row) {
-                $invoiceId = (int) ($row['id'] ?? 0);
-                if ($invoiceId < 1) {
-                    continue;
-                }
-
-                $relatedInvoices->push([
-                    'id' => $invoiceId,
-                    'reference' => '#'.$invoiceId,
-                    'label' => (string) ($row['itemdescription'] ?? __('account.invoice_whmcs')),
-                    'amount' => (float) ($row['total'] ?? 0),
-                    'currency' => (string) ($row['currencycode'] ?? 'USD'),
-                    'status' => (string) ($row['status'] ?? ''),
-                    'date' => (string) ($row['date'] ?? ''),
-                    'url' => route('account.invoices.show', ['invoice' => 'whmcs-'.$invoiceId]),
-                ]);
-            }
-        }
+        $relatedInvoices = $clientId > 0
+            ? AccountInvoiceController::localInvoices($clientId, true)
+                ->map(fn (array $row) => ['date' => $row['date']?->toDateString() ?? ''] + $row)
+            : collect();
 
         return view('pages.account-subscription', [
             'service' => $service,
@@ -138,7 +137,32 @@ class AccountSubscriptionController extends Controller
                 ? route('account.subscriptions.cpanel', $service)
                 : null,
             'relatedInvoices' => $relatedInvoices->take(8)->values(),
+            'canCancel' => $serviceId > 0 && in_array($status, ['active', 'suspended'], true),
         ]);
+    }
+
+    public function cancel(Request $request, WhmcsService $service): RedirectResponse
+    {
+        $owner = $request->user()->accountOwner();
+        abort_unless($this->ownsService($owner->id, $service), 404);
+        abort_unless(in_array(strtolower((string) $service->status), ['active', 'suspended'], true), 403);
+
+        $data = $request->validate([
+            'type' => ['required', Rule::in(['Immediate', 'End of Billing Period'])],
+            'reason' => ['required', 'string', 'max:500'],
+        ]);
+
+        $result = Whmcs::call('AddCancelRequest', [
+            'serviceid' => (int) $service->whmcs_service_id,
+            'type' => $data['type'],
+            'reason' => $data['reason'],
+        ]);
+
+        if (! $result->ok) {
+            return back()->withInput()->withErrors(['reason' => __('account.service_cancel_failed')]);
+        }
+
+        return redirect()->route('account.subscriptions.show', $service)->with('status', __('account.service_cancel_requested'));
     }
 
     public function manage(Request $request, WhmcsService $service): RedirectResponse

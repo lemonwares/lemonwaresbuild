@@ -1,0 +1,5 @@
+name: "LemonWares"
+description: "LemonWares brand theme. Child of Nexus: only css/custom.css is overridden, so WHMCS updates keep working."
+author: "LemonWares"
+config:
+  parent: nexus
