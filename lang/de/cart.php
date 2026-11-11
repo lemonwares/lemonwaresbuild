@@ -45,7 +45,7 @@ return [
     'checkout_sign_in' => 'Anmelden und fortfahren',
     'checkout_sign_in_required' => 'Diese E-Mail hat bereits ein Konto. Bitte anmelden, um fortzufahren.',
     'checkout_create_password' => 'Passwort erstellen',
-    'checkout_create_password_help' => 'Für den Zugang zu Ihrem LemonWares-Konto nach der Zahlung.',
+    'checkout_create_password_help' => 'Mindestens 8 Zeichen. Geben Sie in beide Felder dasselbe Passwort ein.',
     'checkout_signed_in_as' => 'Angemeldet als :email',
     'checkout_billing_title' => 'Rechnungsadresse',
     'checkout_billing_lede' => 'Erforderlich für Rechnungen und WHMCS-Provisioning.',

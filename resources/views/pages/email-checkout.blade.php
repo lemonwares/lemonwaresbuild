@@ -112,14 +112,15 @@
                             type="password"
                             autocomplete="{{ $guestStatus === 'new' ? 'new-password' : 'current-password' }}"
                             class="footer-input w-full rounded-xl border border-border bg-white px-4 py-3"
+                            aria-describedby="email-checkout-password-help @error('password') email-checkout-password-error @enderror"
                             data-checkout-password
                             @if ($showPasswordInitially) required @endif
                         >
-                        <p class="mt-2 text-sm text-on-blush/65" data-password-help>
+                        <p class="mt-2 text-sm text-on-blush/65" id="email-checkout-password-help" data-password-help>
                             {{ in_array($guestStatus, ['existing_complete', 'existing_incomplete'], true) ? __('email.checkout_password_existing_help') : __('email.checkout_password_help') }}
                         </p>
                         @error('password')
-                            <p class="mt-2 text-sm text-rose">{{ $message }}</p>
+                            <p id="email-checkout-password-error" class="mt-2 text-sm text-rose">{{ $message }}</p>
                         @enderror
                     </div>
                 </fieldset>

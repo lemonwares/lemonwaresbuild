@@ -26,7 +26,7 @@
             </x-ui.accordion>
 
             <div class="mt-8 flex flex-wrap items-center gap-4">
-                <x-ui.button href="#contact">
+                <x-ui.button :href="route('web-development')">
                     <x-ui.icons.arrow-up-right class="size-4" />
                     <span>{{ __('site.home.dev_title_accent') }}</span>
                 </x-ui.button>

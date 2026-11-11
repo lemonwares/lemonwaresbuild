@@ -60,14 +60,6 @@
                     <div class="h-px w-full bg-white/15"></div>
                     <div class="mt-4 flex flex-wrap gap-x-8 gap-y-3">
                         <div>
-                            <p class="text-xl font-bold text-white">99%</p>
-                            <p class="text-xs font-medium text-white/60">{{ __('account.auth_stat_uptime') }}</p>
-                        </div>
-                        <div>
-                            <p class="text-xl font-bold text-white">{{ config('site.years_experience') }}+</p>
-                            <p class="text-xs font-medium text-white/60">{{ __('account.auth_stat_years') }}</p>
-                        </div>
-                        <div>
                             <p class="text-xl font-bold text-white">24/7</p>
                             <p class="text-xs font-medium text-white/60">{{ __('account.auth_stat_support') }}</p>
                         </div>

@@ -1,3 +1,12 @@
+@php
+    $startingPrices = collect(['cpanel', 'vps'])->mapWithKeys(fn (string $group) => [
+        $group => collect(config("site.hosting_plans.$group.specifications", []))
+            ->map(fn (array $spec) => \App\Support\HostingPricing::periodNgnForSpec($group, $spec['key'], 'monthly'))
+            ->filter(fn (float $price) => $price > 0)
+            ->min(),
+    ]);
+@endphp
+
 <section id="hosting-plans" {{ $attributes->class('section-band border-t border-border') }}>
     <div class="container-page py-16 sm:py-20">
         <div class="mb-12 max-w-2xl">
@@ -25,6 +34,11 @@
                 <p class="mb-6 text-base text-white/85">
                     {{ __('site.home.cpanel_summary') }}
                 </p>
+                @if (isset($startingPrices['cpanel']))
+                    <p class="mb-4 font-semibold text-white">
+                        {{ __('site.home.hosting_starting_price', ['price' => \App\Support\HostingPricing::ngnPriceDisplay($startingPrices['cpanel'])]) }}
+                    </p>
+                @endif
                 <ul class="check-list check-list-light mb-8 flex flex-col gap-3">
                     @foreach (config('site.hosting_plans.cpanel.highlights', []) as $item)
                         <li>{{ $item }}</li>
@@ -52,6 +66,11 @@
                 <p class="mb-6 text-base text-ink/85">
                     {{ __('site.home.vps_summary') }}
                 </p>
+                @if (isset($startingPrices['vps']))
+                    <p class="mb-4 font-semibold text-ink">
+                        {{ __('site.home.hosting_starting_price', ['price' => \App\Support\HostingPricing::ngnPriceDisplay($startingPrices['vps'])]) }}
+                    </p>
+                @endif
                 <ul class="check-list check-list-light mb-8 flex flex-col gap-3">
                     @foreach (config('site.hosting_plans.vps.highlights', []) as $item)
                         <li>{{ $item }}</li>

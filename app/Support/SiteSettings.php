@@ -31,6 +31,7 @@ class SiteSettings
             'site.phone_e164' => ['label' => 'Phone for links (+234…)', 'type' => 'text', 'group' => 'general'],
             'site.whatsapp' => ['label' => 'WhatsApp link', 'type' => 'url', 'group' => 'general'],
             'site.address' => ['label' => 'Office address', 'type' => 'textarea', 'group' => 'general'],
+            'site.directions_url' => ['label' => 'Office directions URL', 'type' => 'url', 'group' => 'general'],
             'social.linkedin' => ['label' => 'LinkedIn URL', 'type' => 'url', 'group' => 'social'],
             'social.facebook' => ['label' => 'Facebook URL', 'type' => 'url', 'group' => 'social'],
             'social.instagram' => ['label' => 'Instagram URL', 'type' => 'url', 'group' => 'social'],

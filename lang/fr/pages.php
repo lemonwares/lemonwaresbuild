@@ -139,7 +139,7 @@ return [
                 'title' => 'Visite',
                 'body' => config('site.address'),
                 'cta' => 'Itinéraire',
-                'href' => 'https://www.google.com/maps/search/?api=1&query='.urlencode((string) config('site.address')),
+                'href' => config('site.directions_url') ?: 'https://www.google.com/maps/dir/?api=1&destination='.rawurlencode((string) config('site.address')),
                 'external' => true,
             ],
         ],

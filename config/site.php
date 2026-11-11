@@ -7,7 +7,6 @@ return [
     'domain' => 'lemonwares.com',
     'url' => env('APP_URL', 'https://lemonwares.com'),
     'tagline' => 'Hosting · Email · Web & Mobile',
-    'years_experience' => 12,
 
     'locales' => [
         'en' => 'English',
@@ -124,10 +123,12 @@ return [
 
     'address' => '26, Akin Leigh Crescent, Lekki Phase 1, Lagos, Nigeria.',
 
+    'directions_url' => env('SITE_DIRECTIONS_URL'),
+
     'social' => [
-        ['label' => 'LinkedIn', 'href' => 'https://linkedin.com', 'icon' => 'linkedin'],
-        ['label' => 'Facebook', 'href' => 'https://facebook.com', 'icon' => 'facebook'],
-        ['label' => 'Instagram', 'href' => 'https://instagram.com', 'icon' => 'instagram'],
+        ['label' => 'LinkedIn', 'href' => env('SITE_LINKEDIN_URL', 'https://www.linkedin.com/company/lemonwares-technology/'), 'icon' => 'linkedin'],
+        ['label' => 'Facebook', 'href' => env('SITE_FACEBOOK_URL'), 'icon' => 'facebook'],
+        ['label' => 'Instagram', 'href' => env('SITE_INSTAGRAM_URL'), 'icon' => 'instagram'],
     ],
 
     'technologies' => [

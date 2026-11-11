@@ -104,15 +104,7 @@
 
     <section class="border-t border-border bg-white" data-reveal>
         <div class="container-page py-16 sm:py-20">
-            <div class="grid gap-8 sm:grid-cols-3">
-                <div>
-                    <p class="mb-2 text-4xl font-bold tracking-tight text-rose sm:text-5xl">{{ config('site.years_experience') }}+</p>
-                    <p class="text-base font-light text-on-blush/75">{{ __('pages.about.stat_years') }}</p>
-                </div>
-                <div>
-                    <p class="mb-2 text-4xl font-bold tracking-tight text-rose sm:text-5xl">99%</p>
-                    <p class="text-base font-light text-on-blush/75">{{ __('pages.about.stat_uptime') }}</p>
-                </div>
+            <div class="grid gap-8">
                 <div>
                     <p class="mb-2 text-4xl font-bold tracking-tight text-rose sm:text-5xl">24/7</p>
                     <p class="text-base font-light text-on-blush/75">{{ __('pages.about.stat_support') }}</p>

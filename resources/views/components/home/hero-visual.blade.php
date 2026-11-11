@@ -33,10 +33,9 @@
         </picture>
 
         <div class="hosting-cutout-card is-status">
-            <span class="hosting-cutout-live-dot"></span>
             <div>
-                <p class="hosting-cutout-card-kicker">{{ __('site.home.visual_live') }}</p>
-                <p class="hosting-cutout-card-title">{{ __('site.home.visual_metric_uptime_value') }} {{ __('site.home.visual_metric_uptime_label') }}</p>
+                <p class="hosting-cutout-card-kicker">{{ __('site.home.plans_label') }}</p>
+                <p class="hosting-cutout-card-title">{{ __('site.home.features_uptime') }}</p>
             </div>
         </div>
 
